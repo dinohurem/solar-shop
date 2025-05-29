@@ -30,7 +30,8 @@ import { OffersService, Offer } from './services/offers.service';
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           <div 
             *ngFor="let offer of offers$ | async; trackBy: trackByOfferId"
-            class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 group"
+            class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 group cursor-pointer"
+            (click)="navigateToOfferDetails(offer.id)"
           >
             <!-- Product Image -->
             <div class="relative h-56 bg-gray-50 overflow-hidden">
@@ -47,7 +48,7 @@ import { OffersService, Offer } from './services/offers.service';
 
             <!-- Product Info -->
             <div class="p-6">
-              <h3 class="text-xl font-bold text-heyhome-dark-green mb-4 font-['Poppins']">
+              <h3 class="text-xl font-bold text-heyhome-dark-green mb-4 font-['Poppins'] group-hover:text-heyhome-primary transition-colors">
                 {{ offer.title }}
               </h3>
               
@@ -62,13 +63,15 @@ import { OffersService, Offer } from './services/offers.service';
               </div>
 
               <!-- Add to Cart Button -->
-              <app-add-to-cart-button 
-                [productId]="offer.id" 
-                [quantity]="1" 
-                buttonText="Add to Cart"
-                [fullWidth]="true"
-                size="lg">
-              </app-add-to-cart-button>
+              <div (click)="$event.stopPropagation()">
+                <app-add-to-cart-button 
+                  [productId]="offer.id" 
+                  [quantity]="1" 
+                  buttonText="Add to Cart"
+                  [fullWidth]="true"
+                  size="lg">
+                </app-add-to-cart-button>
+              </div>
             </div>
           </div>
         </div>
@@ -128,5 +131,9 @@ export class OffersComponent implements OnInit {
 
   navigateToOffers() {
     this.router.navigate(['/offers']);
+  }
+
+  navigateToOfferDetails(offerId: string) {
+    this.router.navigate(['/offers', offerId]);
   }
 } 

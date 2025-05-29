@@ -14,6 +14,7 @@ import { ProductListComponent } from './features/b2c/products/product-list/produ
 import { HomeComponent } from './features/b2c/home/home.component';
 import { ProductDetailsComponent } from './features/b2c/products/product-details/product-details.component';
 import { OffersPageComponent } from './features/b2c/offers/offers-page.component';
+import { OfferDetailsComponent } from './features/b2c/offers/offer-details.component';
 import { MissionComponent } from './features/b2c/mission/mission.component';
 import { ContactComponent } from './features/b2c/contact/contact.component';
 import { CheckoutComponent } from './features/b2c/checkout/checkout.component';
@@ -42,6 +43,7 @@ export const routes: Routes = [
             { path: 'products', component: ProductListComponent },
             { path: 'products/:id', component: ProductDetailsComponent },
             { path: 'offers', component: OffersPageComponent },
+            { path: 'offers/:id', component: OfferDetailsComponent },
             { path: 'mission', component: MissionComponent },
             { path: 'blog', component: BlogComponent },
             { path: 'blog/:id', component: BlogDetailComponent },
