@@ -1,0 +1,234 @@
+import { Component, OnInit, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import { BehaviorSubject } from 'rxjs';
+import { SupabaseService } from '../../../services/supabase.service';
+import { DataTableComponent, TableConfig } from '../shared/data-table/data-table.component';
+
+@Component({
+    selector: 'app-admin-blog',
+    standalone: true,
+    imports: [CommonModule, DataTableComponent],
+    template: `
+    <div class="space-y-6">
+      <!-- Page Header -->
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">Blog Posts</h1>
+          <p class="mt-2 text-gray-600">Manage your blog content</p>
+        </div>
+      </div>
+
+      <!-- Data Table -->
+      <app-data-table
+        title="Blog Posts"
+        [data]="(blogPosts$ | async) || []"
+        [config]="tableConfig"
+        [loading]="(loading$ | async) || false"
+        (actionClicked)="onTableAction($event)"
+        (addClicked)="onAddPost()"
+        (csvImported)="onCsvImported($event)">
+      </app-data-table>
+    </div>
+  `,
+    styles: [`
+    :host {
+      display: block;
+    }
+  `]
+})
+export class AdminBlogComponent implements OnInit {
+    private supabaseService = inject(SupabaseService);
+    private router = inject(Router);
+
+    private blogPostsSubject = new BehaviorSubject<any[]>([]);
+    private loadingSubject = new BehaviorSubject<boolean>(false);
+
+    blogPosts$ = this.blogPostsSubject.asObservable();
+    loading$ = this.loadingSubject.asObservable();
+
+    tableConfig: TableConfig = {
+        columns: [
+            {
+                key: 'featured_image_url',
+                label: 'Image',
+                type: 'image',
+                sortable: false,
+                searchable: false
+            },
+            {
+                key: 'title',
+                label: 'Title',
+                type: 'text',
+                sortable: true,
+                searchable: true
+            },
+            {
+                key: 'status',
+                label: 'Status',
+                type: 'status',
+                sortable: true
+            },
+            {
+                key: 'is_featured',
+                label: 'Featured',
+                type: 'boolean',
+                sortable: true
+            },
+            {
+                key: 'tags',
+                label: 'Tags',
+                type: 'array',
+                sortable: false,
+                searchable: true
+            },
+            {
+                key: 'view_count',
+                label: 'Views',
+                type: 'number',
+                sortable: true
+            },
+            {
+                key: 'published_at',
+                label: 'Published',
+                type: 'date',
+                sortable: true
+            },
+            {
+                key: 'created_at',
+                label: 'Created',
+                type: 'date',
+                sortable: true
+            }
+        ],
+        actions: [
+            {
+                label: 'Edit',
+                icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>',
+                action: 'edit',
+                class: 'text-blue-600 hover:text-blue-900'
+            },
+            {
+                label: 'View',
+                icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>',
+                action: 'view',
+                class: 'text-green-600 hover:text-green-900'
+            },
+            {
+                label: 'Delete',
+                icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>',
+                action: 'delete',
+                class: 'text-red-600 hover:text-red-900'
+            }
+        ],
+        searchable: true,
+        sortable: true,
+        paginated: true,
+        pageSize: 20,
+        allowCsvImport: true,
+        allowExport: true
+    };
+
+    ngOnInit(): void {
+        this.loadBlogPosts();
+    }
+
+    onTableAction(event: { action: string, item: any }): void {
+        const { action, item } = event;
+
+        switch (action) {
+            case 'edit':
+                this.router.navigate(['/admin/blog/edit', item.id]);
+                break;
+            case 'view':
+                this.router.navigate(['/blog', item.slug]);
+                break;
+            case 'delete':
+                this.deleteBlogPost(item);
+                break;
+        }
+    }
+
+    onAddPost(): void {
+        this.router.navigate(['/admin/blog/new']);
+    }
+
+    async onCsvImported(csvData: any[]): Promise<void> {
+        if (!csvData || csvData.length === 0) {
+            alert('No data found in CSV file');
+            return;
+        }
+
+        this.loadingSubject.next(true);
+
+        try {
+            // Get current user for author_id
+            const session = await this.supabaseService.getSession();
+            if (!session?.user) {
+                alert('User not authenticated');
+                return;
+            }
+
+            // Map CSV data to blog post format
+            const blogPosts = csvData.map(row => ({
+                title: row.title || row.Title || '',
+                slug: (row.slug || row.Slug || row.title || row.Title || '').toLowerCase().replace(/\s+/g, '-'),
+                content: row.content || row.Content || '',
+                excerpt: row.excerpt || row.Excerpt || '',
+                featured_image_url: row.featured_image_url || row['Featured Image URL'] || undefined,
+                author_id: session.user.id,
+                category_id: row.category_id || row['Category ID'] || undefined,
+                tags: row.tags ? row.tags.split(',').map((t: string) => t.trim()) : [],
+                status: (row.status || row.Status || 'draft') as 'draft' | 'published' | 'archived',
+                published_at: row.published_at || row['Published At'] || undefined,
+                seo_title: row.seo_title || row['SEO Title'] || undefined,
+                seo_description: row.seo_description || row['SEO Description'] || undefined,
+                seo_keywords: row.seo_keywords ? row.seo_keywords.split(',').map((k: string) => k.trim()) : [],
+                reading_time: row.reading_time ? parseInt(row.reading_time) : undefined,
+                is_featured: (row.is_featured || row['Is Featured'] || 'false').toLowerCase() === 'true'
+            }));
+
+            // Import blog posts one by one
+            for (const post of blogPosts) {
+                await this.supabaseService.createRecord('blog_posts', post);
+            }
+
+            alert(`Successfully imported ${blogPosts.length} blog posts`);
+            this.loadBlogPosts();
+        } catch (error) {
+            console.error('Error importing blog posts:', error);
+            alert('Error importing blog posts. Please check the CSV format.');
+        } finally {
+            this.loadingSubject.next(false);
+        }
+    }
+
+    private async loadBlogPosts(): Promise<void> {
+        this.loadingSubject.next(true);
+
+        try {
+            const posts = await this.supabaseService.getTable('blog_posts');
+            this.blogPostsSubject.next(posts || []);
+        } catch (error) {
+            console.error('Error loading blog posts:', error);
+            this.blogPostsSubject.next([]);
+        } finally {
+            this.loadingSubject.next(false);
+        }
+    }
+
+    private async deleteBlogPost(post: any): Promise<void> {
+        if (!confirm(`Are you sure you want to delete "${post.title}"?`)) {
+            return;
+        }
+
+        try {
+            await this.supabaseService.deleteRecord('blog_posts', post.id);
+            alert('Blog post deleted successfully');
+            this.loadBlogPosts();
+        } catch (error) {
+            console.error('Error deleting blog post:', error);
+            alert('Error deleting blog post');
+        }
+    }
+} 

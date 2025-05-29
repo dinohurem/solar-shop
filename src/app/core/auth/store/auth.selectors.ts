@@ -73,3 +73,12 @@ export const selectUserPreferences = createSelector(
     selectCurrentUser,
     (user) => user?.preferences || null
 );
+
+export const selectIsAdmin = createSelector(
+    selectCurrentUser,
+    (user) => {
+        if (!user || !user.role) return false;
+        return user.role.name === 'admin' ||
+            user.role.permissions?.some(p => p.resource === 'admin') || false;
+    }
+);

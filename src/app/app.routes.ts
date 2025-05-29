@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from './guards/auth.guard';
+import { AdminGuard } from './guards/admin.guard';
 import { ForgotPasswordComponent } from './core/auth/components/forgot-password/forgot-password.component';
 import { LoginComponent } from './core/auth/components/login/login.component';
 import { RegisterComponent } from './core/auth/components/register/register.component';
@@ -20,6 +21,10 @@ import { OrderReviewComponent } from './features/b2c/checkout/steps/order-review
 import { ShippingComponent } from './features/b2c/checkout/steps/shipping/shipping.component';
 import { PaymentComponent } from './features/b2c/checkout/steps/payment/payment.component';
 import { ProfileComponent } from './features/b2c/profile/profile.component';
+import { AdminLayoutComponent } from './features/admin/admin-layout/admin-layout.component';
+import { AdminDashboardComponent } from './features/admin/dashboard/admin-dashboard.component';
+import { AdminProductsComponent } from './features/admin/products/admin-products.component';
+import { AdminBlogComponent } from './features/admin/blog/admin-blog.component';
 
 export const routes: Routes = [
     // Authentication routes (no layout)
@@ -58,6 +63,18 @@ export const routes: Routes = [
                     { path: 'payment', component: PaymentComponent }
                 ]
             }
+        ]
+    },
+
+    // Admin routes
+    {
+        path: 'admin',
+        component: AdminLayoutComponent,
+        canActivate: [AdminGuard],
+        children: [
+            { path: '', component: AdminDashboardComponent },
+            { path: 'products', component: AdminProductsComponent },
+            { path: 'blog', component: AdminBlogComponent }
         ]
     },
 

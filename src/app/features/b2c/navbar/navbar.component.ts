@@ -4,7 +4,12 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { NavbarActions } from './store/navbar.actions';
 import { selectIsMobileMenuOpen, selectCurrentLanguage } from './store/navbar.selectors';
-import { selectIsAuthenticated, selectCurrentUser, selectUserAvatar } from '../../../core/auth/store/auth.selectors';
+import {
+  selectCurrentUser,
+  selectIsAuthenticated,
+  selectUserAvatar,
+  selectIsAdmin
+} from '../../../core/auth/store/auth.selectors';
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { CartButtonComponent } from '../cart/components/cart-button/cart-button.component';
 import * as AuthActions from '../../../core/auth/store/auth.actions';
@@ -208,6 +213,19 @@ import { filter } from 'rxjs/operators';
                       <span>Profile</span>
                     </div>
                   </a>
+                  <a 
+                    *ngIf="isAdmin$ | async"
+                    routerLink="/admin" 
+                    (click)="closeProfileMenu()"
+                    class="block px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-all duration-200">
+                    <div class="flex items-center space-x-3">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                      </svg>
+                      <span>Admin Dashboard</span>
+                    </div>
+                  </a>
                   <button 
                     (click)="logout()"
                     class="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all duration-200 rounded-b-lg">
@@ -321,6 +339,13 @@ import { filter } from 'rxjs/operators';
                class="block text-gray-900 hover:text-green-600 font-medium transition-all duration-300 py-2 px-3 rounded-lg hover:bg-green-50 mb-2">
               Profile
             </a>
+            <a 
+              *ngIf="isAdmin$ | async"
+              routerLink="/admin" 
+              (click)="closeProfileMenu()"
+              class="block text-gray-900 hover:text-blue-600 font-medium transition-all duration-300 py-2 px-3 rounded-lg hover:bg-blue-50 mb-2">
+              Admin Dashboard
+            </a>
             <button (click)="logout()" 
                     class="block w-full text-left text-gray-900 hover:text-red-600 font-medium transition-all duration-300 py-2 px-3 rounded-lg hover:bg-red-50">
               Sign Out
@@ -399,6 +424,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   isAuthenticated$: Observable<boolean>;
   currentUser$: Observable<User | null>;
   userAvatar$: Observable<string | null>;
+  isAdmin$: Observable<boolean>;
   showProfileMenu = false;
   currentRoute = '';
 
@@ -408,6 +434,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.isAuthenticated$ = this.store.select(selectIsAuthenticated);
     this.currentUser$ = this.store.select(selectCurrentUser);
     this.userAvatar$ = this.store.select(selectUserAvatar);
+    this.isAdmin$ = this.store.select(selectIsAdmin);
 
     // Track route changes for active highlighting
     this.router.events.pipe(
@@ -447,6 +474,11 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   navigateToProfile(): void {
     this.router.navigate(['/profile']);
+  }
+
+  navigateToAdmin(): void {
+    this.router.navigate(['/admin']);
+    this.closeProfileMenu();
   }
 
   toggleProfileMenu(): void {

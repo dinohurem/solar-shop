@@ -51,7 +51,7 @@ export interface FooterData {
           <!-- Company Info -->
           <div class="lg:col-span-1">
             <div class="mb-6">
-              <img src="assets/images/logo.png" alt="HeyHome" class="h-10 w-auto mb-4">
+              <img src="/assets/images/logo.png" alt="HeyHome" class="h-10 w-auto mb-4">
               <p class="text-gray-300 leading-relaxed font-['DM_Sans']">
                 Your destination for sustainable building materials and energy efficiency solutions. 
                 Let's build a greener future together.
