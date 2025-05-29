@@ -54,10 +54,10 @@ import { OffersService, Offer } from './services/offers.service';
               <!-- Pricing -->
               <div class="flex items-center gap-3 mb-4">
                 <span class="text-lg text-gray-400 line-through font-medium">
-                  {{ offer.originalPrice | currency:'EUR':'symbol':'1.2-2':'it' }}
+                  {{ offer.originalPrice | currency:'EUR':'symbol':'1.2-2' }}
                 </span>
                 <span class="text-xl font-bold text-heyhome-dark-green">
-                  {{ offer.discountedPrice | currency:'EUR':'symbol':'1.2-2':'it' }}
+                  {{ offer.discountedPrice | currency:'EUR':'symbol':'1.2-2' }}
                 </span>
               </div>
 
