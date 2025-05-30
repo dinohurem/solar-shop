@@ -47,37 +47,37 @@ import { BlogDataMapperService, SupabaseBlogPost } from '../../../services/blog-
                 <li class="text-green-200">/</li>
                 <li><a routerLink="/blog" class="hover:text-green-200 transition-colors">Blog</a></li>
                 <li class="text-green-200">/</li>
-                <li class="text-green-100">{{ blogPost?.title }}</li>
+                <li class="text-green-100">{{ blogPost.title }}</li>
               </ol>
             </nav>
 
             <div class="max-w-4xl">
               <div class="flex items-center space-x-4 mb-6">
                 <span class="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium">
-                  {{ blogPost?.category?.name }}
+                  {{ blogPost.category.name }}
                 </span>
-                <span class="text-green-100">{{ blogPost?.readTime }} min read</span>
-                <span class="text-green-100">{{ blogPost?.publishedAt | date:'MMM dd, yyyy' }}</span>
+                <span class="text-green-100">{{ blogPost.readTime }} min read</span>
+                <span class="text-green-100">{{ blogPost.publishedAt | date:'MMM dd, yyyy' }}</span>
               </div>
               
               <h1 class="text-4xl md:text-5xl font-bold font-['Poppins'] mb-6 leading-tight">
-                {{ blogPost?.title }}
+                {{ blogPost.title }}
               </h1>
               
               <p class="text-xl text-green-100 mb-8 leading-relaxed">
-                {{ blogPost?.excerpt }}
+                {{ blogPost.excerpt }}
               </p>
 
               <!-- Author Info -->
               <div class="flex items-center space-x-4">
                 <img 
-                  [src]="blogPost?.author?.avatar || '/assets/images/default-avatar.jpg'" 
-                  [alt]="blogPost?.author?.name"
+                  [src]="blogPost.author.avatar || '/assets/images/default-avatar.jpg'" 
+                  [alt]="blogPost.author.name"
                   class="w-12 h-12 rounded-full object-cover"
                 >
                 <div>
-                  <p class="font-semibold">{{ blogPost?.author?.name }}</p>
-                  <p class="text-green-100 text-sm">{{ blogPost?.author?.title }}</p>
+                  <p class="font-semibold">{{ blogPost.author.name }}</p>
+                  <p class="text-green-100 text-sm">{{ blogPost.author.title }}</p>
                 </div>
               </div>
             </div>
@@ -89,15 +89,15 @@ import { BlogDataMapperService, SupabaseBlogPost } from '../../../services/blog-
           <!-- Featured Image -->
           <div class="mb-12">
             <img 
-              [src]="blogPost?.imageUrl || '/assets/images/blog-placeholder.jpg'" 
-              [alt]="blogPost?.title"
+              [src]="blogPost.imageUrl || '/assets/images/blog-placeholder.jpg'" 
+              [alt]="blogPost.title"
               class="w-full h-96 object-cover rounded-lg shadow-lg"
             >
           </div>
 
           <!-- Article Body -->
           <div class="prose prose-lg max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-headings:mt-8 prose-headings:mb-4 prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-6 prose-ul:mb-6 prose-ul:pl-6 prose-li:mb-2 prose-blockquote:border-l-4 prose-blockquote:border-green-500 prose-blockquote:pl-4 prose-blockquote:my-8 prose-blockquote:italic prose-blockquote:text-gray-600 prose-img:rounded-lg prose-img:my-8 prose-a:text-green-600 prose-a:underline hover:prose-a:text-green-500">
-            <div [innerHTML]="blogPost?.htmlContent || blogPost?.content" class="text-gray-700 leading-relaxed">
+            <div [innerHTML]="blogPost.htmlContent || blogPost.content" class="text-gray-700 leading-relaxed">
             </div>
           </div>
 

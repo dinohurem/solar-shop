@@ -6,12 +6,13 @@ import { takeUntil, switchMap, map } from 'rxjs/operators';
 import { OffersService, Offer } from './services/offers.service';
 import { AddToCartButtonComponent } from '../cart/components/add-to-cart-button/add-to-cart-button.component';
 import { SupabaseService } from '../../../services/supabase.service';
+import { CartSidebarComponent } from "../cart/components/cart-sidebar/cart-sidebar.component";
 
 @Component({
-    selector: 'app-offer-details',
-    standalone: true,
-    imports: [CommonModule, AddToCartButtonComponent],
-    template: `
+  selector: 'app-offer-details',
+  standalone: true,
+  imports: [CommonModule, AddToCartButtonComponent, CartSidebarComponent],
+  template: `
     <div class="min-h-screen bg-gray-50" *ngIf="offer$ | async as offer; else loadingTemplate">
       <!-- Hero Section -->
       <div class="relative bg-gradient-to-r from-[#0ACF83] to-[#0ACFAC] text-white py-20">
@@ -229,6 +230,8 @@ import { SupabaseService } from '../../../services/supabase.service';
       </div>
     </div>
 
+    <app-cart-sidebar></app-cart-sidebar>
+
     <!-- Loading Template -->
     <ng-template #loadingTemplate>
       <div class="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -239,7 +242,7 @@ import { SupabaseService } from '../../../services/supabase.service';
       </div>
     </ng-template>
   `,
-    styles: [`
+  styles: [`
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap');
     
     :host {
@@ -259,102 +262,102 @@ import { SupabaseService } from '../../../services/supabase.service';
   `]
 })
 export class OfferDetailsComponent implements OnInit, OnDestroy {
-    offer$: Observable<Offer | null>;
-    relatedProducts$: Observable<any[]>;
-    copiedCoupon = false;
-    private destroy$ = new Subject<void>();
+  offer$: Observable<Offer | null>;
+  relatedProducts$: Observable<any[]>;
+  copiedCoupon = false;
+  private destroy$ = new Subject<void>();
 
-    constructor(
-        private route: ActivatedRoute,
-        private router: Router,
-        private offersService: OffersService,
-        private supabaseService: SupabaseService
-    ) {
-        this.offer$ = this.route.params.pipe(
-            switchMap(params => this.offersService.getOfferById(params['id'])),
-            takeUntil(this.destroy$)
-        );
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private offersService: OffersService,
+    private supabaseService: SupabaseService
+  ) {
+    this.offer$ = this.route.params.pipe(
+      switchMap(params => this.offersService.getOfferById(params['id'])),
+      takeUntil(this.destroy$)
+    );
 
-        this.relatedProducts$ = this.offer$.pipe(
-            switchMap(offer => {
-                if (!offer) return [];
-                return this.getRelatedProducts(offer);
-            }),
-            takeUntil(this.destroy$)
-        );
-    }
+    this.relatedProducts$ = this.offer$.pipe(
+      switchMap(offer => {
+        if (!offer) return [];
+        return this.getRelatedProducts(offer);
+      }),
+      takeUntil(this.destroy$)
+    );
+  }
 
-    ngOnInit(): void {
-        // Scroll to top when component loads
-        window.scrollTo(0, 0);
-    }
+  ngOnInit(): void {
+    // Scroll to top when component loads
+    window.scrollTo(0, 0);
+  }
 
-    ngOnDestroy(): void {
-        this.destroy$.next();
-        this.destroy$.complete();
-    }
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
-    private getRelatedProducts(offer: Offer): Observable<any[]> {
-        // For now, we'll get a few featured products as related products
-        // In a real app, you might have specific product mappings for offers
-        return new Observable(observer => {
-            this.supabaseService.getProducts({ featured: true, limit: 3 })
-                .then(products => {
-                    observer.next(products || []);
-                    observer.complete();
-                })
-                .catch(error => {
-                    console.error('Error fetching related products:', error);
-                    observer.next([]);
-                    observer.complete();
-                });
+  private getRelatedProducts(offer: Offer): Observable<any[]> {
+    // For now, we'll get a few featured products as related products
+    // In a real app, you might have specific product mappings for offers
+    return new Observable(observer => {
+      this.supabaseService.getProducts({ featured: true, limit: 3 })
+        .then(products => {
+          observer.next(products || []);
+          observer.complete();
+        })
+        .catch(error => {
+          console.error('Error fetching related products:', error);
+          observer.next([]);
+          observer.complete();
         });
-    }
+    });
+  }
 
-    getOfferTypeDisplay(type?: string): string {
-        const typeMap: { [key: string]: string } = {
-            'seasonal_sale': 'Seasonal Sale',
-            'flash_sale': 'Flash Sale',
-            'free_shipping': 'Free Shipping',
-            'bundle_deal': 'Bundle Deal',
-            'percentage_discount': 'Special Discount',
-            'fixed_amount_discount': 'Fixed Discount',
-            'first_time_customer': 'New Customer Offer'
-        };
-        return typeMap[type || ''] || 'Special Offer';
-    }
+  getOfferTypeDisplay(type?: string): string {
+    const typeMap: { [key: string]: string } = {
+      'seasonal_sale': 'Seasonal Sale',
+      'flash_sale': 'Flash Sale',
+      'free_shipping': 'Free Shipping',
+      'bundle_deal': 'Bundle Deal',
+      'percentage_discount': 'Special Discount',
+      'fixed_amount_discount': 'Fixed Discount',
+      'first_time_customer': 'New Customer Offer'
+    };
+    return typeMap[type || ''] || 'Special Offer';
+  }
 
-    getProductImage(product: any): string {
-        if (product.images && Array.isArray(product.images) && product.images.length > 0) {
-            return product.images[0].url || product.images[0];
-        }
-        return 'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=500&h=500&fit=crop';
+  getProductImage(product: any): string {
+    if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+      return product.images[0].url || product.images[0];
     }
+    return 'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=500&h=500&fit=crop';
+  }
 
-    calculateDiscountedPrice(originalPrice: number, discountPercentage: number): number {
-        return originalPrice * (1 - discountPercentage / 100);
-    }
+  calculateDiscountedPrice(originalPrice: number, discountPercentage: number): number {
+    return originalPrice * (1 - discountPercentage / 100);
+  }
 
-    copyCouponCode(code: string): void {
-        navigator.clipboard.writeText(code).then(() => {
-            this.copiedCoupon = true;
-            setTimeout(() => {
-                this.copiedCoupon = false;
-            }, 2000);
-        }).catch(err => {
-            console.error('Failed to copy coupon code:', err);
-        });
-    }
+  copyCouponCode(code: string): void {
+    navigator.clipboard.writeText(code).then(() => {
+      this.copiedCoupon = true;
+      setTimeout(() => {
+        this.copiedCoupon = false;
+      }, 2000);
+    }).catch(err => {
+      console.error('Failed to copy coupon code:', err);
+    });
+  }
 
-    trackByProductId(index: number, product: any): string {
-        return product.id;
-    }
+  trackByProductId(index: number, product: any): string {
+    return product.id;
+  }
 
-    navigateToProduct(productId: string): void {
-        this.router.navigate(['/products', productId]);
-    }
+  navigateToProduct(productId: string): void {
+    this.router.navigate(['/products', productId]);
+  }
 
-    navigateToProducts(): void {
-        this.router.navigate(['/products']);
-    }
+  navigateToProducts(): void {
+    this.router.navigate(['/products']);
+  }
 } 

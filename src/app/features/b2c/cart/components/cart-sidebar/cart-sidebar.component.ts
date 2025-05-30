@@ -15,14 +15,17 @@ import * as CartSelectors from '../../store/cart.selectors';
     <!-- Cart Overlay -->
     <div 
       *ngIf="isCartOpen$ | async" 
-      class="fixed inset-0 z-50 overflow-hidden"
+      class="fixed inset-0 z-50 overflow-hidden cart-overlay"
       (click)="onOverlayClick($event)"
     >
       <!-- Background overlay -->
-      <div class="absolute inset-0 bg-black bg-opacity-50 transition-opacity"></div>
+      <div class="absolute inset-0 bg-black bg-opacity-50 transition-opacity duration-300"></div>
       
       <!-- Cart sidebar -->
-      <div class="absolute right-0 top-0 h-screen w-full max-w-md bg-white shadow-xl transform transition-transform flex flex-col" (click)="$event.stopPropagation()">
+      <div 
+        class="absolute right-0 top-0 h-screen w-full max-w-md bg-white shadow-xl transform transition-all duration-300 ease-out flex flex-col cart-sidebar animate-slide-in-right"
+        (click)="$event.stopPropagation()"
+      >
         <!-- Cart Header -->
         <div class="flex items-center justify-between p-4 border-b border-gray-200">
           <h2 class="text-lg font-semibold text-gray-900">Your cart</h2>
@@ -50,8 +53,8 @@ import * as CartSelectors from '../../store/cart.selectors';
                 <path d="M9 8V17H11V8H9ZM13 8V17H15V8H13Z"/>
               </svg>
             </div>
-            <h3 class="text-xl font-medium text-gray-900 mb-2">Il tuo carrello è vuoto!</h3>
-            <p class="text-gray-500 mb-6">Aggiungi alcuni prodotti per iniziare lo shopping.</p>
+            <h3 class="text-xl font-medium text-gray-900 mb-2">Your cart is empty!</h3>
+            <p class="text-gray-500 mb-6">Add some products to start shopping.</p>
             <button 
               (click)="closeCart()"
               class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -65,20 +68,20 @@ import * as CartSelectors from '../../store/cart.selectors';
             <!-- Cart Items -->
             <div class="flex-1 overflow-y-auto p-4 min-h-0">
               <div class="space-y-3">
-                                  <div 
-                    *ngFor="let item of cartItems$ | async; trackBy: trackByItemId"
-                    class="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg"
-                  >
-                                      <!-- Product Image -->
-                    <div class="flex-shrink-0">
-                      <img 
-                        [src]="getImageSrc(item.image)" 
-                        [alt]="item.name"
-                        class="w-14 h-14 object-cover rounded-lg bg-gray-100"
-                        (error)="onImageError($event, item.id)"
-                        loading="lazy"
-                      >
-                    </div>
+                <div 
+                  *ngFor="let item of cartItems$ | async; trackBy: trackByItemId"
+                  class="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg cart-item"
+                >
+                  <!-- Product Image -->
+                  <div class="flex-shrink-0">
+                    <img 
+                      [src]="getImageSrc(item.image)" 
+                      [alt]="item.name"
+                      class="w-14 h-14 object-cover rounded-lg bg-gray-100"
+                      (error)="onImageError($event, item.id)"
+                      loading="lazy"
+                    >
+                  </div>
 
                   <!-- Product Details -->
                   <div class="flex-1 min-w-0">
@@ -100,24 +103,24 @@ import * as CartSelectors from '../../store/cart.selectors';
 
                     <!-- Quantity Controls -->
                     <div class="flex items-center justify-between mt-2">
-                                              <div class="flex items-center space-x-1">
-                          <button 
-                            (click)="decreaseQuantity(item.id)"
-                            [disabled]="item.quantity <= item.minQuantity"
-                            class="w-7 h-7 flex items-center justify-center border border-gray-300 rounded-full hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
+                      <div class="flex items-center space-x-1">
+                        <button 
+                          (click)="decreaseQuantity(item.id)"
+                          [disabled]="item.quantity <= item.minQuantity"
+                          class="w-7 h-7 flex items-center justify-center border border-gray-300 rounded-full hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
                           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
                           </svg>
                         </button>
                         
-                                                  <span class="w-7 text-center text-sm font-medium">{{ item.quantity }}</span>
-                          
-                          <button 
-                            (click)="increaseQuantity(item.id)"
-                            [disabled]="item.quantity >= item.maxQuantity"
-                            class="w-7 h-7 flex items-center justify-center border border-gray-300 rounded-full hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
+                        <span class="w-7 text-center text-sm font-medium">{{ item.quantity }}</span>
+                        
+                        <button 
+                          (click)="increaseQuantity(item.id)"
+                          [disabled]="item.quantity >= item.maxQuantity"
+                          class="w-7 h-7 flex items-center justify-center border border-gray-300 rounded-full hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
                           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                           </svg>
@@ -138,7 +141,7 @@ import * as CartSelectors from '../../store/cart.selectors';
 
               <!-- Coupon Section -->
               <div class="mt-4 p-3 bg-gray-50 rounded-lg flex-shrink-0">
-                  <h4 class="text-sm font-medium text-gray-900 mb-3">Discount code</h4>
+                <h4 class="text-sm font-medium text-gray-900 mb-3">Discount code</h4>
                 
                 <!-- Applied Coupons -->
                 <div *ngIf="appliedCoupons$ | async as coupons" class="mb-3">
@@ -251,6 +254,64 @@ import * as CartSelectors from '../../store/cart.selectors';
     :host {
       display: block;
     }
+
+    .cart-overlay {
+      backdrop-filter: blur(4px);
+    }
+
+    .cart-sidebar {
+      will-change: transform;
+      backface-visibility: hidden;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideInRight {
+      from {
+        transform: translate3d(100%, 0, 0);
+      }
+      to {
+        transform: translate3d(0, 0, 0);
+      }
+    }
+
+    .animate-slide-in-right {
+      animation: slideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Cart item animations - staggered for better performance */
+    .cart-item {
+      opacity: 0;
+      transform: translateY(10px);
+      animation: slideInUp 0.5s ease-out forwards;
+    }
+
+    .cart-item:nth-child(1) { animation-delay: 0.05s; }
+    .cart-item:nth-child(2) { animation-delay: 0.1s; }
+    .cart-item:nth-child(3) { animation-delay: 0.15s; }
+    .cart-item:nth-child(4) { animation-delay: 0.2s; }
+    .cart-item:nth-child(n+5) { animation-delay: 0.25s; }
+
+    @keyframes slideInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Smooth transitions for quantity changes */
+    .cart-item {
+      transition: all 0.5s ease;
+    }
+
+    /* Remove unused notification styles since we have a separate component */
   `]
 })
 export class CartSidebarComponent implements OnInit {
@@ -275,6 +336,34 @@ export class CartSidebarComponent implements OnInit {
   get isApplyButtonDisabled(): boolean {
     // Simple synchronous check for better performance
     return !this.couponCode.trim();
+  }
+
+  constructor() {
+    // Debug: Log cart state changes
+    this.isCartOpen$.subscribe(isOpen => {
+      console.log('Cart sidebar - isCartOpen:', isOpen);
+    });
+
+    this.cartItems$.subscribe(items => {
+      console.log('Cart sidebar - cart items:', items);
+    });
+
+    // Debug: Log cart loading state
+    this.store.select(CartSelectors.selectIsCartLoading).subscribe(isLoading => {
+      console.log('Cart sidebar - isLoading:', isLoading);
+    });
+
+    // Debug: Log cart errors
+    this.store.select(CartSelectors.selectCartError).subscribe(error => {
+      if (error) {
+        console.log('Cart sidebar - error:', error);
+      }
+    });
+
+    // Debug: Log the entire cart state
+    this.store.select(CartSelectors.selectCartState).subscribe(cartState => {
+      console.log('Cart sidebar - full cart state:', cartState);
+    });
   }
 
   ngOnInit() {

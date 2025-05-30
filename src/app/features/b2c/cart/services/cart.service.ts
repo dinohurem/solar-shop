@@ -123,10 +123,14 @@ export class CartService {
             const existingItemIndex = currentItems.findIndex(item => item.productId === productId);
 
             if (existingItemIndex > -1) {
-                // Update quantity of existing item
+                // Update quantity of existing item - create a proper copy to avoid readonly issues
                 const updatedItems = [...currentItems];
-                updatedItems[existingItemIndex].quantity += quantity;
-                updatedItems[existingItemIndex].updatedAt = new Date().toISOString();
+                const existingItem = updatedItems[existingItemIndex];
+                updatedItems[existingItemIndex] = {
+                    ...existingItem,
+                    quantity: existingItem.quantity + quantity,
+                    updatedAt: new Date().toISOString()
+                };
                 this.updateCartItems(updatedItems);
             } else {
                 // Add new item

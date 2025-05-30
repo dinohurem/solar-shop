@@ -32,7 +32,8 @@ export class RegisterComponent {
             email: ['', [Validators.required, Validators.email]],
             firstName: ['', [Validators.required, Validators.minLength(2)]],
             lastName: ['', [Validators.required, Validators.minLength(2)]],
-            phone: ['', [Validators.pattern(/^[\+]?[1-9][\d]{0,15}$/)]],
+            phoneNumber: ['', [Validators.pattern(/^[\+]?[1-9][\d]{0,15}$/)]],
+            address: ['', [Validators.required, Validators.minLength(10)]],
             password: ['', [Validators.required, Validators.minLength(6)]],
             confirmPassword: ['', [Validators.required]]
         }, { validators: this.passwordMatchValidator });
@@ -70,7 +71,7 @@ export class RegisterComponent {
                 password: formData.password,
                 firstName: formData.firstName,
                 lastName: formData.lastName,
-                phone: formData.phone
+                phone: formData.phoneNumber
             };
 
             try {
@@ -126,7 +127,7 @@ export class RegisterComponent {
                 return `${this.getFieldDisplayName(fieldName)} must be at least ${requiredLength} characters long`;
             }
             if (field.errors['pattern']) {
-                if (fieldName === 'phone') {
+                if (fieldName === 'phoneNumber') {
                     return 'Please enter a valid phone number';
                 }
             }
@@ -142,7 +143,8 @@ export class RegisterComponent {
             email: 'Email',
             firstName: 'First name',
             lastName: 'Last name',
-            phone: 'Phone number',
+            phoneNumber: 'Phone number',
+            address: 'Address',
             password: 'Password',
             confirmPassword: 'Confirm password'
         };

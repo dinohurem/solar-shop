@@ -89,6 +89,23 @@ export class SupabaseService {
                 return { user: null, session: null, error: error.message };
             }
 
+            // If user is created successfully and we have a user ID, create profile
+            if (data.user && data.user.id) {
+                try {
+                    await this.createUserProfile({
+                        user_id: data.user.id,
+                        first_name: request.firstName,
+                        last_name: request.lastName,
+                        full_name: `${request.firstName} ${request.lastName}`.trim(),
+                        phone: request.phone
+                    });
+                } catch (profileError) {
+                    console.error('Error creating user profile:', profileError);
+                    // Don't fail the entire signup if profile creation fails
+                    // The trigger function should handle this, but we'll try manually as backup
+                }
+            }
+
             return {
                 user: data.user as AuthUser,
                 session: data.session as AuthSession,
@@ -165,6 +182,22 @@ export class SupabaseService {
             return data;
         } catch (error) {
             console.error('Error updating user profile:', error);
+            return null;
+        }
+    }
+
+    async createUserProfile(profileData: Database['public']['Tables']['profiles']['Insert']): Promise<Database['public']['Tables']['profiles']['Row'] | null> {
+        try {
+            const { data, error } = await this.supabase
+                .from('profiles')
+                .insert(profileData)
+                .select()
+                .single();
+
+            if (error) throw error;
+            return data;
+        } catch (error) {
+            console.error('Error creating user profile:', error);
             return null;
         }
     }

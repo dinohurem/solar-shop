@@ -43,10 +43,24 @@ export class CartEffects {
     addToCart$ = createEffect(() =>
         this.actions$.pipe(
             ofType(CartActions.addToCart),
+            tap(action => console.log('Cart Effect - addToCart action received:', action)),
             switchMap(({ productId, quantity, variantId }) =>
                 this.cartService.addToCart(productId, quantity, variantId).pipe(
-                    map(cart => CartActions.addToCartSuccess({ cart })),
-                    catchError(error => of(CartActions.addToCartFailure({ error: error.message })))
+                    tap(cart => {
+                        console.log('Cart Effect - addToCart service returned cart:', cart);
+                        console.log('Cart Effect - cart items count:', cart?.items?.length || 0);
+                    }),
+                    map(cart => {
+                        const successAction = CartActions.addToCartSuccess({ cart });
+                        console.log('Cart Effect - dispatching addToCartSuccess:', successAction);
+                        console.log('Cart Effect - addToCartSuccess cart:', cart);
+                        return successAction;
+                    }
+                    ),
+                    catchError(error => {
+                        console.error('Cart Effect - addToCart error:', error);
+                        return of(CartActions.addToCartFailure({ error: error.message }));
+                    })
                 )
             )
         )

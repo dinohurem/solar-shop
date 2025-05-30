@@ -57,7 +57,6 @@ export const routes: Routes = [
             {
                 path: 'checkout',
                 component: CheckoutComponent,
-                canActivate: [AuthGuard],
                 children: [
                     { path: '', redirectTo: 'order-review', pathMatch: 'full' },
                     { path: 'order-review', component: OrderReviewComponent },

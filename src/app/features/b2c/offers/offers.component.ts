@@ -2,13 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
 import { Router } from '@angular/router';
-import { AddToCartButtonComponent } from '../cart/components/add-to-cart-button/add-to-cart-button.component';
 import { OffersService, Offer } from './services/offers.service';
 
 @Component({
   selector: 'app-offers',
   standalone: true,
-  imports: [CommonModule, AddToCartButtonComponent],
+  imports: [CommonModule],
   template: `
     <!-- Offers & Promotions Section -->
     <section class="py-20 px-4 sm:px-6 lg:px-8 bg-white">
@@ -60,18 +59,7 @@ import { OffersService, Offer } from './services/offers.service';
                 <span class="text-xl font-bold text-heyhome-dark-green">
                   {{ offer.discountedPrice | currency:'EUR':'symbol':'1.2-2' }}
                 </span>
-              </div>
-
-              <!-- Add to Cart Button -->
-              <div (click)="$event.stopPropagation()">
-                <app-add-to-cart-button 
-                  [productId]="offer.id" 
-                  [quantity]="1" 
-                  buttonText="Add to Cart"
-                  [fullWidth]="true"
-                  size="lg">
-                </app-add-to-cart-button>
-              </div>
+              </div>              
             </div>
           </div>
         </div>

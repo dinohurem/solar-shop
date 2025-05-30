@@ -4,13 +4,14 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule, } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { CartSidebarComponent } from './features/b2c/cart/components/cart-sidebar/cart-sidebar.component';
+import { DebugCartComponent } from './debug-cart.component';
 import * as AuthActions from './core/auth/store/auth.actions';
 
 @Component({
   selector: 'app-root',
   standalone: true,
   templateUrl: './app.component.html',
-  imports: [CommonModule, RouterModule, FormsModule, ReactiveFormsModule, CartSidebarComponent]
+  imports: [CommonModule, RouterModule, FormsModule, ReactiveFormsModule, CartSidebarComponent, DebugCartComponent]
 })
 export class AppComponent implements OnInit {
   title = 'solar-shop';
