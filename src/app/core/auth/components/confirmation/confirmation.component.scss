@@ -1,0 +1,23 @@
+// Confirmation component styles
+.confirmation-container {
+    // Add any specific styles if needed
+}
+
+// Override any default styles if necessary
+button:disabled {
+    cursor: not-allowed !important;
+}
+
+// Animation for the loader
+.loader-spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+} 

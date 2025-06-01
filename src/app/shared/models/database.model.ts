@@ -21,7 +21,7 @@ export interface Database {
                     user_id: string;
                     first_name: string;
                     last_name: string;
-                    full_name: string;
+                    full_name?: string;
                     phone?: string;
                     avatar_url?: string;
                     date_of_birth?: string;

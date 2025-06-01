@@ -96,7 +96,6 @@ export class SupabaseService {
                         user_id: data.user.id,
                         first_name: request.firstName,
                         last_name: request.lastName,
-                        full_name: `${request.firstName} ${request.lastName}`.trim(),
                         phone: request.phone
                     });
                 } catch (profileError) {
@@ -131,6 +130,21 @@ export class SupabaseService {
     async resetPassword(request: ResetPasswordRequest): Promise<{ error?: string }> {
         try {
             const { error } = await this.supabase.auth.resetPasswordForEmail(request.email);
+            if (error) {
+                return { error: error.message };
+            }
+            return {};
+        } catch (error: any) {
+            return { error: error.message };
+        }
+    }
+
+    async resendConfirmationEmail(email: string): Promise<{ error?: string }> {
+        try {
+            const { error } = await this.supabase.auth.resend({
+                type: 'signup',
+                email: email
+            });
             if (error) {
                 return { error: error.message };
             }

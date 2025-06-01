@@ -5,6 +5,7 @@ import { ForgotPasswordComponent } from './core/auth/components/forgot-password/
 import { LoginComponent } from './core/auth/components/login/login.component';
 import { RegisterComponent } from './core/auth/components/register/register.component';
 import { ResetPasswordComponent } from './core/auth/components/reset-password/reset-password.component';
+import { ConfirmationComponent } from './core/auth/components/confirmation/confirmation.component';
 import { LoginGuard } from './core/auth/guards/login.guard';
 import { PageLayoutComponent } from './core/page-layout/page-layout.component';
 import { CompanyComponent } from './features/b2c/company/company.component';
@@ -31,6 +32,7 @@ export const routes: Routes = [
     // Authentication routes (no layout)
     { path: 'login', component: LoginComponent, canActivate: [LoginGuard] },
     { path: 'register', component: RegisterComponent, canActivate: [LoginGuard] },
+    { path: 'confirmation', component: ConfirmationComponent, canActivate: [LoginGuard] },
     { path: 'forgot-password', component: ForgotPasswordComponent, canActivate: [LoginGuard] },
     { path: 'reset-password', component: ResetPasswordComponent, canActivate: [LoginGuard] },
 

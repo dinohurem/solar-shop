@@ -20,7 +20,6 @@ export class RegisterComponent {
     showConfirmPassword = false;
     loading = false;
     errorMessage = '';
-    successMessage = '';
     registerForm: FormGroup;
 
     constructor(
@@ -33,7 +32,7 @@ export class RegisterComponent {
             firstName: ['', [Validators.required, Validators.minLength(2)]],
             lastName: ['', [Validators.required, Validators.minLength(2)]],
             phoneNumber: ['', [Validators.pattern(/^[\+]?[1-9][\d]{0,15}$/)]],
-            address: ['', [Validators.required, Validators.minLength(10)]],
+            address: ['', [Validators.minLength(10)]],
             password: ['', [Validators.required, Validators.minLength(6)]],
             confirmPassword: ['', [Validators.required]]
         }, { validators: this.passwordMatchValidator });
@@ -63,7 +62,6 @@ export class RegisterComponent {
         if (this.registerForm.valid) {
             this.loading = true;
             this.errorMessage = '';
-            this.successMessage = '';
 
             const formData = this.registerForm.value;
             const registerRequest: RegisterRequest = {
@@ -84,8 +82,10 @@ export class RegisterComponent {
                         // User is automatically signed in
                         this.router.navigate(['/']);
                     } else {
-                        // Email confirmation required
-                        this.successMessage = 'Registration successful! Please check your email to confirm your account.';
+                        // Email confirmation required - navigate to confirmation page
+                        this.router.navigate(['/confirmation'], {
+                            queryParams: { email: formData.email }
+                        });
                     }
                 }
             } catch (error: any) {
