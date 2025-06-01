@@ -1,4 +1,4 @@
-<div class="flex justify-center items-center w-full h-dvh bg-white" *ngIf="loading; else loginTemplate">
+<div class="flex justify-center items-center w-full h-dvh bg-white" *ngIf="loading$ | async; else loginTemplate">
     <app-loader class="h-24 w-dvw"></app-loader>
 </div>
 <ng-template #loginTemplate>
@@ -23,8 +23,15 @@
                 </div>
 
                 <!-- Error Message -->
-                <div *ngIf="errorMessage" class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                    <p class="text-sm text-red-600 font-['DM_Sans']">{{ errorMessage }}</p>
+                <div *ngIf="error$ | async as errorMessage" class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 text-red-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                clip-rule="evenodd"></path>
+                        </svg>
+                        <p class="text-sm text-red-800 font-['DM_Sans']">{{ errorMessage }}</p>
+                    </div>
                 </div>
 
                 <!-- Login Form -->
@@ -86,20 +93,13 @@
                     </div>
 
                     <!-- Login Button -->
-                    <button type="submit" [disabled]="loginForm.invalid || loading"
-                        class="w-full h-12 bg-[#0ACF83] hover:bg-[#0ACF83]/90 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#0ACF83] focus:ring-offset-2 font-['DM_Sans']">
-                        <span *ngIf="!loading">Sign in</span>
-                        <span *ngIf="loading" class="flex items-center justify-center">
-                            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg"
-                                fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                    stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor"
-                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                </path>
-                            </svg>
-                            Signing in...
-                        </span>
+                    <button type="submit" [disabled]="loginForm.invalid || (loading$ | async)"
+                        class="w-full h-12 bg-[#0ACF83] hover:bg-[#0ACF83]/90 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#0ACF83] focus:ring-offset-2 font-['DM_Sans'] flex items-center justify-center">
+
+                        <app-loader *ngIf="loading$ | async" class="w-5 h-5 mr-2"></app-loader>
+
+                        <span *ngIf="!(loading$ | async)">Sign in</span>
+                        <span *ngIf="loading$ | async">Signing in...</span>
                     </button>
 
                     <!-- Go to Home Link -->

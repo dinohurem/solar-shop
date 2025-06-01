@@ -89,21 +89,8 @@ export class SupabaseService {
                 return { user: null, session: null, error: error.message };
             }
 
-            // If user is created successfully and we have a user ID, create profile
-            if (data.user && data.user.id) {
-                try {
-                    await this.createUserProfile({
-                        user_id: data.user.id,
-                        first_name: request.firstName,
-                        last_name: request.lastName,
-                        phone: request.phone
-                    });
-                } catch (profileError) {
-                    console.error('Error creating user profile:', profileError);
-                    // Don't fail the entire signup if profile creation fails
-                    // The trigger function should handle this, but we'll try manually as backup
-                }
-            }
+            // Profile creation is handled by database triggers
+            // No need to manually create profile here
 
             return {
                 user: data.user as AuthUser,

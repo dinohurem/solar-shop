@@ -31,7 +31,7 @@ export const selectPasswordResetSuccessMessage = createSelector(
 // User Selectors
 export const selectCurrentUser = createSelector(
     authSelector,
-    (state) => state.user
+    auth => auth.user
 );
 
 export const selectUserProfile = createSelector(
@@ -41,7 +41,7 @@ export const selectUserProfile = createSelector(
 
 export const selectIsAuthenticated = createSelector(
     authSelector,
-    (state) => !!state.loggedIn && !!state.token
+    auth => !!auth.loggedIn
 );
 
 export const selectUserFullName = createSelector(
@@ -50,8 +50,8 @@ export const selectUserFullName = createSelector(
 );
 
 export const selectUserAvatar = createSelector(
-    selectCurrentUser,
-    (user) => user?.avatar || null
+    authSelector,
+    auth => auth.user?.avatar || null
 );
 
 export const selectUserEmail = createSelector(
@@ -75,10 +75,11 @@ export const selectUserPreferences = createSelector(
 );
 
 export const selectIsAdmin = createSelector(
-    selectCurrentUser,
-    (user) => {
-        if (!user || !user.role) return false;
-        return user.role.name === 'admin' ||
-            user.role.permissions?.some(p => p.resource === 'admin') || false;
-    }
+    authSelector,
+    auth => auth.user?.role?.name === 'admin' || false
+);
+
+export const selectAuthToken = createSelector(
+    authSelector,
+    auth => auth.token
 );

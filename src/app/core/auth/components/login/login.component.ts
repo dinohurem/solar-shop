@@ -3,9 +3,12 @@ import { Component, NO_ERRORS_SCHEMA } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { SupabaseService } from '../../../../services/supabase.service';
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
 import { LoaderComponent } from '../../../../shared/components/loader/loader.component';
 import { LoginRequest } from '../../../../shared/models/auth.model';
+import * as AuthActions from '../../store/auth.actions';
+import { selectAuthLoading, selectAuthError } from '../../store/auth.selectors';
 
 @Component({
   selector: 'app-login',
@@ -18,45 +21,32 @@ import { LoginRequest } from '../../../../shared/models/auth.model';
 })
 export class LoginComponent {
   showPassword = false;
-  loading = false;
-  errorMessage = '';
+  loading$: Observable<boolean>;
+  error$: Observable<string | null>;
   loginForm: FormGroup;
 
   constructor(
-    private supabaseService: SupabaseService,
+    private store: Store,
     private fb: FormBuilder,
     private router: Router
   ) {
+    this.loading$ = this.store.select(selectAuthLoading);
+    this.error$ = this.store.select(selectAuthError);
+
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
   }
 
-  async onSubmit(): Promise<void> {
+  onSubmit(): void {
     if (this.loginForm.valid) {
-      this.loading = true;
-      this.errorMessage = '';
-
       const loginRequest: LoginRequest = {
-        email: this.loginForm.get('email')?.value,
-        password: this.loginForm.get('password')?.value
+        email: this.loginForm.value.email,
+        password: this.loginForm.value.password
       };
 
-      try {
-        const response = await this.supabaseService.signIn(loginRequest);
-
-        if (response.error) {
-          this.errorMessage = response.error;
-        } else if (response.user) {
-          // Redirect to dashboard or home page
-          this.router.navigate(['/']);
-        }
-      } catch (error: any) {
-        this.errorMessage = error.message || 'An error occurred during login';
-      } finally {
-        this.loading = false;
-      }
+      this.store.dispatch(AuthActions.login({ loginRequest }));
     } else {
       // Mark all fields as touched to show validation errors
       this.loginForm.markAllAsTouched();
@@ -77,15 +67,24 @@ export class LoginComponent {
     const field = this.loginForm.get(fieldName);
     if (field && field.errors && (field.dirty || field.touched)) {
       if (field.errors['required']) {
-        return `${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)} is required`;
+        return `${this.getFieldDisplayName(fieldName)} is required`;
       }
       if (field.errors['email']) {
         return 'Please enter a valid email address';
       }
       if (field.errors['minlength']) {
-        return 'Password must be at least 6 characters long';
+        const requiredLength = field.errors['minlength'].requiredLength;
+        return `${this.getFieldDisplayName(fieldName)} must be at least ${requiredLength} characters long`;
       }
     }
     return '';
+  }
+
+  private getFieldDisplayName(fieldName: string): string {
+    const displayNames: { [key: string]: string } = {
+      email: 'Email',
+      password: 'Password'
+    };
+    return displayNames[fieldName] || fieldName;
   }
 }

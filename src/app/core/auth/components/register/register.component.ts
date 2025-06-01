@@ -2,9 +2,11 @@ import { Component, NO_ERRORS_SCHEMA } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { SupabaseService } from '../../../../services/supabase.service';
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
 import { LoaderComponent } from '../../../../shared/components/loader/loader.component';
-import { RegisterRequest } from '../../../../shared/models/auth.model';
+import * as AuthActions from '../../store/auth.actions';
+import { selectAuthLoading, selectAuthError } from '../../store/auth.selectors';
 
 @Component({
     selector: 'app-register',
@@ -18,15 +20,18 @@ import { RegisterRequest } from '../../../../shared/models/auth.model';
 export class RegisterComponent {
     showPassword = false;
     showConfirmPassword = false;
-    loading = false;
-    errorMessage = '';
+    loading$: Observable<boolean>;
+    error$: Observable<string | null>;
     registerForm: FormGroup;
 
     constructor(
-        private supabaseService: SupabaseService,
+        private store: Store,
         private fb: FormBuilder,
         private router: Router
     ) {
+        this.loading$ = this.store.select(selectAuthLoading);
+        this.error$ = this.store.select(selectAuthError);
+
         this.registerForm = this.fb.group({
             email: ['', [Validators.required, Validators.email]],
             firstName: ['', [Validators.required, Validators.minLength(2)]],
@@ -58,41 +63,20 @@ export class RegisterComponent {
         return null;
     }
 
-    async onSubmit(): Promise<void> {
+    onSubmit(): void {
         if (this.registerForm.valid) {
-            this.loading = true;
-            this.errorMessage = '';
-
             const formData = this.registerForm.value;
-            const registerRequest: RegisterRequest = {
+            const registerRequest: AuthActions.RegisterRequest = {
                 email: formData.email,
                 password: formData.password,
                 firstName: formData.firstName,
                 lastName: formData.lastName,
-                phone: formData.phoneNumber
+                phone: formData.phoneNumber || '',
+                address: formData.address || '',
+                confirmPassword: formData.confirmPassword
             };
 
-            try {
-                const response = await this.supabaseService.signUp(registerRequest);
-
-                if (response.error) {
-                    this.errorMessage = response.error;
-                } else if (response.user) {
-                    if (response.session) {
-                        // User is automatically signed in
-                        this.router.navigate(['/']);
-                    } else {
-                        // Email confirmation required - navigate to confirmation page
-                        this.router.navigate(['/confirmation'], {
-                            queryParams: { email: formData.email }
-                        });
-                    }
-                }
-            } catch (error: any) {
-                this.errorMessage = error.message || 'An error occurred during registration';
-            } finally {
-                this.loading = false;
-            }
+            this.store.dispatch(AuthActions.register({ registerRequest }));
         } else {
             // Mark all fields as touched to show validation errors
             this.registerForm.markAllAsTouched();

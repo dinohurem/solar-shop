@@ -83,7 +83,17 @@ export class AuthEffects {
     registerSuccess$ = createEffect(() =>
         this.actions$.pipe(
             ofType(AuthActions.registerSuccess),
-            tap(() => this.router.navigate(['/']))
+            tap(({ user }) => {
+                // If user is not email verified, navigate to confirmation page
+                if (user && !user.emailVerified) {
+                    this.router.navigate(['/confirmation'], {
+                        queryParams: { email: user.email }
+                    });
+                } else {
+                    // User is automatically signed in and verified
+                    this.router.navigate(['/']);
+                }
+            })
         ),
         { dispatch: false }
     );
