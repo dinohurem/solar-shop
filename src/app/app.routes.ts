@@ -1,12 +1,11 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from './guards/auth.guard';
-import { AdminGuard } from './guards/admin.guard';
+import { AdminGuard } from './core/auth/guards/admin.guard';
 import { ForgotPasswordComponent } from './core/auth/components/forgot-password/forgot-password.component';
 import { LoginComponent } from './core/auth/components/login/login.component';
 import { RegisterComponent } from './core/auth/components/register/register.component';
 import { ResetPasswordComponent } from './core/auth/components/reset-password/reset-password.component';
 import { ConfirmationComponent } from './core/auth/components/confirmation/confirmation.component';
-import { LoginGuard } from './core/auth/guards/login.guard';
 import { PageLayoutComponent } from './core/page-layout/page-layout.component';
 import { CompanyComponent } from './features/b2c/company/company.component';
 import { BlogComponent } from './features/b2c/blog/blog.component';
@@ -29,12 +28,12 @@ import { AdminProductsComponent } from './features/admin/products/admin-products
 import { AdminBlogComponent } from './features/admin/blog/admin-blog.component';
 
 export const routes: Routes = [
-    // Authentication routes (no layout)
-    { path: 'login', component: LoginComponent, canActivate: [LoginGuard] },
-    { path: 'register', component: RegisterComponent, canActivate: [LoginGuard] },
-    { path: 'confirmation', component: ConfirmationComponent, canActivate: [LoginGuard] },
-    { path: 'forgot-password', component: ForgotPasswordComponent, canActivate: [LoginGuard] },
-    { path: 'reset-password', component: ResetPasswordComponent, canActivate: [LoginGuard] },
+    // Authentication routes (no layout) - no guards needed, Supabase handles auth state
+    { path: 'login', component: LoginComponent },
+    { path: 'register', component: RegisterComponent },
+    { path: 'confirmation', component: ConfirmationComponent },
+    { path: 'forgot-password', component: ForgotPasswordComponent },
+    { path: 'reset-password', component: ResetPasswordComponent },
 
     // Main application routes (with layout)
     {

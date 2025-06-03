@@ -74,9 +74,25 @@ export const selectUserPreferences = createSelector(
     (user) => user?.preferences || null
 );
 
+// Simplified role-based selectors
+export const selectUserRole = createSelector(
+    selectCurrentUser,
+    (user) => user?.role?.name || null
+);
+
 export const selectIsAdmin = createSelector(
-    authSelector,
-    auth => auth.user?.role?.name === 'admin' || false
+    selectUserRole,
+    (role) => role === 'admin'
+);
+
+export const selectIsCompanyAdmin = createSelector(
+    selectUserRole,
+    (role) => role === 'company_admin'
+);
+
+export const selectHasAdminPrivileges = createSelector(
+    selectUserRole,
+    (role) => role === 'admin' || role === 'company_admin'
 );
 
 export const selectAuthToken = createSelector(

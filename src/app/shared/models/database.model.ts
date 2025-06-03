@@ -13,6 +13,7 @@ export interface Database {
                     avatar_url?: string;
                     date_of_birth?: string;
                     gender?: 'male' | 'female' | 'other' | 'prefer_not_to_say';
+                    role: 'customer' | 'admin' | 'company_admin';
                     created_at: string;
                     updated_at: string;
                 };
@@ -26,6 +27,7 @@ export interface Database {
                     avatar_url?: string;
                     date_of_birth?: string;
                     gender?: 'male' | 'female' | 'other' | 'prefer_not_to_say';
+                    role?: 'customer' | 'admin' | 'company_admin';
                     created_at?: string;
                     updated_at?: string;
                 };
@@ -39,6 +41,7 @@ export interface Database {
                     avatar_url?: string;
                     date_of_birth?: string;
                     gender?: 'male' | 'female' | 'other' | 'prefer_not_to_say';
+                    role?: 'customer' | 'admin' | 'company_admin';
                     updated_at?: string;
                 };
             };

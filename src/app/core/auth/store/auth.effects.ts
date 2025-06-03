@@ -4,7 +4,6 @@ import { of } from 'rxjs';
 import { catchError, map, mergeMap, switchMap, tap } from 'rxjs/operators';
 import * as AuthActions from './auth.actions';
 import { AuthService } from '../services/auth.service';
-import { CookieService } from '../services/cookie.service';
 import { Router } from '@angular/router';
 import { User } from '../../../shared/models/user.model';
 import { AuthResponse, AuthUser } from '../../../shared/models/auth.model';
@@ -14,7 +13,6 @@ export class AuthEffects {
     constructor(
         private actions$: Actions,
         private authService: AuthService,
-        private cookieService: CookieService,
         private router: Router
     ) { }
 
@@ -29,7 +27,6 @@ export class AuthEffects {
                         }
 
                         const accessToken = response.session?.access_token || '';
-                        this.cookieService.setCookie('accessToken', accessToken);
 
                         // Create a proper User object from the response
                         const user: User = this.createUserFromAuthResponse(response.user, loginRequest.email);
@@ -56,7 +53,6 @@ export class AuthEffects {
                         }
 
                         const accessToken = response.session?.access_token || '';
-                        this.cookieService.setCookie('accessToken', accessToken);
 
                         // Create a proper User object from the response
                         const user: User = this.createUserFromRegisterResponse(response.user, registerRequest);
@@ -101,11 +97,17 @@ export class AuthEffects {
     logout$ = createEffect(() =>
         this.actions$.pipe(
             ofType(AuthActions.logout),
-            tap(() => {
-                this.cookieService.clear('accessToken');
-                this.router.navigate(['/login']);
-            }),
-            map(() => AuthActions.logoutSuccess())
+            mergeMap(() =>
+                this.authService.logout().pipe(
+                    tap(() => this.router.navigate(['/login'])),
+                    map(() => AuthActions.logoutSuccess()),
+                    catchError(() => {
+                        // Even if logout fails, clear the state and redirect
+                        this.router.navigate(['/login']);
+                        return of(AuthActions.logoutSuccess());
+                    })
+                )
+            )
         )
     );
 
@@ -136,45 +138,21 @@ export class AuthEffects {
     checkAuthToken$ = createEffect(() =>
         this.actions$.pipe(
             ofType(AuthActions.checkAuthToken),
-            mergeMap(() => {
-                const token = this.cookieService.getCookie('accessToken');
-                if (token) {
-                    return this.authService.validateToken(token).pipe(
-                        map((isValid: boolean) => {
-                            if (isValid) {
-                                // Get current user if token is valid
-                                return this.authService.getCurrentUser().pipe(
-                                    map(user => {
-                                        if (user) {
-                                            return AuthActions.loginSuccess({
-                                                token,
-                                                user: user
-                                            });
-                                        } else {
-                                            this.cookieService.clear('accessToken');
-                                            return AuthActions.clearAuthToken();
-                                        }
-                                    }),
-                                    catchError(() => {
-                                        this.cookieService.clear('accessToken');
-                                        return of(AuthActions.clearAuthToken());
-                                    })
-                                );
-                            } else {
-                                this.cookieService.clear('accessToken');
-                                return of(AuthActions.clearAuthToken());
-                            }
-                        }),
-                        mergeMap(action => action), // Flatten the nested observable
-                        catchError(() => {
-                            this.cookieService.clear('accessToken');
-                            return of(AuthActions.clearAuthToken());
-                        })
-                    );
-                } else {
-                    return of(AuthActions.clearAuthToken());
-                }
-            })
+            mergeMap(() =>
+                this.authService.getCurrentUser().pipe(
+                    map(user => {
+                        if (user) {
+                            return AuthActions.loginSuccess({
+                                token: 'supabase-managed', // Supabase manages tokens internally
+                                user: user
+                            });
+                        } else {
+                            return AuthActions.clearAuthToken();
+                        }
+                    }),
+                    catchError(() => of(AuthActions.clearAuthToken()))
+                )
+            )
         )
     );
 
@@ -208,9 +186,9 @@ export class AuthEffects {
     resetPasswordSuccess$ = createEffect(() =>
         this.actions$.pipe(
             ofType(AuthActions.resetPasswordSuccess),
-            tap(() => setTimeout(() => {
+            tap(() => {
                 this.router.navigate(['/login']);
-            }, 3000))
+            })
         ),
         { dispatch: false }
     );
@@ -222,12 +200,14 @@ export class AuthEffects {
 
         return {
             id: authUser.id,
-            email: authUser.email || email,
-            firstName: authUser.user_metadata?.firstName || 'User',
+            email: email,
+            firstName: authUser.user_metadata?.firstName || '',
             lastName: authUser.user_metadata?.lastName || '',
-            fullName: authUser.user_metadata?.fullName || `${authUser.user_metadata?.firstName || 'User'} ${authUser.user_metadata?.lastName || ''}`.trim(),
+            fullName: `${authUser.user_metadata?.firstName || ''} ${authUser.user_metadata?.lastName || ''}`.trim(),
+            avatar: authUser.user_metadata?.avatar_url,
+            phone: authUser.user_metadata?.phone,
             role: {
-                id: '1',
+                id: 'customer',
                 name: 'customer',
                 permissions: [],
                 isDefault: true,
@@ -245,8 +225,9 @@ export class AuthEffects {
             emailVerified: !!authUser.email_confirmed_at,
             phoneVerified: !!authUser.phone_confirmed_at,
             twoFactorEnabled: false,
+            lastLoginAt: authUser.last_sign_in_at,
             createdAt: authUser.created_at,
-            updatedAt: authUser.updated_at
+            updatedAt: authUser.updated_at || authUser.created_at
         };
     }
 
@@ -257,13 +238,13 @@ export class AuthEffects {
 
         return {
             id: authUser.id,
-            email: authUser.email,
-            firstName: authUser.user_metadata?.firstName || registerRequest.firstName || 'User',
-            lastName: authUser.user_metadata?.lastName || registerRequest.lastName || '',
-            fullName: authUser.user_metadata?.fullName || `${registerRequest.firstName || 'User'} ${registerRequest.lastName || ''}`.trim(),
-            phone: authUser.user_metadata?.phone || registerRequest.phone,
+            email: registerRequest.email,
+            firstName: registerRequest.firstName || '',
+            lastName: registerRequest.lastName || '',
+            fullName: `${registerRequest.firstName || ''} ${registerRequest.lastName || ''}`.trim(),
+            phone: registerRequest.phone,
             role: {
-                id: '1',
+                id: 'customer',
                 name: 'customer',
                 permissions: [],
                 isDefault: true,
@@ -281,20 +262,21 @@ export class AuthEffects {
             emailVerified: !!authUser.email_confirmed_at,
             phoneVerified: !!authUser.phone_confirmed_at,
             twoFactorEnabled: false,
+            lastLoginAt: authUser.last_sign_in_at,
             createdAt: authUser.created_at,
-            updatedAt: authUser.updated_at
+            updatedAt: authUser.updated_at || authUser.created_at
         };
     }
 
     private createDefaultUser(): User {
         return {
-            id: 'default',
-            email: 'user@example.com',
-            firstName: 'User',
+            id: '',
+            email: '',
+            firstName: '',
             lastName: '',
-            fullName: 'User',
+            fullName: '',
             role: {
-                id: '1',
+                id: 'customer',
                 name: 'customer',
                 permissions: [],
                 isDefault: true,
@@ -322,7 +304,7 @@ export class AuthEffects {
             language: 'en',
             timezone: 'UTC',
             currency: 'EUR',
-            theme: 'light' as 'light' | 'dark' | 'auto',
+            theme: 'light' as const,
             notifications: {
                 email: {
                     orderUpdates: true,
@@ -343,7 +325,7 @@ export class AuthEffects {
                 }
             },
             privacy: {
-                profileVisibility: 'private' as 'private' | 'public' | 'friends',
+                profileVisibility: 'private' as const,
                 showEmail: false,
                 showPhone: false,
                 allowDataCollection: true,
@@ -355,7 +337,7 @@ export class AuthEffects {
                 allowSmsMarketing: false,
                 allowPushMarketing: true,
                 interests: [],
-                preferredContactTime: 'anytime' as 'anytime' | 'morning' | 'afternoon' | 'evening'
+                preferredContactTime: 'anytime' as const
             }
         };
     }
