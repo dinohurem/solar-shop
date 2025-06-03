@@ -94,7 +94,7 @@ export class AuthService {
           isSuspended: false
         },
         preferences: {
-          language: 'en',
+          language: 'hr',
           timezone: 'UTC',
           currency: 'EUR',
           theme: 'light',

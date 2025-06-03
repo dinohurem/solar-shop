@@ -6,6 +6,7 @@ import { Observable } from 'rxjs';
 import { OffersActions } from './store/offers.actions';
 import { selectOffers, selectIsLoading } from './store/offers.selectors';
 import { AddToCartButtonComponent } from '../cart/components/add-to-cart-button/add-to-cart-button.component';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 export interface Offer {
   id: string;
@@ -21,17 +22,17 @@ export interface Offer {
 @Component({
   selector: 'app-offers-page',
   standalone: true,
-  imports: [CommonModule, AddToCartButtonComponent],
+  imports: [CommonModule, AddToCartButtonComponent, TranslatePipe],
   template: `
     <div class="min-h-screen bg-gray-50">
       <!-- Hero Section -->
       <div class="bg-gradient-to-r from-[#0ACF83] to-[#0ACFAC] text-white py-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 class="text-5xl lg:text-6xl font-bold mb-6 font-['Poppins']">
-            Special Offers
+            {{ 'offers.title' | translate }}
           </h1>
           <p class="text-xl lg:text-2xl max-w-3xl mx-auto font-['DM_Sans']">
-            Discover amazing deals on our premium solar and energy-efficient products
+            {{ 'offers.subtitle' | translate }}
           </p>
         </div>
       </div>
@@ -43,15 +44,15 @@ export interface Offer {
           <div class="flex items-center space-x-4">
             <span class="text-lg font-semibold text-[#324053] font-['Poppins']">Filter by:</span>
             <select class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0ACF83] focus:border-transparent font-['DM_Sans']">
-              <option value="">All Categories</option>
-              <option value="solar-panels">Solar Panels</option>
-              <option value="inverters">Inverters</option>
-              <option value="batteries">Batteries</option>
-              <option value="accessories">Accessories</option>
+              <option value="">{{ 'offers.allCategories' | translate }}</option>
+              <option value="solar-panels">{{ 'offers.solarPanels' | translate }}</option>
+              <option value="inverters">{{ 'offers.inverters' | translate }}</option>
+              <option value="batteries">{{ 'offers.batteries' | translate }}</option>
+              <option value="accessories">{{ 'offers.accessories' | translate }}</option>
             </select>
           </div>
           <div class="text-sm text-gray-600 font-['DM_Sans']">
-            {{ (offers$ | async)?.length || 0 }} offers available
+            {{ 'offers.offersAvailable' | translate:{ count: ((offers$ | async)?.length || 0) } }}
           </div>
         </div>
 
@@ -75,7 +76,7 @@ export interface Offer {
               </div>
               <!-- Sale Badge -->
               <div class="absolute top-4 right-4 bg-[#0ACF83] text-white text-xs font-bold px-2 py-1 rounded-full">
-                SALE
+                {{ 'offers.sale' | translate }}
               </div>
             </div>
 
@@ -101,7 +102,7 @@ export interface Offer {
 
               <!-- Savings -->
               <div class="bg-green-50 text-green-800 text-sm font-semibold px-3 py-2 rounded-lg mb-4 text-center">
-                You save {{ (offer.originalPrice - offer.discountedPrice) | currency:'EUR':'symbol':'1.2-2' }}
+                {{ 'offers.youSave' | translate:{ amount: getSavingsAmount(offer) } }}
               </div>
 
               <!-- Action Buttons -->
@@ -109,7 +110,7 @@ export interface Offer {
                 <app-add-to-cart-button 
                   [productId]="offer.id" 
                   [quantity]="1" 
-                  buttonText="Add To Cart"
+                  [buttonText]="'offers.addToCart' | translate"
                   [fullWidth]="true"
                   size="md"
                   variant="primary"
@@ -120,7 +121,7 @@ export interface Offer {
                   (click)="navigateToProduct(offer.id); $event.stopPropagation()"
                   class="w-full px-4 py-2 bg-white text-[#324053] border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-semibold font-['DM_Sans']"
                 >
-                  View Details
+                  {{ 'offers.viewDetails' | translate }}
                 </button>
               </div>
             </div>
@@ -139,32 +140,32 @@ export interface Offer {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m13-8V4a1 1 0 00-1-1H7a1 1 0 00-1 1v1m8 0V4.5"/>
             </svg>
           </div>
-          <h3 class="text-2xl font-bold text-gray-900 mb-4 font-['Poppins']">No offers available</h3>
-          <p class="text-gray-600 mb-8 font-['DM_Sans']">Check back later for amazing deals on our products.</p>
+          <h3 class="text-2xl font-bold text-gray-900 mb-4 font-['Poppins']">{{ 'offers.noOffers' | translate }}</h3>
+          <p class="text-gray-600 mb-8 font-['DM_Sans']">{{ 'offers.noOffersText' | translate }}</p>
           <button 
             (click)="navigateToProducts()"
             class="px-8 py-3 bg-[#0ACF83] text-white font-semibold rounded-lg hover:bg-[#09b574] transition-colors font-['DM_Sans']"
           >
-            Browse All Products
+            {{ 'offers.browseAllProducts' | translate }}
           </button>
         </div>
 
         <!-- Call to Action -->
         <div class="mt-20 bg-gradient-to-r from-[#0ACF83] to-[#0ACFAC] rounded-3xl p-12 text-center text-white">
           <h2 class="text-3xl lg:text-4xl font-bold mb-6 font-['Poppins']">
-            Don't Miss Out!
+            {{ 'offers.dontMissOut' | translate }}
           </h2>
           <p class="text-xl mb-8 max-w-2xl mx-auto font-['DM_Sans']">
-            Subscribe to our newsletter and be the first to know about new offers and exclusive deals.
+            {{ 'offers.subscribeText' | translate }}
           </p>
           <div class="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
             <input 
               type="email" 
-              placeholder="Enter your email"
+              [placeholder]="'offers.enterEmail' | translate"
               class="flex-1 px-4 py-3 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white font-['DM_Sans']"
             >
             <button class="px-8 py-3 bg-white text-[#0ACF83] font-semibold rounded-lg hover:bg-gray-100 transition-colors font-['DM_Sans']">
-              Subscribe
+              {{ 'offers.subscribe' | translate }}
             </button>
           </div>
         </div>
@@ -220,5 +221,10 @@ export class OffersPageComponent implements OnInit {
 
   navigateToProducts(): void {
     this.router.navigate(['/products']);
+  }
+
+  getSavingsAmount(offer: Offer): string {
+    const savingsAmount = offer.originalPrice - offer.discountedPrice;
+    return savingsAmount.toLocaleString('en-US', { style: 'currency', currency: 'EUR' });
   }
 } 

@@ -1,19 +1,20 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-company',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslatePipe],
   template: `
     <!-- Hero Section -->
     <section class="relative bg-gradient-to-br from-green-600 to-green-800 text-white py-20 px-4 md:px-8 lg:px-32">
       <div class="max-w-6xl mx-auto text-center">
         <h1 class="font-['Poppins'] font-semibold text-4xl md:text-5xl lg:text-6xl mb-6 leading-tight">
-          Our Company
+          {{ 'company.title' | translate }}
         </h1>
         <p class="font-['DM_Sans'] text-base md:text-lg max-w-4xl mx-auto opacity-80 leading-relaxed">
-          Welcome to the section dedicated to our company. Here you can learn more about us, our history, our values and the team that every day works to offer you the best products and services in the field of sustainable construction and energy efficiency.
+          {{ 'company.subtitle' | translate }}
         </p>
       </div>
     </section>
@@ -25,13 +26,13 @@ import { CommonModule } from '@angular/common';
           <!-- Content -->
           <div class="space-y-6">
             <h2 class="font-['Poppins'] font-semibold text-3xl md:text-4xl text-gray-800 leading-tight">
-              Who We Are
+              {{ 'company.whoWeAre' | translate }}
             </h2>
             <p class="font-['DM_Sans'] text-base text-gray-600 leading-relaxed">
-              HeyHome was born from the experience of professionals in the construction sector who, by combining their skills, decided to create a portal where private individuals, craftsmen and companies could easily find the best products for their projects. Year after year, we have enriched our offer, selected the most reliable partners and refined our consultancy, becoming a reference point for those who seek quality, efficiency and transparency.
+              {{ 'company.whoWeAreText' | translate }}
             </p>
             <p class="font-['DM_Sans'] text-base text-gray-600 leading-relaxed">
-              Our mission is simple: to make accessible to everyone the most innovative solutions for sustainable construction, accompanying our customers from design to the realization of their housing dreams.
+              {{ 'company.mission' | translate }}
             </p>
           </div>
           
@@ -52,10 +53,10 @@ import { CommonModule } from '@angular/common';
           <!-- Team Info -->
           <div class="lg:w-1/2 space-y-6">
             <h2 class="font-['Poppins'] font-semibold text-3xl md:text-4xl text-gray-800 text-center lg:text-left leading-tight">
-              Our Team
+              {{ 'company.ourTeam' | translate }}
             </h2>
             <p class="font-['DM_Sans'] text-base text-gray-600 leading-relaxed text-right">
-              Behind HeyHome is a group of passionate and competent people: engineers, architects, energy consultants and construction professionals, united by the desire to help you build better, more efficient and more respectful of the environment. Our team is at your disposal to advise and guide you towards the most suitable solutions for your needs.
+              {{ 'company.teamText' | translate }}
             </p>
           </div>
           
@@ -125,7 +126,7 @@ import { CommonModule } from '@angular/common';
       <div class="max-w-6xl mx-auto relative z-10">
         <div class="text-center mb-12">
           <h2 class="font-['Poppins'] font-semibold text-3xl md:text-4xl text-gray-800 mb-8 leading-tight">
-            Mission and Values
+            {{ 'company.missionValues' | translate }}
           </h2>
           
           <!-- Values Grid -->
@@ -138,9 +139,9 @@ import { CommonModule } from '@angular/common';
                 </svg>
               </div>
               <div>
-                <h3 class="font-['DM_Sans'] font-semibold text-lg text-gray-800 mb-2">Quality</h3>
+                <h3 class="font-['DM_Sans'] font-semibold text-lg text-gray-800 mb-2">{{ 'company.quality' | translate }}</h3>
                 <p class="font-['DM_Sans'] text-sm text-gray-600 leading-relaxed">
-                    We offer only tested and certified products, selected from the most reliable brands on the market.
+                  {{ 'company.qualityText' | translate }}
                 </p>
               </div>
             </div>
@@ -152,9 +153,9 @@ import { CommonModule } from '@angular/common';
                 </svg>
               </div>
               <div>
-                <h3 class="font-['DM_Sans'] font-semibold text-lg text-gray-800 mb-2">Innovazione</h3>
+                <h3 class="font-['DM_Sans'] font-semibold text-lg text-gray-800 mb-2">{{ 'company.innovation' | translate }}</h3>
                 <p class="font-['DM_Sans'] text-sm text-gray-600 leading-relaxed">
-                    We focus on the most advanced technologies and on last generation materials, to ensure high-performance and durable solutions.
+                  {{ 'company.innovationText' | translate }}
                 </p>
               </div>
             </div>
@@ -167,9 +168,9 @@ import { CommonModule } from '@angular/common';
                 </svg>
               </div>
               <div>
-                <h3 class="font-['DM_Sans'] font-semibold text-lg text-gray-800 mb-2">Sostenibilità</h3>
+                <h3 class="font-['DM_Sans'] font-semibold text-lg text-gray-800 mb-2">{{ 'company.sustainability' | translate }}</h3>
                 <p class="font-['DM_Sans'] text-sm text-gray-600 leading-relaxed">
-                    We respect the planet, choosing low-impact materials, encouraging the use of renewable energies and promoting responsible construction practices.
+                  {{ 'company.sustainabilityText' | translate }}
                 </p>
               </div>
             </div>
@@ -181,9 +182,9 @@ import { CommonModule } from '@angular/common';
                 </svg>
               </div>
               <div>
-                <h3 class="font-['DM_Sans'] font-semibold text-lg text-gray-800 mb-2">Supporto</h3>
+                <h3 class="font-['DM_Sans'] font-semibold text-lg text-gray-800 mb-2">{{ 'company.support' | translate }}</h3>
                 <p class="font-['DM_Sans'] text-sm text-gray-600 leading-relaxed">
-                    We accompany you in every phase, from product selection to post-sale assistance, with a team of experts always ready to listen to your needs.
+                  {{ 'company.supportText' | translate }}
                 </p>
               </div>
             </div>
@@ -196,10 +197,10 @@ import { CommonModule } from '@angular/common';
     <section class="py-16 px-4 md:px-8 lg:px-32 bg-white">
       <div class="max-w-6xl mx-auto text-center">
         <h2 class="font-['Poppins'] font-semibold text-3xl md:text-4xl text-gray-800 mb-6 leading-tight">
-          Suppliers and Partners
+          {{ 'company.suppliersPartners' | translate }}
         </h2>
         <p class="font-['DM_Sans'] text-base text-gray-600 max-w-3xl mx-auto mb-12 leading-relaxed">
-          We collaborate with the most established brands and specialized companies, thus ensuring a wide, updated and high-quality catalog. Thanks to these solid partnerships, we can offer you competitive prices, innovative products and a reliable and transparent distribution chain.
+          {{ 'company.partnersText' | translate }}
         </p>
         
         <!-- Partners Grid -->
@@ -264,12 +265,10 @@ import { CommonModule } from '@angular/common';
           <!-- Content -->
           <div class="space-y-6">
             <h2 class="font-['Poppins'] font-semibold text-3xl md:text-4xl text-gray-800 leading-tight">
-              Social Responsibility and Environmental
+              {{ 'company.socialResponsibility' | translate }}
             </h2>
             <p class="font-['DM_Sans'] text-base text-gray-600 leading-relaxed">
-              Our commitment does not stop at the product. We commit to promoting the culture of sustainability, energy efficiency and respect for the territory. We invest in research, training and sensitization, because we believe that every small gesture can contribute to a better future.
-              <br><br>
-              Choosing HeyHome means trusting a reality that combines experience, professionalism and passion. Browse our sections, discover our products and our advice, and do not hesitate to contact us for any request. We are here to help you build, renew and improve the spaces where you live, with the certainty of making smart and sustainable choices.
+              {{ 'company.responsibilityText' | translate }}
             </p>
           </div>
           

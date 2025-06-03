@@ -7,17 +7,18 @@ import { filter } from 'rxjs/operators';
 import * as CartSelectors from '../cart/store/cart.selectors';
 import * as CartActions from '../cart/store/cart.actions';
 import { CartItem, CartSummary } from '../../../shared/models/cart.model';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-checkout',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, TranslatePipe],
   template: `
     <div class="min-h-screen bg-gray-50">
       <!-- Header -->
       <div class="bg-white border-b border-gray-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <h1 class="text-3xl font-bold text-gray-900 font-['Poppins']">Checkout</h1>
+          <h1 class="text-3xl font-bold text-gray-900 font-['Poppins']">{{ 'checkout.title' | translate }}</h1>
           <p class="mt-2 text-gray-600 font-['DM_Sans']">Complete your order</p>
         </div>
       </div>
@@ -42,7 +43,7 @@ import { CartItem, CartSummary } from '../../../shared/models/cart.model';
                     [ngClass]="{
                       'text-[#0ACF83]': currentStep >= 1,
                       'text-gray-400': currentStep < 1
-                    }">Order Review</span>
+                    }">{{ 'checkout.step3' | translate }}</span>
             </div>
 
             <!-- Connector Line -->
@@ -67,7 +68,7 @@ import { CartItem, CartSummary } from '../../../shared/models/cart.model';
                     [ngClass]="{
                       'text-[#0ACF83]': currentStep >= 2,
                       'text-gray-400': currentStep < 2
-                    }">Shipping</span>
+                    }">{{ 'checkout.step1' | translate }}</span>
             </div>
 
             <!-- Connector Line -->
@@ -92,7 +93,7 @@ import { CartItem, CartSummary } from '../../../shared/models/cart.model';
                     [ngClass]="{
                       'text-[#0ACF83]': currentStep >= 3,
                       'text-gray-400': currentStep < 3
-                    }">Payment</span>
+                    }">{{ 'checkout.step2' | translate }}</span>
             </div>
           </div>
         </div>
@@ -107,7 +108,7 @@ import { CartItem, CartSummary } from '../../../shared/models/cart.model';
           <!-- Order Summary -->
           <div class="lg:col-span-1">
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-8">
-              <h3 class="text-lg font-semibold text-gray-900 mb-4 font-['Poppins']">Order Summary</h3>
+              <h3 class="text-lg font-semibold text-gray-900 mb-4 font-['Poppins']">{{ 'checkout.orderSummary' | translate }}</h3>
               
               <!-- Cart Items -->
               <div class="space-y-4 mb-6">
@@ -136,11 +137,11 @@ import { CartItem, CartSummary } from '../../../shared/models/cart.model';
               <!-- Summary -->
               <div class="space-y-2 text-sm mb-4">
                 <div class="flex justify-between">
-                  <span class="text-gray-600 font-['DM_Sans']">Subtotal</span>
+                  <span class="text-gray-600 font-['DM_Sans']">{{ 'checkout.subtotal' | translate }}</span>
                   <span class="font-['DM_Sans']">{{ (cartSummary$ | async)?.subtotal | currency:'EUR':'symbol':'1.2-2' }}</span>
                 </div>
                 <div class="flex justify-between">
-                  <span class="text-gray-600 font-['DM_Sans']">Tax</span>
+                  <span class="text-gray-600 font-['DM_Sans']">{{ 'checkout.tax' | translate }}</span>
                   <span class="font-['DM_Sans']">{{ (cartSummary$ | async)?.tax | currency:'EUR':'symbol':'1.2-2' }}</span>
                 </div>
               </div>
@@ -150,7 +151,7 @@ import { CartItem, CartSummary } from '../../../shared/models/cart.model';
 
               <!-- Total -->
               <div class="flex justify-between text-lg font-semibold">
-                <span class="font-['DM_Sans']">Total</span>
+                <span class="font-['DM_Sans']">{{ 'checkout.total' | translate }}</span>
                 <span class="font-['DM_Sans']">{{ (cartSummary$ | async)?.total | currency:'EUR':'symbol':'1.2-2' }}</span>
               </div>
             </div>

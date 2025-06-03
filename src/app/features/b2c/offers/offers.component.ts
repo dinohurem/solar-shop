@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
 import { Router } from '@angular/router';
 import { OffersService, Offer } from './services/offers.service';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-offers',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslatePipe],
   template: `
     <!-- Offers & Promotions Section -->
     <section class="py-20 px-4 sm:px-6 lg:px-8 bg-white">
@@ -15,10 +16,10 @@ import { OffersService, Offer } from './services/offers.service';
         <!-- Section Header -->
         <div class="flex justify-between items-center mb-16">
           <h2 class="text-4xl lg:text-5xl font-bold text-heyhome-dark-green font-['Poppins']">
-            Offers & Promotions
+            {{ 'offers.title' | translate }}
           </h2>
           <button (click)="navigateToOffers()" class="flex items-center gap-2 text-heyhome-dark-green hover:text-heyhome-primary transition-colors font-semibold text-lg group">
-            <span>View All</span>
+            <span>{{ 'offers.viewAll' | translate }}</span>
             <svg class="w-5 h-5 transform group-hover:translate-x-1 transition-transform" stroke="currentColor" fill="none" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
             </svg>
@@ -71,7 +72,7 @@ import { OffersService, Offer } from './services/offers.service';
 
         <!-- Empty State -->
         <div *ngIf="!isLoading && (offers$ | async)?.length === 0" class="text-center py-12">
-          <div class="text-gray-500 text-lg">No offers available at the moment.</div>
+          <div class="text-gray-500 text-lg">{{ 'offers.noOffers' | translate }}</div>
         </div>
       </div>
     </section>

@@ -15,11 +15,14 @@ import { CartButtonComponent } from '../cart/components/cart-button/cart-button.
 import * as AuthActions from '../../../core/auth/store/auth.actions';
 import { User } from '../../../shared/models/user.model';
 import { filter } from 'rxjs/operators';
+import { TranslationService } from '../../../shared/services/translation.service';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, RouterModule, CartButtonComponent],
+  imports: [CommonModule, RouterModule, CartButtonComponent, TranslatePipe],
   template: `
     <!-- Top Info Bar (Desktop) -->
     <div class="hidden lg:block bg-heyhome-dark-green text-white text-sm">
@@ -31,33 +34,33 @@ import { filter } from 'rxjs/operators';
               <svg class="w-4 h-4 opacity-50" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
               </svg>
-              <span>+39 3456493134</span>
+              <span>{{ 'contact.phone' | translate }}</span>
             </div>
             <div class="flex items-center space-x-2 hover:text-green-200 transition-colors duration-200">
               <svg class="w-4 h-4 opacity-50" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
                 <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
               </svg>
-              <span>info&#64;heyhome.it</span>
+              <span>{{ 'contact.email' | translate }}</span>
             </div>
           </div>
           
           <!-- Language Selector -->
           <div class="flex items-center space-x-1 cursor-pointer hover:text-green-200 transition-colors duration-200" (click)="toggleLanguage()">
             <div class="flex items-center space-x-2" *ngIf="(currentLanguage$ | async) === 'en'">
-              <span>English (US)</span>
+              <span>{{ 'language.current' | translate }}</span>
               <svg class="w-4 h-4 transform transition-transform duration-200 hover:rotate-180" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
               </svg>
             </div>
-            <div class="flex items-center space-x-2" *ngIf="(currentLanguage$ | async) === 'it'">
+            <div class="flex items-center space-x-2" *ngIf="(currentLanguage$ | async) === 'hr'">
               <div class="flex items-center space-x-1">
-                <div class="w-4 h-3 flex rounded-sm overflow-hidden">
-                  <div class="w-1/3 h-full bg-green-600"></div>
-                  <div class="w-1/3 h-full bg-white"></div>
-                  <div class="w-1/3 h-full bg-red-600"></div>
+                <div class="w-4 h-3 flex flex-col rounded-sm overflow-hidden">
+                  <div class="w-full h-1/3 bg-red-600"></div>
+                  <div class="w-full h-1/3 bg-white"></div>
+                  <div class="w-full h-1/3 bg-blue-600"></div>
                 </div>
-                <span>Italiano</span>
+                <span>{{ 'language.current' | translate }}</span>
               </div>
               <svg class="w-4 h-4 transform transition-transform duration-200 hover:rotate-180" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
@@ -77,14 +80,14 @@ import { filter } from 'rxjs/operators';
               <svg class="w-4 h-4 opacity-50" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
               </svg>
-              <span>+39 3456493134</span>
+              <span>{{ 'contact.phone' | translate }}</span>
             </div>
             <div class="flex items-center space-x-2">
               <svg class="w-4 h-4 opacity-50" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
                 <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
               </svg>
-              <span>info&#64;heyhome.it</span>
+              <span>{{ 'contact.email' | translate }}</span>
             </div>
           </div>
         </div>
@@ -112,7 +115,7 @@ import { filter } from 'rxjs/operators';
           <div class="hidden lg:flex items-center space-x-8">
             <div class="relative group">
               <div class="flex items-center space-x-1 cursor-pointer text-gray-900 font-medium transition-all duration-300 hover:text-green-600 group-hover:scale-105">
-                <span>Products</span>
+                <span>{{ 'nav.products' | translate }}</span>
                 <svg class="w-4 h-4 text-gray-600 transition-transform duration-300 group-hover:rotate-180" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
                 </svg>
@@ -123,42 +126,43 @@ import { filter } from 'rxjs/operators';
             <a routerLink="/offers" 
                routerLinkActive="text-green-600 font-semibold" 
                class="relative text-gray-900 hover:text-green-600 font-medium transition-all duration-300 hover:scale-105 group">
-              <span>Offers & Promotions</span>
+              <span>{{ 'nav.offers' | translate }}</span>
               <div class="absolute bottom-0 left-0 w-0 h-0.5 bg-green-600 transition-all duration-300 group-hover:w-full"></div>
             </a>
             
             <a routerLink="/mission" 
                routerLinkActive="text-green-600 font-semibold" 
                class="relative text-gray-900 hover:text-green-600 font-medium transition-all duration-300 hover:scale-105 group">
-              <span>Sustainability</span>
+              <span>{{ 'nav.sustainability' | translate }}</span>
               <div class="absolute bottom-0 left-0 w-0 h-0.5 bg-green-600 transition-all duration-300 group-hover:w-full"></div>
             </a>
             
             <a routerLink="/blog" 
                routerLinkActive="text-green-600 font-semibold" 
                class="relative text-gray-900 hover:text-green-600 font-medium transition-all duration-300 hover:scale-105 group">
-              <span>Blog & Guides</span>
+              <span>{{ 'nav.blog' | translate }}</span>
               <div class="absolute bottom-0 left-0 w-0 h-0.5 bg-green-600 transition-all duration-300 group-hover:w-full"></div>
             </a>
             
             <a routerLink="/company" 
                routerLinkActive="text-green-600 font-semibold" 
                class="relative text-gray-900 hover:text-green-600 font-medium transition-all duration-300 hover:scale-105 group">
-              <span>Company</span>
+              <span>{{ 'nav.company' | translate }}</span>
               <div class="absolute bottom-0 left-0 w-0 h-0.5 bg-green-600 transition-all duration-300 group-hover:w-full"></div>
             </a>
             
             <a routerLink="/contact" 
                routerLinkActive="text-green-600 font-semibold" 
                class="relative text-gray-900 hover:text-green-600 font-medium transition-all duration-300 hover:scale-105 group">
-              <span>Contacts & Support</span>
+              <span>{{ 'nav.contact' | translate }}</span>
               <div class="absolute bottom-0 left-0 w-0 h-0.5 bg-green-600 transition-all duration-300 group-hover:w-full"></div>
             </a>
           </div>
 
           <!-- Desktop Icons -->
           <div class="hidden lg:flex items-center space-x-5">
-            <button class="p-2 text-gray-600 hover:text-green-600 transition-all duration-300 hover:scale-110 hover:bg-green-50 rounded-full">
+            <button class="p-2 text-gray-600 hover:text-green-600 transition-all duration-300 hover:scale-110 hover:bg-green-50 rounded-full" 
+                    [title]="'nav.searchPlaceholder' | translate">
               <svg class="w-6 h-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
               </svg>
@@ -171,7 +175,7 @@ import { filter } from 'rxjs/operators';
                 *ngIf="!(isAuthenticated$ | async)"
                 (click)="navigateToLogin()"
                 class="p-2 text-gray-600 hover:text-green-600 transition-all duration-300 hover:scale-110 hover:bg-green-50 rounded-full"
-                title="Sign In">
+                [title]="'auth.signIn' | translate">
                 <svg class="w-6 h-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
                 </svg>
@@ -182,7 +186,7 @@ import { filter } from 'rxjs/operators';
                 <button 
                   (click)="toggleProfileMenu()"
                   class="p-2 text-gray-600 hover:text-green-600 transition-all duration-300 hover:scale-110 hover:bg-green-50 rounded-full flex items-center space-x-2"
-                  title="Profile">
+                  [title]="'profile.profile' | translate">
                   <!-- User Avatar or Default Profile Icon -->
                   <div *ngIf="(userAvatar$ | async); else defaultProfileIcon" class="w-8 h-8 rounded-full overflow-hidden ring-2 ring-transparent hover:ring-green-200 transition-all duration-300">
                     <img [src]="userAvatar$ | async" [alt]="(currentUser$ | async)?.firstName" class="w-full h-full object-cover">
@@ -210,7 +214,7 @@ import { filter } from 'rxjs/operators';
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                       </svg>
-                      <span>Profile</span>
+                      <span>{{ 'profile.profile' | translate }}</span>
                     </div>
                   </a>
                   <a 
@@ -223,7 +227,7 @@ import { filter } from 'rxjs/operators';
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                       </svg>
-                      <span>Admin Dashboard</span>
+                      <span>{{ 'profile.adminDashboard' | translate }}</span>
                     </div>
                   </a>
                   <button 
@@ -233,7 +237,7 @@ import { filter } from 'rxjs/operators';
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                       </svg>
-                      <span>Sign Out</span>
+                      <span>{{ 'profile.signOut' | translate }}</span>
                     </div>
                   </button>
                 </div>
@@ -245,7 +249,8 @@ import { filter } from 'rxjs/operators';
 
           <!-- Mobile Menu Button and Icons -->
           <div class="lg:hidden flex items-center space-x-3">
-            <button class="p-2 text-gray-600 hover:text-green-600 transition-all duration-300 hover:scale-110 hover:bg-green-50 rounded-full">
+            <button class="p-2 text-gray-600 hover:text-green-600 transition-all duration-300 hover:scale-110 hover:bg-green-50 rounded-full"
+                    [title]="'nav.searchPlaceholder' | translate">
               <svg class="w-6 h-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
               </svg>
@@ -255,7 +260,8 @@ import { filter } from 'rxjs/operators';
             <button 
               *ngIf="!(isAuthenticated$ | async)"
               (click)="navigateToLogin()"
-              class="p-2 text-gray-600 hover:text-green-600 transition-all duration-300 hover:scale-110 hover:bg-green-50 rounded-full">
+              class="p-2 text-gray-600 hover:text-green-600 transition-all duration-300 hover:scale-110 hover:bg-green-50 rounded-full"
+              [title]="'auth.signIn' | translate">
               <svg class="w-6 h-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
               </svg>
@@ -264,7 +270,8 @@ import { filter } from 'rxjs/operators';
             <button 
               *ngIf="isAuthenticated$ | async"
               (click)="navigateToProfile()"
-              class="p-2 text-gray-600 hover:text-green-600 transition-all duration-300 hover:scale-110 hover:bg-green-50 rounded-full">
+              class="p-2 text-gray-600 hover:text-green-600 transition-all duration-300 hover:scale-110 hover:bg-green-50 rounded-full"
+              [title]="'profile.profile' | translate">
               <svg class="w-6 h-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
               </svg>
@@ -295,7 +302,7 @@ import { filter } from 'rxjs/operators';
         <div class="px-4 py-6 space-y-4">
           <div class="relative group">
             <div class="flex items-center space-x-1 cursor-pointer text-gray-900 font-medium transition-all duration-300 hover:text-green-600 py-2">
-              <span>Products</span>
+              <span>{{ 'nav.products' | translate }}</span>
               <svg class="w-4 h-4 text-gray-600 transition-transform duration-300 group-hover:rotate-180" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
               </svg>
@@ -305,31 +312,31 @@ import { filter } from 'rxjs/operators';
           <a routerLink="/offers" 
              routerLinkActive="text-green-600 font-semibold bg-green-50" 
              class="block text-gray-900 hover:text-green-600 font-medium transition-all duration-300 py-2 px-3 rounded-lg hover:bg-green-50">
-            Offers & Promotions
+            {{ 'nav.offers' | translate }}
           </a>
           
           <a routerLink="/mission" 
              routerLinkActive="text-green-600 font-semibold bg-green-50" 
              class="block text-gray-900 hover:text-green-600 font-medium transition-all duration-300 py-2 px-3 rounded-lg hover:bg-green-50">
-            Sustainability
+            {{ 'nav.sustainability' | translate }}
           </a>
           
           <a routerLink="/blog" 
              routerLinkActive="text-green-600 font-semibold bg-green-50" 
              class="block text-gray-900 hover:text-green-600 font-medium transition-all duration-300 py-2 px-3 rounded-lg hover:bg-green-50">
-            Blog & Guides
+            {{ 'nav.blog' | translate }}
           </a>
           
           <a routerLink="/company" 
              routerLinkActive="text-green-600 font-semibold bg-green-50" 
              class="block text-gray-900 hover:text-green-600 font-medium transition-all duration-300 py-2 px-3 rounded-lg hover:bg-green-50">
-            Company
+            {{ 'nav.company' | translate }}
           </a>
           
           <a routerLink="/contact" 
              routerLinkActive="text-green-600 font-semibold bg-green-50" 
              class="block text-gray-900 hover:text-green-600 font-medium transition-all duration-300 py-2 px-3 rounded-lg hover:bg-green-50">
-            Contacts & Support
+            {{ 'nav.contact' | translate }}
           </a>
           
           <!-- Mobile Authentication Links -->
@@ -337,18 +344,18 @@ import { filter } from 'rxjs/operators';
             <a routerLink="/profile" 
                routerLinkActive="text-green-600 font-semibold bg-green-50" 
                class="block text-gray-900 hover:text-green-600 font-medium transition-all duration-300 py-2 px-3 rounded-lg hover:bg-green-50 mb-2">
-              Profile
+              {{ 'profile.profile' | translate }}
             </a>
             <a 
               *ngIf="isAdmin$ | async"
               routerLink="/admin" 
               (click)="closeProfileMenu()"
               class="block text-gray-900 hover:text-blue-600 font-medium transition-all duration-300 py-2 px-3 rounded-lg hover:bg-blue-50 mb-2">
-              Admin Dashboard
+              {{ 'profile.adminDashboard' | translate }}
             </a>
             <button (click)="logout()" 
                     class="block w-full text-left text-gray-900 hover:text-red-600 font-medium transition-all duration-300 py-2 px-3 rounded-lg hover:bg-red-50">
-              Sign Out
+              {{ 'profile.signOut' | translate }}
             </button>
           </div>
         </div>
@@ -418,6 +425,8 @@ import { filter } from 'rxjs/operators';
 export class NavbarComponent implements OnInit, OnDestroy {
   private store = inject(Store);
   private router = inject(Router);
+  private translationService = inject(TranslationService);
+  private destroy$ = new Subject<void>();
 
   isMobileMenuOpen$: Observable<boolean>;
   currentLanguage$: Observable<string>;
@@ -438,7 +447,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
     // Track route changes for active highlighting
     this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
+      filter(event => event instanceof NavigationEnd),
+      takeUntil(this.destroy$)
     ).subscribe((event: NavigationEnd) => {
       this.currentRoute = event.url;
     });
@@ -457,7 +467,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    // Cleanup if needed
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   toggleMobileMenu(): void {

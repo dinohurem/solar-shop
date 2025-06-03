@@ -301,7 +301,7 @@ export class AuthEffects {
 
     private createDefaultPreferences() {
         return {
-            language: 'en',
+            language: 'hr',
             timezone: 'UTC',
             currency: 'EUR',
             theme: 'light' as const,

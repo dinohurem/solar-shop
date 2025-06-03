@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { CategoriesService, ProductCategory } from './services/categories.service';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-products',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslatePipe],
   template: `
     <!-- Products Section -->
     <section class="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
@@ -15,10 +16,10 @@ import { CategoriesService, ProductCategory } from './services/categories.servic
         <!-- Section Header -->
         <div class="text-center mb-16">
           <h2 class="text-4xl lg:text-5xl font-bold text-heyhome-dark-green font-['Poppins'] mb-4">
-            Products
+            {{ 'products.title' | translate }}
           </h2>
           <p class="text-xl text-gray-600 max-w-3xl mx-auto font-['DM_Sans']">
-            Discover our wide range of products for sustainable and energy-efficient construction
+            {{ 'products.subtitle' | translate }}
           </p>
         </div>
 
@@ -48,13 +49,13 @@ import { CategoriesService, ProductCategory } from './services/categories.servic
                 </h3>
                 
                 <p class="text-base leading-relaxed mb-6 opacity-90 font-['DM_Sans'] line-clamp-3">
-                  {{ category.description || 'Explore our ' + category.name.toLowerCase() + ' collection' }}
+                  {{ category.description || ('Explore our ' + category.name.toLowerCase() + ' collection') }}
                 </p>
 
                 <!-- Product Count Badge -->
                 <div class="mb-4">
                   <span class="inline-block bg-white/20 backdrop-blur-sm text-white text-sm font-medium px-3 py-1 rounded-full">
-                    {{ category.productCount || 0 }} Products
+                    {{ 'products.productsCount' | translate:{ count: (category.productCount || 0) } }}
                   </span>
                 </div>
                 
@@ -63,7 +64,7 @@ import { CategoriesService, ProductCategory } from './services/categories.servic
                   class="inline-flex items-center gap-3 bg-white/20 backdrop-blur-sm text-white font-semibold px-6 py-3 rounded-xl hover:bg-[#0ACF83] transition-all duration-300 group-hover:bg-[#0ACF83] border border-white/30"
                   (click)="navigateToProductList(category); $event.stopPropagation()"
                 >
-                  <span>Explore Products</span>
+                  <span>{{ 'products.exploreProducts' | translate }}</span>
                   <svg class="w-5 h-5 transform group-hover:translate-x-1 transition-transform" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                   </svg>
@@ -85,23 +86,23 @@ import { CategoriesService, ProductCategory } from './services/categories.servic
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m13-8V4a1 1 0 00-1-1H7a1 1 0 00-1 1v1m8 0V4.5"/>
             </svg>
           </div>
-          <h3 class="text-2xl font-bold text-gray-900 mb-4 font-['Poppins']">No product categories available</h3>
-          <p class="text-gray-600 font-['DM_Sans']">Check back later for our product categories.</p>
+          <h3 class="text-2xl font-bold text-gray-900 mb-4 font-['Poppins']">{{ 'products.noCategories' | translate }}</h3>
+          <p class="text-gray-600 font-['DM_Sans']">{{ 'products.noCategoriesText' | translate }}</p>
         </div>
 
         <!-- Call to Action -->
         <div class="mt-20 bg-gradient-to-r from-[#0ACF83] to-[#0ACFAC] rounded-3xl p-12 text-center text-white">
           <h2 class="text-3xl lg:text-4xl font-bold mb-6 font-['Poppins']">
-            Need Help Choosing?
+            {{ 'products.needHelp' | translate }}
           </h2>
           <p class="text-xl mb-8 max-w-2xl mx-auto font-['DM_Sans']">
-            Our experts are here to help you find the perfect products for your project. Get personalized recommendations today.
+            {{ 'products.needHelpText' | translate }}
           </p>
           <button 
             (click)="navigateToContact()"
             class="px-8 py-3 bg-white text-[#0ACF83] font-semibold rounded-lg hover:bg-gray-100 transition-colors font-['DM_Sans']"
           >
-            Contact Our Experts
+            {{ 'products.contactExperts' | translate }}
           </button>
         </div>
       </div>

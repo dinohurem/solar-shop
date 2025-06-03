@@ -19,7 +19,7 @@ module.exports = {
         "warning": "#ffcc00",
         "error": "#F8546A",
         "info": "#5D65FF",
-        // HeyHome brand colors from Figma
+        // SolarShop brand colors from Figma
         "heyhome": {
           "primary": "#0ACF83",
           "primary-dark": "#09b574",

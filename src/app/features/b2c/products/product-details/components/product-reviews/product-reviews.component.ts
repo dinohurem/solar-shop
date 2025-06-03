@@ -1,27 +1,28 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
 
 export interface Review {
-    id: string;
-    userName: string;
-    userAvatar: string;
-    rating: number;
-    title: string;
-    comment: string;
-    date: Date;
-    verified: boolean;
-    helpful: number;
+  id: string;
+  userName: string;
+  userAvatar: string;
+  rating: number;
+  title: string;
+  comment: string;
+  date: Date;
+  verified: boolean;
+  helpful: number;
 }
 
 @Component({
-    selector: 'app-product-reviews',
-    standalone: true,
-    imports: [CommonModule],
-    template: `
+  selector: 'app-product-reviews',
+  standalone: true,
+  imports: [CommonModule, TranslatePipe],
+  template: `
     <div id="reviews" class="space-y-8">
       <!-- Reviews Header -->
       <div>
-        <h3 class="text-2xl font-bold text-gray-900 mb-6 font-['Poppins']">Customer Reviews</h3>
+        <h3 class="text-2xl font-bold text-gray-900 mb-6 font-['Poppins']">{{ 'reviews.customerReviews' | translate }}</h3>
         
         <!-- Rating Summary -->
         <div class="bg-gray-50 rounded-lg p-6 mb-8">
@@ -40,7 +41,7 @@ export interface Review {
                   </svg>
                 </div>
               </div>
-              <p class="text-sm text-gray-600 font-['DM_Sans']">Based on {{ reviews.length }} reviews</p>
+              <p class="text-sm text-gray-600 font-['DM_Sans']">{{ 'reviews.basedOnReviews' | translate:{ count: reviews.length } }}</p>
             </div>
 
             <!-- Rating Breakdown -->
@@ -72,7 +73,7 @@ export interface Review {
             (click)="openWriteReview()"
             class="px-6 py-3 bg-[#0ACF83] text-white font-semibold rounded-lg hover:bg-[#09b574] transition-colors font-['DM_Sans']"
           >
-            Write a Review
+            {{ 'reviews.writeReview' | translate }}
           </button>
         </div>
       </div>
@@ -98,7 +99,7 @@ export interface Review {
                     *ngIf="review.verified"
                     class="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full font-['DM_Sans']"
                   >
-                    Verified Purchase
+                    {{ 'reviews.verifiedPurchase' | translate }}
                   </span>
                 </div>
                 <div class="flex items-center mt-1">
@@ -121,8 +122,8 @@ export interface Review {
 
           <!-- Review Content -->
           <div class="mb-4">
-            <h5 class="font-semibold text-gray-900 mb-2 font-['DM_Sans']">{{ review.title }}</h5>
-            <p class="text-gray-700 leading-relaxed font-['DM_Sans']">{{ review.comment }}</p>
+            <h5 class="font-semibold text-gray-900 mb-2 font-['DM_Sans']">{{ review.title | translate }}</h5>
+            <p class="text-gray-700 leading-relaxed font-['DM_Sans']">{{ review.comment | translate }}</p>
           </div>
 
           <!-- Review Actions -->
@@ -134,10 +135,10 @@ export interface Review {
               <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"/>
               </svg>
-              Helpful ({{ review.helpful }})
+              {{ 'reviews.helpful' | translate:{ count: review.helpful } }}
             </button>
             <button class="text-sm text-gray-600 hover:text-gray-800 font-['DM_Sans']">
-              Report
+              {{ 'reviews.report' | translate }}
             </button>
           </div>
         </div>
@@ -149,127 +150,127 @@ export interface Review {
           (click)="loadMoreReviews()"
           class="px-6 py-3 bg-white text-gray-700 font-semibold border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-['DM_Sans']"
         >
-          Load More Reviews
+          {{ 'reviews.loadMoreReviews' | translate }}
         </button>
       </div>
     </div>
   `,
-    styles: [`
+  styles: [`
     :host {
       display: block;
     }
   `]
 })
 export class ProductReviewsComponent implements OnInit {
-    @Input() productId!: string;
+  @Input() productId!: string;
 
-    reviews: Review[] = [];
-    averageRating: number = 0;
+  reviews: Review[] = [];
+  averageRating: number = 0;
 
-    ngOnInit(): void {
-        this.loadReviews();
+  ngOnInit(): void {
+    this.loadReviews();
+  }
+
+  private loadReviews(): void {
+    // Mock reviews data - in a real app, this would come from a service
+    this.reviews = [
+      {
+        id: '1',
+        userName: 'Sarah Johnson',
+        userAvatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=40&h=40&fit=crop&crop=face',
+        rating: 5,
+        title: 'reviews.excellentQuality',
+        comment: 'reviews.excellentQuality',
+        date: new Date('2024-01-20'),
+        verified: true,
+        helpful: 12
+      },
+      {
+        id: '2',
+        userName: 'Michael Chen',
+        userAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face',
+        rating: 4,
+        title: 'reviews.goodValue',
+        comment: 'reviews.goodValue',
+        date: new Date('2024-01-18'),
+        verified: true,
+        helpful: 8
+      },
+      {
+        id: '3',
+        userName: 'Emma Wilson',
+        userAvatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face',
+        rating: 5,
+        title: 'reviews.highlyRecommended',
+        comment: 'reviews.highlyRecommended',
+        date: new Date('2024-01-15'),
+        verified: true,
+        helpful: 15
+      },
+      {
+        id: '4',
+        userName: 'David Rodriguez',
+        userAvatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face',
+        rating: 4,
+        title: 'reviews.solidProduct',
+        comment: 'reviews.solidProduct',
+        date: new Date('2024-01-12'),
+        verified: false,
+        helpful: 5
+      },
+      {
+        id: '5',
+        userName: 'Lisa Thompson',
+        userAvatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=40&h=40&fit=crop&crop=face',
+        rating: 5,
+        title: 'reviews.outstandingService',
+        comment: 'reviews.outstandingService',
+        date: new Date('2024-01-10'),
+        verified: true,
+        helpful: 9
+      }
+    ];
+
+    this.calculateAverageRating();
+  }
+
+  private calculateAverageRating(): void {
+    if (this.reviews.length === 0) {
+      this.averageRating = 0;
+      return;
     }
 
-    private loadReviews(): void {
-        // Mock reviews data - in a real app, this would come from a service
-        this.reviews = [
-            {
-                id: '1',
-                userName: 'Sarah Johnson',
-                userAvatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=40&h=40&fit=crop&crop=face',
-                rating: 5,
-                title: 'Excellent quality and performance',
-                comment: 'This product exceeded my expectations. The build quality is outstanding and it performs exactly as advertised. Installation was straightforward and the customer service was very helpful.',
-                date: new Date('2024-01-20'),
-                verified: true,
-                helpful: 12
-            },
-            {
-                id: '2',
-                userName: 'Michael Chen',
-                userAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face',
-                rating: 4,
-                title: 'Good value for money',
-                comment: 'Overall satisfied with this purchase. The product works well and the price is reasonable. Only minor issue is that delivery took a bit longer than expected.',
-                date: new Date('2024-01-18'),
-                verified: true,
-                helpful: 8
-            },
-            {
-                id: '3',
-                userName: 'Emma Wilson',
-                userAvatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face',
-                rating: 5,
-                title: 'Highly recommended!',
-                comment: 'Perfect for our home renovation project. The sustainable materials and certifications were important to us, and this product delivers on both quality and environmental responsibility.',
-                date: new Date('2024-01-15'),
-                verified: true,
-                helpful: 15
-            },
-            {
-                id: '4',
-                userName: 'David Rodriguez',
-                userAvatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face',
-                rating: 4,
-                title: 'Solid product',
-                comment: 'Does what it says on the tin. Good quality construction and materials. Would buy again.',
-                date: new Date('2024-01-12'),
-                verified: false,
-                helpful: 5
-            },
-            {
-                id: '5',
-                userName: 'Lisa Thompson',
-                userAvatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=40&h=40&fit=crop&crop=face',
-                rating: 5,
-                title: 'Outstanding customer service',
-                comment: 'Not only is the product great, but the customer service team was incredibly helpful when I had questions about installation. They went above and beyond to ensure I was satisfied.',
-                date: new Date('2024-01-10'),
-                verified: true,
-                helpful: 9
-            }
-        ];
+    const sum = this.reviews.reduce((acc, review) => acc + review.rating, 0);
+    this.averageRating = Math.round((sum / this.reviews.length) * 10) / 10;
+  }
 
-        this.calculateAverageRating();
+  getStarArray(rating: number): number[] {
+    return Array(5).fill(0).map((_, i) => i < Math.floor(rating) ? 1 : 0);
+  }
+
+  getRatingCount(rating: number): number {
+    return this.reviews.filter(review => review.rating === rating).length;
+  }
+
+  getRatingPercentage(rating: number): number {
+    const count = this.getRatingCount(rating);
+    return this.reviews.length > 0 ? (count / this.reviews.length) * 100 : 0;
+  }
+
+  markHelpful(reviewId: string): void {
+    const review = this.reviews.find(r => r.id === reviewId);
+    if (review) {
+      review.helpful++;
     }
+  }
 
-    private calculateAverageRating(): void {
-        if (this.reviews.length === 0) {
-            this.averageRating = 0;
-            return;
-        }
+  openWriteReview(): void {
+    // TODO: Implement write review functionality
+    console.log('Open write review modal');
+  }
 
-        const sum = this.reviews.reduce((acc, review) => acc + review.rating, 0);
-        this.averageRating = Math.round((sum / this.reviews.length) * 10) / 10;
-    }
-
-    getStarArray(rating: number): number[] {
-        return Array(5).fill(0).map((_, i) => i < Math.floor(rating) ? 1 : 0);
-    }
-
-    getRatingCount(rating: number): number {
-        return this.reviews.filter(review => review.rating === rating).length;
-    }
-
-    getRatingPercentage(rating: number): number {
-        const count = this.getRatingCount(rating);
-        return this.reviews.length > 0 ? (count / this.reviews.length) * 100 : 0;
-    }
-
-    markHelpful(reviewId: string): void {
-        const review = this.reviews.find(r => r.id === reviewId);
-        if (review) {
-            review.helpful++;
-        }
-    }
-
-    openWriteReview(): void {
-        // TODO: Implement write review functionality
-        console.log('Open write review modal');
-    }
-
-    loadMoreReviews(): void {
-        // TODO: Implement load more reviews functionality
-        console.log('Load more reviews');
-    }
+  loadMoreReviews(): void {
+    // TODO: Implement load more reviews functionality
+    console.log('Load more reviews');
+  }
 } 

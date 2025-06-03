@@ -13,6 +13,6 @@ export const navbarReducer = createReducer(
     })),
     on(NavbarActions.toggleLanguage, (state) => ({
         ...state,
-        currentLanguage: (state.currentLanguage === 'en' ? 'it' : 'en') as 'en' | 'it',
+        currentLanguage: (state.currentLanguage === 'en' ? 'hr' : 'en') as 'en' | 'hr',
     }))
 ); 

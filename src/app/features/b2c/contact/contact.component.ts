@@ -28,7 +28,7 @@ interface FAQItem {
               Contacts & Assistance
             </h1>
             <p class="text-lg lg:text-xl leading-relaxed opacity-90 font-['DM_Sans']">
-              Need help or want more information? We're here for you. The Contacts & Assistance section of HeyHome is designed to provide you with all the support you need, from product selection to post-sale, ensuring a simple, transparent and secure shopping experience.
+              Need help or want more information? We're here for you. The Contacts & Assistance section of SolarShop is designed to provide you with all the support you need, from product selection to post-sale, ensuring a simple, transparent and secure shopping experience.
             </p>
             
             <!-- Contact Info -->
@@ -297,7 +297,7 @@ interface FAQItem {
       <section class="py-16 lg:py-24 bg-white">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <p class="text-lg lg:text-xl text-gray-600 font-['DM_Sans'] leading-relaxed">
-            Whatever your need, the HeyHome team is ready to help you. Contact us today and let us guide you towards the solution most suited to your needs. Building or renovating has never been easier, secure and satisfying.
+            Whatever your need, the SolarShop team is ready to help you. Contact us today and let us guide you towards the solution most suited to your needs. Building or renovating has never been easier, secure and satisfying.
           </p>
         </div>
       </section>
@@ -319,8 +319,8 @@ export class ContactComponent implements OnInit {
   faqs: FAQItem[] = [
     {
       id: '1',
-      question: 'What types of services does HeyHome offer?',
-      answer: 'HeyHome offers a wide range of services, including energy audits, energy modeling, high-efficiency system installations, renewable energy integration, building envelope upgrades, mechanical system upgrades, electrical system upgrades, plumbing system upgrades, and comprehensive project management.',
+      question: 'What types of services does SolarShop offer?',
+      answer: 'SolarShop offers a wide range of services, including energy audits, energy modeling, high-efficiency system installations, renewable energy integration, building envelope upgrades, mechanical system upgrades, electrical system upgrades, plumbing system upgrades, and comprehensive project management.',
       isOpen: false
     },
     {

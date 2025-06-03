@@ -5,21 +5,22 @@ import { Subject, from, takeUntil, catchError, of, finalize } from 'rxjs';
 import { BlogPost } from '../../../shared/models/blog.model';
 import { SupabaseService } from '../../../services/supabase.service';
 import { BlogDataMapperService, SupabaseBlogPost } from '../../../services/blog-data-mapper.service';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-blog',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslatePipe],
   template: `
     <div class="min-h-screen bg-gray-50">
     <!-- Hero Section -->
     <section class="relative bg-gradient-to-br from-green-600 to-green-800 text-white py-20 px-4 md:px-8 lg:px-32">
       <div class="max-w-6xl mx-auto text-center">
         <h1 class="font-['Poppins'] font-semibold text-4xl md:text-5xl lg:text-6xl mb-6 leading-tight">
-          Blog & Guides
+          {{ 'blog.title' | translate }}
         </h1>
         <p class="font-['DM_Sans'] text-base md:text-lg max-w-4xl mx-auto opacity-80 leading-relaxed">
-          Welcome to the Blog & Guides section of SolarShop, your reference point for insights, practical advice and useful information on construction, systems, energy solutions and sustainability. Here you will find content designed to help you choose the right products, plan your projects and better understand the technologies and regulations of the sector.
+          {{ 'blog.subtitle' | translate }}
         </p>
       </div>
     </section>
@@ -33,7 +34,7 @@ import { BlogDataMapperService, SupabaseBlogPost } from '../../../services/blog-
             (click)="filterByCategory(null)"
             [class]="selectedCategory === null ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'"
             class="px-4 py-2 rounded-full text-sm font-medium font-['DM_Sans'] uppercase tracking-wider transition-colors">
-            All Posts
+            {{ 'blog.allPosts' | translate }}
           </button>
           <button 
             *ngFor="let category of categories"
@@ -48,19 +49,19 @@ import { BlogDataMapperService, SupabaseBlogPost } from '../../../services/blog-
         <div *ngIf="loading" class="flex justify-center items-center py-20">
           <div class="flex flex-col items-center space-y-4">
             <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
-            <p class="text-gray-600">Loading articles...</p>
+            <p class="text-gray-600">{{ 'blog.loading' | translate }}</p>
           </div>
         </div>
 
         <!-- Error State -->
         <div *ngIf="error && !loading" class="text-center py-20">
           <div class="text-red-600 text-6xl mb-4">📝</div>
-          <h2 class="text-2xl font-bold text-gray-900 mb-2">Unable to Load Articles</h2>
+          <h2 class="text-2xl font-bold text-gray-900 mb-2">{{ 'blog.unableToLoad' | translate }}</h2>
           <p class="text-gray-600 mb-6">{{ error }}</p>
           <button 
             (click)="loadBlogPosts()"
             class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors">
-            Try Again
+            {{ 'blog.tryAgain' | translate }}
           </button>
         </div>
 
@@ -93,7 +94,7 @@ import { BlogDataMapperService, SupabaseBlogPost } from '../../../services/blog-
                   {{ post.category.name }}
                 </span>
                 <span *ngIf="post.featured" class="bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs font-medium">
-                  Featured
+                  {{ 'blog.featured' | translate }}
                 </span>
               </div>
               <h3 class="font-['DM_Sans'] font-semibold text-xl text-gray-800 leading-tight line-clamp-2">
@@ -120,10 +121,10 @@ import { BlogDataMapperService, SupabaseBlogPost } from '../../../services/blog-
             (click)="loadMorePosts()"
             [disabled]="loadingMore"
             class="bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-            <span *ngIf="!loadingMore">Load More Articles</span>
+            <span *ngIf="!loadingMore">{{ 'blog.loadMore' | translate }}</span>
             <span *ngIf="loadingMore" class="flex items-center space-x-2">
               <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-              <span>Loading...</span>
+              <span>{{ 'common.loading' | translate }}</span>
             </span>
           </button>
         </div>
@@ -137,42 +138,42 @@ import { BlogDataMapperService, SupabaseBlogPost } from '../../../services/blog-
           <!-- Left Column -->
           <div class="space-y-8">
             <h2 class="font-['Poppins'] font-semibold text-2xl text-gray-800 leading-tight">
-              What you'll find in this section?
+              {{ 'blog.whatYouFind' | translate }}
             </h2>
             
             <div class="space-y-6">
               <div class="space-y-2">
-                <h3 class="font-['DM_Sans'] font-semibold text-lg text-gray-800">Technical Guides</h3>
+                <h3 class="font-['DM_Sans'] font-semibold text-lg text-gray-800">{{ 'blog.technicalGuides' | translate }}</h3>
                 <p class="font-['DM_Sans'] text-base text-gray-600 leading-relaxed">
-                  Step by step, learn to install solar panels, replace flooring or improve the thermal insulation of your home. Our guides are written in a clear and understandable way, ideal for both professionals and beginners.
+                  {{ 'blog.technicalGuidesText' | translate }}
                 </p>
               </div>
               
               <div class="space-y-2">
-                <h3 class="font-['DM_Sans'] font-semibold text-lg text-gray-800">Regulations and Incentives Insights</h3>
+                <h3 class="font-['DM_Sans'] font-semibold text-lg text-gray-800">{{ 'blog.regulationsInsights' | translate }}</h3>
                 <p class="font-['DM_Sans'] text-base text-gray-600 leading-relaxed">
-                  Stay updated on tax deductions, environmental regulations and incentives for energy requalification. Discover how to get the most out of your renovation, saving time, money and energy.
+                  {{ 'blog.regulationsText' | translate }}
                 </p>
               </div>
               
               <div class="space-y-2">
-                <h3 class="font-['DM_Sans'] font-semibold text-lg text-gray-800">Sustainability Tips</h3>
+                <h3 class="font-['DM_Sans'] font-semibold text-lg text-gray-800">{{ 'blog.sustainabilityTips' | translate }}</h3>
                 <p class="font-['DM_Sans'] text-base text-gray-600 leading-relaxed">
-                  Practical advice to make your home more efficient and environmentally friendly. From the use of recycled materials to the most innovative technologies, you will find ideas and inspiration to contribute to a greener future.
+                  {{ 'blog.sustainabilityText' | translate }}
                 </p>
               </div>
               
               <div class="space-y-2">
-                <h3 class="font-['DM_Sans'] font-semibold text-lg text-gray-800">Case Studies and Success Stories</h3>
+                <h3 class="font-['DM_Sans'] font-semibold text-lg text-gray-800">{{ 'blog.caseStudies' | translate }}</h3>
                 <p class="font-['DM_Sans'] text-base text-gray-600 leading-relaxed">
-                  Take a look at projects realized with our products, discover how other customers have transformed their spaces, and be inspired by solutions that combine functionality, aesthetics and energy efficiency.
+                  {{ 'blog.caseStudiesText' | translate }}
                 </p>
               </div>
               
               <div class="space-y-2">
-                <h3 class="font-['DM_Sans'] font-semibold text-lg text-gray-800">FAQ and Video Tutorials</h3>
+                <h3 class="font-['DM_Sans'] font-semibold text-lg text-gray-800">{{ 'blog.faqTutorials' | translate }}</h3>
                 <p class="font-['DM_Sans'] text-base text-gray-600 leading-relaxed">
-                  Find quick answers to your most common doubts. Thanks to video tutorials you will be able to better understand the key steps of a renovation or the installation of a system, learning techniques and best practices directly from experts.
+                  {{ 'blog.faqText' | translate }}
                 </p>
               </div>
             </div>
@@ -181,13 +182,11 @@ import { BlogDataMapperService, SupabaseBlogPost } from '../../../services/blog-
           <!-- Right Column -->
           <div class="space-y-8">
             <h2 class="font-['Poppins'] font-semibold text-2xl text-gray-800 leading-tight">
-              Your trusted partner
+              {{ 'blog.trustedPartner' | translate }}
             </h2>
             
             <p class="font-['DM_Sans'] text-base text-gray-800 leading-relaxed">
-              Our goal is to provide you with clear, reliable and up-to-date information, helping you make informed choices to improve the quality and comfort of your environment. Whether you are starting a small renovation or tackling a complex project, here you will find all the support you need, without overly technical or complicated terms.
-              <br><br>
-              Explore the SolarShop blog and guides, get inspired and contact us if you need further information or personalized consultation. With us, building and renovating becomes easier, more sustainable and more convenient.
+              {{ 'blog.partnerText' | translate }}
             </p>
           </div>
         </div>

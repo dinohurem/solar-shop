@@ -8,17 +8,18 @@
             <div class="w-full max-w-md">
                 <!-- Logo/Brand -->
                 <div class="mb-8">
-                    <h1 class="text-2xl lg:text-3xl font-bold text-[#222529] font-['Poppins']">Welcome to Solar Shop
+                    <h1 class="text-2xl lg:text-3xl font-bold text-[#222529] font-['Poppins']">{{ 'auth.welcome' |
+                        translate }}
                     </h1>
-                    <p class="text-[#324053] text-sm mt-2 font-['DM_Sans']">Sign in to your account</p>
+                    <p class="text-[#324053] text-sm mt-2 font-['DM_Sans']">{{ 'auth.signIn' | translate }}</p>
                 </div>
 
                 <!-- Sign up link -->
                 <div class="mb-8">
                     <p class="text-sm text-[#324053] font-['DM_Sans']">
-                        Don't have an account?
-                        <a class="text-[#0ACF83] hover:text-[#0ACF83]/80 font-medium ml-1" routerLink="/register">Sign
-                            up</a>
+                        {{ 'auth.noAccount' | translate }}
+                        <a class="text-[#0ACF83] hover:text-[#0ACF83]/80 font-medium ml-1" routerLink="/register">{{
+                            'auth.signUp' | translate }}</a>
                     </p>
                 </div>
 
@@ -39,13 +40,13 @@
                     <!-- Email Field -->
                     <div>
                         <label class="block text-sm font-medium text-[#222529] mb-2 font-['DM_Sans']" for="email">
-                            Email address*
+                            {{ 'auth.email' | translate }}*
                         </label>
                         <input formControlName="email"
                             class="w-full h-12 px-4 py-3 border rounded-lg text-sm text-[#222529] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0ACF83] focus:border-transparent transition-all duration-200 font-['DM_Sans']"
                             [class.border-red-500]="isFieldInvalid('email')"
                             [class.border-gray-300]="!isFieldInvalid('email')" id="email" type="email"
-                            placeholder="Enter your email address" autocomplete="email">
+                            [placeholder]="'auth.email' | translate" autocomplete="email">
                         <div *ngIf="isFieldInvalid('email')" class="mt-1 text-sm text-red-600 font-['DM_Sans']">
                             {{ getFieldError('email') }}
                         </div>
@@ -54,14 +55,14 @@
                     <!-- Password Field -->
                     <div>
                         <label class="block text-sm font-medium text-[#222529] mb-2 font-['DM_Sans']" for="password">
-                            Password*
+                            {{ 'auth.password' | translate }}*
                         </label>
                         <div class="relative">
                             <input formControlName="password" [type]="showPassword ? 'text' : 'password'"
                                 class="w-full h-12 px-4 py-3 pr-12 border rounded-lg text-sm text-[#222529] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0ACF83] focus:border-transparent transition-all duration-200 font-['DM_Sans']"
                                 [class.border-red-500]="isFieldInvalid('password')"
                                 [class.border-gray-300]="!isFieldInvalid('password')" id="password"
-                                placeholder="Enter your password" autocomplete="current-password">
+                                [placeholder]="'auth.password' | translate" autocomplete="current-password">
                             <button type="button"
                                 class="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#324053] hover:text-[#222529] transition-colors duration-200"
                                 (click)="togglePasswordVisibility()">
@@ -88,7 +89,7 @@
                     <div class="text-right">
                         <a class="text-sm text-[#0ACF83] hover:text-[#0ACF83]/80 font-medium font-['DM_Sans']"
                             routerLink="/forgot-password">
-                            Forgot password?
+                            {{ 'auth.forgotPassword' | translate }}
                         </a>
                     </div>
 
@@ -98,8 +99,8 @@
 
                         <app-loader *ngIf="loading$ | async" class="w-5 h-5 mr-2"></app-loader>
 
-                        <span *ngIf="!(loading$ | async)">Sign in</span>
-                        <span *ngIf="loading$ | async">Signing in...</span>
+                        <span *ngIf="!(loading$ | async)">{{ 'auth.signInButton' | translate }}</span>
+                        <span *ngIf="loading$ | async">{{ 'auth.signingIn' | translate }}</span>
                     </button>
 
                     <!-- Go to Home Link -->
@@ -110,7 +111,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                             </svg>
-                            <span>Back to Home</span>
+                            <span>{{ 'auth.backToHome' | translate }}</span>
                         </a>
                     </div>
                 </form>

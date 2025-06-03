@@ -51,50 +51,50 @@ export class CartService {
     // Add item to cart - returns Cart for NgRx compatibility
     addToCart(productId: string, quantity: number = 1, variantId?: string): Observable<Cart> {
         return from(this.addToCartAsync(productId, quantity)).pipe(
-            map(() => this.createCartFromItems(this.cartItems.value)),
+            map(() => this.createCartFromItems(this.getCartItemsArray())),
             catchError(error => {
                 console.error('Error adding to cart:', error);
-                return of(this.createCartFromItems(this.cartItems.value));
+                return of(this.createCartFromItems(this.getCartItemsArray()));
             })
         );
     }
 
     // Update cart item - returns Cart for NgRx compatibility
     updateCartItem(itemId: string, quantity: number): Observable<Cart> {
-        const currentItems = this.cartItems.value;
+        const currentItems = this.getCartItemsArray();
         const item = currentItems.find(i => i.id === itemId);
 
         if (item) {
             this.updateQuantity(item.productId, quantity);
         }
 
-        return of(this.createCartFromItems(this.cartItems.value));
+        return of(this.createCartFromItems(this.getCartItemsArray()));
     }
 
     // Remove from cart - returns Cart for NgRx compatibility
     removeFromCart(itemId: string): Observable<Cart> {
-        const currentItems = this.cartItems.value;
+        const currentItems = this.getCartItemsArray();
         const item = currentItems.find(i => i.id === itemId);
 
         if (item) {
             this.removeFromCartByProductId(item.productId);
         }
 
-        return of(this.createCartFromItems(this.cartItems.value));
+        return of(this.createCartFromItems(this.getCartItemsArray()));
     }
 
     // Apply coupon - returns Cart for NgRx compatibility
     applyCoupon(code: string): Observable<Cart> {
         // Mock implementation - in real app, this would validate and apply coupon
         console.log('Applying coupon:', code);
-        return of(this.createCartFromItems(this.cartItems.value));
+        return of(this.createCartFromItems(this.getCartItemsArray()));
     }
 
     // Remove coupon - returns Cart for NgRx compatibility
     removeCoupon(couponId: string): Observable<Cart> {
         // Mock implementation - in real app, this would remove applied coupon
         console.log('Removing coupon:', couponId);
-        return of(this.createCartFromItems(this.cartItems.value));
+        return of(this.createCartFromItems(this.getCartItemsArray()));
     }
 
     // Load available coupons
@@ -119,7 +119,7 @@ export class CartService {
                 throw new Error('Product not found');
             }
 
-            const currentItems = this.cartItems.value;
+            const currentItems = this.getCartItemsArray();
             const existingItemIndex = currentItems.findIndex(item => item.productId === productId);
 
             if (existingItemIndex > -1) {
@@ -193,7 +193,7 @@ export class CartService {
 
     // Remove item from cart by product ID
     removeFromCartByProductId(productId: string): void {
-        const currentItems = this.cartItems.value;
+        const currentItems = this.getCartItemsArray();
         const updatedItems = currentItems.filter(item => item.productId !== productId);
         this.updateCartItems(updatedItems);
     }
@@ -205,7 +205,7 @@ export class CartService {
             return;
         }
 
-        const currentItems = this.cartItems.value;
+        const currentItems = this.getCartItemsArray();
         const updatedItems = currentItems.map(item =>
             item.productId === productId
                 ? {
@@ -221,21 +221,42 @@ export class CartService {
     // Get cart item count
     getCartItemCount(): Observable<number> {
         return this.cartItems.pipe(
-            map(items => items.reduce((total, item) => total + item.quantity, 0))
+            map(items => {
+                // Ensure items is an array
+                if (!Array.isArray(items)) {
+                    console.warn('getCartItemCount received non-array items:', items);
+                    return 0;
+                }
+                return items.reduce((total, item) => total + item.quantity, 0);
+            })
         );
     }
 
     // Check if product is in cart
     isInCart(productId: string): Observable<boolean> {
         return this.cartItems.pipe(
-            map(items => items.some(item => item.productId === productId))
+            map(items => {
+                // Ensure items is an array
+                if (!Array.isArray(items)) {
+                    console.warn('isInCart received non-array items:', items);
+                    return false;
+                }
+                return items.some(item => item.productId === productId);
+            })
         );
     }
 
     // Get specific cart item
     getCartItem(productId: string): Observable<CartItem | undefined> {
         return this.cartItems.pipe(
-            map(items => items.find(item => item.productId === productId))
+            map(items => {
+                // Ensure items is an array
+                if (!Array.isArray(items)) {
+                    console.warn('getCartItem received non-array items:', items);
+                    return undefined;
+                }
+                return items.find(item => item.productId === productId);
+            })
         );
     }
 
@@ -265,6 +286,12 @@ export class CartService {
 
     // Calculate cart summary
     private calculateCartSummary(items: CartItem[]): CartSummary {
+        // Ensure items is an array
+        if (!Array.isArray(items)) {
+            console.warn('calculateCartSummary received non-array items:', items);
+            items = [];
+        }
+
         const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
         const tax = subtotal * 0.10; // 10% tax
         const shipping = subtotal > 100 ? 0 : 10; // Free shipping over €100
@@ -356,16 +383,41 @@ export class CartService {
         this.cartSummary.next(summary);
     }
 
+    // Helper method to safely get cart items as array
+    private getCartItemsArray(): CartItem[] {
+        const items = this.cartItems.value;
+        if (!Array.isArray(items)) {
+            console.warn('Cart items is not an array, returning empty array:', items);
+            return [];
+        }
+        return items;
+    }
+
     private loadCartFromStorage(): void {
         try {
             const stored = localStorage.getItem(this.CART_STORAGE_KEY);
             if (stored) {
-                const items: CartItem[] = JSON.parse(stored);
-                this.cartItems.next(items);
-                this.updateCartSummary(items);
+                const parsedData = JSON.parse(stored);
+
+                // Validate that the parsed data is an array
+                if (Array.isArray(parsedData)) {
+                    const items: CartItem[] = parsedData;
+                    this.cartItems.next(items);
+                    this.updateCartSummary(items);
+                } else {
+                    console.warn('Invalid cart data in localStorage, clearing cart');
+                    // Clear invalid data and start with empty cart
+                    localStorage.removeItem(this.CART_STORAGE_KEY);
+                    this.cartItems.next([]);
+                    this.updateCartSummary([]);
+                }
             }
         } catch (error) {
             console.error('Error loading cart from storage:', error);
+            // Clear corrupted data and start with empty cart
+            localStorage.removeItem(this.CART_STORAGE_KEY);
+            this.cartItems.next([]);
+            this.updateCartSummary([]);
         }
     }
 

@@ -9,6 +9,8 @@ import { LoaderComponent } from '../../../../shared/components/loader/loader.com
 import { LoginRequest } from '../../../../shared/models/auth.model';
 import * as AuthActions from '../../store/auth.actions';
 import { selectAuthLoading, selectAuthError } from '../../store/auth.selectors';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-login',
@@ -16,7 +18,7 @@ import { selectAuthLoading, selectAuthError } from '../../store/auth.selectors';
   styleUrls: ['./login.component.scss'],
   standalone: true,
   schemas: [NO_ERRORS_SCHEMA],
-  imports: [CommonModule, RouterModule, LoaderComponent, ReactiveFormsModule],
+  imports: [CommonModule, RouterModule, LoaderComponent, ReactiveFormsModule, TranslatePipe],
   providers: [],
 })
 export class LoginComponent {
@@ -28,7 +30,8 @@ export class LoginComponent {
   constructor(
     private store: Store,
     private fb: FormBuilder,
-    private router: Router
+    private router: Router,
+    private translationService: TranslationService
   ) {
     this.loading$ = this.store.select(selectAuthLoading);
     this.error$ = this.store.select(selectAuthError);
@@ -67,24 +70,26 @@ export class LoginComponent {
     const field = this.loginForm.get(fieldName);
     if (field && field.errors && (field.dirty || field.touched)) {
       if (field.errors['required']) {
-        return `${this.getFieldDisplayName(fieldName)} is required`;
+        const displayName = this.getFieldDisplayName(fieldName);
+        return this.translationService.translate('auth.required', { field: displayName });
       }
       if (field.errors['email']) {
-        return 'Please enter a valid email address';
+        return this.translationService.translate('auth.invalidEmail');
       }
       if (field.errors['minlength']) {
         const requiredLength = field.errors['minlength'].requiredLength;
-        return `${this.getFieldDisplayName(fieldName)} must be at least ${requiredLength} characters long`;
+        const displayName = this.getFieldDisplayName(fieldName);
+        return this.translationService.translate('auth.passwordMinLength', {
+          field: displayName,
+          length: requiredLength
+        });
       }
     }
     return '';
   }
 
   private getFieldDisplayName(fieldName: string): string {
-    const displayNames: { [key: string]: string } = {
-      email: 'Email',
-      password: 'Password'
-    };
-    return displayNames[fieldName] || fieldName;
+    const translationKey = `auth.${fieldName}`;
+    return this.translationService.translate(translationKey);
   }
 }

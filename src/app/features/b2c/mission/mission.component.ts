@@ -1,12 +1,13 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
-    selector: 'app-mission',
-    standalone: true,
-    imports: [CommonModule, RouterModule],
-    template: `
+  selector: 'app-mission',
+  standalone: true,
+  imports: [CommonModule, RouterModule, TranslatePipe],
+  template: `
     <!-- Mission/Sustainability Page -->
     <div class="min-h-screen bg-white">
       <!-- Hero Section -->
@@ -23,10 +24,10 @@ import { RouterModule } from '@angular/router';
         
         <div class="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 font-['Poppins']">
-            Sustainability
+            {{ 'mission.title' | translate }}
           </h1>
           <p class="text-xl lg:text-2xl text-white opacity-80 max-w-3xl mx-auto font-['DM_Sans']">
-            At HeyHome, we believe that building and renovating doesn't just mean creating comfortable and functional spaces, but also taking care of the environment we live in. Sustainability is one of our core values, and guides every choice we make, from material selection to the services we offer our customers.
+            {{ 'mission.subtitle' | translate }}
           </p>
         </div>
       </section>
@@ -47,7 +48,7 @@ import { RouterModule } from '@angular/router';
             <!-- Content -->
             <div class="order-1 lg:order-2">
               <h2 class="text-3xl lg:text-4xl font-bold text-[#222529] mb-8 font-['Poppins']">
-                Our Philosophy
+                {{ 'mission.ourPhilosophy' | translate }}
               </h2>
               
               <div class="space-y-6">
@@ -60,10 +61,10 @@ import { RouterModule } from '@angular/router';
                   </div>
                   <div>
                     <h3 class="text-lg font-semibold text-[#255241] mb-2 font-['DM_Sans']">
-                      Environmental Responsibility
+                      {{ 'mission.environmentalResponsibility' | translate }}
                     </h3>
                     <p class="text-[#4E7A69] font-['DM_Sans']">
-                      Every product we offer is carefully evaluated for its environmental impact, from production phase to final disposal.
+                      {{ 'mission.environmentalText' | translate }}
                     </p>
                   </div>
                 </div>
@@ -77,10 +78,10 @@ import { RouterModule } from '@angular/router';
                   </div>
                   <div>
                     <h3 class="text-lg font-semibold text-[#255241] mb-2 font-['DM_Sans']">
-                      Quality and Durability
+                      {{ 'mission.qualityDurability' | translate }}
                     </h3>
                     <p class="text-[#4E7A69] font-['DM_Sans']">
-                      Durable and resistant materials reduce waste and frequent maintenance, offering more sustainable and cost-effective solutions over time.
+                      {{ 'mission.qualityText' | translate }}
                     </p>
                   </div>
                 </div>
@@ -95,10 +96,10 @@ import { RouterModule } from '@angular/router';
                   </div>
                   <div>
                     <h3 class="text-lg font-semibold text-[#255241] mb-2 font-['DM_Sans']">
-                      Technological Innovation
+                      {{ 'mission.technologicalInnovation' | translate }}
                     </h3>
                     <p class="text-[#4E7A69] font-['DM_Sans']">
-                      We collaborate with suppliers and brands that invest in research and development, focusing on cutting-edge technologies and low environmental impact materials.
+                      {{ 'mission.innovationText' | translate }}
                     </p>
                   </div>
                 </div>
@@ -115,7 +116,7 @@ import { RouterModule } from '@angular/router';
             <!-- Content -->
             <div>
               <h2 class="text-3xl lg:text-4xl font-bold text-[#222529] mb-8 font-['Poppins']">
-                Our Commitment Beyond the Product
+                {{ 'mission.commitmentBeyond' | translate }}
               </h2>
               
               <div class="space-y-6">
@@ -128,10 +129,10 @@ import { RouterModule } from '@angular/router';
                   </div>
                   <div>
                     <h3 class="text-lg font-semibold text-[#255241] mb-2 font-['DM_Sans']">
-                      Personalized Consulting
+                      {{ 'mission.personalizedConsulting' | translate }}
                     </h3>
                     <p class="text-[#4E7A69] font-['DM_Sans']">
-                      We help our customers identify tailor-made solutions to make buildings more efficient and low-impact, providing concrete suggestions and guidance.
+                      {{ 'mission.consultingText' | translate }}
                     </p>
                   </div>
                 </div>
@@ -145,10 +146,10 @@ import { RouterModule } from '@angular/router';
                   </div>
                   <div>
                     <h3 class="text-lg font-semibold text-[#255241] mb-2 font-['DM_Sans']">
-                      Continuous Updates and Research
+                      {{ 'mission.continuousUpdates' | translate }}
                     </h3>
                     <p class="text-[#4E7A69] font-['DM_Sans']">
-                      We constantly monitor industry innovations and new regulations, to always offer the best technologies and most virtuous practices.
+                      {{ 'mission.updatesText' | translate }}
                     </p>
                   </div>
                 </div>
@@ -162,10 +163,10 @@ import { RouterModule } from '@angular/router';
                   </div>
                   <div>
                     <h3 class="text-lg font-semibold text-[#255241] mb-2 font-['DM_Sans']">
-                      Awareness and Education
+                      {{ 'mission.awarenessEducation' | translate }}
                     </h3>
                     <p class="text-[#4E7A69] font-['DM_Sans']">
-                      Through our blog, guides and support service, we offer useful information to understand the benefits of sustainability and the advantages of investing in certified products.
+                      {{ 'mission.educationText' | translate }}
                     </p>
                   </div>
                 </div>
@@ -188,7 +189,7 @@ import { RouterModule } from '@angular/router';
       <section class="py-16 lg:py-24">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <p class="text-xl lg:text-2xl text-[#222529] leading-relaxed font-['DM_Sans']">
-            Together, we can build a future where comfort, quality, efficiency and respect for the environment go hand in hand. By choosing HeyHome, you choose to contribute to a healthier, more balanced and conscious world.
+            Together, we can build a future where comfort, quality, efficiency and respect for the environment go hand in hand. By choosing SolarShop, you choose to contribute to a healthier, more balanced and conscious world.
           </p>
         </div>
       </section>
@@ -198,7 +199,7 @@ import { RouterModule } from '@angular/router';
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="text-center mb-16">
             <h2 class="text-3xl lg:text-4xl font-bold text-[#222529] mb-4 font-['Poppins']">
-              How We Select Materials
+              {{ 'mission.materialSelection' | translate }}
             </h2>
           </div>
 
@@ -211,10 +212,10 @@ import { RouterModule } from '@angular/router';
                 </svg>
               </div>
               <h3 class="text-xl font-bold text-[#222529] mb-4 font-['Poppins']">
-                Raw Materials Analysis
+                {{ 'mission.rawMaterialsAnalysis' | translate }}
               </h3>
               <p class="text-[#324053] font-['DM_Sans']">
-                We prioritize renewable, recycled or recyclable materials, avoiding substances harmful to health and the ecosystem.
+                {{ 'mission.rawMaterialsText' | translate }}
               </p>
             </div>
 
@@ -226,10 +227,10 @@ import { RouterModule } from '@angular/router';
                 </svg>
               </div>
               <h3 class="text-xl font-bold text-[#222529] mb-4 font-['Poppins']">
-                Certification Evaluation
+                {{ 'mission.certificationEvaluation' | translate }}
               </h3>
               <p class="text-[#324053] font-['DM_Sans']">
-                Before proposing a product, we verify its environmental and quality certifications, such as LEED, CasaClima, FSC, PEFC or ISO 14001. These guarantee that the product has been made according to high sustainability standards.
+                {{ 'mission.certificationText' | translate }}
               </p>
             </div>
 
@@ -241,10 +242,10 @@ import { RouterModule } from '@angular/router';
                 </svg>
               </div>
               <h3 class="text-xl font-bold text-[#222529] mb-4 font-['Poppins']">
-                Energy Efficiency
+                {{ 'mission.energyEfficiency' | translate }}
               </h3>
               <p class="text-[#324053] font-['DM_Sans']">
-                We choose products and solutions that improve thermal insulation, reduce consumption and favor the use of renewable energy sources, such as solar panels and heat pumps.
+                {{ 'mission.efficiencyText' | translate }}
               </p>
             </div>
           </div>
@@ -268,7 +269,7 @@ import { RouterModule } from '@angular/router';
           </div>
           
           <h3 class="text-lg font-bold text-[#222529] mb-5 font-['Poppins']">
-            Subscribe to Our Newsletter
+            {{ 'mission.subscribeNewsletter' | translate }}
           </h3>
           
           <div class="flex gap-2">
@@ -278,14 +279,14 @@ import { RouterModule } from '@angular/router';
               class="flex-1 px-4 py-3 border border-[#EEE8D0] rounded-lg bg-white text-sm focus:ring-2 focus:ring-[#0ACF83] focus:border-transparent font-['DM_Sans'] placeholder-gray-400"
             >
             <button class="bg-[#0ACF83] text-white px-5 py-3 rounded-lg font-semibold hover:bg-[#09b574] transition-colors font-['DM_Sans']">
-              Subscribe
+              {{ 'common.subscribe' | translate }}
             </button>
           </div>
         </div>
       </section>
     </div>
   `,
-    styles: [`
+  styles: [`
     /* Custom font loading */
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap');
     
