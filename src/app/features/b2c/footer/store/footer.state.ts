@@ -64,9 +64,9 @@ export const initialFooterState: FooterState = {
             }
         ],
         contactInfo: {
-            address: 'Via Sostenibile 123, 20100 Milano, Italy',
-            phone: '+39 02 1234 5678',
-            email: 'info@heyhome.it',
+            address: 'Zagreb, Croatia',
+            phone: '+385 91 123 4567',
+            email: 'info@solarshop.hr',
             hours: 'Mon-Fri: 8:00-18:00, Sat: 9:00-13:00'
         },
         newsletter: {

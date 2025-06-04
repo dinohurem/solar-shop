@@ -164,7 +164,8 @@ export class TranslationService {
                 dontMissOut: 'Ne propustite!',
                 subscribeText: 'Pretplatite se na naš newsletter i budite prvi koji će saznati o novim ponudama.',
                 enterEmail: 'Unesite vaš email',
-                subscribe: 'Pretplati se'
+                subscribe: 'Pretplati se',
+                viewAll: 'Pogledaj sve'
             },
             // Mission/Sustainability
             mission: {
@@ -597,7 +598,8 @@ export class TranslationService {
                 dontMissOut: 'Don\'t miss out!',
                 subscribeText: 'Subscribe to our newsletter and be the first to know about new offers.',
                 enterEmail: 'Enter your email',
-                subscribe: 'Subscribe'
+                subscribe: 'Subscribe',
+                viewAll: 'View All'
             },
             // Mission/Sustainability
             mission: {
