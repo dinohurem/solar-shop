@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 interface FAQItem {
   id: string;
@@ -12,7 +13,7 @@ interface FAQItem {
 @Component({
   selector: 'app-contact',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, TranslatePipe],
   template: `
     <!-- Contact Page -->
     <div class="min-h-screen bg-white">
@@ -25,10 +26,10 @@ interface FAQItem {
         <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
           <div class="max-w-2xl">
             <h1 class="text-4xl lg:text-5xl font-bold font-['Poppins'] mb-6">
-              Contacts & Assistance
+              {{ 'contactSupport.title' | translate }}
             </h1>
             <p class="text-lg lg:text-xl leading-relaxed opacity-90 font-['DM_Sans']">
-              Need help or want more information? We're here for you. The Contacts & Assistance section of SolarShop is designed to provide you with all the support you need, from product selection to post-sale, ensuring a simple, transparent and secure shopping experience.
+              {{ 'contactSupport.subtitle' | translate }}
             </p>
             
             <!-- Contact Info -->
@@ -40,7 +41,7 @@ interface FAQItem {
                     <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
                   </svg>
                 </div>
-                                 <span class="font-['DM_Sans']">info&#64;heyhome.it</span>
+                <span class="font-['DM_Sans']">info&#64;heyhome.it</span>
               </div>
               <div class="flex items-center space-x-4">
                 <div class="w-5 h-5 flex-shrink-0">
@@ -61,10 +62,10 @@ interface FAQItem {
           <div class="bg-white rounded-3xl shadow-xl p-8 lg:p-12">
             <div class="mb-8">
               <h2 class="text-2xl lg:text-3xl font-bold text-gray-900 font-['Poppins'] mb-4">
-                Contact Form
+                {{ 'contactSupport.contactForm' | translate }}
               </h2>
               <p class="text-gray-600 font-['DM_Sans']">
-                Fill in the online form found on this page, entering your data and the nature of your request. A member of our staff will contact you shortly.
+                {{ 'contactSupport.contactFormText' | translate }}
               </p>
             </div>
 
@@ -73,25 +74,25 @@ interface FAQItem {
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label for="firstName" class="block text-sm font-medium text-gray-900 mb-2 font-['DM_Sans'] uppercase tracking-wide">
-                    Name
+                    {{ 'contactSupport.name' | translate }}
                   </label>
                   <input
                     type="text"
                     id="firstName"
                     formControlName="firstName"
-                    placeholder="Name"
+                    [placeholder]="'contactSupport.name' | translate"
                     class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors font-['DM_Sans']"
                   >
                 </div>
                 <div>
                   <label for="lastName" class="block text-sm font-medium text-gray-900 mb-2 font-['DM_Sans'] uppercase tracking-wide">
-                    Last Name
+                    {{ 'contactSupport.lastName' | translate }}
                   </label>
                   <input
                     type="text"
                     id="lastName"
                     formControlName="lastName"
-                    placeholder="Last Name"
+                    [placeholder]="'contactSupport.lastName' | translate"
                     class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors font-['DM_Sans']"
                   >
                 </div>
@@ -100,13 +101,13 @@ interface FAQItem {
               <!-- Email -->
               <div>
                 <label for="email" class="block text-sm font-medium text-gray-900 mb-2 font-['DM_Sans'] uppercase tracking-wide">
-                  Email
+                  {{ 'contactSupport.email' | translate }}
                 </label>
                 <input
                   type="email"
                   id="email"
                   formControlName="email"
-                  placeholder="Email"
+                  [placeholder]="'contactSupport.email' | translate"
                   class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors font-['DM_Sans']"
                 >
               </div>
@@ -114,13 +115,13 @@ interface FAQItem {
               <!-- Message -->
               <div>
                 <label for="message" class="block text-sm font-medium text-gray-900 mb-2 font-['DM_Sans'] uppercase tracking-wide">
-                  Message
+                  {{ 'contactSupport.message' | translate }}
                 </label>
                 <textarea
                   id="message"
                   formControlName="message"
                   rows="6"
-                  placeholder="Type your message here..."
+                  [placeholder]="'contactSupport.typeMessage' | translate"
                   class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors font-['DM_Sans'] resize-none"
                 ></textarea>
               </div>
@@ -132,8 +133,8 @@ interface FAQItem {
                   [disabled]="contactForm.invalid || isSubmitting"
                   class="inline-flex items-center px-8 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-['DM_Sans'] uppercase tracking-wide"
                 >
-                  <span *ngIf="!isSubmitting">Send message</span>
-                  <span *ngIf="isSubmitting">Sending...</span>
+                  <span *ngIf="!isSubmitting">{{ 'contactSupport.sendMessage' | translate }}</span>
+                  <span *ngIf="isSubmitting">{{ 'contactSupport.sending' | translate }}</span>
                 </button>
               </div>
             </form>
@@ -153,10 +154,10 @@ interface FAQItem {
             </div>
             <div class="w-full lg:w-1/2 space-y-6">
               <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 font-['Poppins'] uppercase">
-                Post-Sale Assistance
+                {{ 'contactSupport.postSaleAssistance' | translate }}
               </h2>
               <p class="text-gray-600 font-['DM_Sans'] leading-relaxed">
-                Once you've completed your purchase, we don't leave you alone. Have questions about the products you received, delivery times, or installation methods? Our post-sale assistance service is at your disposal to:
+                {{ 'contactSupport.postSaleAssistanceText' | translate }}
               </p>
               <div class="space-y-4">
                 <div class="flex items-start space-x-3">
@@ -166,7 +167,7 @@ interface FAQItem {
                     </svg>
                   </div>
                   <p class="text-gray-600 font-['DM_Sans']">
-                    Provide detailed information about the products you chose.
+                    {{ 'contactSupport.detailedProductInfo' | translate }}
                   </p>
                 </div>
                 <div class="flex items-start space-x-3">
@@ -176,7 +177,7 @@ interface FAQItem {
                     </svg>
                   </div>
                   <p class="text-gray-600 font-['DM_Sans']">
-                    Guide you in installation or use of materials.
+                    {{ 'contactSupport.installationGuidance' | translate }}
                   </p>
                 </div>
                 <div class="flex items-start space-x-3">
@@ -186,13 +187,13 @@ interface FAQItem {
                     </svg>
                   </div>
                   <p class="text-gray-600 font-['DM_Sans']">
-                    Help you with any issues, ensuring quick and effective solutions.
+                    {{ 'contactSupport.issueResolution' | translate }}
                   </p>
                 </div>
               </div>
               <div class="pt-4">
                 <button class="inline-flex items-center space-x-2 text-green-600 font-semibold hover:text-green-700 transition-colors font-['DM_Sans']">
-                  <span>Learn more</span>
+                  <span>{{ 'contactSupport.learnMore' | translate }}</span>
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                   </svg>
@@ -210,14 +211,14 @@ interface FAQItem {
             </div>
             <div class="w-full lg:w-1/2 space-y-6">
               <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 font-['Poppins']">
-                Technical Support<br/>& Showroom
+                {{ 'contactSupport.technicalSupport' | translate }}
               </h2>
               <p class="text-gray-600 font-['DM_Sans'] leading-relaxed">
-                If you want a more direct contact, or if your project requires specific technical support, you may visit one of our showrooms or assistance centers, where you can talk to our experts and see the products up close.
+                {{ 'contactSupport.technicalSupportText' | translate }}
               </p>
               <div class="pt-4">
                 <button class="inline-flex items-center space-x-2 text-green-600 font-semibold hover:text-green-700 transition-colors font-['DM_Sans']">
-                  <span>View the nearest point</span>
+                  <span>{{ 'contactSupport.viewNearestPoint' | translate }}</span>
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                   </svg>
@@ -235,14 +236,14 @@ interface FAQItem {
             </div>
             <div class="w-full lg:w-1/2 space-y-6">
               <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 font-['Poppins']">
-                Returns & Shipping Policy
+                {{ 'contactSupport.returnsShipping' | translate }}
               </h2>
               <p class="text-gray-600 font-['DM_Sans'] leading-relaxed">
-                Consult our section dedicated to Returns and Shipping Policy to learn about the return procedures, delivery times and conditions for any refunds. We are always transparent, so you can shop with confidence knowing that you can count on us in case of changes or issues.
+                {{ 'contactSupport.returnsShippingText' | translate }}
               </p>
               <div class="pt-4">
                 <button class="inline-flex items-center space-x-2 text-green-600 font-semibold hover:text-green-700 transition-colors font-['DM_Sans']">
-                  <span>Learn more</span>
+                  <span>{{ 'contactSupport.learnMore' | translate }}</span>
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                   </svg>
@@ -257,7 +258,7 @@ interface FAQItem {
       <section class="py-16 lg:py-24 bg-gray-800 text-white">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="text-center mb-12">
-            <h2 class="text-3xl lg:text-4xl font-bold font-['Poppins'] mb-8">FAQ</h2>
+            <h2 class="text-3xl lg:text-4xl font-bold font-['Poppins'] mb-8">{{ 'contactSupport.faq' | translate }}</h2>
           </div>
           
           <div class="space-y-4">
@@ -269,7 +270,7 @@ interface FAQItem {
                 (click)="toggleFaq(faq.id)"
                 class="w-full flex items-center justify-between py-6 text-left hover:text-green-400 transition-colors"
               >
-                <span class="text-lg lg:text-xl font-semibold font-['DM_Sans'] pr-4">{{ faq.question }}</span>
+                <span class="text-lg lg:text-xl font-semibold font-['DM_Sans'] pr-4">{{ faq.question | translate }}</span>
                 <div class="flex-shrink-0 w-6 h-6">
                   <svg 
                     class="w-full h-full transform transition-transform"
@@ -286,7 +287,7 @@ interface FAQItem {
                 *ngIf="faq.isOpen"
                 class="pb-6 text-gray-300 font-['DM_Sans'] leading-relaxed"
               >
-                {{ faq.answer }}
+                {{ faq.answer | translate }}
               </div>
             </div>
           </div>
@@ -297,7 +298,7 @@ interface FAQItem {
       <section class="py-16 lg:py-24 bg-white">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <p class="text-lg lg:text-xl text-gray-600 font-['DM_Sans'] leading-relaxed">
-            Whatever your need, the SolarShop team is ready to help you. Contact us today and let us guide you towards the solution most suited to your needs. Building or renovating has never been easier, secure and satisfying.
+            {{ 'contactSupport.bottomCta' | translate }}
           </p>
         </div>
       </section>
@@ -319,38 +320,38 @@ export class ContactComponent implements OnInit {
   faqs: FAQItem[] = [
     {
       id: '1',
-      question: 'What types of services does SolarShop offer?',
-      answer: 'SolarShop offers a wide range of services, including energy audits, energy modeling, high-efficiency system installations, renewable energy integration, building envelope upgrades, mechanical system upgrades, electrical system upgrades, plumbing system upgrades, and comprehensive project management.',
+      question: 'contactSupport.faqQuestion1',
+      answer: 'contactSupport.faqAnswer1',
       isOpen: false
     },
     {
       id: '2',
-      question: 'Who are your services designed for?',
-      answer: 'Our services are designed for homeowners, businesses, and contractors looking to improve energy efficiency, reduce costs, and implement sustainable building solutions.',
+      question: 'contactSupport.faqQuestion2',
+      answer: 'contactSupport.faqAnswer2',
       isOpen: false
     },
     {
       id: '3',
-      question: 'How can photovoltaic systems benefit me?',
-      answer: 'Photovoltaic systems can significantly reduce your electricity bills, increase your property value, provide energy independence, and contribute to environmental sustainability by reducing your carbon footprint.',
+      question: 'contactSupport.faqQuestion3',
+      answer: 'contactSupport.faqAnswer3',
       isOpen: false
     },
     {
       id: '4',
-      question: 'What is a thermal jacket, and why is it important?',
-      answer: 'A thermal jacket refers to building insulation that wraps around your home like a jacket, preventing heat loss in winter and heat gain in summer. This improves energy efficiency and comfort while reducing heating and cooling costs.',
+      question: 'contactSupport.faqQuestion4',
+      answer: 'contactSupport.faqAnswer4',
       isOpen: false
     },
     {
       id: '5',
-      question: 'Are your energy solutions environmentally friendly?',
-      answer: 'Yes, all our energy solutions are designed with sustainability in mind. We focus on renewable energy sources, energy-efficient technologies, and environmentally responsible materials and practices.',
+      question: 'contactSupport.faqQuestion5',
+      answer: 'contactSupport.faqAnswer5',
       isOpen: false
     },
     {
       id: '6',
-      question: 'Can you manage complete renovations?',
-      answer: 'Absolutely! We provide comprehensive project management for complete renovations, handling everything from initial planning and permits to final installation and quality assurance.',
+      question: 'contactSupport.faqQuestion6',
+      answer: 'contactSupport.faqAnswer6',
       isOpen: false
     }
   ];

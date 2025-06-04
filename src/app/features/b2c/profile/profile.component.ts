@@ -8,18 +8,19 @@ import { selectCurrentUser, selectAuthLoading, selectAuthError } from '../../../
 import * as AuthActions from '../../../core/auth/store/auth.actions';
 import { User, UserAddress } from '../../../shared/models/user.model';
 import { Actions, ofType } from '@ngrx/effects';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
-    selector: 'app-profile',
-    standalone: true,
-    imports: [CommonModule, RouterModule, ReactiveFormsModule],
-    template: `
+  selector: 'app-profile',
+  standalone: true,
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, TranslatePipe],
+  template: `
     <div class="min-h-screen bg-gray-50 py-8">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header -->
         <div class="mb-8">
-          <h1 class="text-3xl font-bold text-[#222529] font-['Poppins']">My Profile</h1>
-          <p class="text-[#324053] mt-2 font-['DM_Sans']">Manage your account settings and preferences</p>
+          <h1 class="text-3xl font-bold text-[#222529] font-['Poppins']">{{ 'profile.myProfile' | translate }}</h1>
+          <p class="text-[#324053] mt-2 font-['DM_Sans']">{{ 'profile.manageAccount' | translate }}</p>
         </div>
 
         <!-- Success Message -->
@@ -28,7 +29,7 @@ import { Actions, ofType } from '@ngrx/effects';
             <svg class="w-5 h-5 text-green-600 mr-3" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
             </svg>
-            <span class="text-green-800 font-['DM_Sans'] font-medium">Profile updated successfully!</span>
+            <span class="text-green-800 font-['DM_Sans'] font-medium">{{ 'profile.profileUpdated' | translate }}</span>
           </div>
         </div>
 
@@ -38,7 +39,7 @@ import { Actions, ofType } from '@ngrx/effects';
             <svg class="w-5 h-5 text-red-600 mr-3" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
             </svg>
-            <span class="text-red-800 font-['DM_Sans'] font-medium">{{ (error$ | async)?.message || 'An error occurred while updating your profile.' }}</span>
+            <span class="text-red-800 font-['DM_Sans'] font-medium">{{ (error$ | async)?.message || ('profile.updateError' | translate) }}</span>
           </div>
         </div>
 
@@ -54,7 +55,7 @@ import { Actions, ofType } from '@ngrx/effects';
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                   </svg>
-                  <span>User Info</span>
+                  <span>{{ 'profile.userInfo' | translate }}</span>
                 </button>
                 
                 <button
@@ -65,7 +66,7 @@ import { Actions, ofType } from '@ngrx/effects';
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                   </svg>
-                  <span>Billing & Shipping Details</span>
+                  <span>{{ 'profile.billingShipping' | translate }}</span>
                 </button>
               </nav>
             </div>
@@ -76,8 +77,8 @@ import { Actions, ofType } from '@ngrx/effects';
             <!-- User Info Tab -->
             <div *ngIf="activeTab === 'user-info'" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <div class="mb-6">
-                <h2 class="text-2xl font-semibold text-[#222529] font-['Poppins'] mb-2">Personal Information</h2>
-                <p class="text-[#324053] font-['DM_Sans']">Update your personal details and contact information</p>
+                <h2 class="text-2xl font-semibold text-[#222529] font-['Poppins'] mb-2">{{ 'profile.personalInformation' | translate }}</h2>
+                <p class="text-[#324053] font-['DM_Sans']">{{ 'profile.updatePersonalDetails' | translate }}</p>
               </div>
 
               <form [formGroup]="userInfoForm" (ngSubmit)="updateUserInfo()" class="space-y-6">
@@ -97,39 +98,39 @@ import { Actions, ofType } from '@ngrx/effects';
                   </div>
                   <div>
                     <button type="button" class="px-4 py-2 bg-[#0ACF83] text-white rounded-lg font-['DM_Sans'] font-medium hover:bg-[#0ACF83]/90 transition-colors">
-                      Change Photo
+                      {{ 'profile.changePhoto' | translate }}
                     </button>
-                    <p class="text-sm text-[#324053] mt-1 font-['DM_Sans']">JPG, GIF or PNG. 1MB max.</p>
+                    <p class="text-sm text-[#324053] mt-1 font-['DM_Sans']">{{ 'profile.photoRequirements' | translate }}</p>
                   </div>
                 </div>
 
                 <!-- Name Fields -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label class="block text-sm font-medium text-[#222529] mb-2 font-['DM_Sans']">First Name*</label>
+                    <label class="block text-sm font-medium text-[#222529] mb-2 font-['DM_Sans']">{{ 'profile.firstName' | translate }}*</label>
                     <input
                       formControlName="firstName"
                       type="text"
                       class="w-full h-12 px-4 py-3 border rounded-lg text-sm text-[#222529] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0ACF83] focus:border-transparent transition-all duration-200 font-['DM_Sans']"
                       [class.border-red-500]="userInfoForm.get('firstName')?.invalid && userInfoForm.get('firstName')?.touched"
                       [class.border-gray-300]="!userInfoForm.get('firstName')?.invalid || !userInfoForm.get('firstName')?.touched"
-                      placeholder="Enter your first name">
+                      [placeholder]="'profile.enterFirstName' | translate">
                     <div *ngIf="userInfoForm.get('firstName')?.invalid && userInfoForm.get('firstName')?.touched" class="mt-1 text-sm text-red-600 font-['DM_Sans']">
-                      First name is required
+                      {{ 'profile.firstNameRequired' | translate }}
                     </div>
                   </div>
 
                   <div>
-                    <label class="block text-sm font-medium text-[#222529] mb-2 font-['DM_Sans']">Last Name*</label>
+                    <label class="block text-sm font-medium text-[#222529] mb-2 font-['DM_Sans']">{{ 'profile.lastName' | translate }}*</label>
                     <input
                       formControlName="lastName"
                       type="text"
                       class="w-full h-12 px-4 py-3 border rounded-lg text-sm text-[#222529] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0ACF83] focus:border-transparent transition-all duration-200 font-['DM_Sans']"
                       [class.border-red-500]="userInfoForm.get('lastName')?.invalid && userInfoForm.get('lastName')?.touched"
                       [class.border-gray-300]="!userInfoForm.get('lastName')?.invalid || !userInfoForm.get('lastName')?.touched"
-                      placeholder="Enter your last name">
+                      [placeholder]="'profile.enterLastName' | translate">
                     <div *ngIf="userInfoForm.get('lastName')?.invalid && userInfoForm.get('lastName')?.touched" class="mt-1 text-sm text-red-600 font-['DM_Sans']">
-                      Last name is required
+                      {{ 'profile.lastNameRequired' | translate }}
                     </div>
                   </div>
                 </div>
@@ -137,33 +138,33 @@ import { Actions, ofType } from '@ngrx/effects';
                 <!-- Email and Phone -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label class="block text-sm font-medium text-[#222529] mb-2 font-['DM_Sans']">Email Address*</label>
+                    <label class="block text-sm font-medium text-[#222529] mb-2 font-['DM_Sans']">{{ 'profile.emailAddress' | translate }}*</label>
                     <input
                       formControlName="email"
                       type="email"
                       class="w-full h-12 px-4 py-3 border rounded-lg text-sm text-[#222529] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0ACF83] focus:border-transparent transition-all duration-200 font-['DM_Sans']"
                       [class.border-red-500]="userInfoForm.get('email')?.invalid && userInfoForm.get('email')?.touched"
                       [class.border-gray-300]="!userInfoForm.get('email')?.invalid || !userInfoForm.get('email')?.touched"
-                      placeholder="Enter your email address">
+                      [placeholder]="'profile.enterEmailAddress' | translate">
                     <div *ngIf="userInfoForm.get('email')?.invalid && userInfoForm.get('email')?.touched" class="mt-1 text-sm text-red-600 font-['DM_Sans']">
-                      Please enter a valid email address
+                      {{ 'profile.validEmailRequired' | translate }}
                     </div>
                   </div>
 
                   <div>
-                    <label class="block text-sm font-medium text-[#222529] mb-2 font-['DM_Sans']">Phone Number</label>
+                    <label class="block text-sm font-medium text-[#222529] mb-2 font-['DM_Sans']">{{ 'profile.phoneNumber' | translate }}</label>
                     <input
                       formControlName="phone"
                       type="tel"
                       class="w-full h-12 px-4 py-3 border border-gray-300 rounded-lg text-sm text-[#222529] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0ACF83] focus:border-transparent transition-all duration-200 font-['DM_Sans']"
-                      placeholder="Enter your phone number">
+                      [placeholder]="'profile.enterPhoneNumber' | translate">
                   </div>
                 </div>
 
                 <!-- Date of Birth and Gender -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label class="block text-sm font-medium text-[#222529] mb-2 font-['DM_Sans']">Date of Birth</label>
+                    <label class="block text-sm font-medium text-[#222529] mb-2 font-['DM_Sans']">{{ 'profile.dateOfBirth' | translate }}</label>
                     <input
                       formControlName="dateOfBirth"
                       type="date"
@@ -171,15 +172,15 @@ import { Actions, ofType } from '@ngrx/effects';
                   </div>
 
                   <div>
-                    <label class="block text-sm font-medium text-[#222529] mb-2 font-['DM_Sans']">Gender</label>
+                    <label class="block text-sm font-medium text-[#222529] mb-2 font-['DM_Sans']">{{ 'profile.gender' | translate }}</label>
                     <select
                       formControlName="gender"
                       class="w-full h-12 px-4 py-3 border border-gray-300 rounded-lg text-sm text-[#222529] focus:outline-none focus:ring-2 focus:ring-[#0ACF83] focus:border-transparent transition-all duration-200 font-['DM_Sans']">
-                      <option value="">Select gender</option>
-                      <option value="male">Male</option>
-                      <option value="female">Female</option>
-                      <option value="other">Other</option>
-                      <option value="prefer_not_to_say">Prefer not to say</option>
+                      <option value="">{{ 'profile.selectGender' | translate }}</option>
+                      <option value="male">{{ 'profile.male' | translate }}</option>
+                      <option value="female">{{ 'profile.female' | translate }}</option>
+                      <option value="other">{{ 'profile.other' | translate }}</option>
+                      <option value="prefer_not_to_say">{{ 'profile.preferNotToSay' | translate }}</option>
                     </select>
                   </div>
                 </div>
@@ -190,13 +191,13 @@ import { Actions, ofType } from '@ngrx/effects';
                     type="submit"
                     [disabled]="userInfoForm.invalid || (loading$ | async)"
                     class="px-6 py-3 bg-[#0ACF83] hover:bg-[#0ACF83]/90 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#0ACF83] focus:ring-offset-2 font-['DM_Sans']">
-                    <span *ngIf="!(loading$ | async)">Save Changes</span>
+                    <span *ngIf="!(loading$ | async)">{{ 'profile.saveChanges' | translate }}</span>
                     <span *ngIf="loading$ | async" class="flex items-center space-x-2">
                       <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
-                      <span>Saving...</span>
+                      <span>{{ 'profile.saving' | translate }}</span>
                     </span>
                   </button>
                 </div>
@@ -209,8 +210,8 @@ import { Actions, ofType } from '@ngrx/effects';
               <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                 <div class="flex justify-between items-center mb-6">
                   <div>
-                    <h2 class="text-2xl font-semibold text-[#222529] font-['Poppins'] mb-2">Addresses</h2>
-                    <p class="text-[#324053] font-['DM_Sans']">Manage your billing and shipping addresses</p>
+                    <h2 class="text-2xl font-semibold text-[#222529] font-['Poppins'] mb-2">{{ 'profile.addresses' | translate }}</h2>
+                    <p class="text-[#324053] font-['DM_Sans']">{{ 'profile.manageBillingShipping' | translate }}</p>
                   </div>
                   <button
                     (click)="addNewAddress()"
@@ -218,7 +219,7 @@ import { Actions, ofType } from '@ngrx/effects';
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>
-                    <span>Add Address</span>
+                    <span>{{ 'profile.addAddress' | translate }}</span>
                   </button>
                 </div>
 
@@ -233,12 +234,12 @@ import { Actions, ofType } from '@ngrx/effects';
                           {{ address.type | titlecase }}
                         </span>
                         <span *ngIf="address.isDefault" class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full font-['DM_Sans'] font-medium">
-                          Default
+                          {{ 'profile.default' | translate }}
                         </span>
                       </div>
                       <div class="flex space-x-2">
-                        <button class="text-[#0ACF83] hover:text-[#0ACF83]/80 text-sm font-['DM_Sans']">Edit</button>
-                        <button class="text-red-500 hover:text-red-600 text-sm font-['DM_Sans']">Delete</button>
+                        <button class="text-[#0ACF83] hover:text-[#0ACF83]/80 text-sm font-['DM_Sans']">{{ 'profile.edit' | translate }}</button>
+                        <button class="text-red-500 hover:text-red-600 text-sm font-['DM_Sans']">{{ 'profile.delete' | translate }}</button>
                       </div>
                     </div>
                     <div class="text-sm text-[#324053] font-['DM_Sans'] space-y-1">
@@ -258,12 +259,12 @@ import { Actions, ofType } from '@ngrx/effects';
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                     </svg>
-                    <h3 class="text-lg font-medium text-[#222529] font-['Poppins'] mb-2">No addresses found</h3>
-                    <p class="text-[#324053] font-['DM_Sans'] mb-4">Add your first address to get started</p>
+                    <h3 class="text-lg font-medium text-[#222529] font-['Poppins'] mb-2">{{ 'profile.noAddressesFound' | translate }}</h3>
+                    <p class="text-[#324053] font-['DM_Sans'] mb-4">{{ 'profile.addFirstAddress' | translate }}</p>
                     <button
                       (click)="addNewAddress()"
                       class="px-4 py-2 bg-[#0ACF83] text-white rounded-lg font-['DM_Sans'] font-medium hover:bg-[#0ACF83]/90 transition-colors">
-                      Add Address
+                      {{ 'profile.addAddress' | translate }}
                     </button>
                   </div>
                 </ng-template>
@@ -273,8 +274,8 @@ import { Actions, ofType } from '@ngrx/effects';
               <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                 <div class="flex justify-between items-center mb-6">
                   <div>
-                    <h2 class="text-2xl font-semibold text-[#222529] font-['Poppins'] mb-2">Payment Methods</h2>
-                    <p class="text-[#324053] font-['DM_Sans']">Manage your saved payment methods</p>
+                    <h2 class="text-2xl font-semibold text-[#222529] font-['Poppins'] mb-2">{{ 'profile.paymentMethods' | translate }}</h2>
+                    <p class="text-[#324053] font-['DM_Sans']">{{ 'profile.manageSavedPayment' | translate }}</p>
                   </div>
                   <button
                     (click)="addNewPaymentMethod()"
@@ -282,7 +283,7 @@ import { Actions, ofType } from '@ngrx/effects';
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>
-                    <span>Add Payment Method</span>
+                    <span>{{ 'profile.addPaymentMethod' | translate }}</span>
                   </button>
                 </div>
 
@@ -307,12 +308,12 @@ import { Actions, ofType } from '@ngrx/effects';
                           </div>
                         </div>
                         <span *ngIf="payment.isDefault" class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full font-['DM_Sans'] font-medium">
-                          Default
+                          {{ 'profile.default' | translate }}
                         </span>
                       </div>
                       <div class="flex space-x-2">
-                        <button class="text-[#0ACF83] hover:text-[#0ACF83]/80 text-sm font-['DM_Sans']">Edit</button>
-                        <button class="text-red-500 hover:text-red-600 text-sm font-['DM_Sans']">Delete</button>
+                        <button class="text-[#0ACF83] hover:text-[#0ACF83]/80 text-sm font-['DM_Sans']">{{ 'profile.edit' | translate }}</button>
+                        <button class="text-red-500 hover:text-red-600 text-sm font-['DM_Sans']">{{ 'profile.delete' | translate }}</button>
                       </div>
                     </div>
                   </div>
@@ -323,12 +324,12 @@ import { Actions, ofType } from '@ngrx/effects';
                     <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
                     </svg>
-                    <h3 class="text-lg font-medium text-[#222529] font-['Poppins'] mb-2">No payment methods found</h3>
-                    <p class="text-[#324053] font-['DM_Sans'] mb-4">Add your first payment method to get started</p>
+                    <h3 class="text-lg font-medium text-[#222529] font-['Poppins'] mb-2">{{ 'profile.noPaymentMethodsFound' | translate }}</h3>
+                    <p class="text-[#324053] font-['DM_Sans'] mb-4">{{ 'profile.addFirstPayment' | translate }}</p>
                     <button
                       (click)="addNewPaymentMethod()"
                       class="px-4 py-2 bg-[#0ACF83] text-white rounded-lg font-['DM_Sans'] font-medium hover:bg-[#0ACF83]/90 transition-colors">
-                      Add Payment Method
+                      {{ 'profile.addPaymentMethod' | translate }}
                     </button>
                   </div>
                 </ng-template>
@@ -339,95 +340,95 @@ import { Actions, ofType } from '@ngrx/effects';
       </div>
     </div>
   `,
-    styles: [`
+  styles: [`
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap');
   `]
 })
 export class ProfileComponent implements OnInit {
-    private store = inject(Store);
-    private fb = inject(FormBuilder);
-    private router = inject(Router);
-    private actions$ = inject(Actions);
+  private store = inject(Store);
+  private fb = inject(FormBuilder);
+  private router = inject(Router);
+  private actions$ = inject(Actions);
 
-    currentUser$: Observable<User | null>;
-    loading$: Observable<boolean>;
-    error$: Observable<any>;
+  currentUser$: Observable<User | null>;
+  loading$: Observable<boolean>;
+  error$: Observable<any>;
 
-    activeTab: 'user-info' | 'billing-shipping' = 'user-info';
-    userInfoForm: FormGroup;
-    showSuccessMessage = false;
+  activeTab: 'user-info' | 'billing-shipping' = 'user-info';
+  userInfoForm: FormGroup;
+  showSuccessMessage = false;
 
-    constructor() {
-        this.currentUser$ = this.store.select(selectCurrentUser);
-        this.loading$ = this.store.select(selectAuthLoading);
-        this.error$ = this.store.select(selectAuthError);
+  constructor() {
+    this.currentUser$ = this.store.select(selectCurrentUser);
+    this.loading$ = this.store.select(selectAuthLoading);
+    this.error$ = this.store.select(selectAuthError);
 
-        this.userInfoForm = this.fb.group({
-            firstName: ['', [Validators.required]],
-            lastName: ['', [Validators.required]],
-            email: ['', [Validators.required, Validators.email]],
-            phone: [''],
-            dateOfBirth: [''],
-            gender: ['']
+    this.userInfoForm = this.fb.group({
+      firstName: ['', [Validators.required]],
+      lastName: ['', [Validators.required]],
+      email: ['', [Validators.required, Validators.email]],
+      phone: [''],
+      dateOfBirth: [''],
+      gender: ['']
+    });
+  }
+
+  ngOnInit(): void {
+    // Load user profile data
+    this.store.dispatch(AuthActions.loadUserProfile());
+
+    // Subscribe to user data and populate form
+    this.currentUser$.subscribe(user => {
+      if (user) {
+        this.userInfoForm.patchValue({
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          phone: user.phone || '',
+          dateOfBirth: user.dateOfBirth || '',
+          gender: user.gender || ''
         });
+      }
+    });
+
+    // Listen for successful profile updates
+    this.actions$.pipe(
+      ofType(AuthActions.updateUserProfileSuccess),
+      take(1)
+    ).subscribe(() => {
+      this.showSuccessMessage = true;
+      setTimeout(() => {
+        this.showSuccessMessage = false;
+      }, 5000);
+    });
+  }
+
+  setActiveTab(tab: 'user-info' | 'billing-shipping'): void {
+    this.activeTab = tab;
+    this.showSuccessMessage = false; // Hide success message when switching tabs
+  }
+
+  updateUserInfo(): void {
+    if (this.userInfoForm.valid) {
+      const updatedUser = {
+        ...this.userInfoForm.value
+      };
+      this.store.dispatch(AuthActions.updateUserProfile({ user: updatedUser }));
+    } else {
+      // Mark all fields as touched to show validation errors
+      Object.keys(this.userInfoForm.controls).forEach(key => {
+        this.userInfoForm.get(key)?.markAsTouched();
+      });
     }
+  }
 
-    ngOnInit(): void {
-        // Load user profile data
-        this.store.dispatch(AuthActions.loadUserProfile());
+  addNewAddress(): void {
+    // TODO: Implement add address modal/form
+    console.log('Add new address');
+  }
 
-        // Subscribe to user data and populate form
-        this.currentUser$.subscribe(user => {
-            if (user) {
-                this.userInfoForm.patchValue({
-                    firstName: user.firstName,
-                    lastName: user.lastName,
-                    email: user.email,
-                    phone: user.phone || '',
-                    dateOfBirth: user.dateOfBirth || '',
-                    gender: user.gender || ''
-                });
-            }
-        });
-
-        // Listen for successful profile updates
-        this.actions$.pipe(
-            ofType(AuthActions.updateUserProfileSuccess),
-            take(1)
-        ).subscribe(() => {
-            this.showSuccessMessage = true;
-            setTimeout(() => {
-                this.showSuccessMessage = false;
-            }, 5000);
-        });
-    }
-
-    setActiveTab(tab: 'user-info' | 'billing-shipping'): void {
-        this.activeTab = tab;
-        this.showSuccessMessage = false; // Hide success message when switching tabs
-    }
-
-    updateUserInfo(): void {
-        if (this.userInfoForm.valid) {
-            const updatedUser = {
-                ...this.userInfoForm.value
-            };
-            this.store.dispatch(AuthActions.updateUserProfile({ user: updatedUser }));
-        } else {
-            // Mark all fields as touched to show validation errors
-            Object.keys(this.userInfoForm.controls).forEach(key => {
-                this.userInfoForm.get(key)?.markAsTouched();
-            });
-        }
-    }
-
-    addNewAddress(): void {
-        // TODO: Implement add address modal/form
-        console.log('Add new address');
-    }
-
-    addNewPaymentMethod(): void {
-        // TODO: Implement add payment method modal/form
-        console.log('Add new payment method');
-    }
+  addNewPaymentMethod(): void {
+    // TODO: Implement add payment method modal/form
+    console.log('Add new payment method');
+  }
 } 

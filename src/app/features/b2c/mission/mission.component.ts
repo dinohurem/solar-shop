@@ -189,7 +189,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
       <section class="py-16 lg:py-24">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <p class="text-xl lg:text-2xl text-[#222529] leading-relaxed font-['DM_Sans']">
-            Together, we can build a future where comfort, quality, efficiency and respect for the environment go hand in hand. By choosing SolarShop, you choose to contribute to a healthier, more balanced and conscious world.
+            {{ 'mission.callToAction' | translate }}
           </p>
         </div>
       </section>
@@ -279,7 +279,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
               class="flex-1 px-4 py-3 border border-[#EEE8D0] rounded-lg bg-white text-sm focus:ring-2 focus:ring-[#0ACF83] focus:border-transparent font-['DM_Sans'] placeholder-gray-400"
             >
             <button class="bg-[#0ACF83] text-white px-5 py-3 rounded-lg font-semibold hover:bg-[#09b574] transition-colors font-['DM_Sans']">
-              {{ 'common.subscribe' | translate }}
+              {{ 'mission.subscribe' | translate }}
             </button>
           </div>
         </div>

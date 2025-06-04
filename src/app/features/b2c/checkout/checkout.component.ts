@@ -19,7 +19,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
       <div class="bg-white border-b border-gray-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <h1 class="text-3xl font-bold text-gray-900 font-['Poppins']">{{ 'checkout.title' | translate }}</h1>
-          <p class="mt-2 text-gray-600 font-['DM_Sans']">Complete your order</p>
+          <p class="mt-2 text-gray-600 font-['DM_Sans']">{{ 'checkout.completeOrder' | translate }}</p>
         </div>
       </div>
 

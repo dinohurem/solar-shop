@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { SustainabilityActions } from './store/sustainability.actions';
 import { selectFeatures } from './store/sustainability.selectors';
 import { Router } from '@angular/router';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 export interface SustainabilityFeature {
   id: string;
@@ -17,7 +18,7 @@ export interface SustainabilityFeature {
 @Component({
   selector: 'app-sustainability',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslatePipe],
   template: `
     <!-- Sustainability Section -->
     <section class="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-[#F8F9FA] to-[#E8F5E8]">
@@ -47,10 +48,10 @@ export interface SustainabilityFeature {
                   </svg>
                 </div>
                 <h3 class="text-lg font-bold text-[#222529] mb-3 font-['Poppins']">
-                  Energy Efficiency Suggestions
+                  {{ 'sustainability.energyEfficiencySuggestions' | translate }}
                 </h3>
                 <p class="text-[#324053] text-sm leading-relaxed font-['DM_Sans']">
-                  Guides for thermal insulation, consumption reduction, and renewable energy systems.
+                  {{ 'sustainability.energyEfficiencySuggestionsText' | translate }}
                 </p>
               </div>
 
@@ -62,10 +63,10 @@ export interface SustainabilityFeature {
                   </svg>
                 </div>
                 <h3 class="text-lg font-bold text-[#222529] mb-3 font-['Poppins']">
-                  Green Certifications & Standards
+                  {{ 'sustainability.greenCertifications' | translate }}
                 </h3>
                 <p class="text-[#324053] text-sm leading-relaxed font-['DM_Sans']">
-                  Overview of certifications (LEED, ISO 14001, etc.)
+                  {{ 'sustainability.greenCertificationsText' | translate }}
                 </p>
               </div>
 
@@ -77,10 +78,10 @@ export interface SustainabilityFeature {
                   </svg>
                 </div>
                 <h3 class="text-lg font-bold text-[#222529] mb-3 font-['Poppins']">
-                  Reduced Environmental Impact Products
+                  {{ 'sustainability.reducedEnvironmentalImpact' | translate }}
                 </h3>
                 <p class="text-[#324053] text-sm leading-relaxed font-['DM_Sans']">
-                  Selection of solutions focused on sustainability and recyclability.
+                  {{ 'sustainability.reducedEnvironmentalImpactText' | translate }}
                 </p>
               </div>
 
@@ -92,10 +93,10 @@ export interface SustainabilityFeature {
                   </svg>
                 </div>
                 <h3 class="text-lg font-bold text-[#222529] mb-3 font-['Poppins']">
-                  Sustainable Materials
+                  {{ 'sustainability.sustainableMaterials' | translate }}
                 </h3>
                 <p class="text-[#324053] text-sm leading-relaxed font-['DM_Sans']">
-                  Certified low-impact products.
+                  {{ 'sustainability.sustainableMaterialsText' | translate }}
                 </p>
               </div>
             </div>
@@ -105,7 +106,7 @@ export interface SustainabilityFeature {
               <button 
                 (click)="navigateToSustainability()" 
                 class="bg-[#0ACF83] text-white font-semibold text-lg px-8 py-4 rounded-xl hover:bg-[#09b574] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 font-['DM_Sans']">
-                Towards Sustainability
+                {{ 'sustainability.towardsSustainability' | translate }}
               </button>
             </div>
           </div>

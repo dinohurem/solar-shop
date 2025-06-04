@@ -18,6 +18,7 @@ import {
 } from './store/product-list.selectors';
 import { AddToCartButtonComponent } from '../../cart/components/add-to-cart-button/add-to-cart-button.component';
 import * as CartActions from '../../cart/store/cart.actions';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 export interface Product {
   id: string;
@@ -49,14 +50,14 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
 @Component({
   selector: 'app-product-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, AddToCartButtonComponent],
+  imports: [CommonModule, RouterModule, FormsModule, AddToCartButtonComponent, TranslatePipe],
   template: `
     <div class="min-h-screen bg-gray-50">
       <!-- Header -->
       <div class="bg-white border-b border-gray-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <h1 class="text-3xl font-bold text-gray-900 font-['Poppins']">Products</h1>
-          <p class="mt-2 text-gray-600 font-['DM_Sans']">Discover our sustainable building solutions</p>
+          <h1 class="text-3xl font-bold text-gray-900 font-['Poppins']">{{ 'productList.title' | translate }}</h1>
+          <p class="mt-2 text-gray-600 font-['DM_Sans']">{{ 'productList.subtitle' | translate }}</p>
         </div>
       </div>
 
@@ -65,11 +66,11 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
           <!-- Filters Sidebar -->
           <div class="lg:w-1/4">
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-8">
-              <h3 class="text-lg font-semibold text-gray-900 mb-6 font-['Poppins']">Filters</h3>
+              <h3 class="text-lg font-semibold text-gray-900 mb-6 font-['Poppins']">{{ 'productList.filters' | translate }}</h3>
               
               <!-- Categories Filter -->
               <div class="mb-6">
-                <h4 class="text-sm font-medium text-gray-900 mb-3 font-['DM_Sans']">Categories</h4>
+                <h4 class="text-sm font-medium text-gray-900 mb-3 font-['DM_Sans']">{{ 'productList.categories' | translate }}</h4>
                 <div class="space-y-2">
                   <label *ngFor="let category of categories$ | async" class="flex items-center">
                     <input 
@@ -86,12 +87,12 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
 
               <!-- Price Range Filter -->
               <div class="mb-6">
-                <h4 class="text-sm font-medium text-gray-900 mb-3 font-['DM_Sans']">Price Range</h4>
+                <h4 class="text-sm font-medium text-gray-900 mb-3 font-['DM_Sans']">{{ 'productList.priceRange' | translate }}</h4>
                 <div class="space-y-3">
                   <div class="flex items-center space-x-2">
                     <input 
                       type="number" 
-                      placeholder="Min"
+                      [placeholder]="'productList.min' | translate"
                       [value]="(filters$ | async)?.priceRange?.min || 0"
                       (input)="onPriceRangeChange('min', $event)"
                       class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-[#0ACF83] focus:border-[#0ACF83]"
@@ -99,7 +100,7 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
                     <span class="text-gray-500">-</span>
                     <input 
                       type="number" 
-                      placeholder="Max"
+                      [placeholder]="'productList.max' | translate"
                       [value]="(filters$ | async)?.priceRange?.max || 0"
                       (input)="onPriceRangeChange('max', $event)"
                       class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-[#0ACF83] focus:border-[#0ACF83]"
@@ -110,7 +111,7 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
 
               <!-- Certificates Filter -->
               <div class="mb-6">
-                <h4 class="text-sm font-medium text-gray-900 mb-3 font-['DM_Sans']">Certificates</h4>
+                <h4 class="text-sm font-medium text-gray-900 mb-3 font-['DM_Sans']">{{ 'productList.certificates' | translate }}</h4>
                 <div class="space-y-2">
                   <label *ngFor="let certificate of certificates$ | async" class="flex items-center">
                     <input 
@@ -127,7 +128,7 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
 
               <!-- Manufacturer Filter -->
               <div class="mb-6">
-                <h4 class="text-sm font-medium text-gray-900 mb-3 font-['DM_Sans']">Manufacturer</h4>
+                <h4 class="text-sm font-medium text-gray-900 mb-3 font-['DM_Sans']">{{ 'productList.manufacturer' | translate }}</h4>
                 <div class="space-y-2">
                   <label *ngFor="let manufacturer of manufacturers$ | async" class="flex items-center">
                     <input 
@@ -147,7 +148,7 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
                 (click)="clearFilters()"
                 class="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 transition-colors font-['DM_Sans']"
               >
-                Clear All Filters
+                {{ 'productList.clearAllFilters' | translate }}
               </button>
             </div>
           </div>
@@ -157,21 +158,21 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
             <!-- Sort Options -->
             <div class="flex justify-between items-center mb-6">
               <p class="text-sm text-gray-600 font-['DM_Sans']">
-                {{ (filteredProducts$ | async)?.length || 0 }} products found
+                {{ 'productList.productsFound' | translate:{ count: (filteredProducts$ | async)?.length || 0 } }}
               </p>
               <div class="flex items-center space-x-2">
-                <label class="text-sm font-medium text-gray-700 font-['DM_Sans']">Sort by:</label>
+                <label class="text-sm font-medium text-gray-700 font-['DM_Sans']">{{ 'productList.sortBy' | translate }}</label>
                 <select 
                   [value]="sortOption$ | async"
                   (change)="onSortChange($event)"
                   class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-[#0ACF83] focus:border-[#0ACF83] font-['DM_Sans']"
                 >
-                  <option value="featured">Featured</option>
-                  <option value="newest">Newest Arrivals</option>
-                  <option value="name-asc">Name A - Z</option>
-                  <option value="name-desc">Name Z - A</option>
-                  <option value="price-low">Price Low to High</option>
-                  <option value="price-high">Price High to Low</option>
+                  <option value="featured">{{ 'productList.featured' | translate }}</option>
+                  <option value="newest">{{ 'productList.newestArrivals' | translate }}</option>
+                  <option value="name-asc">{{ 'productList.nameAZ' | translate }}</option>
+                  <option value="name-desc">{{ 'productList.nameZA' | translate }}</option>
+                  <option value="price-low">{{ 'productList.priceLowHigh' | translate }}</option>
+                  <option value="price-high">{{ 'productList.priceHighLow' | translate }}</option>
                 </select>
               </div>
             </div>
@@ -233,7 +234,7 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
                         </svg>
                       </div>
                     </div>
-                    <span class="text-xs text-gray-500 ml-2 font-['DM_Sans']">({{ product.reviewCount }} reviews)</span>
+                    <span class="text-xs text-gray-500 ml-2 font-['DM_Sans']">({{ product.reviewCount }} {{ 'productList.reviews' | translate }})</span>
                   </div>
 
                   <!-- Price and Add to Cart -->
@@ -252,7 +253,7 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
                     <app-add-to-cart-button 
                       [productId]="product.id" 
                       [quantity]="1" 
-                      buttonText="Add to Cart"
+                      [buttonText]="'productList.addToCart' | translate"
                       size="sm"
                       [fullWidth]="true"
                       (click)="$event.stopPropagation()">
@@ -277,8 +278,8 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m13-8V4a1 1 0 00-1-1H7a1 1 0 00-1 1v1m8 0V4.5"/>
                 </svg>
               </div>
-              <h3 class="text-lg font-medium text-gray-900 mb-2 font-['Poppins']">No products found</h3>
-              <p class="text-gray-600 font-['DM_Sans']">Try adjusting your filters to see more results.</p>
+              <h3 class="text-lg font-medium text-gray-900 mb-2 font-['Poppins']">{{ 'productList.noProductsFound' | translate }}</h3>
+              <p class="text-gray-600 font-['DM_Sans']">{{ 'productList.adjustFilters' | translate }}</p>
             </div>
           </div>
         </div>

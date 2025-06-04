@@ -2,12 +2,13 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Product } from '../../../product-list/product-list.component';
+import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
 
 @Component({
-    selector: 'app-product-info',
-    standalone: true,
-    imports: [CommonModule, FormsModule],
-    template: `
+  selector: 'app-product-info',
+  standalone: true,
+  imports: [CommonModule, FormsModule, TranslatePipe],
+  template: `
     <div class="space-y-6">
       <!-- Product Title and Rating -->
       <div>
@@ -31,13 +32,13 @@ import { Product } from '../../../product-list/product-list.component';
           </div>
           <span class="mx-2 text-gray-300">|</span>
           <a href="#reviews" class="text-sm text-[#0ACF83] hover:text-[#09b574] font-['DM_Sans']">
-            {{ product.reviewCount }} reviews
+            {{ product.reviewCount }} {{ 'productList.reviews' | translate }}
           </a>
         </div>
 
         <!-- Availability -->
         <div class="flex items-center mb-6">
-          <span class="text-sm font-medium text-gray-700 mr-2 font-['DM_Sans']">Availability:</span>
+          <span class="text-sm font-medium text-gray-700 mr-2 font-['DM_Sans']">{{ 'productDetails.availability' | translate }}:</span>
           <span 
             class="px-2 py-1 rounded-full text-xs font-semibold"
             [ngClass]="{
@@ -71,13 +72,13 @@ import { Product } from '../../../product-list/product-list.component';
           </span>
         </div>
         <p class="text-sm text-gray-600 font-['DM_Sans']">
-          Price includes VAT. Free shipping on orders over €500.
+          {{ 'productDetails.priceIncludesVat' | translate }}
         </p>
       </div>
 
       <!-- Product Description -->
       <div class="border-t border-gray-200 pt-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-3 font-['Poppins']">Description</h3>
+        <h3 class="text-lg font-semibold text-gray-900 mb-3 font-['Poppins']">{{ 'productDetails.description' | translate }}</h3>
         <p class="text-gray-700 leading-relaxed font-['DM_Sans']">
           {{ product.description }}
         </p>
@@ -85,18 +86,18 @@ import { Product } from '../../../product-list/product-list.component';
 
       <!-- Product Details -->
       <div class="border-t border-gray-200 pt-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4 font-['Poppins']">Product Details</h3>
+        <h3 class="text-lg font-semibold text-gray-900 mb-4 font-['Poppins']">{{ 'productDetails.productDetails' | translate }}</h3>
         <dl class="grid grid-cols-1 gap-4">
           <div class="flex justify-between">
-            <dt class="text-sm font-medium text-gray-500 font-['DM_Sans']">Category:</dt>
+            <dt class="text-sm font-medium text-gray-500 font-['DM_Sans']">{{ 'productDetails.category' | translate }}:</dt>
             <dd class="text-sm text-gray-900 font-['DM_Sans']">{{ product.category }}</dd>
           </div>
           <div class="flex justify-between">
-            <dt class="text-sm font-medium text-gray-500 font-['DM_Sans']">Manufacturer:</dt>
+            <dt class="text-sm font-medium text-gray-500 font-['DM_Sans']">{{ 'productDetails.manufacturer' | translate }}:</dt>
             <dd class="text-sm text-gray-900 font-['DM_Sans']">{{ product.manufacturer }}</dd>
           </div>
           <div class="flex justify-between">
-            <dt class="text-sm font-medium text-gray-500 font-['DM_Sans']">SKU:</dt>
+            <dt class="text-sm font-medium text-gray-500 font-['DM_Sans']">{{ 'productDetails.sku' | translate }}:</dt>
             <dd class="text-sm text-gray-900 font-['DM_Sans']">{{ product.id.toUpperCase() }}</dd>
           </div>
         </dl>
@@ -104,7 +105,7 @@ import { Product } from '../../../product-list/product-list.component';
 
       <!-- Certificates -->
       <div class="border-t border-gray-200 pt-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4 font-['Poppins']">Certifications</h3>
+        <h3 class="text-lg font-semibold text-gray-900 mb-4 font-['Poppins']">{{ 'productDetails.certifications' | translate }}</h3>
         <div class="flex flex-wrap gap-2">
           <span 
             *ngFor="let certificate of product.certificates"
@@ -119,7 +120,7 @@ import { Product } from '../../../product-list/product-list.component';
       <div class="border-t border-gray-200 pt-6">
         <div class="flex items-center space-x-4 mb-6">
           <div class="flex items-center">
-            <label class="text-sm font-medium text-gray-700 mr-3 font-['DM_Sans']">Quantity:</label>
+            <label class="text-sm font-medium text-gray-700 mr-3 font-['DM_Sans']">{{ 'productDetails.quantity' | translate }}:</label>
             <div class="flex items-center border border-gray-300 rounded-md">
               <button 
                 (click)="decreaseQuantity()"
@@ -156,7 +157,7 @@ import { Product } from '../../../product-list/product-list.component';
             <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 11-4 0v-6m4 0V9a2 2 0 10-4 0v4.01"/>
             </svg>
-            {{ product.availability === 'out-of-stock' ? 'Out of Stock' : 'Add to Cart' }}
+            {{ product.availability === 'out-of-stock' ? ('productDetails.outOfStock' | translate) : ('productDetails.addToCart' | translate) }}
           </button>
           
           <button 
@@ -166,7 +167,7 @@ import { Product } from '../../../product-list/product-list.component';
             <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
             </svg>
-            Add to Wishlist
+            {{ 'productDetails.addToWishlist' | translate }}
           </button>
         </div>
 
@@ -177,68 +178,68 @@ import { Product } from '../../../product-list/product-list.component';
               <svg class="w-4 h-4 mr-2 text-[#0ACF83]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
               </svg>
-              <span class="font-['DM_Sans']">Free shipping</span>
+              <span class="font-['DM_Sans']">{{ 'productDetails.freeShipping' | translate }}</span>
             </div>
             <div class="flex items-center">
               <svg class="w-4 h-4 mr-2 text-[#0ACF83]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
-              <span class="font-['DM_Sans']">2-year warranty</span>
+              <span class="font-['DM_Sans']">{{ 'productDetails.twoYearWarranty' | translate }}</span>
             </div>
             <div class="flex items-center">
               <svg class="w-4 h-4 mr-2 text-[#0ACF83]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
               </svg>
-              <span class="font-['DM_Sans']">Easy returns</span>
+              <span class="font-['DM_Sans']">{{ 'productDetails.easyReturns' | translate }}</span>
             </div>
           </div>
         </div>
       </div>
     </div>
   `,
-    styles: [`
+  styles: [`
     :host {
       display: block;
     }
   `]
 })
 export class ProductInfoComponent {
-    @Input() product!: Product;
+  @Input() product!: Product;
 
-    quantity: number = 1;
+  quantity: number = 1;
 
-    getStarArray(rating: number): number[] {
-        return Array(5).fill(0).map((_, i) => i < Math.floor(rating) ? 1 : 0);
+  getStarArray(rating: number): number[] {
+    return Array(5).fill(0).map((_, i) => i < Math.floor(rating) ? 1 : 0);
+  }
+
+  getAvailabilityText(availability: string): string {
+    switch (availability) {
+      case 'available': return 'productDetails.inStock';
+      case 'limited': return 'productDetails.limitedStock';
+      case 'out-of-stock': return 'productDetails.outOfStock';
+      default: return '';
     }
+  }
 
-    getAvailabilityText(availability: string): string {
-        switch (availability) {
-            case 'available': return 'In Stock';
-            case 'limited': return 'Limited Stock';
-            case 'out-of-stock': return 'Out of Stock';
-            default: return '';
-        }
+  increaseQuantity(): void {
+    if (this.quantity < 99) {
+      this.quantity++;
     }
+  }
 
-    increaseQuantity(): void {
-        if (this.quantity < 99) {
-            this.quantity++;
-        }
+  decreaseQuantity(): void {
+    if (this.quantity > 1) {
+      this.quantity--;
     }
+  }
 
-    decreaseQuantity(): void {
-        if (this.quantity > 1) {
-            this.quantity--;
-        }
-    }
+  addToCart(): void {
+    // TODO: Implement add to cart functionality
+    console.log('Add to cart:', this.product, 'Quantity:', this.quantity);
+  }
 
-    addToCart(): void {
-        // TODO: Implement add to cart functionality
-        console.log('Add to cart:', this.product, 'Quantity:', this.quantity);
-    }
-
-    addToWishlist(): void {
-        // TODO: Implement add to wishlist functionality
-        console.log('Add to wishlist:', this.product);
-    }
+  addToWishlist(): void {
+    // TODO: Implement add to wishlist functionality
+    console.log('Add to wishlist:', this.product);
+  }
 } 

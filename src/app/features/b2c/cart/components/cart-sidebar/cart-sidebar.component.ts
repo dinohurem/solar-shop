@@ -6,11 +6,12 @@ import { Store } from '@ngrx/store';
 import { Cart, CartItem } from '../../../../../shared/models/cart.model';
 import * as CartActions from '../../store/cart.actions';
 import * as CartSelectors from '../../store/cart.selectors';
+import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-cart-sidebar',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslatePipe],
   template: `
     <!-- Cart Overlay -->
     <div 
@@ -28,7 +29,7 @@ import * as CartSelectors from '../../store/cart.selectors';
       >
         <!-- Cart Header -->
         <div class="flex items-center justify-between p-4 border-b border-gray-200">
-          <h2 class="text-lg font-semibold text-gray-900">Your cart</h2>
+          <h2 class="text-lg font-semibold text-gray-900">{{ 'cart.yourCart' | translate }}</h2>
           <button 
             (click)="closeCart()"
             class="p-2 text-gray-400 hover:text-gray-600 transition-colors"
@@ -48,18 +49,17 @@ import * as CartSelectors from '../../store/cart.selectors';
             class="flex-1 flex flex-col items-center justify-center p-8 text-center"
           >
             <div class="w-24 h-24 mb-6 text-gray-300">
-              <svg fill="currentColor" viewBox="0 0 24 24">
-                <path d="M7 4V2C7 1.45 7.45 1 8 1H16C16.55 1 17 1.45 17 2V4H20C20.55 4 21 4.45 21 5S20.55 6 20 6H19V19C19 20.1 18.1 21 17 21H7C5.9 21 5 20.1 5 19V6H4C3.45 6 3 5.55 3 5S3.45 4 4 4H7ZM9 3V4H15V3H9ZM7 6V19H17V6H7Z"/>
-                <path d="M9 8V17H11V8H9ZM13 8V17H15V8H13Z"/>
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 11-4 0v-6m4 0V9a2 2 0 10-4 0v4.01"/>
               </svg>
             </div>
-            <h3 class="text-xl font-medium text-gray-900 mb-2">Your cart is empty!</h3>
-            <p class="text-gray-500 mb-6">Add some products to start shopping.</p>
+            <h3 class="text-xl font-medium text-gray-900 mb-2">{{ 'cart.empty' | translate }}</h3>
+            <p class="text-gray-500 mb-6">{{ 'cart.emptyText' | translate }}</p>
             <button 
               (click)="closeCart()"
               class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
-              Continue shopping
+              {{ 'cart.continueShopping' | translate }}
             </button>
           </div>
 
@@ -132,7 +132,7 @@ import * as CartSelectors from '../../store/cart.selectors';
                         (click)="removeItem(item.id)"
                         class="text-red-500 hover:text-red-700 text-sm"
                       >
-                        Remove
+                        {{ 'cart.remove' | translate }}
                       </button>
                     </div>
                   </div>
@@ -141,7 +141,7 @@ import * as CartSelectors from '../../store/cart.selectors';
 
               <!-- Coupon Section -->
               <div class="mt-4 p-3 bg-gray-50 rounded-lg flex-shrink-0">
-                <h4 class="text-sm font-medium text-gray-900 mb-3">Discount code</h4>
+                <h4 class="text-sm font-medium text-gray-900 mb-3">{{ 'cart.discountCode' | translate }}</h4>
                 
                 <!-- Applied Coupons -->
                 <div *ngIf="appliedCoupons$ | async as coupons" class="mb-3">
@@ -164,7 +164,7 @@ import * as CartSelectors from '../../store/cart.selectors';
                   <input 
                     type="text"
                     [(ngModel)]="couponCode"
-                    placeholder="Enter discount code"
+                    [placeholder]="'cart.enterDiscountCode' | translate"
                     class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     [disabled]="(isCouponLoading$ | async) || false"
                   >
@@ -173,7 +173,7 @@ import * as CartSelectors from '../../store/cart.selectors';
                     [disabled]="isApplyButtonDisabled || (isCouponLoading$ | async)"
                     class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <span *ngIf="!(isCouponLoading$ | async)">Apply</span>
+                    <span *ngIf="!(isCouponLoading$ | async)">{{ 'cart.apply' | translate }}</span>
                     <span *ngIf="isCouponLoading$ | async">...</span>
                   </button>
                 </div>
@@ -192,17 +192,17 @@ import * as CartSelectors from '../../store/cart.selectors';
             <div class="border-t border-gray-200 p-4 flex-shrink-0">
               <div class="space-y-2 text-sm">
                 <div class="flex justify-between">
-                  <span class="text-gray-600">Subtotal</span>
+                  <span class="text-gray-600">{{ 'cart.subtotal' | translate }}</span>
                   <span>{{ (cartSummary$ | async)?.subtotal | currency:'EUR':'symbol':'1.2-2' }}</span>
                 </div>
                 <div class="flex justify-between">
-                  <span class="text-gray-600">Tax</span>
+                  <span class="text-gray-600">{{ 'cart.tax' | translate }}</span>
                   <span>{{ (cartSummary$ | async)?.tax | currency:'EUR':'symbol':'1.2-2' }}</span>
                 </div>
                 <div class="flex justify-between">
-                  <span class="text-gray-600">Shipping</span>
+                  <span class="text-gray-600">{{ 'cart.shipping' | translate }}</span>
                      <span>
-                       <span *ngIf="(cartSummary$ | async)?.shipping === 0; else shippingCost">Free</span>
+                       <span *ngIf="(cartSummary$ | async)?.shipping === 0; else shippingCost">{{ 'cart.freeShipping' | translate }}</span>
                        <ng-template #shippingCost>{{ (cartSummary$ | async)?.shipping | currency:'EUR':'symbol':'1.2-2' }}</ng-template>
                      </span>
                 </div>
@@ -210,11 +210,11 @@ import * as CartSelectors from '../../store/cart.selectors';
                   *ngIf="(cartSummary$ | async)?.discount && (cartSummary$ | async)!.discount > 0"
                   class="flex justify-between text-green-600"
                 >
-                  <span>Discount</span>
+                  <span>{{ 'cart.discount' | translate }}</span>
                   <span>-{{ (cartSummary$ | async)?.discount | currency:'EUR':'symbol':'1.2-2' }}</span>
                 </div>
                 <div class="flex justify-between font-semibold text-lg border-t pt-2">
-                  <span>Total</span>
+                  <span>{{ 'cart.total' | translate }}</span>
                   <span>{{ (cartSummary$ | async)?.total | currency:'EUR':'symbol':'1.2-2' }}</span>
                 </div>
               </div>
@@ -225,7 +225,7 @@ import * as CartSelectors from '../../store/cart.selectors';
                 class="mt-4 p-3 bg-blue-50 rounded-lg"
               >
                 <div class="text-sm text-blue-800 mb-2">
-                  Add {{ (cartSummary$ | async)?.freeShippingRemaining | currency:'EUR':'symbol':'1.2-2' }} for free shipping!
+                  {{ 'cart.freeShippingProgress' | translate:{ amount: (cartSummary$ | async)?.freeShippingRemaining || 0 } }}
                 </div>
                 <div class="w-full bg-blue-200 rounded-full h-2">
                   <div 
@@ -241,7 +241,7 @@ import * as CartSelectors from '../../store/cart.selectors';
                   (click)="proceedToCheckout()"
                   class="w-full px-6 py-4 bg-[#0ACF83] text-white rounded-lg hover:bg-[#09b574] transition-colors font-semibold text-lg font-['DM_Sans']"
                 >
-                  Checkout
+                  {{ 'cart.checkout' | translate }}
                 </button>
               </div>
             </div>

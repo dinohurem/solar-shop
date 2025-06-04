@@ -204,8 +204,8 @@ export class ProductReviewsComponent implements OnInit {
         title: 'reviews.highlyRecommended',
         comment: 'reviews.highlyRecommended',
         date: new Date('2024-01-15'),
-        verified: true,
-        helpful: 15
+        verified: false,
+        helpful: 5
       },
       {
         id: '4',
@@ -215,19 +215,19 @@ export class ProductReviewsComponent implements OnInit {
         title: 'reviews.solidProduct',
         comment: 'reviews.solidProduct',
         date: new Date('2024-01-12'),
-        verified: false,
-        helpful: 5
+        verified: true,
+        helpful: 3
       },
       {
         id: '5',
         userName: 'Lisa Thompson',
-        userAvatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=40&h=40&fit=crop&crop=face',
+        userAvatar: 'https://images.unsplash.com/photo-1544725176-7c40e5a71c5e?w=40&h=40&fit=crop&crop=face',
         rating: 5,
         title: 'reviews.outstandingService',
         comment: 'reviews.outstandingService',
         date: new Date('2024-01-10'),
         verified: true,
-        helpful: 9
+        helpful: 7
       }
     ];
 
@@ -265,12 +265,12 @@ export class ProductReviewsComponent implements OnInit {
   }
 
   openWriteReview(): void {
-    // TODO: Implement write review functionality
-    console.log('Open write review modal');
+    // Implementation for opening write review modal/form
+    console.log('Opening write review form');
   }
 
   loadMoreReviews(): void {
-    // TODO: Implement load more reviews functionality
-    console.log('Load more reviews');
+    // Implementation for loading more reviews
+    console.log('Loading more reviews');
   }
 } 

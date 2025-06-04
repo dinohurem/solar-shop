@@ -1,12 +1,13 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Product } from '../../../product-list/product-list.component';
+import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
 
 @Component({
-    selector: 'app-product-photos',
-    standalone: true,
-    imports: [CommonModule],
-    template: `
+  selector: 'app-product-photos',
+  standalone: true,
+  imports: [CommonModule, TranslatePipe],
+  template: `
     <div class="space-y-4">
       <!-- Main Image -->
       <div class="aspect-square overflow-hidden rounded-lg bg-gray-100">
@@ -47,43 +48,43 @@ import { Product } from '../../../product-list/product-list.component';
         <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
         </svg>
-        Zoom Image
+        {{ 'productDetails.zoomImage' | translate }}
       </button>
     </div>
   `,
-    styles: [`
+  styles: [`
     :host {
       display: block;
     }
   `]
 })
 export class ProductPhotosComponent implements OnInit {
-    @Input() product!: Product;
+  @Input() product!: Product;
 
-    selectedImage: string = '';
-    productImages: string[] = [];
+  selectedImage: string = '';
+  productImages: string[] = [];
 
-    ngOnInit(): void {
-        // Generate multiple images for the product (in a real app, these would come from the product data)
-        this.productImages = [
-            this.product.imageUrl,
-            this.product.imageUrl.replace('w=500&h=500', 'w=500&h=500&sat=-100'), // B&W version
-            this.product.imageUrl.replace('w=500&h=500', 'w=500&h=500&sepia=100'), // Sepia version
-            this.product.imageUrl.replace('w=500&h=500', 'w=500&h=500&hue=180'), // Hue shifted version
-        ];
-        this.selectedImage = this.productImages[0];
-    }
+  ngOnInit(): void {
+    // Generate multiple images for the product (in a real app, these would come from the product data)
+    this.productImages = [
+      this.product.imageUrl,
+      this.product.imageUrl.replace('w=500&h=500', 'w=500&h=500&sat=-100'), // B&W version
+      this.product.imageUrl.replace('w=500&h=500', 'w=500&h=500&sepia=100'), // Sepia version
+      this.product.imageUrl.replace('w=500&h=500', 'w=500&h=500&hue=180'), // Hue shifted version
+    ];
+    this.selectedImage = this.productImages[0];
+  }
 
-    selectImage(image: string): void {
-        this.selectedImage = image;
-    }
+  selectImage(image: string): void {
+    this.selectedImage = image;
+  }
 
-    getCurrentImageIndex(): number {
-        return this.productImages.indexOf(this.selectedImage);
-    }
+  getCurrentImageIndex(): number {
+    return this.productImages.indexOf(this.selectedImage);
+  }
 
-    openZoom(): void {
-        // TODO: Implement image zoom functionality
-        console.log('Open zoom for image:', this.selectedImage);
-    }
+  openZoom(): void {
+    // TODO: Implement image zoom functionality
+    console.log('Open zoom for image:', this.selectedImage);
+  }
 } 

@@ -5,14 +5,14 @@ import * as CartActions from '../../store/cart.actions';
 import * as CartSelectors from '../../store/cart.selectors';
 
 @Component({
-    selector: 'app-cart-button',
-    standalone: true,
-    imports: [CommonModule],
-    template: `
+  selector: 'app-cart-button',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
     <button 
       (click)="openCart()"
-      class="relative p-2 text-gray-600 hover:text-gray-900 transition-colors"
-      aria-label="Apri carrello"
+      class="relative p-2 text-gray-600 hover:text-green-600 transition-all duration-300 hover:scale-110 hover:bg-green-50 rounded-full"
+      aria-label="Open cart"
     >
       <!-- Cart Icon -->
       <svg 
@@ -38,18 +38,18 @@ import * as CartSelectors from '../../store/cart.selectors';
       </span>
     </button>
   `,
-    styles: [`
+  styles: [`
     :host {
       display: inline-block;
     }
   `]
 })
 export class CartButtonComponent {
-    private store = inject(Store);
+  private store = inject(Store);
 
-    cartItemCount$ = this.store.select(CartSelectors.selectCartItemCount);
+  cartItemCount$ = this.store.select(CartSelectors.selectCartItemCount);
 
-    openCart() {
-        this.store.dispatch(CartActions.openCart());
-    }
+  openCart() {
+    this.store.dispatch(CartActions.openCart());
+  }
 } 
