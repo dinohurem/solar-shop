@@ -7,17 +7,7 @@ import { OffersActions } from './store/offers.actions';
 import { selectOffers, selectIsLoading } from './store/offers.selectors';
 import { AddToCartButtonComponent } from '../cart/components/add-to-cart-button/add-to-cart-button.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
-
-export interface Offer {
-  id: string;
-  title: string;
-  originalPrice: number;
-  discountedPrice: number;
-  discountPercentage: number;
-  imageUrl: string;
-  description?: string;
-  category?: string;
-}
+import { Offer } from './services/offers.service';
 
 @Component({
   selector: 'app-offers-page',

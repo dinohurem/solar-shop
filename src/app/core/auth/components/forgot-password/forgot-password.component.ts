@@ -18,6 +18,7 @@ export class ForgotPasswordComponent {
   loading$: Observable<boolean>;
   resetPasswordRequestSent: boolean = false;
   resetPasswordMessage: string | null = null;
+  errorMessage: string | null = null;
 
   constructor(private store: Store<State>) {
     this.loading$ = this.store.pipe(select(state => state.auth.loading));
@@ -26,6 +27,7 @@ export class ForgotPasswordComponent {
   onResetPassword(email: string): void {
     this.resetPasswordRequestSent = true;
     this.resetPasswordMessage = "We have sent password reset instructions to your email. Please check your inbox.";
+    this.errorMessage = null; // Clear any previous errors
     this.store.dispatch(sendResetPasswordEmail({ email }));
   }
 }

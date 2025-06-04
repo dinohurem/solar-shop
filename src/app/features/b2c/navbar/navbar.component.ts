@@ -54,12 +54,7 @@ import { Subject, takeUntil } from 'rxjs';
               </svg>
             </div>
             <div class="flex items-center space-x-2" *ngIf="(currentLanguage$ | async) === 'hr'">
-              <div class="flex items-center space-x-1">
-                <div class="w-4 h-3 flex flex-col rounded-sm overflow-hidden">
-                  <div class="w-full h-1/3 bg-red-600"></div>
-                  <div class="w-full h-1/3 bg-white"></div>
-                  <div class="w-full h-1/3 bg-blue-600"></div>
-                </div>
+              <div class="flex items-center space-x-1">                
                 <span>{{ 'language.current' | translate }}</span>
               </div>
               <svg class="w-4 h-4 transform transition-transform duration-200 hover:rotate-180" fill="currentColor" viewBox="0 0 20 20">

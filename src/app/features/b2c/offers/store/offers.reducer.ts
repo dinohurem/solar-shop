@@ -7,17 +7,17 @@ export const offersReducer = createReducer(
     on(OffersActions.loadOffers, (state) => ({
         ...state,
         isLoading: true,
-        error: null,
+        error: null
     })),
     on(OffersActions.loadOffersSuccess, (state, { offers }) => ({
         ...state,
         offers,
         isLoading: false,
-        error: null,
+        error: null
     })),
     on(OffersActions.loadOffersFailure, (state, { error }) => ({
         ...state,
         isLoading: false,
-        error,
+        error
     }))
 ); 

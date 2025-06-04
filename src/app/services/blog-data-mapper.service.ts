@@ -21,13 +21,13 @@ export interface SupabaseBlogPost {
     is_featured: boolean;
     created_at: string;
     updated_at: string;
-    author?: {
+    profiles?: {
         first_name: string;
         last_name: string;
         full_name: string;
         avatar_url?: string;
     };
-    category?: {
+    categories?: {
         name: string;
         slug: string;
     };
@@ -71,7 +71,7 @@ export class BlogDataMapperService {
     }
 
     private mapSupabaseToAuthor(supabasePost: SupabaseBlogPost): BlogAuthor {
-        const profile = supabasePost.author;
+        const profile = supabasePost.profiles;
         return {
             id: supabasePost.author_id,
             name: profile?.full_name || `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || 'Anonymous',
@@ -83,7 +83,7 @@ export class BlogDataMapperService {
     }
 
     private mapSupabaseToCategory(supabasePost: SupabaseBlogPost): BlogCategory {
-        const category = supabasePost.category;
+        const category = supabasePost.categories;
         return {
             id: supabasePost.category_id || 'general',
             name: category?.name || 'General',

@@ -410,12 +410,12 @@ export class SupabaseService {
             .from('blog_posts')
             .select(`
                 *,
-                author:profiles!author_id (
+                profiles!author_id (
                     first_name,
                     last_name,
                     full_name
                 ),
-                category:categories!category_id (
+                categories!category_id (
                     name,
                     slug
                 )
@@ -436,8 +436,13 @@ export class SupabaseService {
         }
 
         const { data, error } = await query.order('published_at', { ascending: false });
-        if (error) throw error;
-        return data;
+
+        if (error) {
+            console.error('Error fetching blog posts:', error);
+            throw error;
+        }
+
+        return data || [];
     }
 
     async getBlogPostById(id: string) {
