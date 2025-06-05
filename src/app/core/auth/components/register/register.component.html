@@ -16,7 +16,7 @@
                 <div class="mb-8">
                     <p class="text-sm text-[#324053] font-['DM_Sans']">
                         Already have an account?
-                        <a class="text-[#0ACF83] hover:text-[#0ACF83]/80 font-medium ml-1" routerLink="/login">Sign
+                        <a class="text-solar-600 hover:text-solar-700 font-medium ml-1" routerLink="/login">Sign
                             in</a>
                     </p>
                 </div>
@@ -44,7 +44,7 @@
                                 First Name*
                             </label>
                             <input formControlName="firstName"
-                                class="w-full h-12 px-4 py-3 border rounded-lg text-sm text-[#222529] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0ACF83] focus:border-transparent transition-all duration-200 font-['DM_Sans']"
+                                class="w-full h-12 px-4 py-3 border rounded-lg text-sm text-[#222529] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-solar-500 focus:border-transparent transition-all duration-200 font-['DM_Sans']"
                                 [class.border-red-500]="isFieldInvalid('firstName')"
                                 [class.border-gray-300]="!isFieldInvalid('firstName')" id="firstName" type="text"
                                 placeholder="Enter your first name" autocomplete="given-name">
@@ -60,7 +60,7 @@
                                 Last Name*
                             </label>
                             <input formControlName="lastName"
-                                class="w-full h-12 px-4 py-3 border rounded-lg text-sm text-[#222529] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0ACF83] focus:border-transparent transition-all duration-200 font-['DM_Sans']"
+                                class="w-full h-12 px-4 py-3 border rounded-lg text-sm text-[#222529] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-solar-500 focus:border-transparent transition-all duration-200 font-['DM_Sans']"
                                 [class.border-red-500]="isFieldInvalid('lastName')"
                                 [class.border-gray-300]="!isFieldInvalid('lastName')" id="lastName" type="text"
                                 placeholder="Enter your last name" autocomplete="family-name">
@@ -76,7 +76,7 @@
                             Email address*
                         </label>
                         <input formControlName="email"
-                            class="w-full h-12 px-4 py-3 border rounded-lg text-sm text-[#222529] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0ACF83] focus:border-transparent transition-all duration-200 font-['DM_Sans']"
+                            class="w-full h-12 px-4 py-3 border rounded-lg text-sm text-[#222529] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-solar-500 focus:border-transparent transition-all duration-200 font-['DM_Sans']"
                             [class.border-red-500]="isFieldInvalid('email')"
                             [class.border-gray-300]="!isFieldInvalid('email')" id="email" type="email"
                             placeholder="Enter your email address" autocomplete="email">
@@ -91,7 +91,7 @@
                             Phone Number
                         </label>
                         <input formControlName="phoneNumber"
-                            class="w-full h-12 px-4 py-3 border rounded-lg text-sm text-[#222529] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0ACF83] focus:border-transparent transition-all duration-200 font-['DM_Sans']"
+                            class="w-full h-12 px-4 py-3 border rounded-lg text-sm text-[#222529] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-solar-500 focus:border-transparent transition-all duration-200 font-['DM_Sans']"
                             [class.border-red-500]="isFieldInvalid('phoneNumber')"
                             [class.border-gray-300]="!isFieldInvalid('phoneNumber')" id="phoneNumber" type="tel"
                             placeholder="Enter your phone number" autocomplete="tel">
@@ -106,7 +106,7 @@
                             Address
                         </label>
                         <textarea formControlName="address"
-                            class="w-full h-20 px-4 py-3 border rounded-lg text-sm text-[#222529] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0ACF83] focus:border-transparent transition-all duration-200 font-['DM_Sans'] resize-none"
+                            class="w-full h-20 px-4 py-3 border rounded-lg text-sm text-[#222529] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-solar-500 focus:border-transparent transition-all duration-200 font-['DM_Sans'] resize-none"
                             [class.border-red-500]="isFieldInvalid('address')"
                             [class.border-gray-300]="!isFieldInvalid('address')" id="address"
                             placeholder="Enter your full address" autocomplete="street-address"></textarea>
@@ -122,7 +122,7 @@
                         </label>
                         <div class="relative">
                             <input formControlName="password" [type]="showPassword ? 'text' : 'password'"
-                                class="w-full h-12 px-4 py-3 pr-12 border rounded-lg text-sm text-[#222529] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0ACF83] focus:border-transparent transition-all duration-200 font-['DM_Sans']"
+                                class="w-full h-12 px-4 py-3 pr-12 border rounded-lg text-sm text-[#222529] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-solar-500 focus:border-transparent transition-all duration-200 font-['DM_Sans']"
                                 [class.border-red-500]="isFieldInvalid('password')"
                                 [class.border-gray-300]="!isFieldInvalid('password')" id="password"
                                 placeholder="Create a password" autocomplete="new-password">
@@ -156,7 +156,7 @@
                         </label>
                         <div class="relative">
                             <input formControlName="confirmPassword" [type]="showConfirmPassword ? 'text' : 'password'"
-                                class="w-full h-12 px-4 py-3 pr-12 border rounded-lg text-sm text-[#222529] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0ACF83] focus:border-transparent transition-all duration-200 font-['DM_Sans']"
+                                class="w-full h-12 px-4 py-3 pr-12 border rounded-lg text-sm text-[#222529] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-solar-500 focus:border-transparent transition-all duration-200 font-['DM_Sans']"
                                 [class.border-red-500]="isFieldInvalid('confirmPassword')"
                                 [class.border-gray-300]="!isFieldInvalid('confirmPassword')" id="confirmPassword"
                                 placeholder="Confirm your password" autocomplete="new-password">
@@ -185,7 +185,7 @@
 
                     <!-- Register Button -->
                     <button type="submit" [disabled]="registerForm.invalid || (loading$ | async)"
-                        class="w-full h-12 bg-[#0ACF83] hover:bg-[#0ACF83]/90 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#0ACF83] focus:ring-offset-2 font-['DM_Sans'] flex items-center justify-center">
+                        class="w-full h-12 bg-solar-500 hover:bg-solar-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-solar-500 focus:ring-offset-2 font-['DM_Sans'] flex items-center justify-center">
 
                         <app-loader *ngIf="loading$ | async" class="w-5 h-5 mr-2"></app-loader>
 
@@ -198,7 +198,7 @@
 
         <!-- Background Image - Right side -->
         <div
-            class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-[#0ACF83] to-[#0ACF83]/80 items-center justify-center relative overflow-hidden">
+            class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-solar-500 to-solar-600 items-center justify-center relative overflow-hidden">
             <!-- Background Pattern -->
             <div class="absolute inset-0 opacity-10">
                 <svg class="w-full h-full" viewBox="0 0 100 100" fill="none">

@@ -18,7 +18,7 @@
                 <div class="mb-8">
                     <p class="text-sm text-[#324053] font-['DM_Sans']">
                         {{ 'auth.noAccount' | translate }}
-                        <a class="text-[#0ACF83] hover:text-[#0ACF83]/80 font-medium ml-1" routerLink="/register">{{
+                        <a class="text-solar-600 hover:text-solar-700 font-medium ml-1" routerLink="/register">{{
                             'auth.signUp' | translate }}</a>
                     </p>
                 </div>
@@ -43,7 +43,7 @@
                             {{ 'auth.email' | translate }}*
                         </label>
                         <input formControlName="email"
-                            class="w-full h-12 px-4 py-3 border rounded-lg text-sm text-[#222529] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0ACF83] focus:border-transparent transition-all duration-200 font-['DM_Sans']"
+                            class="w-full h-12 px-4 py-3 border rounded-lg text-sm text-[#222529] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-solar-500 focus:border-transparent transition-all duration-200 font-['DM_Sans']"
                             [class.border-red-500]="isFieldInvalid('email')"
                             [class.border-gray-300]="!isFieldInvalid('email')" id="email" type="email"
                             [placeholder]="'auth.email' | translate" autocomplete="email">
@@ -59,7 +59,7 @@
                         </label>
                         <div class="relative">
                             <input formControlName="password" [type]="showPassword ? 'text' : 'password'"
-                                class="w-full h-12 px-4 py-3 pr-12 border rounded-lg text-sm text-[#222529] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0ACF83] focus:border-transparent transition-all duration-200 font-['DM_Sans']"
+                                class="w-full h-12 px-4 py-3 pr-12 border rounded-lg text-sm text-[#222529] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-solar-500 focus:border-transparent transition-all duration-200 font-['DM_Sans']"
                                 [class.border-red-500]="isFieldInvalid('password')"
                                 [class.border-gray-300]="!isFieldInvalid('password')" id="password"
                                 [placeholder]="'auth.password' | translate" autocomplete="current-password">
@@ -87,7 +87,7 @@
 
                     <!-- Forgot Password -->
                     <div class="text-right">
-                        <a class="text-sm text-[#0ACF83] hover:text-[#0ACF83]/80 font-medium font-['DM_Sans']"
+                        <a class="text-sm text-solar-600 hover:text-solar-700 font-medium font-['DM_Sans']"
                             routerLink="/forgot-password">
                             {{ 'auth.forgotPassword' | translate }}
                         </a>
@@ -95,7 +95,7 @@
 
                     <!-- Login Button -->
                     <button type="submit" [disabled]="loginForm.invalid || (loading$ | async)"
-                        class="w-full h-12 bg-[#0ACF83] hover:bg-[#0ACF83]/90 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#0ACF83] focus:ring-offset-2 font-['DM_Sans'] flex items-center justify-center">
+                        class="w-full h-12 bg-solar-500 hover:bg-solar-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-solar-500 focus:ring-offset-2 font-['DM_Sans'] flex items-center justify-center">
 
                         <app-loader *ngIf="loading$ | async" class="w-5 h-5 mr-2"></app-loader>
 
@@ -106,7 +106,7 @@
                     <!-- Go to Home Link -->
                     <div class="text-center mt-4">
                         <a routerLink="/"
-                            class="text-sm text-[#324053] hover:text-[#0ACF83] font-medium font-['DM_Sans'] transition-colors duration-200 inline-flex items-center space-x-2">
+                            class="text-sm text-[#324053] hover:text-solar-600 font-medium font-['DM_Sans'] transition-colors duration-200 inline-flex items-center space-x-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -120,7 +120,7 @@
 
         <!-- Background Image - Right side -->
         <div
-            class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-[#0ACF83] to-[#0ACF83]/80 items-center justify-center relative overflow-hidden">
+            class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-solar-500 to-solar-600 items-center justify-center relative overflow-hidden">
             <!-- Background Pattern -->
             <div class="absolute inset-0 opacity-10">
                 <svg class="w-full h-full" viewBox="0 0 100 100" fill="none">

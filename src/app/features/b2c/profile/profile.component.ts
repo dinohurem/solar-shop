@@ -19,8 +19,8 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header -->
         <div class="mb-8">
-          <h1 class="text-3xl font-bold text-[#222529] font-['Poppins']">{{ 'profile.myProfile' | translate }}</h1>
-          <p class="text-[#324053] mt-2 font-['DM_Sans']">{{ 'profile.manageAccount' | translate }}</p>
+          <h1 class="text-3xl font-bold text-gray-900 font-['Poppins']">{{ 'profile.myProfile' | translate }}</h1>
+          <p class="text-gray-600 mt-2 font-['DM_Sans']">{{ 'profile.manageAccount' | translate }}</p>
         </div>
 
         <!-- Success Message -->
@@ -50,7 +50,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
               <nav class="space-y-2">
                 <button
                   (click)="setActiveTab('user-info')"
-                  [class]="activeTab === 'user-info' ? 'bg-[#0ACF83] text-white' : 'text-[#324053] hover:bg-gray-50'"
+                  [class]="activeTab === 'user-info' ? 'bg-solar-600 text-white' : 'text-gray-700 hover:bg-gray-50'"
                   class="w-full text-left px-4 py-3 rounded-lg font-['DM_Sans'] font-medium transition-colors duration-200 flex items-center space-x-3">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
@@ -60,7 +60,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
                 
                 <button
                   (click)="setActiveTab('billing-shipping')"
-                  [class]="activeTab === 'billing-shipping' ? 'bg-[#0ACF83] text-white' : 'text-[#324053] hover:bg-gray-50'"
+                  [class]="activeTab === 'billing-shipping' ? 'bg-solar-600 text-white' : 'text-gray-700 hover:bg-gray-50'"
                   class="w-full text-left px-4 py-3 rounded-lg font-['DM_Sans'] font-medium transition-colors duration-200 flex items-center space-x-3">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
@@ -77,8 +77,8 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
             <!-- User Info Tab -->
             <div *ngIf="activeTab === 'user-info'" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <div class="mb-6">
-                <h2 class="text-2xl font-semibold text-[#222529] font-['Poppins'] mb-2">{{ 'profile.personalInformation' | translate }}</h2>
-                <p class="text-[#324053] font-['DM_Sans']">{{ 'profile.updatePersonalDetails' | translate }}</p>
+                <h2 class="text-2xl font-semibold text-gray-900 font-['Poppins'] mb-2">{{ 'profile.personalInformation' | translate }}</h2>
+                <p class="text-gray-600 font-['DM_Sans']">{{ 'profile.updatePersonalDetails' | translate }}</p>
               </div>
 
               <form [formGroup]="userInfoForm" (ngSubmit)="updateUserInfo()" class="space-y-6">
@@ -97,21 +97,21 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
                     </ng-template>
                   </div>
                   <div>
-                    <button type="button" class="px-4 py-2 bg-[#0ACF83] text-white rounded-lg font-['DM_Sans'] font-medium hover:bg-[#0ACF83]/90 transition-colors">
+                    <button type="button" class="px-4 py-2 bg-solar-600 text-white rounded-lg font-['DM_Sans'] font-medium hover:bg-solar-700 transition-colors">
                       {{ 'profile.changePhoto' | translate }}
                     </button>
-                    <p class="text-sm text-[#324053] mt-1 font-['DM_Sans']">{{ 'profile.photoRequirements' | translate }}</p>
+                    <p class="text-sm text-gray-600 mt-1 font-['DM_Sans']">{{ 'profile.photoRequirements' | translate }}</p>
                   </div>
                 </div>
 
                 <!-- Name Fields -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label class="block text-sm font-medium text-[#222529] mb-2 font-['DM_Sans']">{{ 'profile.firstName' | translate }}*</label>
+                    <label class="block text-sm font-medium text-gray-900 mb-2 font-['DM_Sans']">{{ 'profile.firstName' | translate }}*</label>
                     <input
                       formControlName="firstName"
                       type="text"
-                      class="w-full h-12 px-4 py-3 border rounded-lg text-sm text-[#222529] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0ACF83] focus:border-transparent transition-all duration-200 font-['DM_Sans']"
+                      class="w-full h-12 px-4 py-3 border rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-solar-600 focus:border-transparent transition-all duration-200 font-['DM_Sans']"
                       [class.border-red-500]="userInfoForm.get('firstName')?.invalid && userInfoForm.get('firstName')?.touched"
                       [class.border-gray-300]="!userInfoForm.get('firstName')?.invalid || !userInfoForm.get('firstName')?.touched"
                       [placeholder]="'profile.enterFirstName' | translate">
@@ -121,11 +121,11 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
                   </div>
 
                   <div>
-                    <label class="block text-sm font-medium text-[#222529] mb-2 font-['DM_Sans']">{{ 'profile.lastName' | translate }}*</label>
+                    <label class="block text-sm font-medium text-gray-900 mb-2 font-['DM_Sans']">{{ 'profile.lastName' | translate }}*</label>
                     <input
                       formControlName="lastName"
                       type="text"
-                      class="w-full h-12 px-4 py-3 border rounded-lg text-sm text-[#222529] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0ACF83] focus:border-transparent transition-all duration-200 font-['DM_Sans']"
+                      class="w-full h-12 px-4 py-3 border rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-solar-600 focus:border-transparent transition-all duration-200 font-['DM_Sans']"
                       [class.border-red-500]="userInfoForm.get('lastName')?.invalid && userInfoForm.get('lastName')?.touched"
                       [class.border-gray-300]="!userInfoForm.get('lastName')?.invalid || !userInfoForm.get('lastName')?.touched"
                       [placeholder]="'profile.enterLastName' | translate">
@@ -138,11 +138,11 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
                 <!-- Email and Phone -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label class="block text-sm font-medium text-[#222529] mb-2 font-['DM_Sans']">{{ 'profile.emailAddress' | translate }}*</label>
+                    <label class="block text-sm font-medium text-gray-900 mb-2 font-['DM_Sans']">{{ 'profile.emailAddress' | translate }}*</label>
                     <input
                       formControlName="email"
                       type="email"
-                      class="w-full h-12 px-4 py-3 border rounded-lg text-sm text-[#222529] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0ACF83] focus:border-transparent transition-all duration-200 font-['DM_Sans']"
+                      class="w-full h-12 px-4 py-3 border rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-solar-600 focus:border-transparent transition-all duration-200 font-['DM_Sans']"
                       [class.border-red-500]="userInfoForm.get('email')?.invalid && userInfoForm.get('email')?.touched"
                       [class.border-gray-300]="!userInfoForm.get('email')?.invalid || !userInfoForm.get('email')?.touched"
                       [placeholder]="'profile.enterEmailAddress' | translate">
@@ -152,11 +152,11 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
                   </div>
 
                   <div>
-                    <label class="block text-sm font-medium text-[#222529] mb-2 font-['DM_Sans']">{{ 'profile.phoneNumber' | translate }}</label>
+                    <label class="block text-sm font-medium text-gray-900 mb-2 font-['DM_Sans']">{{ 'profile.phoneNumber' | translate }}</label>
                     <input
                       formControlName="phone"
                       type="tel"
-                      class="w-full h-12 px-4 py-3 border border-gray-300 rounded-lg text-sm text-[#222529] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0ACF83] focus:border-transparent transition-all duration-200 font-['DM_Sans']"
+                      class="w-full h-12 px-4 py-3 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-solar-600 focus:border-transparent transition-all duration-200 font-['DM_Sans']"
                       [placeholder]="'profile.enterPhoneNumber' | translate">
                   </div>
                 </div>
@@ -164,18 +164,18 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
                 <!-- Date of Birth and Gender -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label class="block text-sm font-medium text-[#222529] mb-2 font-['DM_Sans']">{{ 'profile.dateOfBirth' | translate }}</label>
+                    <label class="block text-sm font-medium text-gray-900 mb-2 font-['DM_Sans']">{{ 'profile.dateOfBirth' | translate }}</label>
                     <input
                       formControlName="dateOfBirth"
                       type="date"
-                      class="w-full h-12 px-4 py-3 border border-gray-300 rounded-lg text-sm text-[#222529] focus:outline-none focus:ring-2 focus:ring-[#0ACF83] focus:border-transparent transition-all duration-200 font-['DM_Sans']">
+                      class="w-full h-12 px-4 py-3 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-solar-600 focus:border-transparent transition-all duration-200 font-['DM_Sans']">
                   </div>
 
                   <div>
-                    <label class="block text-sm font-medium text-[#222529] mb-2 font-['DM_Sans']">{{ 'profile.gender' | translate }}</label>
+                    <label class="block text-sm font-medium text-gray-900 mb-2 font-['DM_Sans']">{{ 'profile.gender' | translate }}</label>
                     <select
                       formControlName="gender"
-                      class="w-full h-12 px-4 py-3 border border-gray-300 rounded-lg text-sm text-[#222529] focus:outline-none focus:ring-2 focus:ring-[#0ACF83] focus:border-transparent transition-all duration-200 font-['DM_Sans']">
+                      class="w-full h-12 px-4 py-3 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-solar-600 focus:border-transparent transition-all duration-200 font-['DM_Sans']">
                       <option value="">{{ 'profile.selectGender' | translate }}</option>
                       <option value="male">{{ 'profile.male' | translate }}</option>
                       <option value="female">{{ 'profile.female' | translate }}</option>
@@ -190,7 +190,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
                   <button
                     type="submit"
                     [disabled]="userInfoForm.invalid || (loading$ | async)"
-                    class="px-6 py-3 bg-[#0ACF83] hover:bg-[#0ACF83]/90 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#0ACF83] focus:ring-offset-2 font-['DM_Sans']">
+                    class="px-6 py-3 bg-solar-600 hover:bg-solar-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-solar-600 focus:ring-offset-2 font-['DM_Sans']">
                     <span *ngIf="!(loading$ | async)">{{ 'profile.saveChanges' | translate }}</span>
                     <span *ngIf="loading$ | async" class="flex items-center space-x-2">
                       <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
@@ -210,12 +210,12 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
               <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                 <div class="flex justify-between items-center mb-6">
                   <div>
-                    <h2 class="text-2xl font-semibold text-[#222529] font-['Poppins'] mb-2">{{ 'profile.addresses' | translate }}</h2>
-                    <p class="text-[#324053] font-['DM_Sans']">{{ 'profile.manageBillingShipping' | translate }}</p>
+                    <h2 class="text-2xl font-semibold text-gray-900 font-['Poppins'] mb-2">{{ 'profile.addresses' | translate }}</h2>
+                    <p class="text-gray-600 font-['DM_Sans']">{{ 'profile.manageBillingShipping' | translate }}</p>
                   </div>
                   <button
                     (click)="addNewAddress()"
-                    class="px-4 py-2 bg-[#0ACF83] text-white rounded-lg font-['DM_Sans'] font-medium hover:bg-[#0ACF83]/90 transition-colors flex items-center space-x-2">
+                    class="px-4 py-2 bg-solar-600 text-white rounded-lg font-['DM_Sans'] font-medium hover:bg-solar-700 transition-colors flex items-center space-x-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>
@@ -227,10 +227,10 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4" *ngIf="(currentUser$ | async)?.addresses?.length; else noAddresses">
                   <div 
                     *ngFor="let address of (currentUser$ | async)?.addresses" 
-                    class="border border-gray-200 rounded-lg p-4 hover:border-[#0ACF83] transition-colors">
+                    class="border border-gray-200 rounded-lg p-4 hover:border-solar-600 transition-colors">
                     <div class="flex justify-between items-start mb-3">
                       <div class="flex items-center space-x-2">
-                        <span class="px-2 py-1 bg-[#0ACF83] text-white text-xs rounded-full font-['DM_Sans'] font-medium">
+                        <span class="px-2 py-1 bg-solar-600 text-white text-xs rounded-full font-['DM_Sans'] font-medium">
                           {{ address.type | titlecase }}
                         </span>
                         <span *ngIf="address.isDefault" class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full font-['DM_Sans'] font-medium">
@@ -238,11 +238,11 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
                         </span>
                       </div>
                       <div class="flex space-x-2">
-                        <button class="text-[#0ACF83] hover:text-[#0ACF83]/80 text-sm font-['DM_Sans']">{{ 'profile.edit' | translate }}</button>
+                        <button class="text-solar-600 hover:text-solar-700 text-sm font-['DM_Sans']">{{ 'profile.edit' | translate }}</button>
                         <button class="text-red-500 hover:text-red-600 text-sm font-['DM_Sans']">{{ 'profile.delete' | translate }}</button>
                       </div>
                     </div>
-                    <div class="text-sm text-[#324053] font-['DM_Sans'] space-y-1">
+                    <div class="text-sm text-gray-600 font-['DM_Sans'] space-y-1">
                       <div class="font-medium">{{ address.firstName }} {{ address.lastName }}</div>
                       <div>{{ address.addressLine1 }}</div>
                       <div *ngIf="address.addressLine2">{{ address.addressLine2 }}</div>
@@ -259,11 +259,11 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                     </svg>
-                    <h3 class="text-lg font-medium text-[#222529] font-['Poppins'] mb-2">{{ 'profile.noAddressesFound' | translate }}</h3>
-                    <p class="text-[#324053] font-['DM_Sans'] mb-4">{{ 'profile.addFirstAddress' | translate }}</p>
+                    <h3 class="text-lg font-medium text-gray-900 font-['Poppins'] mb-2">{{ 'profile.noAddressesFound' | translate }}</h3>
+                    <p class="text-gray-600 font-['DM_Sans'] mb-4">{{ 'profile.addFirstAddress' | translate }}</p>
                     <button
                       (click)="addNewAddress()"
-                      class="px-4 py-2 bg-[#0ACF83] text-white rounded-lg font-['DM_Sans'] font-medium hover:bg-[#0ACF83]/90 transition-colors">
+                      class="px-4 py-2 bg-solar-600 text-white rounded-lg font-['DM_Sans'] font-medium hover:bg-solar-700 transition-colors">
                       {{ 'profile.addAddress' | translate }}
                     </button>
                   </div>
@@ -274,12 +274,12 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
               <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                 <div class="flex justify-between items-center mb-6">
                   <div>
-                    <h2 class="text-2xl font-semibold text-[#222529] font-['Poppins'] mb-2">{{ 'profile.paymentMethods' | translate }}</h2>
-                    <p class="text-[#324053] font-['DM_Sans']">{{ 'profile.manageSavedPayment' | translate }}</p>
+                    <h2 class="text-2xl font-semibold text-gray-900 font-['Poppins'] mb-2">{{ 'profile.paymentMethods' | translate }}</h2>
+                    <p class="text-gray-600 font-['DM_Sans']">{{ 'profile.manageSavedPayment' | translate }}</p>
                   </div>
                   <button
                     (click)="addNewPaymentMethod()"
-                    class="px-4 py-2 bg-[#0ACF83] text-white rounded-lg font-['DM_Sans'] font-medium hover:bg-[#0ACF83]/90 transition-colors flex items-center space-x-2">
+                    class="px-4 py-2 bg-solar-600 text-white rounded-lg font-['DM_Sans'] font-medium hover:bg-solar-700 transition-colors flex items-center space-x-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>
@@ -291,7 +291,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
                 <div class="space-y-4" *ngIf="(currentUser$ | async)?.paymentMethods?.length; else noPaymentMethods">
                   <div 
                     *ngFor="let payment of (currentUser$ | async)?.paymentMethods" 
-                    class="border border-gray-200 rounded-lg p-4 hover:border-[#0ACF83] transition-colors">
+                    class="border border-gray-200 rounded-lg p-4 hover:border-solar-600 transition-colors">
                     <div class="flex justify-between items-center">
                       <div class="flex items-center space-x-4">
                         <div class="w-12 h-8 bg-gray-100 rounded flex items-center justify-center">
@@ -300,10 +300,10 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
                           </svg>
                         </div>
                         <div>
-                          <div class="font-medium text-[#222529] font-['DM_Sans']">
+                          <div class="font-medium text-gray-900 font-['DM_Sans']">
                             {{ payment.cardDetails?.brand | titlecase }} ending in {{ payment.cardDetails?.lastFourDigits }}
                           </div>
-                          <div class="text-sm text-[#324053] font-['DM_Sans']">
+                          <div class="text-sm text-gray-600 font-['DM_Sans']">
                             Expires {{ payment.cardDetails?.expiryMonth }}/{{ payment.cardDetails?.expiryYear }}
                           </div>
                         </div>
@@ -312,7 +312,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
                         </span>
                       </div>
                       <div class="flex space-x-2">
-                        <button class="text-[#0ACF83] hover:text-[#0ACF83]/80 text-sm font-['DM_Sans']">{{ 'profile.edit' | translate }}</button>
+                        <button class="text-solar-600 hover:text-solar-700 text-sm font-['DM_Sans']">{{ 'profile.edit' | translate }}</button>
                         <button class="text-red-500 hover:text-red-600 text-sm font-['DM_Sans']">{{ 'profile.delete' | translate }}</button>
                       </div>
                     </div>
@@ -324,11 +324,11 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
                     <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
                     </svg>
-                    <h3 class="text-lg font-medium text-[#222529] font-['Poppins'] mb-2">{{ 'profile.noPaymentMethodsFound' | translate }}</h3>
-                    <p class="text-[#324053] font-['DM_Sans'] mb-4">{{ 'profile.addFirstPayment' | translate }}</p>
+                    <h3 class="text-lg font-medium text-gray-900 font-['Poppins'] mb-2">{{ 'profile.noPaymentMethodsFound' | translate }}</h3>
+                    <p class="text-gray-600 font-['DM_Sans'] mb-4">{{ 'profile.addFirstPayment' | translate }}</p>
                     <button
                       (click)="addNewPaymentMethod()"
-                      class="px-4 py-2 bg-[#0ACF83] text-white rounded-lg font-['DM_Sans'] font-medium hover:bg-[#0ACF83]/90 transition-colors">
+                      class="px-4 py-2 bg-solar-600 text-white rounded-lg font-['DM_Sans'] font-medium hover:bg-solar-700 transition-colors">
                       {{ 'profile.addPaymentMethod' | translate }}
                     </button>
                   </div>

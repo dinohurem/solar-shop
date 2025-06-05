@@ -3,20 +3,21 @@ import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { Subject, takeUntil, filter, delay, distinctUntilChanged } from 'rxjs';
 import * as CartSelectors from '../../store/cart.selectors';
+import { TranslatePipe } from "../../../../../shared/pipes/translate.pipe";
 
 @Component({
   selector: 'app-cart-notification',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslatePipe],
   template: `
     <div 
       *ngIf="showNotification"
-      class="fixed top-4 right-4 bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg z-50 flex items-center space-x-2 cart-notification"
+      class="fixed top-4 right-4 bg-orange-500 text-white px-4 py-3 rounded-lg shadow-lg z-50 flex items-center space-x-2 cart-notification"
     >
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
       </svg>
-      <span>Item added to cart!</span>
+      <span>{{ 'cart.itemAddedToCart' | translate }}</span>
     </div>
   `,
   styles: [`

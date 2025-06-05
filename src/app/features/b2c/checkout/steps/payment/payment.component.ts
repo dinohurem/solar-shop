@@ -2,19 +2,20 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-payment',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, TranslatePipe],
   template: `
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <h2 class="text-2xl font-bold text-[#324053] mb-6 font-['Poppins']">Payment</h2>
+      <h2 class="text-2xl font-bold text-gray-900 mb-6 font-['Poppins']">{{ 'checkout.payment' | translate }}</h2>
       
       <form [formGroup]="paymentForm" (ngSubmit)="onSubmit()">
         <!-- Payment Method Selection -->
         <div class="mb-8">
-          <h3 class="text-lg font-semibold text-[#324053] mb-4 font-['Poppins']">Payment Method</h3>
+          <h3 class="text-lg font-semibold text-gray-900 mb-4 font-['Poppins']">{{ 'checkout.paymentMethod' | translate }}</h3>
           <div class="space-y-3">
             <!-- Credit Card -->
             <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
@@ -172,14 +173,14 @@ import { Router } from '@angular/router';
             (click)="goBack()"
             class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium font-['DM_Sans']"
           >
-            Back
+          {{ 'checkout.backStep' | translate }} {{ 'checkout.step2' | translate }}
           </button>
           <button 
             type="submit"
             [disabled]="paymentForm.invalid || isProcessing"
-            class="flex-1 px-6 py-3 bg-[#0ACF83] text-white rounded-lg hover:bg-[#09b574] transition-colors font-semibold font-['DM_Sans'] disabled:opacity-50 disabled:cursor-not-allowed"
+            class="flex-1 px-6 py-3 bg-solar-600 text-white rounded-lg hover:bg-solar-700 transition-colors font-semibold font-['DM_Sans'] disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <span *ngIf="!isProcessing">Complete order</span>
+            <span *ngIf="!isProcessing">{{ 'checkout.completeOrder' | translate }}</span>
             <span *ngIf="isProcessing" class="flex items-center justify-center">
               <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

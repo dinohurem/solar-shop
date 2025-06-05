@@ -18,7 +18,7 @@ interface FAQItem {
     <!-- Contact Page -->
     <div class="min-h-screen bg-white">
       <!-- Hero Section -->
-      <section class="relative bg-gradient-to-br from-green-800 via-green-700 to-green-900 text-white overflow-hidden">
+      <section class="relative bg-gradient-to-br from-solar-800 via-solar-700 to-solar-900 text-white overflow-hidden">
         <!-- Background Image -->
         <div class="absolute inset-0 bg-black bg-opacity-40"></div>
         
@@ -81,7 +81,7 @@ interface FAQItem {
                     id="firstName"
                     formControlName="firstName"
                     [placeholder]="'contactSupport.name' | translate"
-                    class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors font-['DM_Sans']"
+                    class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-md focus:ring-2 focus:ring-solar-500 focus:border-solar-500 transition-colors font-['DM_Sans']"
                   >
                 </div>
                 <div>
@@ -93,7 +93,7 @@ interface FAQItem {
                     id="lastName"
                     formControlName="lastName"
                     [placeholder]="'contactSupport.lastName' | translate"
-                    class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors font-['DM_Sans']"
+                    class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-md focus:ring-2 focus:ring-solar-500 focus:border-solar-500 transition-colors font-['DM_Sans']"
                   >
                 </div>
               </div>
@@ -108,7 +108,7 @@ interface FAQItem {
                   id="email"
                   formControlName="email"
                   [placeholder]="'contactSupport.email' | translate"
-                  class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors font-['DM_Sans']"
+                  class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-md focus:ring-2 focus:ring-solar-500 focus:border-solar-500 transition-colors font-['DM_Sans']"
                 >
               </div>
 
@@ -122,7 +122,7 @@ interface FAQItem {
                   formControlName="message"
                   rows="6"
                   [placeholder]="'contactSupport.typeMessage' | translate"
-                  class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors font-['DM_Sans'] resize-none"
+                  class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-md focus:ring-2 focus:ring-solar-500 focus:border-solar-500 transition-colors font-['DM_Sans'] resize-none"
                 ></textarea>
               </div>
 
@@ -131,7 +131,7 @@ interface FAQItem {
                 <button
                   type="submit"
                   [disabled]="contactForm.invalid || isSubmitting"
-                  class="inline-flex items-center px-8 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-['DM_Sans'] uppercase tracking-wide"
+                  class="inline-flex items-center px-8 py-3 bg-solar-600 text-white font-semibold rounded-lg hover:bg-solar-700 focus:ring-2 focus:ring-solar-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-['DM_Sans'] uppercase tracking-wide"
                 >
                   <span *ngIf="!isSubmitting">{{ 'contactSupport.sendMessage' | translate }}</span>
                   <span *ngIf="isSubmitting">{{ 'contactSupport.sending' | translate }}</span>
@@ -162,7 +162,7 @@ interface FAQItem {
               <div class="space-y-4">
                 <div class="flex items-start space-x-3">
                   <div class="w-6 h-6 flex-shrink-0 mt-0.5">
-                    <svg class="w-full h-full text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-full h-full text-solar-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>
                   </div>
@@ -172,7 +172,7 @@ interface FAQItem {
                 </div>
                 <div class="flex items-start space-x-3">
                   <div class="w-6 h-6 flex-shrink-0 mt-0.5">
-                    <svg class="w-full h-full text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-full h-full text-solar-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>
                   </div>
@@ -182,7 +182,7 @@ interface FAQItem {
                 </div>
                 <div class="flex items-start space-x-3">
                   <div class="w-6 h-6 flex-shrink-0 mt-0.5">
-                    <svg class="w-full h-full text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-full h-full text-solar-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>
                   </div>
@@ -192,12 +192,6 @@ interface FAQItem {
                 </div>
               </div>
               <div class="pt-4">
-                <button class="inline-flex items-center space-x-2 text-green-600 font-semibold hover:text-green-700 transition-colors font-['DM_Sans']">
-                  <span>{{ 'contactSupport.learnMore' | translate }}</span>
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                  </svg>
-                </button>
               </div>
             </div>
           </div>
@@ -205,8 +199,8 @@ interface FAQItem {
           <!-- Technical Support & Showrooms -->
           <div class="flex flex-col lg:flex-row-reverse items-center gap-12 lg:gap-20 mb-20">
             <div class="w-full lg:w-1/2">
-              <div class="aspect-[4/3] bg-gradient-to-br from-green-100 to-green-200 rounded-[40px] flex items-center justify-center">
-                <div class="text-6xl text-green-600">🏢</div>
+              <div class="aspect-[4/3] bg-gradient-to-br from-solar-100 to-solar-200 rounded-[40px] flex items-center justify-center">
+                <div class="text-6xl text-solar-600">🏢</div>
               </div>
             </div>
             <div class="w-full lg:w-1/2 space-y-6">
@@ -217,7 +211,7 @@ interface FAQItem {
                 {{ 'contactSupport.technicalSupportText' | translate }}
               </p>
               <div class="pt-4">
-                <button class="inline-flex items-center space-x-2 text-green-600 font-semibold hover:text-green-700 transition-colors font-['DM_Sans']">
+                <button class="inline-flex items-center space-x-2 text-solar-600 font-semibold hover:text-solar-700 transition-colors font-['DM_Sans']">
                   <span>{{ 'contactSupport.viewNearestPoint' | translate }}</span>
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -230,8 +224,8 @@ interface FAQItem {
           <!-- Returns & Shipping Policy -->
           <div class="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
             <div class="w-full lg:w-1/2">
-              <div class="aspect-[4/3] bg-gradient-to-br from-purple-100 to-purple-200 rounded-[40px] flex items-center justify-center">
-                <div class="text-6xl text-purple-600">📦</div>
+              <div class="aspect-[4/3] bg-gradient-to-br from-accent-100 to-accent-200 rounded-[40px] flex items-center justify-center">
+                <div class="text-6xl text-accent-600">📦</div>
               </div>
             </div>
             <div class="w-full lg:w-1/2 space-y-6">
@@ -241,14 +235,6 @@ interface FAQItem {
               <p class="text-gray-600 font-['DM_Sans'] leading-relaxed">
                 {{ 'contactSupport.returnsShippingText' | translate }}
               </p>
-              <div class="pt-4">
-                <button class="inline-flex items-center space-x-2 text-green-600 font-semibold hover:text-green-700 transition-colors font-['DM_Sans']">
-                  <span>{{ 'contactSupport.learnMore' | translate }}</span>
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                  </svg>
-                </button>
-              </div>
             </div>
           </div>
         </div>
@@ -268,7 +254,7 @@ interface FAQItem {
             >
               <button
                 (click)="toggleFaq(faq.id)"
-                class="w-full flex items-center justify-between py-6 text-left hover:text-green-400 transition-colors"
+                class="w-full flex items-center justify-between py-6 text-left hover:text-solar-400 transition-colors"
               >
                 <span class="text-lg lg:text-xl font-semibold font-['DM_Sans'] pr-4">{{ faq.question | translate }}</span>
                 <div class="flex-shrink-0 w-6 h-6">

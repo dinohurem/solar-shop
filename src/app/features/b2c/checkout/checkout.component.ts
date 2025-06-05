@@ -31,7 +31,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
             <div class="flex items-center space-x-2">
               <div class="flex items-center justify-center w-8 h-8 rounded-full" 
                    [ngClass]="{
-                     'bg-[#0ACF83] text-white': currentStep >= 1,
+                     'bg-solar-600 text-white': currentStep >= 1,
                      'border-2 border-gray-300 bg-white text-gray-400': currentStep < 1
                    }">
                 <svg *ngIf="currentStep > 1" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -41,14 +41,14 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
               </div>
               <span class="text-sm font-medium font-['DM_Sans']" 
                     [ngClass]="{
-                      'text-[#0ACF83]': currentStep >= 1,
+                      'text-solar-600': currentStep >= 1,
                       'text-gray-400': currentStep < 1
-                    }">{{ 'checkout.step3' | translate }}</span>
+                    }">{{ 'checkout.step1' | translate }}</span>
             </div>
 
             <!-- Connector Line -->
             <div class="w-16 h-px" [ngClass]="{
-              'bg-[#0ACF83]': currentStep > 1,
+              'bg-solar-600': currentStep > 1,
               'bg-gray-300': currentStep <= 1
             }"></div>
 
@@ -56,7 +56,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
             <div class="flex items-center space-x-2">
               <div class="flex items-center justify-center w-8 h-8 rounded-full" 
                    [ngClass]="{
-                     'bg-[#0ACF83] text-white': currentStep >= 2,
+                     'bg-solar-600 text-white': currentStep >= 2,
                      'border-2 border-gray-300 bg-white text-gray-400': currentStep < 2
                    }">
                 <svg *ngIf="currentStep > 2" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -66,14 +66,14 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
               </div>
               <span class="text-sm font-medium font-['DM_Sans']" 
                     [ngClass]="{
-                      'text-[#0ACF83]': currentStep >= 2,
+                      'text-solar-600': currentStep >= 2,
                       'text-gray-400': currentStep < 2
-                    }">{{ 'checkout.step1' | translate }}</span>
+                    }">{{ 'checkout.step2' | translate }}</span>
             </div>
 
             <!-- Connector Line -->
             <div class="w-16 h-px" [ngClass]="{
-              'bg-[#0ACF83]': currentStep > 2,
+              'bg-solar-600': currentStep > 2,
               'bg-gray-300': currentStep <= 2
             }"></div>
 
@@ -81,7 +81,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
             <div class="flex items-center space-x-2">
               <div class="flex items-center justify-center w-8 h-8 rounded-full" 
                    [ngClass]="{
-                     'bg-[#0ACF83] text-white': currentStep >= 3,
+                     'bg-solar-600 text-white': currentStep >= 3,
                      'border-2 border-gray-300 bg-white text-gray-400': currentStep < 3
                    }">
                 <svg *ngIf="currentStep > 3" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -91,9 +91,9 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
               </div>
               <span class="text-sm font-medium font-['DM_Sans']" 
                     [ngClass]="{
-                      'text-[#0ACF83]': currentStep >= 3,
+                      'text-solar-600': currentStep >= 3,
                       'text-gray-400': currentStep < 3
-                    }">{{ 'checkout.step2' | translate }}</span>
+                    }">{{ 'checkout.step3' | translate }}</span>
             </div>
           </div>
         </div>
@@ -125,7 +125,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
                     <h4 class="text-sm font-medium text-gray-900 truncate font-['DM_Sans']">{{ item.name }}</h4>
                     <p class="text-sm text-gray-500 font-['DM_Sans']">x{{ item.quantity }}</p>
                   </div>
-                  <span class="text-sm font-medium text-[#324053] font-['DM_Sans']">
+                  <span class="text-sm font-medium text-gray-900 font-['DM_Sans']">
                     {{ (item.price * item.quantity) | currency:'EUR':'symbol':'1.2-2' }}
                   </span>
                 </div>

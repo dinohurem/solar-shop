@@ -11,7 +11,7 @@ import * as CartSelectors from '../../store/cart.selectors';
   template: `
     <button 
       (click)="openCart()"
-      class="relative p-2 text-gray-600 hover:text-green-600 transition-all duration-300 hover:scale-110 hover:bg-green-50 rounded-full"
+      class="relative p-2 text-gray-600 hover:text-solar-600 transition-all duration-300 hover:scale-110 hover:bg-solar-50 rounded-full"
       aria-label="Open cart"
     >
       <!-- Cart Icon -->
@@ -32,7 +32,7 @@ import * as CartSelectors from '../../store/cart.selectors';
       <!-- Item Count Badge -->
       <span 
         *ngIf="(cartItemCount$ | async) && (cartItemCount$ | async)! > 0"
-        class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium"
+        class="absolute -top-1 -right-1 bg-accent-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium"
       >
         {{ cartItemCount$ | async }}
       </span>

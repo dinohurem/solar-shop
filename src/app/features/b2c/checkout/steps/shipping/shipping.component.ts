@@ -2,31 +2,32 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-shipping',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, TranslatePipe],
   template: `
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <h2 class="text-2xl font-bold text-[#324053] mb-6 font-['Poppins']">Shipping</h2>
+      <h2 class="text-2xl font-bold text-gray-900 mb-6 font-['Poppins']">{{ 'checkout.step2' | translate }}</h2>
       
       <form [formGroup]="shippingForm" (ngSubmit)="onSubmit()">
         <!-- Contact Information -->
         <div class="mb-8">
-          <h3 class="text-lg font-semibold text-[#324053] mb-4 font-['Poppins']">Contact Information</h3>
+          <h3 class="text-lg font-semibold text-gray-900 mb-4 font-['Poppins']">{{ 'checkout.personalInfo' | translate }}</h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label for="firstName" class="block text-sm font-medium text-gray-700 mb-2 font-['DM_Sans']">Name *</label>
+              <label for="firstName" class="block text-sm font-medium text-gray-700 mb-2 font-['DM_Sans']">{{ 'checkout.firstName' | translate }} *</label>
               <input
                 type="text"
                 id="firstName"
                 formControlName="firstName"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0ACF83] focus:border-transparent font-['DM_Sans']"
-                placeholder="Insert your name"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-solar-500 focus:border-transparent font-['DM_Sans']"
+                [placeholder]="'checkout.firstName' | translate"
               >
               <div *ngIf="shippingForm.get('firstName')?.invalid && shippingForm.get('firstName')?.touched" class="mt-1 text-sm text-red-600">
-                The name is required
+                {{ 'checkout.firstNameRequired' | translate }}
               </div>
             </div>
             <div>
@@ -36,7 +37,7 @@ import { Router } from '@angular/router';
                 id="lastName"
                 formControlName="lastName"
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0ACF83] focus:border-transparent font-['DM_Sans']"
-                placeholder="Insert your last name"
+                [placeholder]="'checkout.lastName' | translate"
               >
               <div *ngIf="shippingForm.get('lastName')?.invalid && shippingForm.get('lastName')?.touched" class="mt-1 text-sm text-red-600">
                 The last name is required
@@ -49,7 +50,7 @@ import { Router } from '@angular/router';
                 id="email"
                 formControlName="email"
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0ACF83] focus:border-transparent font-['DM_Sans']"
-                placeholder="insert your email"
+                [placeholder]="'checkout.email' | translate"
               >
               <div *ngIf="shippingForm.get('email')?.invalid && shippingForm.get('email')?.touched" class="mt-1 text-sm text-red-600">
                 Insert a valid email
@@ -62,7 +63,7 @@ import { Router } from '@angular/router';
                 id="phone"
                 formControlName="phone"
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0ACF83] focus:border-transparent font-['DM_Sans']"
-                placeholder="insert your phone number"
+                [placeholder]="'checkout.phone' | translate"
               >
               <div *ngIf="shippingForm.get('phone')?.invalid && shippingForm.get('phone')?.touched" class="mt-1 text-sm text-red-600">
                 The phone number is required
@@ -82,7 +83,7 @@ import { Router } from '@angular/router';
                 id="address"
                 formControlName="address"
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0ACF83] focus:border-transparent font-['DM_Sans']"
-                placeholder="insert your address"
+                [placeholder]="'checkout.address' | translate"
               >
               <div *ngIf="shippingForm.get('address')?.invalid && shippingForm.get('address')?.touched" class="mt-1 text-sm text-red-600">
                 The address is required
@@ -96,7 +97,7 @@ import { Router } from '@angular/router';
                   id="city"
                   formControlName="city"
                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0ACF83] focus:border-transparent font-['DM_Sans']"
-                  placeholder="insert your city"
+                  [placeholder]="'checkout.city' | translate"
                 >
                 <div *ngIf="shippingForm.get('city')?.invalid && shippingForm.get('city')?.touched" class="mt-1 text-sm text-red-600">
                   The city is required
@@ -109,7 +110,7 @@ import { Router } from '@angular/router';
                   id="postalCode"
                   formControlName="postalCode"
                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0ACF83] focus:border-transparent font-['DM_Sans']"
-                  placeholder="insert your postal code"
+                  [placeholder]="'checkout.postalCode' | translate"
                 >
                 <div *ngIf="shippingForm.get('postalCode')?.invalid && shippingForm.get('postalCode')?.touched" class="mt-1 text-sm text-red-600">
                   The postal code is required
@@ -182,14 +183,14 @@ import { Router } from '@angular/router';
             (click)="goBack()"
             class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium font-['DM_Sans']"
           >
-            Back
+          {{ 'checkout.backStep' | translate }}  {{ 'checkout.step1' | translate }}
           </button>
           <button 
             type="submit"
             [disabled]="shippingForm.invalid"
-            class="flex-1 px-6 py-3 bg-[#0ACF83] text-white rounded-lg hover:bg-[#09b574] transition-colors font-semibold font-['DM_Sans'] disabled:opacity-50 disabled:cursor-not-allowed"
+            class="flex-1 px-6 py-3 bg-solar-600 text-white rounded-lg hover:bg-solar-700 transition-colors font-semibold font-['DM_Sans'] disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Continue to payment
+            {{ 'checkout.nextStep' | translate }} {{ 'checkout.step3' | translate }}
           </button>
         </div>
       </form>

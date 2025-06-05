@@ -6,14 +6,15 @@ import { Observable } from 'rxjs';
 import * as CartSelectors from '../../../cart/store/cart.selectors';
 import * as CartActions from '../../../cart/store/cart.actions';
 import { CartItem } from '../../../../../shared/models/cart.model';
+import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-order-review',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslatePipe],
   template: `
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <h2 class="text-2xl font-bold text-[#324053] mb-6 font-['Poppins']">Checkout</h2>
+      <h2 class="text-2xl font-bold text-gray-900 mb-6 font-['Poppins']">{{ 'checkout.title' | translate }}</h2>
       
       <!-- Cart Items -->
       <div class="space-y-6">
@@ -32,12 +33,12 @@ import { CartItem } from '../../../../../shared/models/cart.model';
 
           <!-- Product Details -->
           <div class="flex-1 min-w-0">
-            <h3 class="text-lg font-semibold text-[#324053] mb-2 font-['Poppins']">{{ item.name }}</h3>
+            <h3 class="text-lg font-semibold text-gray-900 mb-2 font-['Poppins']">{{ item.name }}</h3>
             <p class="text-sm text-gray-600 mb-3 font-['DM_Sans']">{{ item.description }}</p>
             
             <!-- Quantity Controls -->
             <div class="flex items-center space-x-3">
-              <span class="text-sm text-gray-600 font-['DM_Sans']">Quantity:</span>
+              <span class="text-sm text-gray-600 font-['DM_Sans']">{{ 'checkout.quantity' | translate }}:</span>
               <div class="flex items-center space-x-2">
                 <button 
                   (click)="decreaseQuantity(item.id)"
@@ -62,18 +63,18 @@ import { CartItem } from '../../../../../shared/models/cart.model';
                 (click)="removeItem(item.id)"
                 class="text-red-600 hover:text-red-700 text-sm font-medium font-['DM_Sans'] ml-4"
               >
-                Remove
+                {{ 'cart.remove' | translate }}
               </button>
             </div>
           </div>
 
           <!-- Price -->
           <div class="text-right">
-            <div class="text-lg font-bold text-[#324053] font-['DM_Sans']">
+            <div class="text-lg font-bold text-gray-900 font-['DM_Sans']">
               {{ (item.price * item.quantity) | currency:'EUR':'symbol':'1.2-2' }}
             </div>
             <div class="text-sm text-gray-500 font-['DM_Sans']">
-              {{ item.price | currency:'EUR':'symbol':'1.2-2' }} cad.
+              {{ item.price | currency:'EUR':'symbol':'1.2-2' }} {{ 'checkout.each' | translate }}
             </div>
           </div>
         </div>
@@ -89,8 +90,8 @@ import { CartItem } from '../../../../../shared/models/cart.model';
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
           </svg>
         </div>
-        <h3 class="text-lg font-medium text-gray-900 mb-2 font-['Poppins']">Your cart is empty</h3>
-        <p class="text-gray-600 font-['DM_Sans']">Add some products to continue.</p>
+        <h3 class="text-lg font-medium text-gray-900 mb-2 font-['Poppins']">{{ 'cart.empty' | translate }}</h3>
+        <p class="text-gray-600 font-['DM_Sans']">{{ 'cart.emptyText' | translate }}</p>
       </div>
 
       <!-- Continue Button -->
@@ -98,9 +99,9 @@ import { CartItem } from '../../../../../shared/models/cart.model';
         <button 
           (click)="continueToShipping()"
           [disabled]="(cartItems$ | async)?.length === 0"
-          class="w-full px-6 py-4 bg-[#0ACF83] text-white rounded-lg hover:bg-[#09b574] transition-colors font-semibold text-lg font-['DM_Sans'] disabled:opacity-50 disabled:cursor-not-allowed"
+          class="w-full px-6 py-4 bg-solar-600 text-white rounded-lg hover:bg-solar-700 transition-colors font-semibold text-lg font-['DM_Sans'] disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Continue to shipping
+          {{ 'checkout.nextStep' | translate }} {{ 'checkout.step2' | translate }}
         </button>
       </div>
     </div>

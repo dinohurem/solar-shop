@@ -15,7 +15,7 @@ import { CartSidebarComponent } from "../cart/components/cart-sidebar/cart-sideb
   template: `
     <div class="min-h-screen bg-gray-50" *ngIf="offer$ | async as offer; else loadingTemplate">
       <!-- Hero Section -->
-      <div class="relative bg-gradient-to-r from-[#0ACF83] to-[#0ACFAC] text-white py-20">
+      <div class="relative bg-gradient-to-r from-solar-600 to-solar-800 text-white py-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <!-- Offer Image -->
@@ -26,7 +26,7 @@ import { CartSidebarComponent } from "../cart/components/cart-sidebar/cart-sideb
                 class="w-full h-96 object-cover rounded-2xl shadow-2xl"
               >
               <!-- Discount Badge -->
-              <div class="absolute top-6 left-6 bg-red-500 text-white text-lg font-bold px-4 py-3 rounded-full shadow-lg">
+              <div class="absolute top-6 left-6 bg-accent-500 text-white text-lg font-bold px-4 py-3 rounded-full shadow-lg">
                 -{{ offer.discountPercentage }}%
               </div>
             </div>
@@ -69,7 +69,7 @@ import { CartSidebarComponent } from "../cart/components/cart-sidebar/cart-sideb
                   </div>
                   <button 
                     (click)="copyCouponCode(offer.couponCode!)"
-                    class="bg-white text-[#0ACF83] px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+                    class="bg-white text-solar-600 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
                   >
                     {{ copiedCoupon ? 'Copied!' : 'Copy' }}
                   </button>
@@ -77,9 +77,9 @@ import { CartSidebarComponent } from "../cart/components/cart-sidebar/cart-sideb
               </div>
 
               <!-- Offer Validity -->
-              <div *ngIf="offer.endDate" class="bg-red-500/20 border border-red-300/30 rounded-xl p-4 mb-6">
+              <div *ngIf="offer.endDate" class="bg-accent-500/20 border border-accent-300/30 rounded-xl p-4 mb-6">
                 <div class="flex items-center gap-2">
-                  <svg class="w-5 h-5 text-red-300" fill="currentColor" viewBox="0 0 20 20">
+                  <svg class="w-5 h-5 text-accent-300" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V5z"/>
                   </svg>
                   <span class="text-white font-semibold">
@@ -112,7 +112,7 @@ import { CartSidebarComponent } from "../cart/components/cart-sidebar/cart-sideb
                 class="w-full h-full object-cover"
               >
               <!-- Offer Badge -->
-              <div class="absolute top-4 left-4 bg-[#0ACF83] text-white text-sm font-bold px-3 py-2 rounded-full">
+              <div class="absolute top-4 left-4 bg-solar-600 text-white text-sm font-bold px-3 py-2 rounded-full">
                 Special Offer
               </div>
             </div>
@@ -131,7 +131,7 @@ import { CartSidebarComponent } from "../cart/components/cart-sidebar/cart-sideb
                 <span class="text-lg text-gray-500 line-through">
                   {{ product.price | currency:'EUR':'symbol':'1.2-2' }}
                 </span>
-                <span class="text-xl font-bold text-[#0ACF83]">
+                <span class="text-xl font-bold text-solar-600">
                   {{ calculateDiscountedPrice(product.price, offer.discountPercentage) | currency:'EUR':'symbol':'1.2-2' }}
                 </span>
               </div>
@@ -169,7 +169,7 @@ import { CartSidebarComponent } from "../cart/components/cart-sidebar/cart-sideb
             <p class="text-gray-600 font-['DM_Sans']">This offer applies to multiple products. Browse our catalog to find eligible items.</p>
             <button 
               (click)="navigateToProducts()"
-              class="mt-6 px-6 py-3 bg-[#0ACF83] text-white font-semibold rounded-lg hover:bg-[#09b574] transition-colors font-['DM_Sans']"
+              class="mt-6 px-6 py-3 bg-solar-600 text-white font-semibold rounded-lg hover:bg-solar-700 transition-colors font-['DM_Sans']"
             >
               Browse Products
             </button>
@@ -200,25 +200,25 @@ import { CartSidebarComponent } from "../cart/components/cart-sidebar/cart-sideb
               </h3>
               <ul class="space-y-3">
                 <li class="flex items-center gap-3">
-                  <svg class="w-5 h-5 text-[#0ACF83]" fill="currentColor" viewBox="0 0 20 20">
+                  <svg class="w-5 h-5 text-solar-600" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/>
                   </svg>
                   <span class="text-gray-700 font-['DM_Sans']">{{ offer.discountPercentage }}% Discount</span>
                 </li>
                 <li class="flex items-center gap-3">
-                  <svg class="w-5 h-5 text-[#0ACF83]" fill="currentColor" viewBox="0 0 20 20">
+                  <svg class="w-5 h-5 text-solar-600" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/>
                   </svg>
                   <span class="text-gray-700 font-['DM_Sans']">Limited Time Only</span>
                 </li>
                 <li class="flex items-center gap-3">
-                  <svg class="w-5 h-5 text-[#0ACF83]" fill="currentColor" viewBox="0 0 20 20">
+                  <svg class="w-5 h-5 text-solar-600" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/>
                   </svg>
                   <span class="text-gray-700 font-['DM_Sans']">Premium Quality Products</span>
                 </li>
                 <li class="flex items-center gap-3">
-                  <svg class="w-5 h-5 text-[#0ACF83]" fill="currentColor" viewBox="0 0 20 20">
+                  <svg class="w-5 h-5 text-solar-600" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/>
                   </svg>
                   <span class="text-gray-700 font-['DM_Sans']">Free Shipping Available</span>
@@ -236,7 +236,7 @@ import { CartSidebarComponent } from "../cart/components/cart-sidebar/cart-sideb
     <ng-template #loadingTemplate>
       <div class="min-h-screen bg-gray-50 flex items-center justify-center">
         <div class="text-center">
-          <div class="animate-spin rounded-full h-12 w-12 border-4 border-[#0ACF83] border-t-transparent mx-auto mb-4"></div>
+          <div class="animate-spin rounded-full h-12 w-12 border-4 border-solar-600 border-t-transparent mx-auto mb-4"></div>
           <p class="text-gray-600 font-['DM_Sans']">Loading offer details...</p>
         </div>
       </div>

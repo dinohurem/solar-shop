@@ -117,9 +117,9 @@ export class AddToCartButtonComponent {
 
     // Variant classes
     const variantClasses = {
-      primary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+      primary: 'bg-solar-600 text-white hover:bg-solar-700 focus:ring-2 focus:ring-solar-500 focus:ring-offset-2',
       secondary: 'bg-gray-600 text-white hover:bg-gray-700 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2',
-      outline: 'border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
+      outline: 'border-2 border-solar-600 text-solar-600 hover:bg-solar-600 hover:text-white focus:ring-2 focus:ring-solar-500 focus:ring-offset-2'
     };
 
     // Width classes

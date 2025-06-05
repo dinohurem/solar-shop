@@ -44,7 +44,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
             <!-- Content -->
             <div class="relative z-10 h-full flex flex-col justify-end p-8">
               <div class="text-white">
-                <h3 class="text-3xl font-bold mb-4 font-['Poppins'] group-hover:text-[#0ACF83] transition-colors duration-300">
+                <h3 class="text-3xl font-bold mb-4 font-['Poppins'] group-hover:text-solar-300 transition-colors duration-300">
                   {{ category.name }}
                 </h3>
                 
@@ -61,7 +61,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
                 
                 <!-- Learn More Button -->
                 <button 
-                  class="inline-flex items-center gap-3 bg-white/20 backdrop-blur-sm text-white font-semibold px-6 py-3 rounded-xl hover:bg-[#0ACF83] transition-all duration-300 group-hover:bg-[#0ACF83] border border-white/30"
+                  class="inline-flex items-center gap-3 bg-white/20 backdrop-blur-sm text-white font-semibold px-6 py-3 rounded-xl hover:bg-solar-500 transition-all duration-300 group-hover:bg-solar-500 border border-white/30"
                   (click)="navigateToProductList(category); $event.stopPropagation()"
                 >
                   <span>{{ 'products.exploreProducts' | translate }}</span>
@@ -76,7 +76,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
         <!-- Loading State -->
         <div *ngIf="isLoading" class="flex justify-center items-center py-12">
-          <div class="animate-spin rounded-full h-12 w-12 border-4 border-heyhome-primary border-t-transparent"></div>
+          <div class="animate-spin rounded-full h-12 w-12 border-4 border-solar-500 border-t-transparent"></div>
         </div>
 
         <!-- Empty State -->
@@ -91,7 +91,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
         </div>
 
         <!-- Call to Action -->
-        <div class="mt-20 bg-gradient-to-r from-[#0ACF83] to-[#0ACFAC] rounded-3xl p-12 text-center text-white">
+        <div class="mt-20 bg-gradient-to-r from-solar-500 to-solar-600 rounded-3xl p-12 text-center text-white">
           <h2 class="text-3xl lg:text-4xl font-bold mb-6 font-['Poppins']">
             {{ 'products.needHelp' | translate }}
           </h2>
@@ -100,7 +100,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
           </p>
           <button 
             (click)="navigateToContact()"
-            class="px-8 py-3 bg-white text-[#0ACF83] font-semibold rounded-lg hover:bg-gray-100 transition-colors font-['DM_Sans']"
+            class="px-8 py-3 bg-white text-solar-600 font-semibold rounded-lg hover:bg-gray-100 transition-colors font-['DM_Sans']"
           >
             {{ 'products.contactExperts' | translate }}
           </button>

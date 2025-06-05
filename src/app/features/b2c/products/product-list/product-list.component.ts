@@ -78,7 +78,7 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
                       [value]="category"
                       [checked]="(filters$ | async)?.categories?.includes(category) || false"
                       (change)="onCategoryChange(category, $event)"
-                      class="rounded border-gray-300 text-[#0ACF83] focus:ring-[#0ACF83]"
+                      class="rounded border-gray-300 text-solar-600 focus:ring-solar-500"
                     >
                     <span class="ml-2 text-sm text-gray-700 font-['DM_Sans']">{{ category }}</span>
                   </label>
@@ -95,7 +95,7 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
                       [placeholder]="'productList.min' | translate"
                       [value]="(filters$ | async)?.priceRange?.min || 0"
                       (input)="onPriceRangeChange('min', $event)"
-                      class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-[#0ACF83] focus:border-[#0ACF83]"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-solar-500 focus:border-solar-500"
                     >
                     <span class="text-gray-500">-</span>
                     <input 
@@ -103,7 +103,7 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
                       [placeholder]="'productList.max' | translate"
                       [value]="(filters$ | async)?.priceRange?.max || 0"
                       (input)="onPriceRangeChange('max', $event)"
-                      class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-[#0ACF83] focus:border-[#0ACF83]"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-solar-500 focus:border-solar-500"
                     >
                   </div>
                 </div>
@@ -119,7 +119,7 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
                       [value]="certificate"
                       [checked]="(filters$ | async)?.certificates?.includes(certificate) || false"
                       (change)="onCertificateChange(certificate, $event)"
-                      class="rounded border-gray-300 text-[#0ACF83] focus:ring-[#0ACF83]"
+                      class="rounded border-gray-300 text-solar-600 focus:ring-solar-500"
                     >
                     <span class="ml-2 text-sm text-gray-700 font-['DM_Sans']">{{ certificate }}</span>
                   </label>
@@ -136,7 +136,7 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
                       [value]="manufacturer"
                       [checked]="(filters$ | async)?.manufacturers?.includes(manufacturer) || false"
                       (change)="onManufacturerChange(manufacturer, $event)"
-                      class="rounded border-gray-300 text-[#0ACF83] focus:ring-[#0ACF83]"
+                      class="rounded border-gray-300 text-solar-600 focus:ring-solar-500"
                     >
                     <span class="ml-2 text-sm text-gray-700 font-['DM_Sans']">{{ manufacturer }}</span>
                   </label>
@@ -165,7 +165,7 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
                 <select 
                   [value]="sortOption$ | async"
                   (change)="onSortChange($event)"
-                  class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-[#0ACF83] focus:border-[#0ACF83] font-['DM_Sans']"
+                  class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-solar-500 focus:border-solar-500 font-['DM_Sans']"
                 >
                   <option value="featured">{{ 'productList.featured' | translate }}</option>
                   <option value="newest">{{ 'productList.newestArrivals' | translate }}</option>
@@ -194,7 +194,7 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
                   <!-- Discount Badge -->
                   <div 
                     *ngIf="product.discount" 
-                    class="absolute top-3 left-3 bg-[#0ACF83] text-white px-2 py-1 rounded-full text-xs font-semibold"
+                    class="absolute top-3 left-3 bg-solar-500 text-white px-2 py-1 rounded-full text-xs font-semibold"
                   >
                     -{{ product.discount }}%
                   </div>
@@ -265,7 +265,7 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
 
             <!-- Loading State -->
             <div *ngIf="isLoading$ | async" class="flex justify-center items-center py-12">
-              <div class="animate-spin rounded-full h-12 w-12 border-4 border-[#0ACF83] border-t-transparent"></div>
+              <div class="animate-spin rounded-full h-12 w-12 border-4 border-solar-500 border-t-transparent"></div>
             </div>
 
             <!-- Empty State -->

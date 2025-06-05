@@ -130,7 +130,9 @@ export class TranslationService {
                 mainTitle: 'Ekološki materijali za zeleniju budućnost',
                 subtitle: 'Otkrijte naš asortiman održivih građevinskih rješenja, dizajniranih za smanjenje utjecaja na okoliš uz održavanje izuzetne kvalitete i stila.',
                 exploreProducts: 'Istražite proizvode',
-                loading: 'Učitavanje...'
+                exploreOffers: 'Istražite ponude',
+                loading: 'Učitavanje...',
+                noOffersAvailable: 'Trenutno nema dostupnih ponuda'
             },
             // Products
             products: {
@@ -284,9 +286,9 @@ export class TranslationService {
             checkout: {
                 title: 'Naplata',
                 completeOrder: 'Dovršite svoju narudžbu',
-                step1: 'Informacije o dostavi',
-                step2: 'Način plaćanja',
-                step3: 'Pregled narudžbe',
+                step1: 'Pregled narudžbe',
+                step2: 'Informacije o dostavi',
+                step3: 'Način plaćanja',
                 orderSummary: 'Sažetak narudžbe',
                 subtotal: 'Međuzbroj',
                 tax: 'Porez',
@@ -312,8 +314,8 @@ export class TranslationService {
                 processing: 'Obrađujemo...',
                 orderPlaced: 'Narudžba je uspješno poslana!',
                 orderNumber: 'Broj narudžbe: {{number}}',
-                backToStep: 'Nazad na {{step}}',
-                nextStep: 'Sljedeći korak'
+                backStep: 'Nazad na',
+                nextStep: 'Nastavi na'
             },
             // Footer
             footer: {
@@ -368,7 +370,7 @@ export class TranslationService {
                 installationGuidance: 'Voditi vas u ugradnji ili korištenju materijala.',
                 issueResolution: 'Pomoći vam s bilo kojim problemima, osiguravajući brza i učinkovita rješenja.',
                 technicalSupport: 'Tehnička podrška i izložbeni salon',
-                technicalSupportText: 'Ako želite direktniji kontakt, ili ako vaš projekt zahtijeva specifičnu tehničku podršku, možete posjetiti jedan od naših izložbenih salona ili centara za pomoć, gdje možete razgovarati s našim stručnjacima i vidjeti proizvode izbliza.',
+                technicalSupportText: 'Ako želite direktniji kontakt, ili ako vaš projekt zahtijeva specifičnu tehničku podršku, možete posjetiti jedan od naših centara za pomoć, gdje možete razgovarati s našim stručnjacima i vidjeti proizvode izbliza.',
                 viewNearestPoint: 'Pogledajte najbliže mjesto',
                 returnsShipping: 'Politika povrata i dostave',
                 returnsShippingText: 'Konzultirajte naš odjel posvećen Politici povrata i dostave da biste saznali o postupcima povrata, rokovima dostave i uvjetima za bilo kakve povrate novca. Uvijek smo transparentni, tako da možete kupovati s povjerenjem znajući da se možete osloniti na nas u slučaju promjena ili problema.',
@@ -564,7 +566,9 @@ export class TranslationService {
                 mainTitle: 'Eco-Friendly Materials For A Greener Tomorrow',
                 subtitle: 'Discover our range of sustainable building solutions, designed to reduce environmental impact while maintaining exceptional quality and style.',
                 exploreProducts: 'Explore Products',
-                loading: 'Loading...'
+                exploreOffers: 'Explore Offers',
+                loading: 'Loading...',
+                noOffersAvailable: 'No offers available at the moment'
             },
             // Products
             products: {
@@ -718,9 +722,9 @@ export class TranslationService {
             checkout: {
                 title: 'Checkout',
                 completeOrder: 'Complete your order',
-                step1: 'Shipping Information',
-                step2: 'Payment Method',
-                step3: 'Order Review',
+                step1: 'Order Review',
+                step2: 'Shipping Information',
+                step3: 'Payment Method',
                 orderSummary: 'Order Summary',
                 subtotal: 'Subtotal',
                 tax: 'Tax',
@@ -746,8 +750,8 @@ export class TranslationService {
                 processing: 'Processing...',
                 orderPlaced: 'Order placed successfully!',
                 orderNumber: 'Order number: {{number}}',
-                backToStep: 'Back to {{step}}',
-                nextStep: 'Next Step'
+                backStep: 'Back to',
+                nextStep: 'Continue to'
             },
             // Footer
             footer: {

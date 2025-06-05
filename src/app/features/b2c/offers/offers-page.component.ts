@@ -16,7 +16,7 @@ import { Offer } from './services/offers.service';
   template: `
     <div class="min-h-screen bg-gray-50">
       <!-- Hero Section -->
-      <div class="bg-gradient-to-r from-[#0ACF83] to-[#0ACFAC] text-white py-20">
+      <div class="bg-gradient-to-r from-solar-600 to-solar-800 text-white py-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 class="text-5xl lg:text-6xl font-bold mb-6 font-['Poppins']">
             {{ 'offers.title' | translate }}
@@ -33,7 +33,7 @@ import { Offer } from './services/offers.service';
         <div class="flex flex-wrap items-center justify-between mb-12 gap-4">
           <div class="flex items-center space-x-4">
             <span class="text-lg font-semibold text-[#324053] font-['Poppins']">Filter by:</span>
-            <select class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0ACF83] focus:border-transparent font-['DM_Sans']">
+            <select class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-solar-500 focus:border-transparent font-['DM_Sans']">
               <option value="">{{ 'offers.allCategories' | translate }}</option>
               <option value="solar-panels">{{ 'offers.solarPanels' | translate }}</option>
               <option value="inverters">{{ 'offers.inverters' | translate }}</option>
@@ -61,18 +61,18 @@ import { Offer } from './services/offers.service';
                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               >
               <!-- Discount Badge -->
-              <div class="absolute top-4 left-4 bg-gradient-to-r from-red-500 to-red-600 text-white text-sm font-bold px-3 py-2 rounded-full shadow-lg">
+              <div class="absolute top-4 left-4 bg-gradient-to-r from-accent-500 to-accent-600 text-white text-sm font-bold px-3 py-2 rounded-full shadow-lg">
                 -{{ offer.discountPercentage }}%
               </div>
               <!-- Sale Badge -->
-              <div class="absolute top-4 right-4 bg-[#0ACF83] text-white text-xs font-bold px-2 py-1 rounded-full">
+              <div class="absolute top-4 right-4 bg-solar-600 text-white text-xs font-bold px-2 py-1 rounded-full">
                 {{ 'offers.sale' | translate }}
               </div>
             </div>
 
             <!-- Product Info -->
             <div class="p-6">
-              <h3 class="text-xl font-bold text-[#324053] mb-3 font-['Poppins'] line-clamp-2 group-hover:text-[#0ACF83] transition-colors">
+              <h3 class="text-xl font-bold text-[#324053] mb-3 font-['Poppins'] line-clamp-2 group-hover:text-solar-600 transition-colors">
                 {{ offer.title }}
               </h3>
               
@@ -91,7 +91,7 @@ import { Offer } from './services/offers.service';
               </div>
 
               <!-- Savings -->
-              <div class="bg-green-50 text-green-800 text-sm font-semibold px-3 py-2 rounded-lg mb-4 text-center">
+              <div class="bg-solar-50 text-solar-800 text-sm font-semibold px-3 py-2 rounded-lg mb-4 text-center">
                 {{ 'offers.youSave' | translate:{ amount: getSavingsAmount(offer) } }}
               </div>
 
@@ -120,7 +120,7 @@ import { Offer } from './services/offers.service';
 
         <!-- Loading State -->
         <div *ngIf="isLoading$ | async" class="flex justify-center items-center py-20">
-          <div class="animate-spin rounded-full h-12 w-12 border-4 border-[#0ACF83] border-t-transparent"></div>
+          <div class="animate-spin rounded-full h-12 w-12 border-4 border-solar-600 border-t-transparent"></div>
         </div>
 
         <!-- Empty State -->
@@ -134,14 +134,14 @@ import { Offer } from './services/offers.service';
           <p class="text-gray-600 mb-8 font-['DM_Sans']">{{ 'offers.noOffersText' | translate }}</p>
           <button 
             (click)="navigateToProducts()"
-            class="px-8 py-3 bg-[#0ACF83] text-white font-semibold rounded-lg hover:bg-[#09b574] transition-colors font-['DM_Sans']"
+            class="px-8 py-3 bg-solar-600 text-white font-semibold rounded-lg hover:bg-solar-700 transition-colors font-['DM_Sans']"
           >
             {{ 'offers.browseAllProducts' | translate }}
           </button>
         </div>
 
         <!-- Call to Action -->
-        <div class="mt-20 bg-gradient-to-r from-[#0ACF83] to-[#0ACFAC] rounded-3xl p-12 text-center text-white">
+        <div class="mt-20 bg-gradient-to-r from-solar-600 to-solar-800 rounded-3xl p-12 text-center text-white">
           <h2 class="text-3xl lg:text-4xl font-bold mb-6 font-['Poppins']">
             {{ 'offers.dontMissOut' | translate }}
           </h2>
@@ -154,7 +154,7 @@ import { Offer } from './services/offers.service';
               [placeholder]="'offers.enterEmail' | translate"
               class="flex-1 px-4 py-3 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white font-['DM_Sans']"
             >
-            <button class="px-8 py-3 bg-white text-[#0ACF83] font-semibold rounded-lg hover:bg-gray-100 transition-colors font-['DM_Sans']">
+            <button class="px-8 py-3 bg-white text-solar-600 font-semibold rounded-lg hover:bg-gray-100 transition-colors font-['DM_Sans']">
               {{ 'offers.subscribe' | translate }}
             </button>
           </div>
