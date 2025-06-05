@@ -26,7 +26,7 @@ export const blogReducer = createReducer(
     })),
     on(BlogActions.filterByCategory, (state, { category }) => ({
         ...state,
-        filteredCategory: category,
+        filteredCategory: category === '' ? null : category,
     })),
     on(BlogActions.searchPosts, (state, { query }) => ({
         ...state,

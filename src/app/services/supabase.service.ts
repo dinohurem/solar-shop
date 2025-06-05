@@ -410,12 +410,12 @@ export class SupabaseService {
             .from('blog_posts')
             .select(`
                 *,
-                profiles!author_id (
+                profiles:author_id (
                     first_name,
                     last_name,
                     full_name
                 ),
-                categories!category_id (
+                categories:category_id (
                     name,
                     slug
                 )
@@ -450,13 +450,13 @@ export class SupabaseService {
             .from('blog_posts')
             .select(`
                 *,
-                author:profiles!author_id (
+                author:profiles:author_id (
                     first_name,
                     last_name,
                     full_name,
                     avatar_url
                 ),
-                category:categories!category_id (
+                category:categories:category_id (
                     name,
                     slug
                 )
@@ -474,13 +474,13 @@ export class SupabaseService {
             .from('blog_posts')
             .select(`
                 *,
-                author:profiles!author_id (
+                author:profiles:author_id (
                     first_name,
                     last_name,
                     full_name,
                     avatar_url
                 ),
-                category:categories!category_id (
+                category:categories:category_id (
                     name,
                     slug
                 )
@@ -498,13 +498,13 @@ export class SupabaseService {
             .from('blog_posts')
             .select(`
                 *,
-                author:profiles!author_id (
+                author:profiles:author_id (
                     first_name,
                     last_name,
                     full_name,
                     avatar_url
                 ),
-                category:categories!category_id (
+                category:categories:category_id (
                     name,
                     slug
                 )
