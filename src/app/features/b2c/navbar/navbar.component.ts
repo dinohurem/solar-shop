@@ -25,7 +25,7 @@ import { Subject, takeUntil } from 'rxjs';
   imports: [CommonModule, RouterModule, CartButtonComponent, TranslatePipe],
   template: `
     <!-- Top Info Bar (Desktop) -->
-    <div class="hidden lg:block bg-heyhome-dark-green text-white text-sm">
+    <div class="hidden lg:block bg-black text-white text-sm">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center py-2">
           <!-- Contact Info -->
