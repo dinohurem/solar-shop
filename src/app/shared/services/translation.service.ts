@@ -17,10 +17,10 @@ export class TranslationService {
             // Navigation
             nav: {
                 products: 'Proizvodi',
-                offers: 'Ponude i Promocije',
+                offers: 'Ponude',
                 sustainability: 'Održivost',
-                blog: 'Blog i Vodiči',
-                company: 'Kompanija',
+                blog: 'Blog',
+                company: 'O nama',
                 contact: 'Kontakt i Podrška',
                 searchPlaceholder: 'Traži proizvode...'
             },
@@ -127,12 +127,13 @@ export class TranslationService {
             },
             // Hero Section
             hero: {
-                mainTitle: 'Ekološki materijali za zeleniju budućnost',
-                subtitle: 'Otkrijte naš asortiman održivih građevinskih rješenja, dizajniranih za smanjenje utjecaja na okoliš uz održavanje izuzetne kvalitete i stila.',
+                mainTitle: 'Vaša destinacija za solarnu energiju',
+                subtitle: 'Kupujte visokokvalitetne solarne panele, invertere, baterije i opremu. Sve što trebate za vlastiti sustav solarne energije na jednom mjestu.',
                 exploreProducts: 'Istražite proizvode',
                 exploreOffers: 'Istražite ponude',
                 loading: 'Učitavanje...',
-                noOffersAvailable: 'Trenutno nema dostupnih ponuda'
+                noOffersAvailable: 'Trenutno nema dostupnih ponuda',
+                primeDeal: 'Hit Ponuda'
             },
             // Products
             products: {
@@ -453,11 +454,11 @@ export class TranslationService {
             // Navigation
             nav: {
                 products: 'Products',
-                offers: 'Offers & Promotions',
+                offers: 'Deals',
                 sustainability: 'Sustainability',
-                blog: 'Blog & Guides',
-                company: 'Company',
-                contact: 'Contacts & Support',
+                blog: 'Blog',
+                company: 'About us',
+                contact: 'Contact & Support',
                 searchPlaceholder: 'Search products...'
             },
             // Authentication
@@ -563,12 +564,13 @@ export class TranslationService {
             },
             // Hero Section
             hero: {
-                mainTitle: 'Eco-Friendly Materials For A Greener Tomorrow',
-                subtitle: 'Discover our range of sustainable building solutions, designed to reduce environmental impact while maintaining exceptional quality and style.',
+                mainTitle: 'Your Destination for Solar Energy',
+                subtitle: 'Shop high-quality solar panels, inverters, batteries and equipment. Everything you need for your own solar energy system in one place.',
                 exploreProducts: 'Explore Products',
                 exploreOffers: 'Explore Offers',
                 loading: 'Loading...',
-                noOffersAvailable: 'No offers available at the moment'
+                noOffersAvailable: 'No offers available at the moment',
+                primeDeal: 'Prime Deal'
             },
             // Products
             products: {

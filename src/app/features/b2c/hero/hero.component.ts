@@ -36,7 +36,7 @@ import { OffersService, Offer } from '../offers/services/offers.service';
       <div class="relative z-10 flex flex-col min-h-screen justify-center px-4 sm:px-6 lg:px-8">
         <div class="max-w-7xl mx-auto text-center">
           <!-- Main Heading -->
-          <h1 class="text-white font-bold text-3xl sm:text-5xl lg:text-6xl xl:text-4xl leading-tight mb-6 font-['Poppins']">
+          <h1 class="text-white font-bold text-3xl sm:text-5xl lg:text-8xl xl:text-6xl leading-tight mb-6 font-['Poppins']">
             {{ 'hero.mainTitle' | translate }}
           </h1>
           
@@ -108,9 +108,23 @@ import { OffersService, Offer } from '../offers/services/offers.service';
                       class="flex-shrink-0 w-full px-2"
                     >
                       <!-- Fixed Height Card Container -->
-                      <div class="bg-white/15 backdrop-blur-sm rounded-3xl border border-white/30 hover:bg-white/20 transition-all duration-500 cursor-pointer"
+                      <div class="bg-white/15 backdrop-blur-sm rounded-3xl border border-white/30 hover:bg-white/20 transition-all duration-500 cursor-pointer relative overflow-hidden"
                            style="min-height: 600px; height: 600px;"
                            (click)="viewOffer(offer.id)">
+                        
+                        <!-- Prime Deal Ribbon with Corner Wrap -->
+                        <div class="absolute top-0 right-0 z-10">
+                          <!-- Main Ribbon -->
+                          <div class="relative">
+                            <div class="bg-gradient-to-r from-accent-500 to-accent-600 text-white text-xs font-bold px-8 py-3 transform rotate-45 translate-x-6 translate-y-6 shadow-xl">
+                              {{ 'hero.primeDeal' | translate }}
+                            </div>
+                            <!-- Corner Wrap Shadow/Fold Effect -->
+                            <div class="absolute top-0 right-0 w-3 h-3 bg-accent-700 transform rotate-45 translate-x-4 translate-y-4 opacity-60"></div>
+                            <div class="absolute top-0 right-0 w-2 h-2 bg-accent-800 transform rotate-45 translate-x-5 translate-y-5 opacity-40"></div>
+                          </div>
+                        </div>
+                        
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-stretch h-full p-8 lg:p-12">
                           <!-- Fixed Size Image Container -->
                           <div class="relative order-2 lg:order-1 flex flex-col justify-center">
