@@ -15,5 +15,6 @@ export const ProductListActions = createActionGroup({
         'Clear Filters': emptyProps(),
 
         'Update Sort Option': props<{ sortOption: SortOption }>(),
+        'Search Products': props<{ query: string }>(),
     }
 }); 

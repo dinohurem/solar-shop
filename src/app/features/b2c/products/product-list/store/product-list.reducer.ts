@@ -8,6 +8,7 @@ export interface ProductListState {
     error: string | null;
     filters: ProductFilters;
     sortOption: SortOption;
+    searchQuery: string;
 }
 
 const initialState: ProductListState = {
@@ -20,7 +21,8 @@ const initialState: ProductListState = {
         certificates: [],
         manufacturers: []
     },
-    sortOption: 'featured'
+    sortOption: 'featured',
+    searchQuery: ''
 };
 
 export const productListReducer = createReducer(
@@ -99,5 +101,10 @@ export const productListReducer = createReducer(
     on(ProductListActions.updateSortOption, (state, { sortOption }) => ({
         ...state,
         sortOption
+    })),
+
+    on(ProductListActions.searchProducts, (state, { query }) => ({
+        ...state,
+        searchQuery: query
     }))
 ); 

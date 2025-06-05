@@ -221,6 +221,12 @@ export class TranslationService {
                 tryAgain: 'Pokušaj ponovno',
                 featured: 'Istaknuto',
                 loadMore: 'Učitaj više',
+                noPosts: 'Nema članaka',
+                noPostsText: 'Trenutno nema dostupnih članaka. Provjerite kasnije.',
+                readMore: 'Čitaj više',
+                viewAllPosts: 'Pogledaj sve članke',
+                recentProjects: 'Najnoviji projekti i uvidi',
+                recentProjectsSubtitle: 'Otkrijte najnovije solar projekte, tehnične uvide i stručne savjete našeg tima',
                 whatYouFind: 'Što ćete pronaći',
                 technicalGuides: 'Tehnički vodiči',
                 technicalGuidesText: 'Detaljni vodiči za instalaciju, održavanje i optimizaciju solarnih sustava.',
@@ -351,6 +357,13 @@ export class TranslationService {
                 highlyRecommended: 'Toplo preporučujem!',
                 solidProduct: 'Solidan proizvod',
                 outstandingService: 'Izvanredna korisnička služba'
+            },
+            // Search
+            search: {
+                searchProducts: 'Pretraži proizvode',
+                search: 'Pretraži',
+                placeholder: 'Unesite naziv ili opis proizvoda...',
+                searchByName: 'Pretraži po nazivu ili opisu...'
             },
             // Contact & Support
             contactSupport: {
@@ -658,6 +671,12 @@ export class TranslationService {
                 tryAgain: 'Try Again',
                 featured: 'Featured',
                 loadMore: 'Load More',
+                noPosts: 'No articles',
+                noPostsText: 'Currently no articles available. Check back later.',
+                readMore: 'Read more',
+                viewAllPosts: 'View all articles',
+                recentProjects: 'Latest projects and insights',
+                recentProjectsSubtitle: 'Discover the latest solar projects, technical insights and expert advice from our team',
                 whatYouFind: 'What you\'ll find',
                 technicalGuides: 'Technical Guides',
                 technicalGuidesText: 'Detailed guides for installation, maintenance and optimization of solar systems.',
@@ -788,6 +807,13 @@ export class TranslationService {
                 highlyRecommended: 'Highly recommended!',
                 solidProduct: 'Solid product',
                 outstandingService: 'Outstanding customer service'
+            },
+            // Search
+            search: {
+                searchProducts: 'Search products',
+                search: 'Search',
+                placeholder: 'Enter product name or description...',
+                searchByName: 'Search by name or description...'
             },
             // Contact & Support
             contactSupport: {

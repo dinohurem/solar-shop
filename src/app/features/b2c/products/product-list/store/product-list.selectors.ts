@@ -6,29 +6,39 @@ export const selectProductListState = createFeatureSelector<ProductListState>('p
 
 export const selectProducts = createSelector(
     selectProductListState,
-    (state) => state.products
+    (state: ProductListState) => state.products
 );
 
 export const selectIsLoading = createSelector(
     selectProductListState,
-    (state) => state.loading
+    (state: ProductListState) => state.loading
+);
+
+export const selectError = createSelector(
+    selectProductListState,
+    (state: ProductListState) => state.error
 );
 
 export const selectFilters = createSelector(
     selectProductListState,
-    (state) => state.filters
+    (state: ProductListState) => state.filters
 );
 
 export const selectSortOption = createSelector(
     selectProductListState,
-    (state) => state.sortOption
+    (state: ProductListState) => state.sortOption
+);
+
+export const selectSearchQuery = createSelector(
+    selectProductListState,
+    (state: ProductListState) => state.searchQuery
 );
 
 export const selectCategories = createSelector(
     selectProducts,
     (products: Product[]) => {
         const categories = products.map(product => product.category);
-        return [...new Set(categories)].sort();
+        return [...new Set(categories)];
     }
 );
 
@@ -36,15 +46,15 @@ export const selectManufacturers = createSelector(
     selectProducts,
     (products: Product[]) => {
         const manufacturers = products.map(product => product.manufacturer);
-        return [...new Set(manufacturers)].sort();
+        return [...new Set(manufacturers)];
     }
 );
 
 export const selectCertificates = createSelector(
     selectProducts,
     (products: Product[]) => {
-        const certificates = products.flatMap(product => product.certificates);
-        return [...new Set(certificates)].sort();
+        const allCertificates = products.flatMap(product => product.certificates);
+        return [...new Set(allCertificates)];
     }
 );
 
@@ -52,8 +62,19 @@ export const selectFilteredProducts = createSelector(
     selectProducts,
     selectFilters,
     selectSortOption,
-    (products, filters, sortOption) => {
+    selectSearchQuery,
+    (products, filters, sortOption, searchQuery) => {
         let filtered = products.filter(product => {
+            // Search filter
+            if (searchQuery) {
+                const query = searchQuery.toLowerCase();
+                const matchesName = product.name.toLowerCase().includes(query);
+                const matchesDescription = product.description.toLowerCase().includes(query);
+                if (!matchesName && !matchesDescription) {
+                    return false;
+                }
+            }
+
             // Category filter
             if (filters.categories.length > 0 && !filters.categories.includes(product.category)) {
                 return false;
@@ -85,34 +106,22 @@ export const selectFilteredProducts = createSelector(
             return true;
         });
 
-        // Apply sorting
+        // Sort products
         switch (sortOption) {
             case 'featured':
-                filtered = filtered.sort((a, b) => {
-                    if (a.featured && !b.featured) return -1;
-                    if (!a.featured && b.featured) return 1;
-                    return b.rating - a.rating;
-                });
-                break;
+                return filtered.sort((a, b) => Number(b.featured) - Number(a.featured));
             case 'newest':
-                filtered = filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-                break;
+                return filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
             case 'name-asc':
-                filtered = filtered.sort((a, b) => a.name.localeCompare(b.name));
-                break;
+                return filtered.sort((a, b) => a.name.localeCompare(b.name));
             case 'name-desc':
-                filtered = filtered.sort((a, b) => b.name.localeCompare(a.name));
-                break;
+                return filtered.sort((a, b) => b.name.localeCompare(a.name));
             case 'price-low':
-                filtered = filtered.sort((a, b) => a.price - b.price);
-                break;
+                return filtered.sort((a, b) => a.price - b.price);
             case 'price-high':
-                filtered = filtered.sort((a, b) => b.price - a.price);
-                break;
+                return filtered.sort((a, b) => b.price - a.price);
             default:
-                break;
+                return filtered;
         }
-
-        return filtered;
     }
 ); 

@@ -14,7 +14,8 @@ import {
   selectSortOption,
   selectCategories,
   selectManufacturers,
-  selectCertificates
+  selectCertificates,
+  selectSearchQuery
 } from './store/product-list.selectors';
 import { AddToCartButtonComponent } from '../../cart/components/add-to-cart-button/add-to-cart-button.component';
 import * as CartActions from '../../cart/store/cart.actions';
@@ -68,6 +69,25 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-8">
               <h3 class="text-lg font-semibold text-gray-900 mb-6 font-['Poppins']">{{ 'productList.filters' | translate }}</h3>
               
+              <!-- Search Bar -->
+              <div class="mb-6">
+                <h4 class="text-sm font-medium text-gray-900 mb-3 font-['DM_Sans']">{{ 'search.search' | translate }}</h4>
+                <div class="relative">
+                  <input 
+                    type="text"
+                    [(ngModel)]="currentSearchQuery"
+                    (ngModelChange)="onSearchChange($event)"
+                    [placeholder]="'search.searchByName' | translate"
+                    class="w-full px-3 py-2 pl-10 border border-gray-300 rounded-md text-sm focus:ring-solar-500 focus:border-solar-500 font-['DM_Sans']"
+                  >
+                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
               <!-- Categories Filter -->
               <div class="mb-6">
                 <h4 class="text-sm font-medium text-gray-900 mb-3 font-['DM_Sans']">{{ 'productList.categories' | translate }}</h4>
@@ -311,6 +331,9 @@ export class ProductListComponent implements OnInit, OnDestroy {
   categories$: Observable<string[]>;
   manufacturers$: Observable<string[]>;
   certificates$: Observable<string[]>;
+  searchQuery$: Observable<string>;
+
+  currentSearchQuery = '';
 
   constructor() {
     this.products$ = this.store.select(selectProducts);
@@ -321,15 +344,25 @@ export class ProductListComponent implements OnInit, OnDestroy {
     this.categories$ = this.store.select(selectCategories);
     this.manufacturers$ = this.store.select(selectManufacturers);
     this.certificates$ = this.store.select(selectCertificates);
+    this.searchQuery$ = this.store.select(selectSearchQuery);
   }
 
   ngOnInit(): void {
     this.store.dispatch(ProductListActions.loadProducts());
 
-    // Handle category filtering from query parameters
+    // Handle query parameters
     this.route.queryParams.pipe(
       takeUntil(this.destroy$)
     ).subscribe(params => {
+      // Handle search from navbar
+      if (params['search']) {
+        this.currentSearchQuery = params['search'];
+        this.store.dispatch(ProductListActions.searchProducts({
+          query: params['search']
+        }));
+      }
+
+      // Handle category filtering from query parameters
       if (params['category']) {
         // Clear existing filters first
         this.store.dispatch(ProductListActions.clearFilters());
@@ -340,11 +373,22 @@ export class ProductListComponent implements OnInit, OnDestroy {
         }));
       }
     });
+
+    // Subscribe to search query changes from store to update local state
+    this.searchQuery$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(query => {
+      this.currentSearchQuery = query || '';
+    });
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  onSearchChange(query: string): void {
+    this.store.dispatch(ProductListActions.searchProducts({ query }));
   }
 
   onCategoryChange(category: string, event: Event): void {
@@ -376,6 +420,8 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
   clearFilters(): void {
     this.store.dispatch(ProductListActions.clearFilters());
+    this.currentSearchQuery = '';
+    this.store.dispatch(ProductListActions.searchProducts({ query: '' }));
   }
 
   trackByProductId(index: number, product: Product): string {

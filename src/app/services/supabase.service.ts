@@ -406,20 +406,10 @@ export class SupabaseService {
         limit?: number;
         offset?: number;
     }) {
+        // First, get the blog posts without joins
         let query = this.supabase
             .from('blog_posts')
-            .select(`
-                *,
-                profiles:author_id (
-                    first_name,
-                    last_name,
-                    full_name
-                ),
-                categories:category_id (
-                    name,
-                    slug
-                )
-            `)
+            .select('*')
             .eq('status', 'published');
 
         if (filters?.featured !== undefined) {
@@ -435,80 +425,156 @@ export class SupabaseService {
             query = query.range(filters.offset, (filters.offset + (filters.limit || 10)) - 1);
         }
 
-        const { data, error } = await query.order('published_at', { ascending: false });
+        const { data: posts, error } = await query.order('published_at', { ascending: false });
 
         if (error) {
             console.error('Error fetching blog posts:', error);
             throw error;
         }
 
-        return data || [];
+        if (!posts || posts.length === 0) {
+            return [];
+        }
+
+        // Now get author and category information separately
+        const authorIds = [...new Set(posts.map(post => post.author_id).filter(Boolean))];
+        const categoryIds = [...new Set(posts.map(post => post.category_id).filter(Boolean))];
+
+        // Get profiles data
+        let profiles: any[] = [];
+        if (authorIds.length > 0) {
+            const { data: profilesData, error: profilesError } = await this.supabase
+                .from('profiles')
+                .select('id, first_name, last_name, full_name, avatar_url')
+                .in('id', authorIds);
+
+            if (!profilesError) {
+                profiles = profilesData || [];
+            }
+        }
+
+        // Get categories data
+        let categories: any[] = [];
+        if (categoryIds.length > 0) {
+            const { data: categoriesData, error: categoriesError } = await this.supabase
+                .from('categories')
+                .select('id, name, slug')
+                .in('id', categoryIds);
+
+            if (!categoriesError) {
+                categories = categoriesData || [];
+            }
+        }
+
+        // Map the data together
+        const postsWithRelations = posts.map(post => ({
+            ...post,
+            profiles: profiles.find(profile => profile.id === post.author_id) || null,
+            categories: categories.find(category => category.id === post.category_id) || null
+        }));
+
+        return postsWithRelations;
     }
 
     async getBlogPostById(id: string) {
-        const { data, error } = await this.supabase
+        // Get the blog post
+        const { data: post, error } = await this.supabase
             .from('blog_posts')
-            .select(`
-                *,
-                author:profiles:author_id (
-                    first_name,
-                    last_name,
-                    full_name,
-                    avatar_url
-                ),
-                category:categories:category_id (
-                    name,
-                    slug
-                )
-            `)
+            .select('*')
             .eq('id', id)
             .eq('status', 'published')
             .single();
 
         if (error) throw error;
-        return data;
+        if (!post) return null;
+
+        // Get author data
+        let profiles = null;
+        if (post.author_id) {
+            const { data: profileData, error: profileError } = await this.supabase
+                .from('profiles')
+                .select('id, first_name, last_name, full_name, avatar_url')
+                .eq('id', post.author_id)
+                .single();
+
+            if (!profileError && profileData) {
+                profiles = profileData;
+            }
+        }
+
+        // Get category data
+        let categories = null;
+        if (post.category_id) {
+            const { data: categoryData, error: categoryError } = await this.supabase
+                .from('categories')
+                .select('id, name, slug')
+                .eq('id', post.category_id)
+                .single();
+
+            if (!categoryError && categoryData) {
+                categories = categoryData;
+            }
+        }
+
+        return {
+            ...post,
+            profiles,
+            categories
+        };
     }
 
     async getBlogPostBySlug(slug: string) {
-        const { data, error } = await this.supabase
+        // Get the blog post
+        const { data: post, error } = await this.supabase
             .from('blog_posts')
-            .select(`
-                *,
-                author:profiles:author_id (
-                    first_name,
-                    last_name,
-                    full_name,
-                    avatar_url
-                ),
-                category:categories:category_id (
-                    name,
-                    slug
-                )
-            `)
+            .select('*')
             .eq('slug', slug)
             .eq('status', 'published')
             .single();
 
         if (error) throw error;
-        return data;
+        if (!post) return null;
+
+        // Get author data
+        let profiles = null;
+        if (post.author_id) {
+            const { data: profileData, error: profileError } = await this.supabase
+                .from('profiles')
+                .select('id, first_name, last_name, full_name, avatar_url')
+                .eq('id', post.author_id)
+                .single();
+
+            if (!profileError && profileData) {
+                profiles = profileData;
+            }
+        }
+
+        // Get category data
+        let categories = null;
+        if (post.category_id) {
+            const { data: categoryData, error: categoryError } = await this.supabase
+                .from('categories')
+                .select('id, name, slug')
+                .eq('id', post.category_id)
+                .single();
+
+            if (!categoryError && categoryData) {
+                categories = categoryData;
+            }
+        }
+
+        return {
+            ...post,
+            profiles,
+            categories
+        };
     }
 
     async getRelatedBlogPosts(categoryId?: string, excludeId?: string, limit: number = 3) {
+        // Get related blog posts
         let query = this.supabase
             .from('blog_posts')
-            .select(`
-                *,
-                author:profiles:author_id (
-                    first_name,
-                    last_name,
-                    full_name,
-                    avatar_url
-                ),
-                category:categories:category_id (
-                    name,
-                    slug
-                )
-            `)
+            .select('*')
             .eq('status', 'published')
             .limit(limit);
 
@@ -519,9 +585,51 @@ export class SupabaseService {
             query = query.neq('id', excludeId);
         }
 
-        const { data, error } = await query.order('published_at', { ascending: false });
+        const { data: posts, error } = await query.order('published_at', { ascending: false });
         if (error) throw error;
-        return data;
+
+        if (!posts || posts.length === 0) {
+            return [];
+        }
+
+        // Get author and category information separately
+        const authorIds = [...new Set(posts.map(post => post.author_id).filter(Boolean))];
+        const categoryIds = [...new Set(posts.map(post => post.category_id).filter(Boolean))];
+
+        // Get profiles data
+        let profiles: any[] = [];
+        if (authorIds.length > 0) {
+            const { data: profilesData, error: profilesError } = await this.supabase
+                .from('profiles')
+                .select('id, first_name, last_name, full_name, avatar_url')
+                .in('id', authorIds);
+
+            if (!profilesError) {
+                profiles = profilesData || [];
+            }
+        }
+
+        // Get categories data
+        let categories: any[] = [];
+        if (categoryIds.length > 0) {
+            const { data: categoriesData, error: categoriesError } = await this.supabase
+                .from('categories')
+                .select('id, name, slug')
+                .in('id', categoryIds);
+
+            if (!categoriesError) {
+                categories = categoriesData || [];
+            }
+        }
+
+        // Map the data together
+        const postsWithRelations = posts.map(post => ({
+            ...post,
+            profiles: profiles.find(profile => profile.id === post.author_id) || null,
+            categories: categories.find(category => category.id === post.category_id) || null
+        }));
+
+        return postsWithRelations;
     }
 
     async incrementBlogPostViews(id: string) {

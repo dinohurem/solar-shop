@@ -18,12 +18,76 @@ import { filter } from 'rxjs/operators';
 import { TranslationService } from '../../../shared/services/translation.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { Subject, takeUntil } from 'rxjs';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, RouterModule, CartButtonComponent, TranslatePipe],
+  imports: [CommonModule, RouterModule, CartButtonComponent, TranslatePipe, FormsModule],
   template: `
+    <!-- Search Overlay -->
+    <div 
+      *ngIf="showSearchOverlay"
+      class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+      (click)="closeSearchOverlay()"
+    >
+      <div 
+        class="bg-white rounded-lg shadow-xl w-full max-w-2xl"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-900 font-['Poppins']">
+              {{ 'search.searchProducts' | translate }}
+            </h3>
+            <button 
+              (click)="closeSearchOverlay()"
+              class="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+          
+          <form (ngSubmit)="performSearch()" class="space-y-4">
+            <div class="relative">
+              <input 
+                type="text"
+                [(ngModel)]="searchQuery"
+                name="searchQuery"
+                [placeholder]="'search.placeholder' | translate"
+                class="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-solar-500 focus:border-solar-500 text-lg font-['DM_Sans']"
+                #searchInput
+                autofocus
+              >
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+              </div>
+            </div>
+            
+            <div class="flex justify-end space-x-3">
+              <button 
+                type="button"
+                (click)="closeSearchOverlay()"
+                class="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium font-['DM_Sans'] transition-colors"
+              >
+                {{ 'common.cancel' | translate }}
+              </button>
+              <button 
+                type="submit"
+                class="px-6 py-2 bg-solar-600 text-white rounded-lg hover:bg-solar-700 transition-colors font-medium font-['DM_Sans']"
+              >
+                {{ 'search.search' | translate }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
     <!-- Top Info Bar (Desktop) -->
     <div class="hidden lg:block bg-black text-white text-sm">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -155,8 +219,10 @@ import { Subject, takeUntil } from 'rxjs';
 
           <!-- Desktop Icons -->
           <div class="hidden lg:flex items-center space-x-5">
-            <button class="p-2 text-gray-600 hover:text-solar-600 transition-all duration-300 hover:scale-110 hover:bg-solar-50 rounded-full" 
-                    [title]="'nav.searchPlaceholder' | translate">
+            <button 
+              (click)="openSearchOverlay()"
+              class="p-2 text-gray-600 hover:text-solar-600 transition-all duration-300 hover:scale-110 hover:bg-solar-50 rounded-full" 
+              [title]="'search.searchProducts' | translate">
               <svg class="w-6 h-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
               </svg>
@@ -243,8 +309,10 @@ import { Subject, takeUntil } from 'rxjs';
 
           <!-- Mobile Menu Button and Icons -->
           <div class="lg:hidden flex items-center space-x-3">
-            <button class="p-2 text-gray-600 hover:text-solar-600 transition-all duration-300 hover:scale-110 hover:bg-solar-50 rounded-full"
-                    [title]="'nav.searchPlaceholder' | translate">
+            <button 
+              (click)="openSearchOverlay()"
+              class="p-2 text-gray-600 hover:text-solar-600 transition-all duration-300 hover:scale-110 hover:bg-solar-50 rounded-full"
+              [title]="'search.searchProducts' | translate">
               <svg class="w-6 h-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
               </svg>
@@ -478,6 +546,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
   userAvatar$: Observable<string | null>;
   isAdmin$: Observable<boolean>;
   showProfileMenu = false;
+  showSearchOverlay = false;
+  searchQuery = '';
   currentRoute = '';
 
   constructor() {
@@ -502,6 +572,13 @@ export class NavbarComponent implements OnInit, OnDestroy {
     const target = event.target as HTMLElement;
     if (!target.closest('.relative')) {
       this.showProfileMenu = false;
+    }
+  }
+
+  @HostListener('document:keydown.escape', ['$event'])
+  onEscapeKey(event: KeyboardEvent) {
+    if (this.showSearchOverlay) {
+      this.closeSearchOverlay();
     }
   }
 
@@ -541,6 +618,32 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   closeProfileMenu(): void {
     this.showProfileMenu = false;
+  }
+
+  openSearchOverlay(): void {
+    this.showSearchOverlay = true;
+    this.searchQuery = '';
+    // Focus the input after a short delay to ensure it's rendered
+    setTimeout(() => {
+      const searchInput = document.querySelector('input[name="searchQuery"]') as HTMLInputElement;
+      if (searchInput) {
+        searchInput.focus();
+      }
+    }, 100);
+  }
+
+  closeSearchOverlay(): void {
+    this.showSearchOverlay = false;
+    this.searchQuery = '';
+  }
+
+  performSearch(): void {
+    if (this.searchQuery.trim()) {
+      this.closeSearchOverlay();
+      this.router.navigate(['/products'], {
+        queryParams: { search: this.searchQuery.trim() }
+      });
+    }
   }
 
   logout(): void {
