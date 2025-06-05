@@ -6,7 +6,8 @@ import { HeroActions } from './store/hero.actions';
 import { selectIsLoading } from './store/hero.selectors';
 import { Router } from '@angular/router';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
-import { OffersService, Offer } from '../offers/services/offers.service';
+import { OffersService } from '../offers/services/offers.service';
+import { Offer } from '../../../shared/models/offer.model';
 
 @Component({
   selector: 'app-hero',

@@ -31,7 +31,7 @@ import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
             <span class="ml-2 text-sm font-medium text-gray-900">{{ product.rating }}</span>
           </div>
           <span class="mx-2 text-gray-300">|</span>
-          <a href="#reviews" class="text-sm text-[#0ACF83] hover:text-[#09b574] font-['DM_Sans']">
+          <a href="#reviews" class="text-sm text-solar-600 hover:text-solar-700 font-['DM_Sans']">
             {{ product.reviewCount }} {{ 'productList.reviews' | translate }}
           </a>
         </div>
@@ -66,7 +66,7 @@ import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
           </span>
           <span 
             *ngIf="product.discount" 
-            class="bg-[#0ACF83] text-white px-2 py-1 rounded-full text-sm font-semibold"
+            class="bg-solar-600 text-white px-2 py-1 rounded-full text-sm font-semibold"
           >
             -{{ product.discount }}%
           </span>
@@ -152,7 +152,7 @@ import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
           <button 
             (click)="addToCart()"
             [disabled]="product.availability === 'out-of-stock'"
-            class="w-full px-6 py-3 bg-[#0ACF83] text-white font-semibold rounded-lg hover:bg-[#09b574] transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed font-['DM_Sans']"
+            class="w-full px-6 py-3 bg-solar-600 text-white font-semibold rounded-lg hover:bg-solar-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed font-['DM_Sans']"
           >
             <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 11-4 0v-6m4 0V9a2 2 0 10-4 0v4.01"/>
@@ -175,19 +175,19 @@ import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
         <div class="mt-6 pt-6 border-t border-gray-200">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
             <div class="flex items-center">
-              <svg class="w-4 h-4 mr-2 text-[#0ACF83]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 mr-2 text-solar-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
               </svg>
               <span class="font-['DM_Sans']">{{ 'productDetails.freeShipping' | translate }}</span>
             </div>
             <div class="flex items-center">
-              <svg class="w-4 h-4 mr-2 text-[#0ACF83]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 mr-2 text-solar-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
               <span class="font-['DM_Sans']">{{ 'productDetails.twoYearWarranty' | translate }}</span>
             </div>
             <div class="flex items-center">
-              <svg class="w-4 h-4 mr-2 text-[#0ACF83]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 mr-2 text-solar-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
               </svg>
               <span class="font-['DM_Sans']">{{ 'productDetails.easyReturns' | translate }}</span>

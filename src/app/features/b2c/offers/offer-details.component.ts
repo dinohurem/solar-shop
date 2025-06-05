@@ -3,10 +3,11 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subject, combineLatest } from 'rxjs';
 import { takeUntil, switchMap, map } from 'rxjs/operators';
-import { OffersService, Offer } from './services/offers.service';
+import { OffersService } from './services/offers.service';
 import { AddToCartButtonComponent } from '../cart/components/add-to-cart-button/add-to-cart-button.component';
 import { SupabaseService } from '../../../services/supabase.service';
 import { CartSidebarComponent } from "../cart/components/cart-sidebar/cart-sidebar.component";
+import { Offer } from '../../../shared/models/offer.model';
 
 @Component({
   selector: 'app-offer-details',

@@ -7,7 +7,7 @@ import { OffersActions } from './store/offers.actions';
 import { selectOffers, selectIsLoading } from './store/offers.selectors';
 import { AddToCartButtonComponent } from '../cart/components/add-to-cart-button/add-to-cart-button.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
-import { Offer } from './services/offers.service';
+import { Offer } from '../../../shared/models/offer.model';
 
 @Component({
   selector: 'app-offers-page',
@@ -51,7 +51,7 @@ import { Offer } from './services/offers.service';
           <div 
             *ngFor="let offer of offers$ | async; trackBy: trackByOfferId"
             class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 group cursor-pointer"
-            (click)="navigateToProduct(offer.id)"
+            (click)="navigateToOfferDetails(offer.id)"
           >
             <!-- Product Image -->
             <div class="relative h-64 bg-gray-50 overflow-hidden">
@@ -108,7 +108,7 @@ import { Offer } from './services/offers.service';
                 </app-add-to-cart-button>
                 
                 <button 
-                  (click)="navigateToProduct(offer.id); $event.stopPropagation()"
+                  (click)="navigateToOfferDetails(offer.id); $event.stopPropagation()"
                   class="w-full px-4 py-2 bg-white text-[#324053] border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-semibold font-['DM_Sans']"
                 >
                   {{ 'offers.viewDetails' | translate }}
@@ -205,8 +205,8 @@ export class OffersPageComponent implements OnInit {
     return offer.id;
   }
 
-  navigateToProduct(productId: string): void {
-    this.router.navigate(['/products', productId]);
+  navigateToOfferDetails(offerId: string) {
+    this.router.navigate(['/offers', offerId]);
   }
 
   navigateToProducts(): void {

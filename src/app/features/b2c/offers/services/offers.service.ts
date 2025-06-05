@@ -1,32 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, from, map, catchError, of } from 'rxjs';
 import { SupabaseService } from '../../../../services/supabase.service';
-
-export interface Offer {
-    id: string;
-    title: string;
-    originalPrice: number;
-    discountedPrice: number;
-    discountPercentage: number;
-    imageUrl: string;
-    description?: string;
-    shortDescription?: string;
-    type?: string;
-    status?: string;
-    couponCode?: string;
-    startDate?: string;
-    endDate?: string;
-    featured?: boolean;
-}
-
-export interface OfferFilters {
-    featured?: boolean;
-    type?: string;
-    status?: string;
-    limit?: number;
-    offset?: number;
-}
-
+import { OfferFilters, Offer } from '../../../../shared/models/offer.model';
 @Injectable({
     providedIn: 'root'
 })

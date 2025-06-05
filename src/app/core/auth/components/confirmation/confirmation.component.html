@@ -68,7 +68,7 @@
                 <!-- Resend Email Button -->
                 <button type="button" (click)="resendConfirmationEmail()"
                     [disabled]="resendLoading || resendCooldown > 0 || !email"
-                    class="w-full h-12 bg-[#0ACF83] hover:bg-[#0ACF83]/90 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#0ACF83] focus:ring-offset-2 font-['DM_Sans'] flex items-center justify-center">
+                    class="w-full h-12 bg-solar-500 hover:bg-solar-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-solar-500 focus:ring-offset-2 font-['DM_Sans'] flex items-center justify-center">
 
                     <app-loader *ngIf="resendLoading" class="w-5 h-5 mr-2"></app-loader>
 
@@ -83,7 +83,7 @@
 
                 <!-- Back to Login Button -->
                 <button type="button" (click)="goToLogin()"
-                    class="w-full h-12 bg-white hover:bg-gray-50 border border-gray-300 text-[#222529] font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#0ACF83] focus:ring-offset-2 font-['DM_Sans']">
+                    class="w-full h-12 bg-white hover:bg-gray-50 border border-gray-300 text-[#222529] font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-solar-500 focus:ring-offset-2 font-['DM_Sans']">
                     Back to Login
                 </button>
             </div>
@@ -92,7 +92,7 @@
             <div class="mt-8 text-center">
                 <p class="text-sm text-[#324053] font-['DM_Sans']">
                     Still having trouble?
-                    <a href="/contact" class="text-[#0ACF83] hover:text-[#0ACF83]/80 font-medium">Contact Support</a>
+                    <a href="/contact" class="text-solar-600 hover:text-solar-700 font-medium">Contact Support</a>
                 </p>
             </div>
         </div>
@@ -100,7 +100,7 @@
 
     <!-- Background Image - Right side -->
     <div
-        class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-[#0ACF83] to-[#0ACF83]/80 items-center justify-center relative overflow-hidden">
+        class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-solar-500 to-solar-600 items-center justify-center relative overflow-hidden">
         <!-- Background Pattern -->
         <div class="absolute inset-0 opacity-10">
             <svg class="w-full h-full" viewBox="0 0 100 100" fill="none">
@@ -116,10 +116,9 @@
         <!-- Content -->
         <div class="relative z-10 text-center text-white">
             <div class="mb-6">
-                <div class="w-20 h-20 mx-auto bg-white/20 rounded-full flex items-center justify-center mb-4">
-                    <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                    </svg>
+                <!-- Logo -->
+                <div class="w-32 h-32 mx-auto mb-6 flex items-center justify-center">
+                    <img src="assets/images/logo.svg" alt="SolarShop" class="w-full h-auto filter brightness-0 invert">
                 </div>
                 <h2 class="text-3xl font-bold font-['Poppins'] mb-2">Almost There!</h2>
                 <p class="text-white/90 font-['DM_Sans']">Just one more step to get started</p>

@@ -1,4 +1,4 @@
-import { Offer } from '../services/offers.service';
+import { Offer } from '../../../../shared/models/offer.model';
 
 export interface OffersState {
     offers: Offer[];

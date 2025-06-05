@@ -24,7 +24,7 @@ import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
           *ngFor="let image of productImages; let i = index"
           (click)="selectImage(image)"
           class="aspect-square overflow-hidden rounded-lg bg-gray-100 border-2 transition-colors"
-          [class.border-[#0ACF83]]="selectedImage === image"
+          [class.border-solar-600]="selectedImage === image"
           [class.border-gray-200]="selectedImage !== image"
         >
           <img 

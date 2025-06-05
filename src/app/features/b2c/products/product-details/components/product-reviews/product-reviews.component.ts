@@ -71,7 +71,7 @@ export interface Review {
         <div class="mb-8">
           <button 
             (click)="openWriteReview()"
-            class="px-6 py-3 bg-[#0ACF83] text-white font-semibold rounded-lg hover:bg-[#09b574] transition-colors font-['DM_Sans']"
+            class="px-6 py-3 bg-solar-600 text-white font-semibold rounded-lg hover:bg-solar-700 transition-colors font-['DM_Sans']"
           >
             {{ 'reviews.writeReview' | translate }}
           </button>
