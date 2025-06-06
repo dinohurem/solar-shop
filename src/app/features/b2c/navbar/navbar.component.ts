@@ -28,62 +28,89 @@ import { FormsModule } from '@angular/forms';
     <!-- Search Overlay -->
     <div 
       *ngIf="showSearchOverlay"
-      class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+      class="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center p-4"
       (click)="closeSearchOverlay()"
     >
       <div 
-        class="bg-white rounded-lg shadow-xl w-full max-w-2xl"
+        class="bg-white/95 backdrop-blur-md rounded-xl shadow-2xl w-full max-w-2xl border border-white/20 search-overlay-content"
         (click)="$event.stopPropagation()"
       >
         <div class="p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold text-gray-900 font-['Poppins']">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-xl font-semibold text-gray-900 font-['Poppins']">
               {{ 'search.searchProducts' | translate }}
             </h3>
             <button 
               (click)="closeSearchOverlay()"
-              class="text-gray-400 hover:text-gray-600 transition-colors"
+              class="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
             >
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
               </svg>
             </button>
           </div>
           
-          <form (ngSubmit)="performSearch()" class="space-y-4">
+          <form (ngSubmit)="performSearch()" class="relative">
             <div class="relative">
+              <!-- Search Icon -->
+              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+              </div>
+              
+              <!-- Search Input -->
               <input 
                 type="text"
                 [(ngModel)]="searchQuery"
                 name="searchQuery"
                 [placeholder]="'search.placeholder' | translate"
-                class="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-solar-500 focus:border-solar-500 text-lg font-['DM_Sans']"
+                class="w-full px-4 py-4 pl-12 pr-24 border border-gray-200 rounded-xl focus:ring-2 focus:ring-solar-500/50 focus:border-solar-500 text-lg font-['DM_Sans'] bg-white/80 backdrop-blur-sm placeholder-gray-400 search-input"
                 #searchInput
                 autofocus
+                (keydown.escape)="closeSearchOverlay()"
               >
-              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                </svg>
+              
+              <!-- Action Buttons Container -->
+              <div class="absolute inset-y-0 right-0 flex items-center pr-2 space-x-1">
+                <!-- Clear/Cancel Button -->
+                <button 
+                  type="button"
+                  *ngIf="searchQuery.length > 0"
+                  (click)="clearSearch()"
+                  class="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100"
+                  [title]="'common.clear' | translate">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                </button>
+                
+                <!-- Search Submit Button -->
+                <button 
+                  type="submit"
+                  [disabled]="!searchQuery.trim()"
+                  class="p-2 text-white bg-solar-600 hover:bg-solar-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors rounded-lg"
+                  [title]="'search.search' | translate">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                  </svg>
+                </button>
               </div>
             </div>
-            
-            <div class="flex justify-end space-x-3">
+          </form>
+          
+          <!-- Quick Search Suggestions (Optional) -->
+          <div class="mt-4 text-sm text-gray-500">
+            <p class="font-medium mb-2">{{ 'search.suggestions' | translate }}</p>
+            <div class="flex flex-wrap gap-2">
               <button 
-                type="button"
-                (click)="closeSearchOverlay()"
-                class="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium font-['DM_Sans'] transition-colors"
-              >
-                {{ 'common.cancel' | translate }}
-              </button>
-              <button 
-                type="submit"
-                class="px-6 py-2 bg-solar-600 text-white rounded-lg hover:bg-solar-700 transition-colors font-medium font-['DM_Sans']"
-              >
-                {{ 'search.search' | translate }}
+                *ngFor="let suggestion of searchSuggestions"
+                (click)="selectSearchSuggestion(suggestion)"
+                class="px-3 py-1 bg-gray-100 hover:bg-solar-100 text-gray-700 hover:text-solar-700 rounded-full transition-colors text-xs">
+                {{ suggestion }}
               </button>
             </div>
-          </form>
+          </div>
         </div>
       </div>
     </div>
@@ -530,6 +557,37 @@ import { FormsModule } from '@angular/forms';
     .group:hover .group-hover\\:scale-105 {
       transform: scale(1.05);
     }
+    
+    /* Search overlay enhancements */
+    .backdrop-blur-sm {
+      backdrop-filter: blur(4px);
+    }
+    
+    .backdrop-blur-md {
+      backdrop-filter: blur(8px);
+    }
+    
+    /* Custom focus states for search input */
+    .search-input:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(244, 116, 36, 0.1);
+    }
+    
+    /* Smooth fade-in animation for search overlay */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+    
+    .search-overlay-content {
+      animation: fadeIn 0.2s ease-out;
+    }
   `],
   animations: []
 })
@@ -549,6 +607,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   showSearchOverlay = false;
   searchQuery = '';
   currentRoute = '';
+  searchSuggestions = ['Solar Panels', 'Inverters', 'Batteries', 'Mounting Systems', 'Cables'];
 
   constructor() {
     this.isMobileMenuOpen$ = this.store.select(selectIsMobileMenuOpen);
@@ -635,6 +694,19 @@ export class NavbarComponent implements OnInit, OnDestroy {
   closeSearchOverlay(): void {
     this.showSearchOverlay = false;
     this.searchQuery = '';
+  }
+
+  clearSearch(): void {
+    this.searchQuery = '';
+    const searchInput = document.querySelector('input[name="searchQuery"]') as HTMLInputElement;
+    if (searchInput) {
+      searchInput.focus();
+    }
+  }
+
+  selectSearchSuggestion(suggestion: string): void {
+    this.searchQuery = suggestion;
+    this.performSearch();
   }
 
   performSearch(): void {

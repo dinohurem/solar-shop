@@ -26,6 +26,16 @@ import { AdminLayoutComponent } from './features/admin/admin-layout/admin-layout
 import { AdminDashboardComponent } from './features/admin/dashboard/admin-dashboard.component';
 import { AdminProductsComponent } from './features/admin/products/admin-products.component';
 import { AdminBlogComponent } from './features/admin/blog/admin-blog.component';
+import { AdminCategoriesComponent } from './features/admin/categories/admin-categories.component';
+import { AdminOffersComponent } from './features/admin/offers/admin-offers.component';
+import { AdminUsersComponent } from './features/admin/users/admin-users.component';
+import { AdminOrdersComponent } from './features/admin/orders/admin-orders.component';
+import { CategoryFormComponent } from './features/admin/categories/category-form/category-form.component';
+import { ProductFormComponent } from './features/admin/products/product-form/product-form.component';
+import { OfferFormComponent } from './features/admin/offers/offer-form/offer-form.component';
+import { BlogFormComponent } from './features/admin/blog/blog-form/blog-form.component';
+import { UserFormComponent } from './features/admin/users/user-form/user-form.component';
+import { OrderFormComponent } from './features/admin/orders/order-form/order-form.component';
 
 export const routes: Routes = [
     // Authentication routes (no layout) - no guards needed, Supabase handles auth state
@@ -75,8 +85,36 @@ export const routes: Routes = [
         canActivate: [AdminGuard],
         children: [
             { path: '', component: AdminDashboardComponent },
+
+            // Products
             { path: 'products', component: AdminProductsComponent },
-            { path: 'blog', component: AdminBlogComponent }
+            { path: 'products/create', component: ProductFormComponent },
+            { path: 'products/edit/:id', component: ProductFormComponent },
+
+            // Categories
+            { path: 'categories', component: AdminCategoriesComponent },
+            { path: 'categories/create', component: CategoryFormComponent },
+            { path: 'categories/edit/:id', component: CategoryFormComponent },
+
+            // Blog
+            { path: 'blog', component: AdminBlogComponent },
+            { path: 'blog/create', component: BlogFormComponent },
+            { path: 'blog/edit/:id', component: BlogFormComponent },
+
+            // Offers
+            { path: 'offers', component: AdminOffersComponent },
+            { path: 'offers/create', component: OfferFormComponent },
+            { path: 'offers/edit/:id', component: OfferFormComponent },
+
+            // Users
+            { path: 'users', component: AdminUsersComponent },
+            { path: 'users/create', component: UserFormComponent },
+            { path: 'users/edit/:id', component: UserFormComponent },
+
+            // Orders
+            { path: 'orders', component: AdminOrdersComponent },
+            { path: 'orders/create', component: OrderFormComponent },
+            { path: 'orders/edit/:id', component: OrderFormComponent }
         ]
     },
 

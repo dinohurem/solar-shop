@@ -114,7 +114,8 @@ export class TranslationService {
                 page: 'Stranica',
                 of: 'od',
                 noResults: 'Nema rezultata',
-                tryAgain: 'Pokušajte ponovno'
+                tryAgain: 'Pokušajte ponovno',
+                clear: 'Obriši'
             },
             // Contact Information
             contact: {
@@ -363,7 +364,9 @@ export class TranslationService {
                 searchProducts: 'Pretraži proizvode',
                 search: 'Pretraži',
                 placeholder: 'Unesite naziv ili opis proizvoda...',
-                searchByName: 'Pretraži po nazivu ili opisu...'
+                searchByName: 'Pretraži po nazivu ili opisu...',
+                suggestions: 'Prijedlozi',
+                clear: 'Obriši'
             },
             // Contact & Support
             contactSupport: {
@@ -564,7 +567,8 @@ export class TranslationService {
                 page: 'Page',
                 of: 'of',
                 noResults: 'No results',
-                tryAgain: 'Try again'
+                tryAgain: 'Try again',
+                clear: 'Clear'
             },
             // Contact Information
             contact: {
@@ -813,7 +817,9 @@ export class TranslationService {
                 searchProducts: 'Search products',
                 search: 'Search',
                 placeholder: 'Enter product name or description...',
-                searchByName: 'Search by name or description...'
+                searchByName: 'Search by name or description...',
+                suggestions: 'Suggestions',
+                clear: 'Clear'
             },
             // Contact & Support
             contactSupport: {

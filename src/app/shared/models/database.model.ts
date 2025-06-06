@@ -215,6 +215,67 @@ export interface Database {
                     updated_at?: string;
                 };
             };
+            orders: {
+                Row: {
+                    id: string;
+                    order_number: string;
+                    customer_email: string;
+                    customer_name?: string;
+                    customer_phone?: string;
+                    total_amount: number;
+                    status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'refunded';
+                    payment_status: 'pending' | 'paid' | 'failed' | 'refunded' | 'partially_refunded';
+                    shipping_status?: 'not_shipped' | 'preparing' | 'shipped' | 'in_transit' | 'delivered' | 'returned';
+                    payment_method?: 'credit_card' | 'debit_card' | 'paypal' | 'bank_transfer' | 'cash_on_delivery';
+                    order_date: string;
+                    shipping_address?: string;
+                    billing_address?: string;
+                    tracking_number?: string;
+                    shipping_cost?: number;
+                    notes?: string;
+                    created_at: string;
+                    updated_at: string;
+                };
+                Insert: {
+                    id?: string;
+                    order_number: string;
+                    customer_email: string;
+                    customer_name?: string;
+                    customer_phone?: string;
+                    total_amount: number;
+                    status?: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'refunded';
+                    payment_status?: 'pending' | 'paid' | 'failed' | 'refunded' | 'partially_refunded';
+                    shipping_status?: 'not_shipped' | 'preparing' | 'shipped' | 'in_transit' | 'delivered' | 'returned';
+                    payment_method?: 'credit_card' | 'debit_card' | 'paypal' | 'bank_transfer' | 'cash_on_delivery';
+                    order_date: string;
+                    shipping_address?: string;
+                    billing_address?: string;
+                    tracking_number?: string;
+                    shipping_cost?: number;
+                    notes?: string;
+                    created_at?: string;
+                    updated_at?: string;
+                };
+                Update: {
+                    id?: string;
+                    order_number?: string;
+                    customer_email?: string;
+                    customer_name?: string;
+                    customer_phone?: string;
+                    total_amount?: number;
+                    status?: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'refunded';
+                    payment_status?: 'pending' | 'paid' | 'failed' | 'refunded' | 'partially_refunded';
+                    shipping_status?: 'not_shipped' | 'preparing' | 'shipped' | 'in_transit' | 'delivered' | 'returned';
+                    payment_method?: 'credit_card' | 'debit_card' | 'paypal' | 'bank_transfer' | 'cash_on_delivery';
+                    order_date?: string;
+                    shipping_address?: string;
+                    billing_address?: string;
+                    tracking_number?: string;
+                    shipping_cost?: number;
+                    notes?: string;
+                    updated_at?: string;
+                };
+            };
             offers: {
                 Row: {
                     id: string;

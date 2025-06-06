@@ -1,12 +1,12 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { Observable, from, map, catchError, of, BehaviorSubject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { SupabaseService } from '../../../services/supabase.service';
-import { DataTableComponent, TableConfig, TableColumn, TableAction } from '../shared/data-table/data-table.component';
+import { DataTableComponent, TableConfig } from '../shared/data-table/data-table.component';
 
 @Component({
-    selector: 'app-admin-products',
+    selector: 'app-admin-categories',
     standalone: true,
     imports: [CommonModule, DataTableComponent],
     template: `
@@ -14,19 +14,19 @@ import { DataTableComponent, TableConfig, TableColumn, TableAction } from '../sh
       <!-- Page Header -->
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-3xl font-bold text-gray-900">Products</h1>
-          <p class="mt-2 text-gray-600">Manage your product catalog</p>
+          <h1 class="text-3xl font-bold text-gray-900">Categories</h1>
+          <p class="mt-2 text-gray-600">Manage product categories</p>
         </div>
       </div>
 
       <!-- Data Table -->
       <app-data-table
-        title="Products"
-        [data]="(products$ | async) || []"
+        title="Categories"
+        [data]="(categories$ | async) || []"
         [config]="tableConfig"
         [loading]="(loading$ | async) || false"
         (actionClicked)="onTableAction($event)"
-        (addClicked)="onAddProduct()"
+        (addClicked)="onAddCategory()"
         (rowClicked)="onRowClick($event)"
         (csvImported)="onCsvImported($event)">
       </app-data-table>
@@ -38,14 +38,14 @@ import { DataTableComponent, TableConfig, TableColumn, TableAction } from '../sh
     }
   `]
 })
-export class AdminProductsComponent implements OnInit {
+export class AdminCategoriesComponent implements OnInit {
     private supabaseService = inject(SupabaseService);
     private router = inject(Router);
 
-    private productsSubject = new BehaviorSubject<any[]>([]);
+    private categoriesSubject = new BehaviorSubject<any[]>([]);
     private loadingSubject = new BehaviorSubject<boolean>(true);
 
-    products$ = this.productsSubject.asObservable();
+    categories$ = this.categoriesSubject.asObservable();
     loading$ = this.loadingSubject.asObservable();
 
     tableConfig: TableConfig = {
@@ -65,29 +65,22 @@ export class AdminProductsComponent implements OnInit {
                 searchable: true
             },
             {
-                key: 'sku',
-                label: 'SKU',
+                key: 'slug',
+                label: 'Slug',
                 type: 'text',
                 sortable: true,
                 searchable: true
             },
             {
-                key: 'brand',
-                label: 'Brand',
+                key: 'description',
+                label: 'Description',
                 type: 'text',
-                sortable: true,
+                sortable: false,
                 searchable: true
             },
             {
-                key: 'price',
-                label: 'Price',
-                type: 'number',
-                sortable: true,
-                format: (value) => value ? `$${value.toFixed(2)}` : ''
-            },
-            {
-                key: 'stock_quantity',
-                label: 'Stock',
+                key: 'sort_order',
+                label: 'Sort Order',
                 type: 'number',
                 sortable: true
             },
@@ -128,7 +121,7 @@ export class AdminProductsComponent implements OnInit {
     };
 
     ngOnInit(): void {
-        this.loadProducts();
+        this.loadCategories();
     }
 
     onTableAction(event: { action: string, item: any }): void {
@@ -136,20 +129,20 @@ export class AdminProductsComponent implements OnInit {
 
         switch (action) {
             case 'edit':
-                this.router.navigate(['/admin/products/edit', item.id]);
+                this.router.navigate(['/admin/categories/edit', item.id]);
                 break;
             case 'delete':
-                this.deleteProduct(item);
+                this.deleteCategory(item);
                 break;
         }
     }
 
     onRowClick(item: any): void {
-        this.router.navigate(['/admin/products/edit', item.id]);
+        this.router.navigate(['/admin/categories/edit', item.id]);
     }
 
-    onAddProduct(): void {
-        this.router.navigate(['/admin/products/create']);
+    onAddCategory(): void {
+        this.router.navigate(['/admin/categories/create']);
     }
 
     async onCsvImported(csvData: any[]): Promise<void> {
@@ -161,69 +154,57 @@ export class AdminProductsComponent implements OnInit {
         this.loadingSubject.next(true);
 
         try {
-            // Map CSV data to product format
-            const products = csvData.map(row => ({
+            // Map CSV data to category format
+            const categories = csvData.map(row => ({
                 name: row.name || row.Name || '',
+                slug: (row.slug || row.Slug || row.name || row.Name || '').toLowerCase().replace(/\s+/g, '-'),
                 description: row.description || row.Description || '',
-                short_description: row.short_description || row['Short Description'] || '',
-                price: parseFloat(row.price || row.Price || '0'),
-                original_price: row.original_price ? parseFloat(row.original_price) : undefined,
-                currency: row.currency || row.Currency || 'USD',
-                sku: row.sku || row.SKU || '',
-                brand: row.brand || row.Brand || '',
-                category_id: row.category_id || row['Category ID'] || undefined,
-                weight: row.weight ? parseFloat(row.weight) : undefined,
-                dimensions: row.dimensions || undefined,
-                stock_quantity: parseInt(row.stock_quantity || row['Stock Quantity'] || '0'),
-                stock_threshold: parseInt(row.stock_threshold || row['Stock Threshold'] || '5'),
-                is_active: (row.is_active || row['Is Active'] || 'true').toLowerCase() === 'true',
-                is_featured: (row.is_featured || row['Is Featured'] || 'false').toLowerCase() === 'true',
-                tags: row.tags ? row.tags.split(',').map((t: string) => t.trim()) : [],
                 image_url: row.image_url || row['Image URL'] || undefined,
-                gallery_urls: row.gallery_urls ? row.gallery_urls.split(',').map((u: string) => u.trim()) : []
+                sort_order: parseInt(row.sort_order || row['Sort Order'] || '0'),
+                is_active: (row.is_active || row['Is Active'] || 'true').toLowerCase() === 'true'
             }));
 
-            // Import products one by one
-            for (const product of products) {
-                await this.supabaseService.createRecord('products', product);
+            // Import categories one by one
+            for (const category of categories) {
+                await this.supabaseService.createRecord('categories', category);
             }
 
-            alert(`Successfully imported ${products.length} products`);
-            this.loadProducts();
+            alert(`Successfully imported ${categories.length} categories`);
+            this.loadCategories();
         } catch (error) {
-            console.error('Error importing products:', error);
-            alert('Error importing products. Please check the CSV format.');
+            console.error('Error importing categories:', error);
+            alert('Error importing categories. Please check the CSV format.');
         } finally {
             this.loadingSubject.next(false);
         }
     }
 
-    private async loadProducts(): Promise<void> {
+    private async loadCategories(): Promise<void> {
         this.loadingSubject.next(true);
 
         try {
-            const products = await this.supabaseService.getTable('products');
-            this.productsSubject.next(products || []);
+            const categories = await this.supabaseService.getTable('categories');
+            this.categoriesSubject.next(categories || []);
         } catch (error) {
-            console.error('Error loading products:', error);
-            this.productsSubject.next([]);
+            console.error('Error loading categories:', error);
+            this.categoriesSubject.next([]);
         } finally {
             this.loadingSubject.next(false);
         }
     }
 
-    private async deleteProduct(product: any): Promise<void> {
-        if (!confirm(`Are you sure you want to delete "${product.name}"?`)) {
+    private async deleteCategory(category: any): Promise<void> {
+        if (!confirm(`Are you sure you want to delete "${category.name}"?`)) {
             return;
         }
 
         try {
-            await this.supabaseService.deleteRecord('products', product.id);
-            alert('Product deleted successfully');
-            this.loadProducts();
+            await this.supabaseService.deleteRecord('categories', category.id);
+            alert('Category deleted successfully');
+            this.loadCategories();
         } catch (error) {
-            console.error('Error deleting product:', error);
-            alert('Error deleting product');
+            console.error('Error deleting category:', error);
+            alert('Error deleting category');
         }
     }
 } 

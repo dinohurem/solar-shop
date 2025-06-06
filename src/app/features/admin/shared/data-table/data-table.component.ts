@@ -4,38 +4,39 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 
 export interface TableColumn {
-    key: string;
-    label: string;
-    type?: 'text' | 'number' | 'date' | 'boolean' | 'image' | 'status' | 'array';
-    sortable?: boolean;
-    searchable?: boolean;
-    format?: (value: any) => string;
+  key: string;
+  label: string;
+  type?: 'text' | 'number' | 'date' | 'boolean' | 'image' | 'status' | 'array';
+  sortable?: boolean;
+  searchable?: boolean;
+  format?: (value: any) => string;
 }
 
 export interface TableAction {
-    label: string;
-    icon: string;
-    action: string;
-    class?: string;
-    condition?: (item: any) => boolean;
+  label: string;
+  icon: string;
+  action: string;
+  class?: string;
+  condition?: (item: any) => boolean;
 }
 
 export interface TableConfig {
-    columns: TableColumn[];
-    actions: TableAction[];
-    searchable?: boolean;
-    sortable?: boolean;
-    paginated?: boolean;
-    pageSize?: number;
-    allowCsvImport?: boolean;
-    allowExport?: boolean;
+  columns: TableColumn[];
+  actions: TableAction[];
+  searchable?: boolean;
+  sortable?: boolean;
+  paginated?: boolean;
+  pageSize?: number;
+  allowCsvImport?: boolean;
+  allowExport?: boolean;
+  rowClickable?: boolean;
 }
 
 @Component({
-    selector: 'app-data-table',
-    standalone: true,
-    imports: [CommonModule, FormsModule, RouterModule],
-    template: `
+  selector: 'app-data-table',
+  standalone: true,
+  imports: [CommonModule, FormsModule, RouterModule],
+  template: `
     <div class="bg-white rounded-lg shadow-sm border border-gray-200">
       <!-- Table Header -->
       <div class="px-6 py-4 border-b border-gray-200">
@@ -135,8 +136,34 @@ export interface TableConfig {
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
+            <!-- No data message -->
+            <tr *ngIf="paginatedData.length === 0 && !loading" class="text-center">
+              <td [attr.colspan]="config.columns.length + 1" class="px-6 py-12 text-gray-500">
+                <div class="flex flex-col items-center">
+                  <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m8-4h.01M9 9h1m4 0h.01M9 12h1m4 0h.01"/>
+                  </svg>
+                  <p class="text-lg font-medium">No data available</p>
+                  <p class="text-sm">{{ searchTerm ? 'No results found for your search.' : 'Get started by adding your first record.' }}</p>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Loading state -->
+            <tr *ngIf="loading" class="text-center">
+              <td [attr.colspan]="config.columns.length + 1" class="px-6 py-12">
+                <div class="flex items-center justify-center">
+                  <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  <span class="ml-3 text-gray-600">Loading...</span>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Data rows -->
             <tr *ngFor="let item of paginatedData; let i = index" 
-                class="hover:bg-gray-50 transition-colors">
+                class="hover:bg-gray-50 transition-colors"
+                [class.cursor-pointer]="config.rowClickable !== false"
+                (click)="onRowClick(item)">
               <td *ngFor="let column of config.columns" 
                   class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                 <ng-container [ngSwitch]="column.type">
@@ -196,9 +223,10 @@ export interface TableConfig {
                 <div class="flex items-center justify-end space-x-2">
                   <ng-container *ngFor="let action of config.actions">
                     <button *ngIf="!action.condition || action.condition(item)"
-                            (click)="onAction(action.action, item)"
+                            (click)="onAction(action.action, item, $event)"
                             [class]="action.class || 'text-blue-600 hover:text-blue-900'"
-                            class="p-1 rounded hover:bg-gray-100 transition-colors">
+                            class="p-1 rounded hover:bg-gray-100 transition-colors"
+                            [title]="action.label">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" [innerHTML]="action.icon">
                       </svg>
                       <span class="sr-only">{{ action.label }}</span>
@@ -259,200 +287,207 @@ export interface TableConfig {
       </div>
     </div>
   `,
-    styles: [`
+  styles: [`
     :host {
       display: block;
     }
   `]
 })
 export class DataTableComponent implements OnInit {
-    @Input() title: string = '';
-    @Input() data: any[] = [];
-    @Input() config!: TableConfig;
-    @Input() loading: boolean = false;
+  @Input() title: string = '';
+  @Input() data: any[] = [];
+  @Input() config!: TableConfig;
+  @Input() loading: boolean = false;
 
-    @Output() actionClicked = new EventEmitter<{ action: string, item: any }>();
-    @Output() addClicked = new EventEmitter<void>();
-    @Output() csvImported = new EventEmitter<any[]>();
+  @Output() actionClicked = new EventEmitter<{ action: string, item: any }>();
+  @Output() addClicked = new EventEmitter<void>();
+  @Output() csvImported = new EventEmitter<any[]>();
+  @Output() rowClicked = new EventEmitter<any>();
 
-    searchTerm: string = '';
-    sortColumn: string = '';
-    sortDirection: 'asc' | 'desc' = 'asc';
-    currentPage: number = 1;
-    pageSize: number = 10;
-    importing: boolean = false;
+  searchTerm: string = '';
+  sortColumn: string = '';
+  sortDirection: 'asc' | 'desc' = 'asc';
+  currentPage: number = 1;
+  pageSize: number = 10;
+  importing: boolean = false;
 
-    filteredData: any[] = [];
-    paginatedData: any[] = [];
-    totalPages: number = 0;
+  filteredData: any[] = [];
+  paginatedData: any[] = [];
+  totalPages: number = 0;
 
-    Math = Math;
+  Math = Math;
 
-    ngOnInit(): void {
-        this.pageSize = this.config.pageSize || 10;
-        this.updateDisplayData();
+  ngOnInit(): void {
+    this.pageSize = this.config.pageSize || 10;
+    this.updateDisplayData();
+  }
+
+  ngOnChanges(): void {
+    this.updateDisplayData();
+  }
+
+  onSearch(): void {
+    this.currentPage = 1;
+    this.updateDisplayData();
+  }
+
+  onSort(column: TableColumn): void {
+    if (!column.sortable) return;
+
+    if (this.sortColumn === column.key) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortColumn = column.key;
+      this.sortDirection = 'asc';
     }
+    this.updateDisplayData();
+  }
 
-    ngOnChanges(): void {
-        this.updateDisplayData();
+  onAction(action: string, item: any, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
     }
+    this.actionClicked.emit({ action, item });
+  }
 
-    onSearch(): void {
-        this.currentPage = 1;
-        this.updateDisplayData();
+  onAdd(): void {
+    this.addClicked.emit();
+  }
+
+  onFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file && file.type === 'text/csv') {
+      this.importing = true;
+      this.parseCsv(file);
     }
+  }
 
-    onSort(column: TableColumn): void {
-        if (!column.sortable) return;
+  private parseCsv(file: File): void {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const csv = e.target?.result as string;
+      const lines = csv.split('\n');
+      const headers = lines[0].split(',').map(h => h.trim());
 
-        if (this.sortColumn === column.key) {
-            this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-        } else {
-            this.sortColumn = column.key;
-            this.sortDirection = 'asc';
-        }
-        this.updateDisplayData();
-    }
-
-    onAction(action: string, item: any): void {
-        this.actionClicked.emit({ action, item });
-    }
-
-    onAdd(): void {
-        this.addClicked.emit();
-    }
-
-    onFileSelected(event: any): void {
-        const file = event.target.files[0];
-        if (file && file.type === 'text/csv') {
-            this.importing = true;
-            this.parseCsv(file);
-        }
-    }
-
-    private parseCsv(file: File): void {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const csv = e.target?.result as string;
-            const lines = csv.split('\n');
-            const headers = lines[0].split(',').map(h => h.trim());
-
-            const data = lines.slice(1)
-                .filter(line => line.trim())
-                .map(line => {
-                    const values = line.split(',');
-                    const obj: any = {};
-                    headers.forEach((header, index) => {
-                        obj[header] = values[index]?.trim() || '';
-                    });
-                    return obj;
-                });
-
-            this.importing = false;
-            this.csvImported.emit(data);
-        };
-        reader.readAsText(file);
-    }
-
-    exportToCsv(): void {
-        const headers = this.config.columns.map(col => col.label).join(',');
-        const rows = this.data.map(item =>
-            this.config.columns.map(col => this.getColumnValue(item, col.key) || '').join(',')
-        );
-
-        const csv = [headers, ...rows].join('\n');
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${this.title.toLowerCase().replace(/\s+/g, '-')}.csv`;
-        a.click();
-        window.URL.revokeObjectURL(url);
-    }
-
-    goToPage(page: number): void {
-        if (page >= 1 && page <= this.totalPages) {
-            this.currentPage = page;
-            this.updateDisplayData();
-        }
-    }
-
-    getPageNumbers(): number[] {
-        const pages: number[] = [];
-        const maxPages = 5; // Show max 5 page numbers
-        const half = Math.floor(maxPages / 2);
-
-        let start = Math.max(1, this.currentPage - half);
-        let end = Math.min(this.totalPages, start + maxPages - 1);
-
-        if (end - start + 1 < maxPages) {
-            start = Math.max(1, end - maxPages + 1);
-        }
-
-        for (let i = start; i <= end; i++) {
-            pages.push(i);
-        }
-
-        return pages;
-    }
-
-    getColumnValue(item: any, key: string): any {
-        return key.split('.').reduce((obj, k) => obj?.[k], item);
-    }
-
-    getStatusClass(status: string): string {
-        const statusClasses: { [key: string]: string } = {
-            'active': 'bg-green-100 text-green-800',
-            'inactive': 'bg-red-100 text-red-800',
-            'published': 'bg-green-100 text-green-800',
-            'draft': 'bg-yellow-100 text-yellow-800',
-            'archived': 'bg-gray-100 text-gray-800',
-            'pending': 'bg-blue-100 text-blue-800',
-            'approved': 'bg-green-100 text-green-800',
-            'rejected': 'bg-red-100 text-red-800'
-        };
-        return statusClasses[status?.toLowerCase()] || 'bg-gray-100 text-gray-800';
-    }
-
-    formatDate(date: string): string {
-        if (!date) return '';
-        return new Date(date).toLocaleDateString();
-    }
-
-    private updateDisplayData(): void {
-        // Filter data
-        this.filteredData = this.data.filter(item => {
-            if (!this.searchTerm) return true;
-
-            return this.config.columns
-                .filter(col => col.searchable !== false)
-                .some(col => {
-                    const value = this.getColumnValue(item, col.key);
-                    return value?.toString().toLowerCase().includes(this.searchTerm.toLowerCase());
-                });
+      const data = lines.slice(1)
+        .filter(line => line.trim())
+        .map(line => {
+          const values = line.split(',');
+          const obj: any = {};
+          headers.forEach((header, index) => {
+            obj[header] = values[index]?.trim() || '';
+          });
+          return obj;
         });
 
-        // Sort data
-        if (this.sortColumn) {
-            this.filteredData.sort((a, b) => {
-                const aVal = this.getColumnValue(a, this.sortColumn);
-                const bVal = this.getColumnValue(b, this.sortColumn);
+      this.importing = false;
+      this.csvImported.emit(data);
+    };
+    reader.readAsText(file);
+  }
 
-                let comparison = 0;
-                if (aVal < bVal) comparison = -1;
-                if (aVal > bVal) comparison = 1;
+  exportToCsv(): void {
+    const headers = this.config.columns.map(col => col.label).join(',');
+    const rows = this.data.map(item =>
+      this.config.columns.map(col => this.getColumnValue(item, col.key) || '').join(',')
+    );
 
-                return this.sortDirection === 'desc' ? -comparison : comparison;
-            });
-        }
+    const csv = [headers, ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${this.title.toLowerCase().replace(/\s+/g, '-')}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  }
 
-        // Pagination
-        this.totalPages = Math.ceil(this.filteredData.length / this.pageSize);
-        if (this.config.paginated) {
-            const startIndex = (this.currentPage - 1) * this.pageSize;
-            this.paginatedData = this.filteredData.slice(startIndex, startIndex + this.pageSize);
-        } else {
-            this.paginatedData = this.filteredData;
-        }
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.updateDisplayData();
     }
+  }
+
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    const maxPages = 5;
+    const half = Math.floor(maxPages / 2);
+
+    let start = Math.max(1, this.currentPage - half);
+    let end = Math.min(this.totalPages, start + maxPages - 1);
+
+    if (end - start + 1 < maxPages) {
+      start = Math.max(1, end - maxPages + 1);
+    }
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+
+    return pages;
+  }
+
+  getColumnValue(item: any, key: string): any {
+    return key.split('.').reduce((obj, k) => obj?.[k], item);
+  }
+
+  getStatusClass(status: string): string {
+    const statusClasses: { [key: string]: string } = {
+      'active': 'bg-green-100 text-green-800',
+      'inactive': 'bg-red-100 text-red-800',
+      'published': 'bg-green-100 text-green-800',
+      'draft': 'bg-yellow-100 text-yellow-800',
+      'archived': 'bg-gray-100 text-gray-800',
+      'pending': 'bg-blue-100 text-blue-800',
+      'approved': 'bg-green-100 text-green-800',
+      'rejected': 'bg-red-100 text-red-800'
+    };
+    return statusClasses[status?.toLowerCase()] || 'bg-gray-100 text-gray-800';
+  }
+
+  formatDate(date: string): string {
+    if (!date) return '';
+    return new Date(date).toLocaleDateString();
+  }
+
+  onRowClick(item: any): void {
+    if (this.config.rowClickable !== false) {
+      this.rowClicked.emit(item);
+    }
+  }
+
+  private updateDisplayData(): void {
+    this.filteredData = this.data.filter(item => {
+      if (!this.searchTerm) return true;
+
+      return this.config.columns
+        .filter(col => col.searchable !== false)
+        .some(col => {
+          const value = this.getColumnValue(item, col.key);
+          return value?.toString().toLowerCase().includes(this.searchTerm.toLowerCase());
+        });
+    });
+
+    if (this.sortColumn) {
+      this.filteredData.sort((a, b) => {
+        const aVal = this.getColumnValue(a, this.sortColumn);
+        const bVal = this.getColumnValue(b, this.sortColumn);
+
+        let comparison = 0;
+        if (aVal < bVal) comparison = -1;
+        if (aVal > bVal) comparison = 1;
+
+        return this.sortDirection === 'desc' ? -comparison : comparison;
+      });
+    }
+
+    this.totalPages = Math.ceil(this.filteredData.length / this.pageSize);
+    if (this.config.paginated) {
+      const startIndex = (this.currentPage - 1) * this.pageSize;
+      this.paginatedData = this.filteredData.slice(startIndex, startIndex + this.pageSize);
+    } else {
+      this.paginatedData = this.filteredData;
+    }
+  }
 } 

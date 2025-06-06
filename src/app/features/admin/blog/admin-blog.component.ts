@@ -15,18 +15,19 @@ import { DataTableComponent, TableConfig } from '../shared/data-table/data-table
       <div class="flex items-center justify-between">
         <div>
           <h1 class="text-3xl font-bold text-gray-900">Blog Posts</h1>
-          <p class="mt-2 text-gray-600">Manage your blog content</p>
+          <p class="mt-2 text-gray-600">Manage blog content and articles</p>
         </div>
       </div>
 
       <!-- Data Table -->
       <app-data-table
         title="Blog Posts"
-        [data]="(blogPosts$ | async) || []"
+        [data]="(posts$ | async) || []"
         [config]="tableConfig"
         [loading]="(loading$ | async) || false"
         (actionClicked)="onTableAction($event)"
         (addClicked)="onAddPost()"
+        (rowClicked)="onRowClick($event)"
         (csvImported)="onCsvImported($event)">
       </app-data-table>
     </div>
@@ -41,16 +42,16 @@ export class AdminBlogComponent implements OnInit {
     private supabaseService = inject(SupabaseService);
     private router = inject(Router);
 
-    private blogPostsSubject = new BehaviorSubject<any[]>([]);
-    private loadingSubject = new BehaviorSubject<boolean>(false);
+    private postsSubject = new BehaviorSubject<any[]>([]);
+    private loadingSubject = new BehaviorSubject<boolean>(true);
 
-    blogPosts$ = this.blogPostsSubject.asObservable();
+    posts$ = this.postsSubject.asObservable();
     loading$ = this.loadingSubject.asObservable();
 
     tableConfig: TableConfig = {
         columns: [
             {
-                key: 'featured_image_url',
+                key: 'featured_image',
                 label: 'Image',
                 type: 'image',
                 sortable: false,
@@ -64,28 +65,30 @@ export class AdminBlogComponent implements OnInit {
                 searchable: true
             },
             {
-                key: 'status',
-                label: 'Status',
-                type: 'status',
-                sortable: true
-            },
-            {
-                key: 'is_featured',
-                label: 'Featured',
-                type: 'boolean',
-                sortable: true
-            },
-            {
-                key: 'tags',
-                label: 'Tags',
-                type: 'array',
-                sortable: false,
+                key: 'slug',
+                label: 'Slug',
+                type: 'text',
+                sortable: true,
                 searchable: true
             },
             {
-                key: 'view_count',
-                label: 'Views',
-                type: 'number',
+                key: 'author',
+                label: 'Author',
+                type: 'text',
+                sortable: true,
+                searchable: true
+            },
+            {
+                key: 'category',
+                label: 'Category',
+                type: 'text',
+                sortable: true,
+                searchable: true
+            },
+            {
+                key: 'status',
+                label: 'Status',
+                type: 'status',
                 sortable: true
             },
             {
@@ -109,12 +112,6 @@ export class AdminBlogComponent implements OnInit {
                 class: 'text-blue-600 hover:text-blue-900'
             },
             {
-                label: 'View',
-                icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>',
-                action: 'view',
-                class: 'text-green-600 hover:text-green-900'
-            },
-            {
                 label: 'Delete',
                 icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>',
                 action: 'delete',
@@ -126,11 +123,12 @@ export class AdminBlogComponent implements OnInit {
         paginated: true,
         pageSize: 20,
         allowCsvImport: true,
-        allowExport: true
+        allowExport: true,
+        rowClickable: true
     };
 
     ngOnInit(): void {
-        this.loadBlogPosts();
+        this.loadPosts();
     }
 
     onTableAction(event: { action: string, item: any }): void {
@@ -140,17 +138,18 @@ export class AdminBlogComponent implements OnInit {
             case 'edit':
                 this.router.navigate(['/admin/blog/edit', item.id]);
                 break;
-            case 'view':
-                this.router.navigate(['/blog', item.slug]);
-                break;
             case 'delete':
-                this.deleteBlogPost(item);
+                this.deletePost(item);
                 break;
         }
     }
 
+    onRowClick(item: any): void {
+        this.router.navigate(['/admin/blog/edit', item.id]);
+    }
+
     onAddPost(): void {
-        this.router.navigate(['/admin/blog/new']);
+        this.router.navigate(['/admin/blog/create']);
     }
 
     async onCsvImported(csvData: any[]): Promise<void> {
@@ -194,7 +193,7 @@ export class AdminBlogComponent implements OnInit {
             }
 
             alert(`Successfully imported ${blogPosts.length} blog posts`);
-            this.loadBlogPosts();
+            this.loadPosts();
         } catch (error) {
             console.error('Error importing blog posts:', error);
             alert('Error importing blog posts. Please check the CSV format.');
@@ -203,21 +202,21 @@ export class AdminBlogComponent implements OnInit {
         }
     }
 
-    private async loadBlogPosts(): Promise<void> {
+    private async loadPosts(): Promise<void> {
         this.loadingSubject.next(true);
 
         try {
             const posts = await this.supabaseService.getTable('blog_posts');
-            this.blogPostsSubject.next(posts || []);
+            this.postsSubject.next(posts || []);
         } catch (error) {
             console.error('Error loading blog posts:', error);
-            this.blogPostsSubject.next([]);
+            this.postsSubject.next([]);
         } finally {
             this.loadingSubject.next(false);
         }
     }
 
-    private async deleteBlogPost(post: any): Promise<void> {
+    private async deletePost(post: any): Promise<void> {
         if (!confirm(`Are you sure you want to delete "${post.title}"?`)) {
             return;
         }
@@ -225,7 +224,7 @@ export class AdminBlogComponent implements OnInit {
         try {
             await this.supabaseService.deleteRecord('blog_posts', post.id);
             alert('Blog post deleted successfully');
-            this.loadBlogPosts();
+            this.loadPosts();
         } catch (error) {
             console.error('Error deleting blog post:', error);
             alert('Error deleting blog post');

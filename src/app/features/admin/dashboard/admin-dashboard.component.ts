@@ -2,28 +2,30 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { SupabaseService } from '../../../services/supabase.service';
-import { Observable, forkJoin, map, catchError, of } from 'rxjs';
+import { Observable, forkJoin, map, catchError, of, from } from 'rxjs';
 
 interface DashboardStats {
-    totalProducts: number;
-    totalCategories: number;
-    totalBlogPosts: number;
-    totalOffers: number;
-    totalUsers: number;
-    recentActivity: any[];
+  totalProducts: number;
+  totalCategories: number;
+  totalBlogPosts: number;
+  totalOffers: number;
+  totalUsers: number;
+  recentActivity: any[];
 }
 
 @Component({
-    selector: 'app-admin-dashboard',
-    standalone: true,
-    imports: [CommonModule, RouterModule],
-    template: `
+  selector: 'app-admin-dashboard',
+  standalone: true,
+  imports: [CommonModule, RouterModule],
+  template: `
     <div class="space-y-6">
       <!-- Page Header -->
       <div class="flex items-center justify-between">
         <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>
         <div class="flex space-x-3">
-          <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+          <button 
+            (click)="refreshStats()"
+            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
             Refresh Data
           </button>
         </div>
@@ -231,50 +233,59 @@ interface DashboardStats {
       </div>
     </div>
   `,
-    styles: [`
+  styles: [`
     :host {
       display: block;
     }
   `]
 })
 export class AdminDashboardComponent implements OnInit {
-    private supabaseService = inject(SupabaseService);
+  private supabaseService = inject(SupabaseService);
 
-    stats$: Observable<DashboardStats>;
+  stats$: Observable<DashboardStats>;
 
-    constructor() {
-        this.stats$ = this.loadStats();
-    }
+  constructor() {
+    this.stats$ = this.loadStats();
+  }
 
-    ngOnInit(): void { }
+  ngOnInit(): void { }
 
-    private loadStats(): Observable<DashboardStats> {
-        return forkJoin({
-            products: this.supabaseService.getTable('products').then(result => result?.length || 0),
-            categories: this.supabaseService.getTable('categories').then(result => result?.length || 0),
-            blogPosts: this.supabaseService.getTable('blog_posts').then(result => result?.length || 0),
-            offers: this.supabaseService.getTable('offers').then(result => result?.length || 0),
-            users: this.supabaseService.getTable('profiles').then(result => result?.length || 0)
-        }).pipe(
-            map(results => ({
-                totalProducts: results.products,
-                totalCategories: results.categories,
-                totalBlogPosts: results.blogPosts,
-                totalOffers: results.offers,
-                totalUsers: results.users,
-                recentActivity: []
-            })),
-            catchError(error => {
-                console.error('Error loading dashboard stats:', error);
-                return of({
-                    totalProducts: 0,
-                    totalCategories: 0,
-                    totalBlogPosts: 0,
-                    totalOffers: 0,
-                    totalUsers: 0,
-                    recentActivity: []
-                });
-            })
-        );
-    }
+  refreshStats(): void {
+    this.stats$ = this.loadStats();
+  }
+
+  private loadStats(): Observable<DashboardStats> {
+    const loadStatsAsync = async () => {
+      try {
+        const [products, categories, blogPosts, offers, users] = await Promise.all([
+          this.supabaseService.getTable('products'),
+          this.supabaseService.getTable('categories'),
+          this.supabaseService.getTable('blog_posts'),
+          this.supabaseService.getTable('offers'),
+          this.supabaseService.getTable('profiles')
+        ]);
+
+        return {
+          totalProducts: products?.length || 0,
+          totalCategories: categories?.length || 0,
+          totalBlogPosts: blogPosts?.length || 0,
+          totalOffers: offers?.length || 0,
+          totalUsers: users?.length || 0,
+          recentActivity: []
+        };
+      } catch (error) {
+        console.error('Error loading dashboard stats:', error);
+        return {
+          totalProducts: 0,
+          totalCategories: 0,
+          totalBlogPosts: 0,
+          totalOffers: 0,
+          totalUsers: 0,
+          recentActivity: []
+        };
+      }
+    };
+
+    return from(loadStatsAsync());
+  }
 } 
