@@ -12,7 +12,6 @@ import { SupabaseService } from '../../../../services/supabase.service';
   imports: [CommonModule, ReactiveFormsModule, AdminFormComponent],
   template: `
     <app-admin-form
-      *ngIf="blogForm"
       [title]="isEditMode ? 'Edit Blog Post' : 'Create Blog Post'"
       [subtitle]="isEditMode ? 'Update blog post content' : 'Create a new blog post'"
       [form]="blogForm"
@@ -21,7 +20,7 @@ import { SupabaseService } from '../../../../services/supabase.service';
       [backRoute]="'/admin/blog'"
       (formSubmit)="onSubmit($event)"
     >
-      <div *ngIf="blogForm">
+      <div [formGroup]="blogForm">
         <!-- Basic Info -->
         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
           <div>
@@ -213,7 +212,7 @@ export class BlogFormComponent implements OnInit {
   private supabaseService = inject(SupabaseService);
   private title = inject(Title);
 
-  blogForm: FormGroup | null = null;
+  blogForm!: FormGroup;
   isEditMode = false;
   isSubmitting = false;
   blogId: string | null = null;
@@ -265,7 +264,7 @@ export class BlogFormComponent implements OnInit {
   }
 
   private async loadBlogPost(): Promise<void> {
-    if (!this.blogId || !this.blogForm) return;
+    if (!this.blogId) return;
 
     try {
       const data = await this.supabaseService.getTableById('blog_posts', this.blogId);
@@ -292,8 +291,6 @@ export class BlogFormComponent implements OnInit {
   }
 
   onTitleChange(event: any): void {
-    if (!this.blogForm) return;
-
     const title = event.target.value;
     const slug = this.generateSlug(title);
     this.blogForm.patchValue({ slug });
@@ -312,7 +309,7 @@ export class BlogFormComponent implements OnInit {
   }
 
   async onSubmit(formValue: any): Promise<void> {
-    if (!this.blogForm || this.blogForm.invalid) return;
+    if (this.blogForm.invalid) return;
 
     this.isSubmitting = true;
 

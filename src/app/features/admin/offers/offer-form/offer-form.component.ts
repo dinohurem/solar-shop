@@ -12,7 +12,6 @@ import { SupabaseService } from '../../../../services/supabase.service';
   imports: [CommonModule, ReactiveFormsModule, AdminFormComponent],
   template: `
     <app-admin-form
-      *ngIf="offerForm"
       [title]="isEditMode ? 'Edit Offer' : 'Create Offer'"
       [subtitle]="isEditMode ? 'Update offer information' : 'Create a new promotional offer'"
       [form]="offerForm"
@@ -21,7 +20,7 @@ import { SupabaseService } from '../../../../services/supabase.service';
       [backRoute]="'/admin/offers'"
       (formSubmit)="onSubmit($event)"
     >
-      <div *ngIf="offerForm">
+      <div [formGroup]="offerForm">
         <!-- Basic Info -->
         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
           <div>
@@ -212,7 +211,7 @@ export class OfferFormComponent implements OnInit {
   private supabaseService = inject(SupabaseService);
   private title = inject(Title);
 
-  offerForm: FormGroup | null = null;
+  offerForm!: FormGroup;
   isEditMode = false;
   isSubmitting = false;
   offerId: string | null = null;
@@ -266,7 +265,7 @@ export class OfferFormComponent implements OnInit {
   }
 
   private async loadOffer(): Promise<void> {
-    if (!this.offerId || !this.offerForm) return;
+    if (!this.offerId) return;
 
     try {
       const data = await this.supabaseService.getTableById('offers', this.offerId);
@@ -284,7 +283,7 @@ export class OfferFormComponent implements OnInit {
   }
 
   async onSubmit(formValue: any): Promise<void> {
-    if (!this.offerForm || this.offerForm.invalid) return;
+    if (this.offerForm.invalid) return;
 
     this.isSubmitting = true;
 

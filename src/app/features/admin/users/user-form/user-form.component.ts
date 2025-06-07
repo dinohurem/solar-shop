@@ -12,7 +12,6 @@ import { AdminFormComponent } from '../../shared/admin-form/admin-form.component
   imports: [CommonModule, ReactiveFormsModule, AdminFormComponent],
   template: `
     <app-admin-form
-      *ngIf="userForm"
       [title]="isEditMode ? 'Edit User' : 'Create User'"
       subtitle="Manage user accounts and profiles"
       [form]="userForm"
@@ -21,7 +20,7 @@ import { AdminFormComponent } from '../../shared/admin-form/admin-form.component
       backRoute="/admin/users"
       (formSubmit)="onSave()">
       
-      <div *ngIf="userForm">
+      <div [formGroup]="userForm">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <!-- Personal Information -->
           <div class="space-y-4">
@@ -208,7 +207,7 @@ export class UserFormComponent implements OnInit {
   private supabaseService = inject(SupabaseService);
   private titleService = inject(Title);
 
-  userForm: FormGroup | null = null;
+  userForm!: FormGroup;
   loading = false;
   isEditMode = false;
   userId: string | null = null;
@@ -245,7 +244,7 @@ export class UserFormComponent implements OnInit {
   }
 
   private async loadUser(): Promise<void> {
-    if (!this.userId || !this.userForm) return;
+    if (!this.userId) return;
 
     try {
       const data = await this.supabaseService.getTableById('profiles', this.userId);
@@ -258,7 +257,7 @@ export class UserFormComponent implements OnInit {
   }
 
   async onSave(): Promise<void> {
-    if (!this.userForm || this.userForm.invalid) return;
+    if (this.userForm.invalid) return;
 
     this.loading = true;
 

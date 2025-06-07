@@ -33,7 +33,6 @@ interface Product {
   imports: [CommonModule, ReactiveFormsModule, AdminFormComponent],
   template: `
     <app-admin-form
-      *ngIf="productForm"
       [title]="isEditMode ? 'Edit Product' : 'Create Product'"
       [subtitle]="isEditMode ? 'Update product information' : 'Add a new product to your catalog'"
       [form]="productForm"
@@ -42,7 +41,7 @@ interface Product {
       [backRoute]="'/admin/products'"
       (formSubmit)="onSubmit($event)"
     >
-      <div *ngIf="productForm">
+      <div [formGroup]="productForm">
         <!-- Product Basic Info -->
         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
           <div>
@@ -75,8 +74,8 @@ interface Product {
           </div>
         </div>
 
-        <!-- SKU and Category -->
-        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <!-- SKU, Brand and Category -->
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
           <div>
             <label for="sku" class="block text-sm font-medium text-gray-700">SKU *</label>
             <input
@@ -89,6 +88,17 @@ interface Product {
             <div *ngIf="productForm.get('sku')?.invalid && productForm.get('sku')?.touched" class="mt-1 text-sm text-red-600">
               SKU is required
             </div>
+          </div>
+
+          <div>
+            <label for="brand" class="block text-sm font-medium text-gray-700">Brand</label>
+            <input
+              type="text"
+              id="brand"
+              formControlName="brand"
+              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-solar-500 focus:border-solar-500 sm:text-sm"
+              placeholder="Enter brand name"
+            >
           </div>
 
           <div>
@@ -250,7 +260,7 @@ export class ProductFormComponent implements OnInit {
   private supabaseService = inject(SupabaseService);
   private title = inject(Title);
 
-  productForm: FormGroup | null = null;
+  productForm!: FormGroup;
   isEditMode = false;
   isSubmitting = false;
   productId: string | null = null;
@@ -273,6 +283,7 @@ export class ProductFormComponent implements OnInit {
       price: [0, [Validators.required, Validators.min(0.01)]],
       compare_at_price: [null],
       sku: ['', [Validators.required]],
+      brand: [''],
       category_id: [''],
       images: [''],
       stock_quantity: [0, [Validators.required, Validators.min(0)]],
@@ -302,15 +313,33 @@ export class ProductFormComponent implements OnInit {
   }
 
   private async loadProduct(): Promise<void> {
-    if (!this.productId || !this.productForm) return;
+    if (!this.productId) return;
 
     try {
       const data = await this.supabaseService.getTableById('products', this.productId);
+      console.log('Loaded product data:', data); // Debug log
+
       if (data) {
+        // Map database fields to form fields
+        const productName = data.name || '';
         const formData = {
-          ...data,
-          images: Array.isArray(data.images) ? data.images.join('\n') : ''
+          name: productName,
+          slug: (data as any).slug || this.generateSlug(productName),
+          description: data.description || '',
+          price: Number(data.price) || 0,
+          compare_at_price: Number((data as any).compare_at_price || data.original_price) || null,
+          sku: data.sku || '',
+          brand: data.brand || '',
+          category_id: data.category_id || '',
+          stock_quantity: Number(data.stock_quantity) || 0,
+          weight: data.weight ? Number(data.weight) : null,
+          is_active: data.is_active !== undefined ? Boolean(data.is_active) : true,
+          is_featured: data.is_featured !== undefined ? Boolean(data.is_featured) : false,
+          is_on_sale: data.is_on_sale !== undefined ? Boolean(data.is_on_sale) : false,
+          images: this.formatImages(data)
         };
+
+        console.log('Mapped form data:', formData); // Debug log
         this.productForm.patchValue(formData);
       }
     } catch (error) {
@@ -318,9 +347,21 @@ export class ProductFormComponent implements OnInit {
     }
   }
 
-  onNameChange(event: any): void {
-    if (!this.productForm) return;
+  private formatImages(data: any): string {
+    // Handle different possible image field formats
+    if (data.images && Array.isArray(data.images)) {
+      return data.images.join('\n');
+    } else if (data.image_url) {
+      return data.image_url;
+    } else if (data.gallery_urls && Array.isArray(data.gallery_urls)) {
+      return data.gallery_urls.join('\n');
+    } else if (typeof data.images === 'string') {
+      return data.images;
+    }
+    return '';
+  }
 
+  onNameChange(event: any): void {
     const name = event.target.value;
     const slug = this.generateSlug(name);
     this.productForm.patchValue({ slug });
@@ -334,27 +375,49 @@ export class ProductFormComponent implements OnInit {
   }
 
   async onSubmit(formValue: any): Promise<void> {
-    if (!this.productForm || this.productForm.invalid) return;
+    if (this.productForm.invalid) return;
 
     this.isSubmitting = true;
 
     try {
+      // Map form fields to database fields
       const productData = {
-        ...formValue,
-        images: formValue.images ? formValue.images.split('\n').filter((url: string) => url.trim()) : [],
+        name: formValue.name,
+        description: formValue.description,
+        short_description: formValue.description, // Use description as short_description if not provided
+        price: Number(formValue.price),
+        original_price: formValue.compare_at_price ? Number(formValue.compare_at_price) : undefined,
+        sku: formValue.sku,
+        brand: formValue.brand,
+        category_id: formValue.category_id || undefined,
+        stock_quantity: Number(formValue.stock_quantity),
+        weight: formValue.weight ? Number(formValue.weight) : undefined,
+        is_active: Boolean(formValue.is_active),
+        is_featured: Boolean(formValue.is_featured),
+        is_on_sale: Boolean(formValue.is_on_sale),
+        image_url: formValue.images ? formValue.images.split('\n').filter((url: string) => url.trim())[0] : undefined,
+        gallery_urls: formValue.images ? formValue.images.split('\n').filter((url: string) => url.trim()) : [],
         updated_at: new Date().toISOString()
       };
+
+      // Add slug if it doesn't exist in database schema
+      if (formValue.slug) {
+        (productData as any).slug = formValue.slug;
+      }
+
+      console.log('Saving product data:', productData); // Debug log
 
       if (this.isEditMode && this.productId) {
         await this.supabaseService.updateRecord('products', this.productId, productData);
       } else {
-        productData.created_at = new Date().toISOString();
+        (productData as any).created_at = new Date().toISOString();
         await this.supabaseService.createRecord('products', productData);
       }
 
       this.router.navigate(['/admin/products']);
     } catch (error) {
       console.error('Error saving product:', error);
+      alert('Error saving product. Please try again.');
     } finally {
       this.isSubmitting = false;
     }

@@ -24,7 +24,6 @@ interface Category {
   imports: [CommonModule, ReactiveFormsModule, AdminFormComponent],
   template: `
     <app-admin-form
-      *ngIf="categoryForm"
       [title]="isEditMode ? 'Edit Category' : 'Create Category'"
       [subtitle]="isEditMode ? 'Update category information' : 'Add a new category to your store'"
       [form]="categoryForm"
@@ -33,7 +32,7 @@ interface Category {
       [backRoute]="'/admin/categories'"
       (formSubmit)="onSubmit($event)"
     >
-      <div *ngIf="categoryForm">
+      <div [formGroup]="categoryForm">
         <!-- Category Basic Info -->
         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
           <div>
@@ -130,7 +129,7 @@ export class CategoryFormComponent implements OnInit {
   private supabaseService = inject(SupabaseService);
   private title = inject(Title);
 
-  categoryForm: FormGroup | null = null;
+  categoryForm!: FormGroup;
   isEditMode = false;
   isSubmitting = false;
   categoryId: string | null = null;
@@ -165,7 +164,7 @@ export class CategoryFormComponent implements OnInit {
   }
 
   private async loadCategory(): Promise<void> {
-    if (!this.categoryId || !this.categoryForm) return;
+    if (!this.categoryId) return;
 
     try {
       const data = await this.supabaseService.getTableById('categories', this.categoryId);
@@ -179,8 +178,6 @@ export class CategoryFormComponent implements OnInit {
   }
 
   onNameChange(event: any): void {
-    if (!this.categoryForm) return;
-
     const name = event.target.value;
     const slug = this.generateSlug(name);
     this.categoryForm.patchValue({ slug });
@@ -194,7 +191,7 @@ export class CategoryFormComponent implements OnInit {
   }
 
   async onSubmit(formValue: any): Promise<void> {
-    if (!this.categoryForm || this.categoryForm.invalid) return;
+    if (this.categoryForm.invalid) return;
 
     this.isSubmitting = true;
 

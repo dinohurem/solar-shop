@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { Title } from '@angular/platform-browser';
 import { BehaviorSubject } from 'rxjs';
 import { SupabaseService } from '../../../services/supabase.service';
 import { DataTableComponent, TableConfig } from '../shared/data-table/data-table.component';
@@ -41,6 +42,7 @@ import { DataTableComponent, TableConfig } from '../shared/data-table/data-table
 export class AdminOffersComponent implements OnInit {
     private supabaseService = inject(SupabaseService);
     private router = inject(Router);
+    private title = inject(Title);
 
     private offersSubject = new BehaviorSubject<any[]>([]);
     private loadingSubject = new BehaviorSubject<boolean>(true);
@@ -140,6 +142,7 @@ export class AdminOffersComponent implements OnInit {
     };
 
     ngOnInit(): void {
+        this.title.setTitle('Offers - Solar Shop Admin');
         this.loadOffers();
     }
 
