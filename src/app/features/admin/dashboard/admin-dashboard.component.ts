@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { Title } from '@angular/platform-browser';
 import { SupabaseService } from '../../../services/supabase.service';
 import { Observable, forkJoin, map, catchError, of, from } from 'rxjs';
 
@@ -140,7 +141,7 @@ interface DashboardStats {
         <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
           <h2 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
           <div class="space-y-3">
-            <a routerLink="/admin/products/new" 
+            <a routerLink="/admin/products/create" 
                class="flex items-center justify-between p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
               <div class="flex items-center space-x-3">
                 <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -153,7 +154,7 @@ interface DashboardStats {
               </svg>
             </a>
 
-            <a routerLink="/admin/blog/new" 
+            <a routerLink="/admin/blog/create" 
                class="flex items-center justify-between p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors">
               <div class="flex items-center space-x-3">
                 <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -166,7 +167,7 @@ interface DashboardStats {
               </svg>
             </a>
 
-            <a routerLink="/admin/offers/new" 
+            <a routerLink="/admin/offers/create" 
                class="flex items-center justify-between p-4 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition-colors">
               <div class="flex items-center space-x-3">
                 <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -183,41 +184,41 @@ interface DashboardStats {
 
         <!-- Import Tools -->
         <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-          <h2 class="text-lg font-semibold text-gray-900 mb-4">Import Tools</h2>
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">Data Management</h2>
           <div class="space-y-3">
-            <a routerLink="/admin/import/products" 
+            <a routerLink="/admin/products" 
                class="flex items-center justify-between p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors">
               <div class="flex items-center space-x-3">
                 <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
-                <span class="font-medium text-gray-900">Import Products (CSV)</span>
+                <span class="font-medium text-gray-900">Manage Products & Import CSV</span>
               </div>
               <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
               </svg>
             </a>
 
-            <a routerLink="/admin/import/blog" 
+            <a routerLink="/admin/blog" 
                class="flex items-center justify-between p-4 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors">
               <div class="flex items-center space-x-3">
                 <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
-                <span class="font-medium text-gray-900">Import Blog Posts (CSV)</span>
+                <span class="font-medium text-gray-900">Manage Blog Posts & Import CSV</span>
               </div>
               <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
               </svg>
             </a>
 
-            <a routerLink="/admin/import/offers" 
+            <a routerLink="/admin/offers" 
                class="flex items-center justify-between p-4 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">
               <div class="flex items-center space-x-3">
                 <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
-                <span class="font-medium text-gray-900">Import Offers (CSV)</span>
+                <span class="font-medium text-gray-900">Manage Offers & Import CSV</span>
               </div>
               <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -241,6 +242,7 @@ interface DashboardStats {
 })
 export class AdminDashboardComponent implements OnInit {
   private supabaseService = inject(SupabaseService);
+  private titleService = inject(Title);
 
   stats$: Observable<DashboardStats>;
 
@@ -248,7 +250,9 @@ export class AdminDashboardComponent implements OnInit {
     this.stats$ = this.loadStats();
   }
 
-  ngOnInit(): void { }
+  ngOnInit(): void {
+    this.titleService.setTitle('Dashboard - Solar Shop Admin');
+  }
 
   refreshStats(): void {
     this.stats$ = this.loadStats();

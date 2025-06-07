@@ -607,7 +607,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   showSearchOverlay = false;
   searchQuery = '';
   currentRoute = '';
-  searchSuggestions = ['Solar Panels', 'Inverters', 'Batteries', 'Mounting Systems', 'Cables'];
+  searchSuggestions: string[] = [];
 
   constructor() {
     this.isMobileMenuOpen$ = this.store.select(selectIsMobileMenuOpen);
@@ -623,6 +623,13 @@ export class NavbarComponent implements OnInit, OnDestroy {
       takeUntil(this.destroy$)
     ).subscribe((event: NavigationEnd) => {
       this.currentRoute = event.url;
+    });
+
+    // Update search suggestions when language changes
+    this.currentLanguage$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(() => {
+      this.updateSearchSuggestions();
     });
   }
 
@@ -643,6 +650,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.store.dispatch(NavbarActions.initializeNavbar());
+    this.updateSearchSuggestions();
   }
 
   ngOnDestroy(): void {
@@ -726,5 +734,15 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   isRouteActive(route: string): boolean {
     return this.currentRoute.startsWith(route);
+  }
+
+  updateSearchSuggestions(): void {
+    this.searchSuggestions = [
+      this.translationService.translate('search.solarPanels'),
+      this.translationService.translate('search.inverters'),
+      this.translationService.translate('search.batteries'),
+      this.translationService.translate('search.mountingSystems'),
+      this.translationService.translate('search.cables')
+    ];
   }
 } 

@@ -111,14 +111,6 @@ import {
               <p class="font-['DM_Sans'] text-sm text-gray-600 leading-relaxed line-clamp-3">
                 {{ post.excerpt }}
               </p>
-              <div class="flex items-center space-x-2 pt-2">
-                <img 
-                  [src]="post.author.avatar || '/assets/images/default-avatar.jpg'"
-                  [alt]="post.author.name"
-                  class="w-8 h-8 rounded-full object-cover"
-                >
-                <span class="text-sm text-gray-700">{{ post.author.name }}</span>
-              </div>
             </div>
           </article>
         </div>

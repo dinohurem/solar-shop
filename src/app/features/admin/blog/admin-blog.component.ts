@@ -51,7 +51,7 @@ export class AdminBlogComponent implements OnInit {
     tableConfig: TableConfig = {
         columns: [
             {
-                key: 'featured_image',
+                key: 'featured_image_url',
                 label: 'Image',
                 type: 'image',
                 sortable: false,
@@ -72,14 +72,7 @@ export class AdminBlogComponent implements OnInit {
                 searchable: true
             },
             {
-                key: 'author',
-                label: 'Author',
-                type: 'text',
-                sortable: true,
-                searchable: true
-            },
-            {
-                key: 'category',
+                key: 'category_id',
                 label: 'Category',
                 type: 'text',
                 sortable: true,
@@ -161,13 +154,6 @@ export class AdminBlogComponent implements OnInit {
         this.loadingSubject.next(true);
 
         try {
-            // Get current user for author_id
-            const session = await this.supabaseService.getSession();
-            if (!session?.user) {
-                alert('User not authenticated');
-                return;
-            }
-
             // Map CSV data to blog post format
             const blogPosts = csvData.map(row => ({
                 title: row.title || row.Title || '',
@@ -175,7 +161,6 @@ export class AdminBlogComponent implements OnInit {
                 content: row.content || row.Content || '',
                 excerpt: row.excerpt || row.Excerpt || '',
                 featured_image_url: row.featured_image_url || row['Featured Image URL'] || undefined,
-                author_id: session.user.id,
                 category_id: row.category_id || row['Category ID'] || undefined,
                 tags: row.tags ? row.tags.split(',').map((t: string) => t.trim()) : [],
                 status: (row.status || row.Status || 'draft') as 'draft' | 'published' | 'archived',

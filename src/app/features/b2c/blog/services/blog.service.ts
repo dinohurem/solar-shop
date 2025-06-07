@@ -9,8 +9,6 @@ export interface BlogPost {
     content: string;
     excerpt: string;
     featuredImageUrl?: string;
-    authorId: string;
-    authorName?: string;
     categoryId?: string;
     categoryName?: string;
     tags: string[];
@@ -233,8 +231,6 @@ export class BlogService {
                 content: post.content,
                 excerpt: post.excerpt,
                 featuredImageUrl: post.featured_image_url || this.getDefaultPostImage(),
-                authorId: post.author_id,
-                authorName: post.profiles?.full_name || 'Unknown Author',
                 categoryId: post.category_id,
                 categoryName: post.categories?.name || undefined,
                 tags: post.tags || [],

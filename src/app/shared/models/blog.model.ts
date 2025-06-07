@@ -7,7 +7,6 @@ export interface BlogPost {
     htmlContent?: string;
     imageUrl: string;
     thumbnailUrl?: string;
-    author: BlogAuthor;
     publishedAt: string;
     updatedAt: string;
     readTime: number;
@@ -22,18 +21,6 @@ export interface BlogPost {
     relatedPosts?: string[];
     tableOfContents?: TableOfContentsItem[];
     socialSharing: SocialSharingConfig;
-}
-
-export interface BlogAuthor {
-    id: string;
-    name: string;
-    email: string;
-    avatar: string;
-    bio?: string;
-    title?: string;
-    socialLinks?: SocialLinks;
-    website?: string;
-    isActive: boolean;
 }
 
 export interface BlogCategory {
@@ -69,7 +56,7 @@ export interface TableOfContentsItem {
 
 export interface SocialSharingConfig {
     enabled: boolean;
-    platforms: ('facebook' | 'twitter' | 'linkedin' | 'whatsapp' | 'email')[];
+    platforms: string[];
     customMessage?: string;
 }
 
@@ -109,7 +96,6 @@ export interface CommentAuthor {
 export interface BlogFilter {
     categories?: string[];
     tags?: string[];
-    authors?: string[];
     dateRange?: {
         start: string;
         end: string;
@@ -133,7 +119,6 @@ export interface BlogSearchResult {
 export interface BlogFacets {
     categories: FacetItem[];
     tags: FacetItem[];
-    authors: FacetItem[];
     years: FacetItem[];
     months: FacetItem[];
 }
@@ -151,7 +136,6 @@ export interface BlogStats {
     draftPosts: number;
     totalViews: number;
     totalComments: number;
-    totalAuthors: number;
     totalCategories: number;
     totalTags: number;
     popularPosts: BlogPost[];

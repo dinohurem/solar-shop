@@ -412,7 +412,6 @@ export interface Database {
                     content: string;
                     excerpt: string;
                     featured_image_url?: string;
-                    author_id: string;
                     category_id?: string;
                     tags: string[];
                     status: 'draft' | 'published' | 'archived';
@@ -433,7 +432,6 @@ export interface Database {
                     content: string;
                     excerpt: string;
                     featured_image_url?: string;
-                    author_id: string;
                     category_id?: string;
                     tags?: string[];
                     status?: 'draft' | 'published' | 'archived';
@@ -454,7 +452,6 @@ export interface Database {
                     content?: string;
                     excerpt?: string;
                     featured_image_url?: string;
-                    author_id?: string;
                     category_id?: string;
                     tags?: string[];
                     status?: 'draft' | 'published' | 'archived';

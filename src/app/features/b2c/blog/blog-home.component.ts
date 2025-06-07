@@ -94,14 +94,6 @@ import {
               </p>
               
               <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-2">
-                  <img 
-                    [src]="post.author.avatar || '/assets/images/default-avatar.jpg'"
-                    [alt]="post.author.name || 'Anonymous'"
-                    class="w-6 h-6 rounded-full object-cover"
-                  >
-                  <span class="text-xs text-gray-700 font-['DM_Sans']">{{ post.author.name || 'Anonymous' }}</span>
-                </div>
                 <div class="text-solar-600 font-medium text-sm font-['DM_Sans'] group-hover:text-solar-700 transition-colors">
                   {{ 'blog.readMore' | translate }}
                   <svg class="w-4 h-4 inline ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BlogPost, BlogAuthor, BlogCategory, BlogTag } from '../shared/models/blog.model';
+import { BlogPost, BlogCategory, BlogTag } from '../shared/models/blog.model';
 
 export interface SupabaseBlogPost {
     id: string;
@@ -8,7 +8,6 @@ export interface SupabaseBlogPost {
     content: string;
     excerpt: string;
     featured_image_url?: string;
-    author_id: string;
     category_id?: string;
     tags: string[];
     status: 'draft' | 'published' | 'archived';
@@ -21,12 +20,6 @@ export interface SupabaseBlogPost {
     is_featured: boolean;
     created_at: string;
     updated_at: string;
-    profiles?: {
-        first_name: string;
-        last_name: string;
-        full_name: string;
-        avatar_url?: string;
-    };
     categories?: {
         name: string;
         slug: string;
@@ -47,7 +40,6 @@ export class BlogDataMapperService {
             content: supabasePost.content,
             htmlContent: supabasePost.content,
             imageUrl: supabasePost.featured_image_url || '/assets/images/blog-placeholder.jpg',
-            author: this.mapSupabaseToAuthor(supabasePost),
             publishedAt: supabasePost.published_at || supabasePost.created_at,
             updatedAt: supabasePost.updated_at,
             readTime: supabasePost.reading_time || this.calculateReadTime(supabasePost.content),
@@ -70,36 +62,30 @@ export class BlogDataMapperService {
         };
     }
 
-    private mapSupabaseToAuthor(supabasePost: SupabaseBlogPost): BlogAuthor {
-        const profile = supabasePost.profiles;
-        return {
-            id: supabasePost.author_id,
-            name: profile?.full_name || `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || 'Anonymous',
-            email: '', // We don't expose email publicly
-            avatar: profile?.avatar_url || '/assets/images/default-avatar.jpg',
-            title: 'Solar Expert', // Default title
-            isActive: true
-        };
+    mapSupabaseToBlogPosts(supabasePosts: SupabaseBlogPost[]): BlogPost[] {
+        return supabasePosts.map(post => this.mapSupabaseToBlogPost(post));
     }
 
     private mapSupabaseToCategory(supabasePost: SupabaseBlogPost): BlogCategory {
         const category = supabasePost.categories;
         return {
-            id: supabasePost.category_id || 'general',
-            name: category?.name || 'General',
-            slug: category?.slug || 'general',
-            postCount: 0, // We'd need a separate query for this
+            id: supabasePost.category_id || '',
+            name: category?.name || 'Uncategorized',
+            slug: category?.slug || 'uncategorized',
+            postCount: 0,
             isActive: true,
-            order: 1
+            order: 0
         };
     }
 
     private mapSupabaseToTags(tags: string[]): BlogTag[] {
+        if (!tags || !Array.isArray(tags)) return [];
+
         return tags.map((tag, index) => ({
             id: `tag-${index}`,
             name: tag,
             slug: tag.toLowerCase().replace(/\s+/g, '-'),
-            postCount: 0, // We'd need a separate query for this
+            postCount: 0,
             isActive: true
         }));
     }
@@ -108,9 +94,5 @@ export class BlogDataMapperService {
         const wordsPerMinute = 200;
         const wordCount = content.split(/\s+/).length;
         return Math.ceil(wordCount / wordsPerMinute);
-    }
-
-    mapSupabaseToBlogPosts(supabasePosts: SupabaseBlogPost[]): BlogPost[] {
-        return supabasePosts.map(post => this.mapSupabaseToBlogPost(post));
     }
 } 
