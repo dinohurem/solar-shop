@@ -1,10 +1,10 @@
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, ActivatedRoute } from '@angular/router';
+import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ProductListActions } from './store/product-list.actions';
 import {
   selectProducts,
@@ -75,8 +75,8 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
                 <div class="relative">
                   <input 
                     type="text"
-                    [(ngModel)]="currentSearchQuery"
-                    (ngModelChange)="onSearchChange($event)"
+                    [value]="searchQuery$ | async"
+                    (input)="onSearchChange($event)"
                     [placeholder]="'search.searchByName' | translate"
                     class="w-full px-3 py-2 pl-10 border border-gray-300 rounded-md text-sm focus:ring-solar-500 focus:border-solar-500 font-['DM_Sans']"
                   >
@@ -321,6 +321,7 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
 export class ProductListComponent implements OnInit, OnDestroy {
   private store = inject(Store);
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private destroy$ = new Subject<void>();
 
   products$: Observable<Product[]>;
@@ -333,7 +334,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
   certificates$: Observable<string[]>;
   searchQuery$: Observable<string>;
 
-  currentSearchQuery = '';
+  private searchSubject = new Subject<string>();
 
   constructor() {
     this.products$ = this.store.select(selectProducts);
@@ -350,15 +351,14 @@ export class ProductListComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.store.dispatch(ProductListActions.loadProducts());
 
-    // Handle query parameters
+    // Handle query parameters first (for initial load and external navigation)
     this.route.queryParams.pipe(
       takeUntil(this.destroy$)
     ).subscribe(params => {
-      // Handle search from navbar
-      if (params['search']) {
-        this.currentSearchQuery = params['search'];
+      // Handle search from navbar or direct URL access
+      if (params['search'] !== undefined) {
         this.store.dispatch(ProductListActions.searchProducts({
-          query: params['search']
+          query: params['search'] || ''
         }));
       }
 
@@ -374,21 +374,37 @@ export class ProductListComponent implements OnInit, OnDestroy {
       }
     });
 
-    // Subscribe to search query changes from store to update local state
-    this.searchQuery$.pipe(
+    // Handle debounced search input (for user typing)
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
       takeUntil(this.destroy$)
     ).subscribe(query => {
-      this.currentSearchQuery = query || '';
+      // Update the store
+      this.store.dispatch(ProductListActions.searchProducts({ query }));
+
+      // Update the URL to maintain the search parameter
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: query ? { search: query } : {},
+        queryParamsHandling: 'merge',
+        replaceUrl: true // Use replaceUrl to avoid creating history entries for each keystroke
+      });
     });
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    this.searchSubject.complete();
   }
 
-  onSearchChange(query: string): void {
-    this.store.dispatch(ProductListActions.searchProducts({ query }));
+  onSearchChange(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    const query = target.value;
+
+    // Use the subject to debounce the search
+    this.searchSubject.next(query);
   }
 
   onCategoryChange(category: string, event: Event): void {
@@ -420,8 +436,14 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
   clearFilters(): void {
     this.store.dispatch(ProductListActions.clearFilters());
-    this.currentSearchQuery = '';
     this.store.dispatch(ProductListActions.searchProducts({ query: '' }));
+
+    // Clear search parameter from URL
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {},
+      queryParamsHandling: 'replace'
+    });
   }
 
   trackByProductId(index: number, product: Product): string {
