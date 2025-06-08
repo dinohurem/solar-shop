@@ -2,13 +2,16 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, filter, take } from 'rxjs';
+import { Observable, filter, take, BehaviorSubject } from 'rxjs';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { selectCurrentUser, selectAuthLoading, selectAuthError } from '../../../core/auth/store/auth.selectors';
 import * as AuthActions from '../../../core/auth/store/auth.actions';
 import { User, UserAddress } from '../../../shared/models/user.model';
 import { Actions, ofType } from '@ngrx/effects';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { Order } from '../../../shared/models/order.model';
+import { Review } from '../../../shared/models/review.model';
+import { SupabaseService } from '../../../services/supabase.service';
 
 @Component({
   selector: 'app-profile',
@@ -67,6 +70,26 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                   </svg>
                   <span>{{ 'profile.billingShipping' | translate }}</span>
+                </button>
+
+                <button
+                  (click)="setActiveTab('my-orders')"
+                  [class]="activeTab === 'my-orders' ? 'bg-solar-600 text-white' : 'text-gray-700 hover:bg-gray-50'"
+                  class="w-full text-left px-4 py-3 rounded-lg font-['DM_Sans'] font-medium transition-colors duration-200 flex items-center space-x-3">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                  </svg>
+                  <span>{{ 'profile.myOrders' | translate }}</span>
+                </button>
+
+                <button
+                  (click)="setActiveTab('my-reviews')"
+                  [class]="activeTab === 'my-reviews' ? 'bg-solar-600 text-white' : 'text-gray-700 hover:bg-gray-50'"
+                  class="w-full text-left px-4 py-3 rounded-lg font-['DM_Sans'] font-medium transition-colors duration-200 flex items-center space-x-3">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                  </svg>
+                  <span>{{ 'profile.myReviews' | translate }}</span>
                 </button>
               </nav>
             </div>
@@ -335,6 +358,209 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
                 </ng-template>
               </div>
             </div>
+
+            <!-- My Orders Tab -->
+            <div *ngIf="activeTab === 'my-orders'" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div class="mb-6">
+                <h2 class="text-2xl font-semibold text-gray-900 font-['Poppins'] mb-2">{{ 'profile.myOrders' | translate }}</h2>
+                <p class="text-gray-600 font-['DM_Sans']">{{ 'profile.viewOrderHistory' | translate }}</p>
+              </div>
+
+              <!-- Loading State -->
+              <div *ngIf="ordersLoading$ | async" class="flex justify-center py-8">
+                <svg class="animate-spin w-8 h-8 text-solar-600" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              </div>
+
+              <!-- Orders List -->
+              <div class="space-y-4" *ngIf="!(ordersLoading$ | async) && (orders$ | async)?.length; else noOrders">
+                <div 
+                  *ngFor="let order of orders$ | async" 
+                  class="border border-gray-200 rounded-lg p-6 hover:border-solar-600 transition-colors">
+                  <div class="flex justify-between items-start mb-4">
+                    <div>
+                      <h3 class="text-lg font-semibold text-gray-900 font-['Poppins']">{{ order.orderNumber }}</h3>
+                      <p class="text-sm text-gray-600 font-['DM_Sans']">{{ order.orderDate | date:'medium' }}</p>
+                    </div>
+                    <div class="text-right">
+                      <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full font-['DM_Sans']"
+                            [ngClass]="{
+                              'bg-yellow-100 text-yellow-800': order.status === 'pending',
+                              'bg-blue-100 text-blue-800': order.status === 'confirmed',
+                              'bg-purple-100 text-purple-800': order.status === 'processing',
+                              'bg-indigo-100 text-indigo-800': order.status === 'shipped',
+                              'bg-green-100 text-green-800': order.status === 'delivered',
+                              'bg-red-100 text-red-800': order.status === 'cancelled'
+                            }">
+                        {{ order.status | titlecase }}
+                      </span>
+                      <p class="text-lg font-semibold text-gray-900 mt-1 font-['DM_Sans']">
+                        {{ order.totalAmount | currency:'EUR':'symbol':'1.2-2' }}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <!-- Order Items Preview -->
+                  <div class="space-y-2 mb-4">
+                    <div 
+                      *ngFor="let item of order.items.slice(0, 2)" 
+                      class="flex items-center space-x-3">
+                      <img 
+                        [src]="item.productImageUrl || '/assets/images/placeholder.jpg'" 
+                        [alt]="item.productName"
+                        class="w-12 h-12 object-cover rounded-lg bg-gray-100">
+                      <div class="flex-1 min-w-0">
+                        <h4 class="text-sm font-medium text-gray-900 truncate font-['DM_Sans']">{{ item.productName }}</h4>
+                        <p class="text-sm text-gray-500 font-['DM_Sans']">Qty: {{ item.quantity }}</p>
+                      </div>
+                      <span class="text-sm font-medium text-gray-900 font-['DM_Sans']">
+                        {{ item.totalPrice | currency:'EUR':'symbol':'1.2-2' }}
+                      </span>
+                    </div>
+                    <div *ngIf="order.items.length > 2" class="text-sm text-gray-500 font-['DM_Sans'] pl-15">
+                      +{{ order.items.length - 2 }} more items
+                    </div>
+                  </div>
+
+                  <!-- Actions -->
+                  <div class="flex space-x-3 pt-4 border-t border-gray-200">
+                    <button class="text-solar-600 hover:text-solar-700 text-sm font-medium font-['DM_Sans']">
+                      {{ 'profile.viewDetails' | translate }}
+                    </button>
+                    <button *ngIf="order.status === 'delivered'" 
+                            class="text-solar-600 hover:text-solar-700 text-sm font-medium font-['DM_Sans']">
+                      {{ 'profile.writeReview' | translate }}
+                    </button>
+                    <button *ngIf="order.trackingNumber" 
+                            class="text-solar-600 hover:text-solar-700 text-sm font-medium font-['DM_Sans']">
+                      {{ 'profile.trackOrder' | translate }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <ng-template #noOrders>
+                <div *ngIf="!(ordersLoading$ | async)" class="text-center py-12">
+                  <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                  </svg>
+                  <h3 class="text-lg font-medium text-gray-900 font-['Poppins'] mb-2">{{ 'profile.noOrdersFound' | translate }}</h3>
+                  <p class="text-gray-600 font-['DM_Sans'] mb-6">{{ 'profile.startShopping' | translate }}</p>
+                  <button
+                    (click)="router.navigate(['/products'])"
+                    class="px-6 py-3 bg-solar-600 text-white rounded-lg font-['DM_Sans'] font-medium hover:bg-solar-700 transition-colors">
+                    {{ 'profile.browseProducts' | translate }}
+                  </button>
+                </div>
+              </ng-template>
+            </div>
+
+            <!-- My Reviews Tab -->
+            <div *ngIf="activeTab === 'my-reviews'" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div class="mb-6">
+                <h2 class="text-2xl font-semibold text-gray-900 font-['Poppins'] mb-2">{{ 'profile.myReviews' | translate }}</h2>
+                <p class="text-gray-600 font-['DM_Sans']">{{ 'profile.manageReviews' | translate }}</p>
+              </div>
+
+              <!-- Loading State -->
+              <div *ngIf="reviewsLoading$ | async" class="flex justify-center py-8">
+                <svg class="animate-spin w-8 h-8 text-solar-600" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              </div>
+
+              <!-- Reviews List -->
+              <div class="space-y-6" *ngIf="!(reviewsLoading$ | async) && (reviews$ | async)?.length; else noReviews">
+                <div 
+                  *ngFor="let review of reviews$ | async" 
+                  class="border border-gray-200 rounded-lg p-6 hover:border-solar-600 transition-colors">
+                  <div class="flex items-start space-x-4">
+                    <img 
+                      [src]="review.product?.imageUrl || '/assets/images/placeholder.jpg'" 
+                      [alt]="review.product?.name"
+                      class="w-16 h-16 object-cover rounded-lg bg-gray-100">
+                    <div class="flex-1 min-w-0">
+                      <div class="flex justify-between items-start mb-2">
+                        <div>
+                          <h3 class="text-lg font-semibold text-gray-900 font-['Poppins']">{{ review.product?.name }}</h3>
+                          <div class="flex items-center space-x-1 mt-1">
+                            <div class="flex space-x-1">
+                              <svg *ngFor="let star of [1,2,3,4,5]" 
+                                   class="w-4 h-4"
+                                   [class.text-yellow-400]="star <= review.rating"
+                                   [class.text-gray-300]="star > review.rating"
+                                   fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                              </svg>
+                            </div>
+                            <span class="text-sm text-gray-600 font-['DM_Sans']">{{ review.createdAt | date:'mediumDate' }}</span>
+                          </div>
+                        </div>
+                        <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full font-['DM_Sans']"
+                              [ngClass]="{
+                                'bg-yellow-100 text-yellow-800': review.status === 'pending',
+                                'bg-green-100 text-green-800': review.status === 'approved',
+                                'bg-red-100 text-red-800': review.status === 'rejected',
+                                'bg-gray-100 text-gray-800': review.status === 'hidden'
+                              }">
+                          {{ review.status | titlecase }}
+                        </span>
+                      </div>
+                      
+                      <div *ngIf="review.title" class="mb-2">
+                        <h4 class="font-medium text-gray-900 font-['DM_Sans']">{{ review.title }}</h4>
+                      </div>
+                      
+                      <div *ngIf="review.comment" class="mb-3">
+                        <p class="text-gray-700 font-['DM_Sans']">{{ review.comment }}</p>
+                      </div>
+
+                      <div *ngIf="review.isVerifiedPurchase" class="mb-3">
+                        <span class="inline-flex items-center px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full font-['DM_Sans']">
+                          <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                          </svg>
+                          {{ 'profile.verifiedPurchase' | translate }}
+                        </span>
+                      </div>
+
+                      <div *ngIf="review.adminResponse" class="bg-gray-50 rounded-lg p-3 mt-3">
+                        <h5 class="text-sm font-medium text-gray-900 mb-1 font-['DM_Sans']">{{ 'profile.adminResponse' | translate }}</h5>
+                        <p class="text-sm text-gray-700 font-['DM_Sans']">{{ review.adminResponse }}</p>
+                      </div>
+
+                      <!-- Actions -->
+                      <div class="flex space-x-3 mt-4">
+                        <button class="text-solar-600 hover:text-solar-700 text-sm font-medium font-['DM_Sans']">
+                          {{ 'profile.editReview' | translate }}
+                        </button>
+                        <button class="text-red-600 hover:text-red-700 text-sm font-medium font-['DM_Sans']">
+                          {{ 'profile.deleteReview' | translate }}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <ng-template #noReviews>
+                <div *ngIf="!(reviewsLoading$ | async)" class="text-center py-12">
+                  <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                  </svg>
+                  <h3 class="text-lg font-medium text-gray-900 font-['Poppins'] mb-2">{{ 'profile.noReviewsFound' | translate }}</h3>
+                  <p class="text-gray-600 font-['DM_Sans'] mb-6">{{ 'profile.writeFirstReview' | translate }}</p>
+                  <button
+                    (click)="router.navigate(['/products'])"
+                    class="px-6 py-3 bg-solar-600 text-white rounded-lg font-['DM_Sans'] font-medium hover:bg-solar-700 transition-colors">
+                    {{ 'profile.browseProducts' | translate }}
+                  </button>
+                </div>
+              </ng-template>
+            </div>
           </div>
         </div>
       </div>
@@ -347,16 +573,29 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 export class ProfileComponent implements OnInit {
   private store = inject(Store);
   private fb = inject(FormBuilder);
-  private router = inject(Router);
+  public router = inject(Router);
   private actions$ = inject(Actions);
+  private supabaseService = inject(SupabaseService);
 
   currentUser$: Observable<User | null>;
   loading$: Observable<boolean>;
   error$: Observable<any>;
 
-  activeTab: 'user-info' | 'billing-shipping' = 'user-info';
+  activeTab: 'user-info' | 'billing-shipping' | 'my-orders' | 'my-reviews' = 'user-info';
   userInfoForm: FormGroup;
   showSuccessMessage = false;
+
+  // Orders
+  private ordersSubject = new BehaviorSubject<Order[]>([]);
+  private ordersLoadingSubject = new BehaviorSubject<boolean>(false);
+  orders$ = this.ordersSubject.asObservable();
+  ordersLoading$ = this.ordersLoadingSubject.asObservable();
+
+  // Reviews
+  private reviewsSubject = new BehaviorSubject<Review[]>([]);
+  private reviewsLoadingSubject = new BehaviorSubject<boolean>(false);
+  reviews$ = this.reviewsSubject.asObservable();
+  reviewsLoading$ = this.reviewsLoadingSubject.asObservable();
 
   constructor() {
     this.currentUser$ = this.store.select(selectCurrentUser);
@@ -403,9 +642,16 @@ export class ProfileComponent implements OnInit {
     });
   }
 
-  setActiveTab(tab: 'user-info' | 'billing-shipping'): void {
+  setActiveTab(tab: 'user-info' | 'billing-shipping' | 'my-orders' | 'my-reviews'): void {
     this.activeTab = tab;
     this.showSuccessMessage = false; // Hide success message when switching tabs
+
+    // Load data when switching to specific tabs
+    if (tab === 'my-orders') {
+      this.loadUserOrders();
+    } else if (tab === 'my-reviews') {
+      this.loadUserReviews();
+    }
   }
 
   updateUserInfo(): void {
@@ -430,5 +676,35 @@ export class ProfileComponent implements OnInit {
   addNewPaymentMethod(): void {
     // TODO: Implement add payment method modal/form
     console.log('Add new payment method');
+  }
+
+  private async loadUserOrders(): Promise<void> {
+    this.ordersLoadingSubject.next(true);
+    try {
+      // TODO: Implement actual order loading from Supabase
+      // For now, return empty array as placeholder
+      const orders: Order[] = [];
+      this.ordersSubject.next(orders);
+    } catch (error) {
+      console.error('Error loading user orders:', error);
+      this.ordersSubject.next([]);
+    } finally {
+      this.ordersLoadingSubject.next(false);
+    }
+  }
+
+  private async loadUserReviews(): Promise<void> {
+    this.reviewsLoadingSubject.next(true);
+    try {
+      // TODO: Implement actual review loading from Supabase
+      // For now, return empty array as placeholder
+      const reviews: Review[] = [];
+      this.reviewsSubject.next(reviews);
+    } catch (error) {
+      console.error('Error loading user reviews:', error);
+      this.reviewsSubject.next([]);
+    } finally {
+      this.reviewsLoadingSubject.next(false);
+    }
   }
 } 

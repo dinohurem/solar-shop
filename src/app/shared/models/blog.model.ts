@@ -144,21 +144,7 @@ export interface BlogStats {
     topTags: BlogTag[];
 }
 
-export interface BlogNewsletter {
-    id: string;
-    email: string;
-    name?: string;
-    subscribedAt: string;
-    isActive: boolean;
-    preferences: NewsletterPreferences;
-}
 
-export interface NewsletterPreferences {
-    frequency: 'daily' | 'weekly' | 'monthly';
-    categories: string[];
-    tags: string[];
-    format: 'html' | 'text';
-}
 
 export interface SeoMetadata {
     title: string;

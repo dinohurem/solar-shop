@@ -30,6 +30,7 @@ import { AdminCategoriesComponent } from './features/admin/categories/admin-cate
 import { AdminOffersComponent } from './features/admin/offers/admin-offers.component';
 import { AdminUsersComponent } from './features/admin/users/admin-users.component';
 import { AdminOrdersComponent } from './features/admin/orders/admin-orders.component';
+import { AdminReviewsComponent } from './features/admin/reviews/admin-reviews.component';
 import { CategoryFormComponent } from './features/admin/categories/category-form/category-form.component';
 import { ProductFormComponent } from './features/admin/products/product-form/product-form.component';
 import { OfferFormComponent } from './features/admin/offers/offer-form/offer-form.component';
@@ -114,7 +115,10 @@ export const routes: Routes = [
             // Orders
             { path: 'orders', component: AdminOrdersComponent },
             { path: 'orders/create', component: OrderFormComponent },
-            { path: 'orders/edit/:id', component: OrderFormComponent }
+            { path: 'orders/edit/:id', component: OrderFormComponent },
+
+            // Reviews
+            { path: 'reviews', component: AdminReviewsComponent }
         ]
     },
 

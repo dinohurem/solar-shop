@@ -263,47 +263,7 @@ export interface SeoTemplate {
     variables: string[];
 }
 
-export interface CategoryImport {
-    id: string;
-    fileName: string;
-    status: 'pending' | 'processing' | 'completed' | 'failed';
-    totalRows: number;
-    processedRows: number;
-    successfulRows: number;
-    failedRows: number;
-    errors: ImportError[];
-    warnings: ImportWarning[];
-    createdAt: string;
-    completedAt?: string;
-    createdBy: string;
-}
 
-export interface ImportError {
-    row: number;
-    field: string;
-    message: string;
-    value?: string;
-}
-
-export interface ImportWarning {
-    row: number;
-    field: string;
-    message: string;
-    value?: string;
-}
-
-export interface CategoryExport {
-    id: string;
-    fileName: string;
-    format: 'csv' | 'xlsx' | 'json' | 'xml';
-    filters: CategorySearchFilter;
-    status: 'pending' | 'processing' | 'completed' | 'failed';
-    downloadUrl?: string;
-    expiresAt?: string;
-    createdAt: string;
-    completedAt?: string;
-    createdBy: string;
-}
 
 export interface CategoryAnalytics {
     categoryId: string;

@@ -270,24 +270,24 @@ export class PaymentComponent {
   }
 
   onSubmit() {
-    if (this.paymentForm.valid) {
-      this.isProcessing = true;
+    this.isProcessing = true;
 
-      // Simulate payment processing
-      setTimeout(() => {
-        console.log('Payment form data:', this.paymentForm.value);
-        this.isProcessing = false;
+    // Process payment and create order
+    setTimeout(() => {
+      console.log('Payment form data:', this.paymentForm.value);
+      this.createOrder();
+    }, 2000);
+  }
 
-        // Navigate to success page or show success message
-        alert('Ordine completato con successo!');
-        this.router.navigate(['/']);
-      }, 2000);
-    } else {
-      // Mark all fields as touched to show validation errors
-      Object.keys(this.paymentForm.controls).forEach(key => {
-        this.paymentForm.get(key)?.markAsTouched();
-      });
-    }
+  private createOrder() {
+    // TODO: Implement order creation logic
+    // This will create an order with status 'pending' in the database
+    console.log('Creating order...');
+    this.isProcessing = false;
+
+    // Navigate to success page or show success message
+    alert('Order created successfully! Status: Pending - Admin will review your order.');
+    this.router.navigate(['/']);
   }
 
   goBack() {
