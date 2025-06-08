@@ -93,7 +93,23 @@ export class TranslationService {
                 manageSavedPayment: 'Upravljajte spremljenim načinima plaćanja',
                 addPaymentMethod: 'Dodaj način plaćanja',
                 noPaymentMethodsFound: 'Nema pronađenih načina plaćanja',
-                addFirstPayment: 'Dodajte svoj prvi način plaćanja za početak'
+                addFirstPayment: 'Dodajte svoj prvi način plaćanja za početak',
+                myOrders: 'Moje narudžbe',
+                viewOrderHistory: 'Pregledajte svoju povijest narudžbi',
+                viewDetails: 'Prikaži detalje',
+                writeReview: 'Napišite recenziju',
+                trackOrder: 'Pratite narudžbu',
+                noOrdersFound: 'Nema pronađenih narudžbi',
+                startShopping: 'Počnite s kupovinom da biste vidjeli svoje narudžbe ovdje',
+                browseProducts: 'Pregledajte proizvode',
+                myReviews: 'Moje recenzije',
+                manageReviews: 'Upravljajte svojim recenzijama i pogledajte odgovore admina',
+                verifiedPurchase: 'Potvrđena kupnja',
+                adminResponse: 'Odgovor administratora',
+                editReview: 'Uredi recenziju',
+                deleteReview: 'Obriši recenziju',
+                noReviewsFound: 'Nema pronađenih recenzija',
+                writeFirstReview: 'Napišite svoju prvu recenziju nakon kupovine proizvoda'
             },
             // Common
             common: {
@@ -556,7 +572,23 @@ export class TranslationService {
                 manageSavedPayment: 'Manage Saved Payment',
                 addPaymentMethod: 'Add Payment Method',
                 noPaymentMethodsFound: 'No payment methods found',
-                addFirstPayment: 'Add your first payment method for starting'
+                addFirstPayment: 'Add your first payment method for starting',
+                myOrders: 'My Orders',
+                viewOrderHistory: 'View your order history and track shipments',
+                viewDetails: 'View Details',
+                writeReview: 'Write Review',
+                trackOrder: 'Track Order',
+                noOrdersFound: 'No orders found',
+                startShopping: 'Start shopping to see your orders here',
+                browseProducts: 'Browse Products',
+                myReviews: 'My Reviews',
+                manageReviews: 'Manage your reviews and view admin responses',
+                verifiedPurchase: 'Verified Purchase',
+                adminResponse: 'Admin Response',
+                editReview: 'Edit Review',
+                deleteReview: 'Delete Review',
+                noReviewsFound: 'No reviews found',
+                writeFirstReview: 'Write your first review after purchasing a product'
             },
             // Common
             common: {

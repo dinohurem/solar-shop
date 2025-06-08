@@ -222,8 +222,11 @@ export class ShippingComponent {
   }
 
   onSubmit() {
-    // Save shipping information (no validation required for testing)
-    console.log('Shipping form data:', this.shippingForm.value);
+    // Save shipping information to localStorage for payment step
+    const shippingData = this.shippingForm.value;
+    localStorage.setItem('shippingInfo', JSON.stringify(shippingData));
+
+    console.log('Shipping form data saved:', shippingData);
     this.router.navigate(['/checkout/payment']);
   }
 

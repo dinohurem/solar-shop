@@ -58,8 +58,16 @@ export class AdminOrdersComponent implements OnInit {
                 searchable: true
             },
             {
+                key: 'customer_name',
+                label: 'Customer Name',
+                type: 'text',
+                sortable: true,
+                searchable: true,
+                format: (value) => value || 'Guest'
+            },
+            {
                 key: 'customer_email',
-                label: 'Customer',
+                label: 'Email',
                 type: 'text',
                 sortable: true,
                 searchable: true
@@ -162,13 +170,28 @@ export class AdminOrdersComponent implements OnInit {
         this.loadingSubject.next(true);
 
         try {
-            // Try to load orders from database
+            // Load all orders from database
             const orders = await this.supabaseService.getTable('orders');
-            this.ordersSubject.next(orders || []);
+
+            // Transform data to match table display format
+            const transformedOrders = (orders || []).map((order: any) => ({
+                id: order.id,
+                order_number: order.order_number,
+                customer_email: order.customer_email,
+                customer_name: order.customer_name,
+                total_amount: order.total_amount,
+                status: order.status,
+                payment_status: order.payment_status,
+                shipping_status: order.shipping_status,
+                payment_method: order.payment_method,
+                order_date: order.order_date,
+                created_at: order.created_at,
+                updated_at: order.updated_at
+            }));
+
+            this.ordersSubject.next(transformedOrders);
         } catch (error) {
-            console.warn('Orders table not found in database. Using empty array as placeholder.');
-            // Orders table doesn't exist yet - this is expected
-            // Return empty array as placeholder
+            console.warn('Error loading orders:', error);
             this.ordersSubject.next([]);
         } finally {
             this.loadingSubject.next(false);

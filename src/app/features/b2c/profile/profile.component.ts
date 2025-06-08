@@ -2,7 +2,8 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, filter, take, BehaviorSubject } from 'rxjs';
+import { Observable, filter, BehaviorSubject } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { selectCurrentUser, selectAuthLoading, selectAuthError } from '../../../core/auth/store/auth.selectors';
 import * as AuthActions from '../../../core/auth/store/auth.actions';
@@ -681,10 +682,76 @@ export class ProfileComponent implements OnInit {
   private async loadUserOrders(): Promise<void> {
     this.ordersLoadingSubject.next(true);
     try {
-      // TODO: Implement actual order loading from Supabase
-      // For now, return empty array as placeholder
-      const orders: Order[] = [];
-      this.ordersSubject.next(orders);
+      // Get current user
+      const currentUser = await this.currentUser$.pipe(take(1)).toPromise();
+
+      if (!currentUser || !currentUser.id) {
+        // No authenticated user, cannot load orders
+        console.log('No authenticated user found, cannot load orders');
+        this.ordersSubject.next([]);
+        return;
+      }
+
+      // Load orders from database
+      const ordersData = await this.supabaseService.getTable('orders', {
+        user_id: currentUser.id
+      });
+
+      // Load order items for each order
+      const ordersWithItems: Order[] = [];
+
+      for (const orderData of ordersData) {
+        const orderItemsData = await this.supabaseService.getTable('order_items', {
+          order_id: orderData.id
+        });
+
+        // Convert database order to Order model
+        const order: Order = {
+          id: orderData.id,
+          orderNumber: orderData.order_number,
+          userId: orderData.user_id,
+          customerEmail: orderData.customer_email,
+          customerName: orderData.customer_name,
+          customerPhone: orderData.customer_phone,
+          totalAmount: orderData.total_amount,
+          subtotal: orderData.subtotal,
+          taxAmount: orderData.tax_amount || 0,
+          shippingCost: orderData.shipping_cost || 0,
+          discountAmount: orderData.discount_amount || 0,
+          status: orderData.status,
+          paymentStatus: orderData.payment_status,
+          shippingStatus: orderData.shipping_status,
+          paymentMethod: orderData.payment_method,
+          orderDate: orderData.order_date,
+          shippingAddress: orderData.shipping_address,
+          billingAddress: orderData.billing_address,
+          trackingNumber: orderData.tracking_number,
+          notes: orderData.notes,
+          adminNotes: orderData.admin_notes,
+          items: orderItemsData.map((itemData: any) => ({
+            id: itemData.id,
+            orderId: itemData.order_id,
+            productId: itemData.product_id,
+            productName: itemData.product_name,
+            productSku: itemData.product_sku,
+            quantity: itemData.quantity,
+            unitPrice: itemData.unit_price,
+            totalPrice: itemData.total_price,
+            productImageUrl: itemData.product_image_url,
+            productSpecifications: itemData.product_specifications,
+            createdAt: itemData.created_at
+          })),
+          createdAt: orderData.created_at,
+          updatedAt: orderData.updated_at
+        };
+
+        ordersWithItems.push(order);
+      }
+
+      // Sort by order date (newest first)
+      ordersWithItems.sort((a, b) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime());
+
+      this.ordersSubject.next(ordersWithItems);
     } catch (error) {
       console.error('Error loading user orders:', error);
       this.ordersSubject.next([]);

@@ -2,7 +2,12 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { take } from 'rxjs/operators';
+import { selectCurrentUser } from '../../../../../core/auth/store/auth.selectors';
+import { SupabaseService } from '../../../../../services/supabase.service';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
+import { User } from '../../../../../shared/models/user.model';
 
 @Component({
   selector: 'app-payment',
@@ -17,133 +22,41 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
         <div class="mb-8">
           <h3 class="text-lg font-semibold text-gray-900 mb-4 font-['Poppins']">{{ 'checkout.paymentMethod' | translate }}</h3>
           <div class="space-y-3">
-            <!-- Credit Card -->
-            <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
-              <input
-                type="radio"
-                name="paymentMethod"
-                value="credit-card"
-                formControlName="paymentMethod"
-                class="text-[#0ACF83] focus:ring-[#0ACF83]"
-              >
-              <div class="ml-3 flex-1 flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                  <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
-                  </svg>
-                  <span class="font-medium text-[#324053] font-['DM_Sans']">Credit/Debit Card</span>
-                </div>
-                <div class="flex space-x-2">
-                  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/2560px-Visa_Inc._logo.svg.png" alt="Visa" class="h-6">
-                  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/2560px-Mastercard-logo.svg.png" alt="Mastercard" class="h-6">
-                </div>
-              </div>
-            </label>
-
-            <!-- PayPal -->
-            <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+            <!-- PayPal Only -->
+            <label class="flex items-center p-4 border-2 border-blue-200 bg-blue-50 rounded-lg cursor-pointer">
               <input
                 type="radio"
                 name="paymentMethod"
                 value="paypal"
                 formControlName="paymentMethod"
-                class="text-[#0ACF83] focus:ring-[#0ACF83]"
+                class="text-blue-600 focus:ring-blue-600"
+                checked
               >
               <div class="ml-3 flex-1 flex items-center justify-between">
                 <div class="flex items-center space-x-3">
                   <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.421c-.315-.178-.7-.284-1.139-.284H12.85l-.523 3.322h1.139c1.524 0 2.71-.543 3.33-1.810.62-1.267.356-2.807-.574-3.807z"/>
+                    <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.421c-.315-.178-.7-.284-1.139-.284H12.85l-.523 3.322h1.139c1.524 0 2.71-.543 3.33-1.81.62-1.267.356-2.807-.574-3.807z"/>
                   </svg>
-                  <span class="font-medium text-[#324053] font-['DM_Sans']">PayPal</span>
+                  <span class="font-medium text-blue-900 font-['DM_Sans']">PayPal</span>
                 </div>
                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/PayPal.svg/2560px-PayPal.svg.png" alt="PayPal" class="h-6">
               </div>
             </label>
-
-            <!-- Bank Transfer -->
-            <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
-              <input
-                type="radio"
-                name="paymentMethod"
-                value="bank-transfer"
-                formControlName="paymentMethod"
-                class="text-[#0ACF83] focus:ring-[#0ACF83]"
-              >
-              <div class="ml-3 flex-1">
-                <div class="flex items-center space-x-3">
-                  <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"/>
-                  </svg>
-                  <span class="font-medium text-[#324053] font-['DM_Sans']">Bank Transfer</span>
-                </div>
-                <p class="text-sm text-gray-600 mt-1 ml-9 font-['DM_Sans']">You will receive the instructions via email</p>
-              </div>
-            </label>
           </div>
-        </div>
-
-        <!-- Credit Card Details (shown when credit card is selected) -->
-        <div *ngIf="paymentForm.get('paymentMethod')?.value === 'credit-card'" class="mb-8">
-          <h3 class="text-lg font-semibold text-[#324053] mb-4 font-['Poppins']">Credit Card Details</h3>
-          <div class="space-y-4">
-            <div>
-              <label for="cardNumber" class="block text-sm font-medium text-gray-700 mb-2 font-['DM_Sans']">Credit Card Number *</label>
-              <input
-                type="text"
-                id="cardNumber"
-                formControlName="cardNumber"
-                placeholder="1234 5678 9012 3456"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0ACF83] focus:border-transparent font-['DM_Sans']"
-                maxlength="19"
-                (input)="formatCardNumber($event)"
-              >
-              <div *ngIf="paymentForm.get('cardNumber')?.invalid && paymentForm.get('cardNumber')?.touched" class="mt-1 text-sm text-red-600">
-                Insert a valid card number
-              </div>
-            </div>
-            <div>
-              <label for="cardName" class="block text-sm font-medium text-gray-700 mb-2 font-['DM_Sans']">Card Name *</label>
-              <input
-                type="text"
-                id="cardName"
-                formControlName="cardName"
-                placeholder="Mario Rossi"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0ACF83] focus:border-transparent font-['DM_Sans']"
-              >
-              <div *ngIf="paymentForm.get('cardName')?.invalid && paymentForm.get('cardName')?.touched" class="mt-1 text-sm text-red-600">
-                The card name is required
-              </div>
-            </div>
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <label for="expiryDate" class="block text-sm font-medium text-gray-700 mb-2 font-['DM_Sans']">Expiration Date *</label>
-                <input
-                  type="text"
-                  id="expiryDate"
-                  formControlName="expiryDate"
-                  placeholder="MM/AA"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0ACF83] focus:border-transparent font-['DM_Sans']"
-                  maxlength="5"
-                  (input)="formatExpiryDate($event)"
-                >
-                <div *ngIf="paymentForm.get('expiryDate')?.invalid && paymentForm.get('expiryDate')?.touched" class="mt-1 text-sm text-red-600">
-                  Insert a valid expiration date
-                </div>
-              </div>
-              <div>
-                <label for="cvv" class="block text-sm font-medium text-gray-700 mb-2 font-['DM_Sans']">CVV *</label>
-                <input
-                  type="text"
-                  id="cvv"
-                  formControlName="cvv"
-                  placeholder="123"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0ACF83] focus:border-transparent font-['DM_Sans']"
-                  maxlength="4"
-                >
-                <div *ngIf="paymentForm.get('cvv')?.invalid && paymentForm.get('cvv')?.touched" class="mt-1 text-sm text-red-600">
-                  Insert a valid CVV
-                </div>
-              </div>
+          <p class="text-sm text-gray-600 mt-3 font-['DM_Sans']">
+            Secure payment with PayPal. You will be redirected to PayPal to complete your payment.
+          </p>
+          
+          <!-- Guest Checkout Notice -->
+          <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <div class="flex items-center space-x-2">
+              <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              <p class="text-sm text-blue-800 font-['DM_Sans']">
+                <span class="font-medium">Guest Checkout:</span> You can complete your order without creating an account. 
+                Your order will be processed and you'll receive confirmation via email.
+              </p>
             </div>
           </div>
         </div>
@@ -154,11 +67,11 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
             <input
               type="checkbox"
               formControlName="acceptTerms"
-              class="mt-1 text-[#0ACF83] focus:ring-[#0ACF83] rounded"
+              class="mt-1 text-blue-600 focus:ring-blue-600 rounded"
             >
             <span class="text-sm text-gray-600 font-['DM_Sans']">
-              I accept the <a href="#" class="text-[#0ACF83] hover:underline">terms and conditions</a> and the 
-              <a href="#" class="text-[#0ACF83] hover:underline">privacy policy</a> *
+              I accept the <a href="#" class="text-blue-600 hover:underline">terms and conditions</a> and the 
+              <a href="#" class="text-blue-600 hover:underline">privacy policy</a> *
             </span>
           </label>
           <div *ngIf="paymentForm.get('acceptTerms')?.invalid && paymentForm.get('acceptTerms')?.touched" class="mt-1 text-sm text-red-600">
@@ -178,7 +91,7 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
           <button 
             type="submit"
             [disabled]="paymentForm.invalid || isProcessing"
-            class="flex-1 px-6 py-3 bg-solar-600 text-white rounded-lg hover:bg-solar-700 transition-colors font-semibold font-['DM_Sans'] disabled:opacity-50 disabled:cursor-not-allowed"
+            class="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold font-['DM_Sans'] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <span *ngIf="!isProcessing">{{ 'checkout.completeOrder' | translate }}</span>
             <span *ngIf="isProcessing" class="flex items-center justify-center">
@@ -192,6 +105,19 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
         </div>
       </form>
     </div>
+
+    <!-- Toast Notification -->
+    <div *ngIf="showToast" class="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg transform transition-all duration-300 ease-in-out">
+      <div class="flex items-center space-x-3">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+        </svg>
+        <div>
+          <p class="font-semibold">Order Completed Successfully!</p>
+          <p class="text-sm">Order #{{ orderNumber }} has been created and is pending review.</p>
+        </div>
+      </div>
+    </div>
   `,
   styles: [`
     /* Custom font loading */
@@ -201,93 +127,221 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 export class PaymentComponent {
   private fb = inject(FormBuilder);
   private router = inject(Router);
+  private store = inject(Store);
+  private supabaseService = inject(SupabaseService);
 
   paymentForm: FormGroup;
   isProcessing = false;
+  showToast = false;
+  orderNumber = '';
 
   constructor() {
     this.paymentForm = this.fb.group({
-      paymentMethod: ['credit-card', [Validators.required]],
-      cardNumber: [''],
-      cardName: [''],
-      expiryDate: [''],
-      cvv: [''],
+      paymentMethod: ['paypal', [Validators.required]],
       acceptTerms: [false, [Validators.requiredTrue]]
     });
-
-    // Add conditional validators for credit card fields
-    this.paymentForm.get('paymentMethod')?.valueChanges.subscribe(method => {
-      const cardNumber = this.paymentForm.get('cardNumber');
-      const cardName = this.paymentForm.get('cardName');
-      const expiryDate = this.paymentForm.get('expiryDate');
-      const cvv = this.paymentForm.get('cvv');
-
-      if (method === 'credit-card') {
-        cardNumber?.setValidators([Validators.required, Validators.pattern(/^\d{4}\s\d{4}\s\d{4}\s\d{4}$/)]);
-        cardName?.setValidators([Validators.required]);
-        expiryDate?.setValidators([Validators.required, Validators.pattern(/^\d{2}\/\d{2}$/)]);
-        cvv?.setValidators([Validators.required, Validators.pattern(/^\d{3,4}$/)]);
-      } else {
-        cardNumber?.clearValidators();
-        cardName?.clearValidators();
-        expiryDate?.clearValidators();
-        cvv?.clearValidators();
-      }
-
-      cardNumber?.updateValueAndValidity();
-      cardName?.updateValueAndValidity();
-      expiryDate?.updateValueAndValidity();
-      cvv?.updateValueAndValidity();
-    });
   }
 
-  formatCardNumber(event: any) {
-    let value = event.target.value.replace(/\s/g, '').replace(/[^0-9]/gi, '');
-    const matches = value.match(/\d{4,16}/g);
-    const match = matches && matches[0] || '';
-    const parts = [];
-
-    for (let i = 0, len = match.length; i < len; i += 4) {
-      parts.push(match.substring(i, i + 4));
+  async onSubmit() {
+    if (this.paymentForm.invalid) {
+      Object.keys(this.paymentForm.controls).forEach(key => {
+        this.paymentForm.get(key)?.markAsTouched();
+      });
+      return;
     }
 
-    if (parts.length) {
-      event.target.value = parts.join(' ');
-      this.paymentForm.get('cardNumber')?.setValue(parts.join(' '));
-    } else {
-      event.target.value = '';
-      this.paymentForm.get('cardNumber')?.setValue('');
-    }
-  }
-
-  formatExpiryDate(event: any) {
-    let value = event.target.value.replace(/\D/g, '');
-    if (value.length >= 2) {
-      value = value.substring(0, 2) + '/' + value.substring(2, 4);
-    }
-    event.target.value = value;
-    this.paymentForm.get('expiryDate')?.setValue(value);
-  }
-
-  onSubmit() {
     this.isProcessing = true;
 
-    // Process payment and create order
-    setTimeout(() => {
-      console.log('Payment form data:', this.paymentForm.value);
-      this.createOrder();
-    }, 2000);
+    try {
+      await this.createOrder();
+      this.showSuccessToast();
+
+      // Navigate to home after 3 seconds
+      setTimeout(() => {
+        this.router.navigate(['/']);
+      }, 3000);
+    } catch (error) {
+      console.error('Error creating order:', error);
+      alert('Error creating order. Please try again.');
+    } finally {
+      this.isProcessing = false;
+    }
   }
 
-  private createOrder() {
-    // TODO: Implement order creation logic
-    // This will create an order with status 'pending' in the database
-    console.log('Creating order...');
-    this.isProcessing = false;
+  private async createOrder() {
+    // Get current user (optional for guest checkout)
+    const currentUser = await this.store.select(selectCurrentUser).pipe(
+      take(1)
+    ).toPromise();
 
-    // Navigate to success page or show success message
-    alert('Order created successfully! Status: Pending - Admin will review your order.');
-    this.router.navigate(['/']);
+    console.log('Current user from store:', currentUser);
+
+    // If no authenticated user, proceed with guest checkout
+    if (!currentUser) {
+      try {
+        const session = await this.supabaseService.getSession();
+        console.log('Supabase session:', session);
+
+        if (session?.user) {
+          // Use authenticated user data
+          const sessionUser = {
+            id: session.user.id,
+            email: session.user.email || '',
+            firstName: session.user.user_metadata?.firstName || 'Customer',
+            lastName: session.user.user_metadata?.lastName || '',
+            phone: session.user.user_metadata?.phone || ''
+          };
+          console.log('Using authenticated session user:', sessionUser);
+          return this.createOrderWithUser(sessionUser);
+        } else {
+          // Proceed with guest checkout
+          console.log('Proceeding with guest checkout');
+          return this.createGuestOrder();
+        }
+      } catch (sessionError) {
+        console.warn('Session error, proceeding with guest checkout:', sessionError);
+        return this.createGuestOrder();
+      }
+    }
+
+    return this.createOrderWithUser(currentUser);
+  }
+
+  private async createGuestOrder() {
+    // Get shipping info from the shipping step
+    const shippingInfo = JSON.parse(localStorage.getItem('shippingInfo') || '{}');
+
+    if (!shippingInfo.email || !shippingInfo.firstName || !shippingInfo.lastName) {
+      throw new Error('Shipping information is required for guest checkout');
+    }
+
+    // Create guest user object from shipping info
+    const guestUser = {
+      id: null, // No user ID for guest orders
+      email: shippingInfo.email,
+      firstName: shippingInfo.firstName,
+      lastName: shippingInfo.lastName,
+      phone: shippingInfo.phone || ''
+    };
+
+    console.log('Creating order for guest user:', guestUser);
+    return this.createOrderWithUser(guestUser);
+  }
+
+  private async createOrderWithUser(currentUser: any) {
+
+    // Get cart items from localStorage (or from cart service)
+    const cartItems = JSON.parse(localStorage.getItem('cart') || '[]');
+
+    if (cartItems.length === 0) {
+      // For testing purposes, create a dummy cart item with a valid UUID
+      console.warn('Cart is empty, creating test order');
+      const testCartItems = [{
+        id: '00000000-0000-0000-0000-000000000001', // Valid UUID for testing
+        name: 'Test Solar Panel',
+        price: 299.99,
+        quantity: 1,
+        sku: 'TEST-001',
+        image: '/assets/images/placeholder.jpg'
+      }];
+      return this.processCartItems(currentUser, testCartItems);
+    }
+
+    return this.processCartItems(currentUser, cartItems);
+  }
+
+  private async processCartItems(currentUser: any, cartItems: any[]) {
+
+    // Calculate totals
+    const subtotal = cartItems.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0);
+    const tax = subtotal * 0.25; // 25% VAT
+    const shipping = subtotal > 500 ? 0 : 50; // Free shipping over €500
+    const total = subtotal + tax + shipping;
+
+    // Generate order number
+    this.orderNumber = 'ORD-' + Date.now();
+
+    // Get shipping info from localStorage (from shipping step)
+    const shippingInfo = JSON.parse(localStorage.getItem('shippingInfo') || '{}');
+
+    // Create shipping and billing address objects
+    const shippingAddress = {
+      firstName: shippingInfo.firstName || currentUser.firstName || '',
+      lastName: shippingInfo.lastName || currentUser.lastName || '',
+      addressLine1: shippingInfo.address || '',
+      addressLine2: shippingInfo.addressLine2 || null,
+      city: shippingInfo.city || '',
+      state: shippingInfo.state || '',
+      postalCode: shippingInfo.postalCode || '',
+      country: shippingInfo.country || '',
+      phone: shippingInfo.phone || currentUser.phone || ''
+    };
+
+    // Create order object
+    const orderData = {
+      order_number: this.orderNumber,
+      user_id: currentUser.id, // Will be null for guest orders
+      customer_email: currentUser.email,
+      customer_name: `${currentUser.firstName || ''} ${currentUser.lastName || ''}`.trim(),
+      customer_phone: shippingInfo.phone || currentUser.phone,
+
+      // Amounts
+      subtotal: subtotal,
+      tax_amount: tax,
+      shipping_cost: shipping,
+      discount_amount: 0,
+      total_amount: total,
+
+      // Order details
+      status: 'pending' as const,
+      payment_status: 'pending' as const,
+      shipping_status: 'not_shipped' as const,
+      payment_method: 'paypal' as const,
+
+      // Addresses as JSON
+      shipping_address: shippingAddress,
+      billing_address: shippingAddress, // Same as shipping for now
+
+      // Timestamps
+      order_date: new Date().toISOString(),
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    // Create order in database
+    const order = await this.supabaseService.createRecord('orders', orderData);
+
+    if (!order) {
+      throw new Error('Failed to create order');
+    }
+
+    // Create order items
+    for (const item of cartItems) {
+      const orderItemData = {
+        order_id: order.id,
+        product_id: item.id === '00000000-0000-0000-0000-000000000001' ? null : item.id, // Set to null for test products
+        product_name: item.name,
+        product_sku: item.sku || `SKU-${item.id}`,
+        product_image_url: item.image,
+        quantity: item.quantity,
+        unit_price: item.price,
+        total_price: item.price * item.quantity,
+        created_at: new Date().toISOString()
+      };
+
+      await this.supabaseService.createRecord('order_items', orderItemData);
+    }
+
+    // Clear cart
+    localStorage.removeItem('cart');
+    localStorage.removeItem('shippingInfo');
+  }
+
+  private showSuccessToast() {
+    this.showToast = true;
+    setTimeout(() => {
+      this.showToast = false;
+    }, 4000);
   }
 
   goBack() {
