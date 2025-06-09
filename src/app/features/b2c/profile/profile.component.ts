@@ -427,7 +427,9 @@ import { SupabaseService } from '../../../services/supabase.service';
 
                   <!-- Actions -->
                   <div class="flex space-x-3 pt-4 border-t border-gray-200">
-                    <button class="text-solar-600 hover:text-solar-700 text-sm font-medium font-['DM_Sans']">
+                    <button 
+                      (click)="viewOrderDetails(order.id)"
+                      class="text-solar-600 hover:text-solar-700 text-sm font-medium font-['DM_Sans']">
                       {{ 'profile.viewDetails' | translate }}
                     </button>
                     <button *ngIf="order.status === 'delivered'" 
@@ -677,6 +679,10 @@ export class ProfileComponent implements OnInit {
   addNewPaymentMethod(): void {
     // TODO: Implement add payment method modal/form
     console.log('Add new payment method');
+  }
+
+  viewOrderDetails(orderId: string): void {
+    this.router.navigate(['/order-details', orderId]);
   }
 
   private async loadUserOrders(): Promise<void> {

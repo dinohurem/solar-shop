@@ -1,40 +1,36 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { SupabaseService } from '../../../services/supabase.service';
-import { Observable, forkJoin, map, catchError, of, from } from 'rxjs';
+import { Observable, from } from 'rxjs';
 
 interface DashboardStats {
-  totalProducts: number;
-  totalCategories: number;
-  totalBlogPosts: number;
-  totalOffers: number;
-  totalUsers: number;
-  recentActivity: any[];
+    totalProducts: number;
+    totalCategories: number;
+    totalBlogPosts: number;
+    totalOffers: number;
+    totalUsers: number;
+    totalOrders: number;
+    recentOrders: any[];
 }
 
 @Component({
-  selector: 'app-admin-dashboard',
-  standalone: true,
-  imports: [CommonModule, RouterModule],
-  template: `
+    selector: 'app-admin-dashboard',
+    standalone: true,
+    imports: [CommonModule, RouterModule],
+    template: `
     <div class="space-y-6">
-      <!-- Page Header -->
       <div class="flex items-center justify-between">
         <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <div class="flex space-x-3">
-          <button 
-            (click)="refreshStats()"
-            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-            Refresh Data
-          </button>
-        </div>
+        <button 
+          (click)="refreshStats()"
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+          Refresh Data
+        </button>
       </div>
 
-      <!-- Stats Cards -->
-      <div *ngIf="stats$ | async as stats" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-        <!-- Products -->
+      <div *ngIf="stats$ | async as stats" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6">
         <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
           <div class="flex items-center justify-between">
             <div>
@@ -54,7 +50,6 @@ interface DashboardStats {
           </div>
         </div>
 
-        <!-- Categories -->
         <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
           <div class="flex items-center justify-between">
             <div>
@@ -74,7 +69,6 @@ interface DashboardStats {
           </div>
         </div>
 
-        <!-- Blog Posts -->
         <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
           <div class="flex items-center justify-between">
             <div>
@@ -94,7 +88,6 @@ interface DashboardStats {
           </div>
         </div>
 
-        <!-- Offers -->
         <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
           <div class="flex items-center justify-between">
             <div>
@@ -114,7 +107,6 @@ interface DashboardStats {
           </div>
         </div>
 
-        <!-- Users -->
         <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
           <div class="flex items-center justify-between">
             <div>
@@ -133,163 +125,147 @@ interface DashboardStats {
             </a>
           </div>
         </div>
-      </div>
 
-      <!-- Quick Actions -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Content Management -->
         <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-          <h2 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
-          <div class="space-y-3">
-            <a routerLink="/admin/products/create" 
-               class="flex items-center justify-between p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
-              <div class="flex items-center space-x-3">
-                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                </svg>
-                <span class="font-medium text-gray-900">Add New Product</span>
-              </div>
-              <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-gray-600">Total Orders</p>
+              <p class="text-3xl font-bold text-gray-900">{{ stats.totalOrders }}</p>
+            </div>
+            <div class="p-3 bg-orange-100 rounded-lg">
+              <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
               </svg>
-            </a>
-
-            <a routerLink="/admin/blog/create" 
-               class="flex items-center justify-between p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors">
-              <div class="flex items-center space-x-3">
-                <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                </svg>
-                <span class="font-medium text-gray-900">Create Blog Post</span>
-              </div>
-              <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-              </svg>
-            </a>
-
-            <a routerLink="/admin/offers/create" 
-               class="flex items-center justify-between p-4 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition-colors">
-              <div class="flex items-center space-x-3">
-                <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                </svg>
-                <span class="font-medium text-gray-900">Create New Offer</span>
-              </div>
-              <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-              </svg>
-            </a>
+            </div>
           </div>
-        </div>
-
-        <!-- Import Tools -->
-        <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-          <h2 class="text-lg font-semibold text-gray-900 mb-4">Data Management</h2>
-          <div class="space-y-3">
-            <a routerLink="/admin/products" 
-               class="flex items-center justify-between p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors">
-              <div class="flex items-center space-x-3">
-                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                </svg>
-                <span class="font-medium text-gray-900">Manage Products & Import CSV</span>
-              </div>
-              <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-              </svg>
-            </a>
-
-            <a routerLink="/admin/blog" 
-               class="flex items-center justify-between p-4 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors">
-              <div class="flex items-center space-x-3">
-                <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                </svg>
-                <span class="font-medium text-gray-900">Manage Blog Posts & Import CSV</span>
-              </div>
-              <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-              </svg>
-            </a>
-
-            <a routerLink="/admin/offers" 
-               class="flex items-center justify-between p-4 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">
-              <div class="flex items-center space-x-3">
-                <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                </svg>
-                <span class="font-medium text-gray-900">Manage Offers & Import CSV</span>
-              </div>
-              <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-              </svg>
+          <div class="mt-4">
+            <a routerLink="/admin/orders" class="text-orange-600 hover:text-orange-800 text-sm font-medium">
+              Manage Orders →
             </a>
           </div>
         </div>
       </div>
 
-      <!-- Loading State -->
+      <div *ngIf="stats$ | async as stats">
+        <div *ngIf="stats.recentOrders && stats.recentOrders.length > 0" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-lg font-semibold text-gray-900">Recent Orders</h2>
+            <a routerLink="/admin/orders" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+              View All Orders →
+            </a>
+          </div>
+          
+          <div class="space-y-4">
+            <div 
+              *ngFor="let order of stats.recentOrders" 
+              (click)="viewOrderDetails(order.id)"
+              class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 cursor-pointer transition-all duration-200">
+              <div class="flex-1">
+                <div class="flex items-center space-x-4">
+                  <div>
+                    <h3 class="font-medium text-gray-900">{{ order.order_number }}</h3>
+                    <p class="text-sm text-gray-600">{{ order.customer_name || order.customer_email }}</p>
+                  </div>
+                  <div class="text-center">
+                    <p class="text-lg font-semibold text-gray-900">\${{ order.total_amount?.toFixed(2) }}</p>
+                    <p class="text-xs text-gray-500">{{ order.created_at | date:'shortDate' }}</p>
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-center space-x-3">
+                <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full"
+                      [ngClass]="{
+                        'bg-yellow-100 text-yellow-800': order.status === 'pending',
+                        'bg-blue-100 text-blue-800': order.status === 'confirmed',
+                        'bg-purple-100 text-purple-800': order.status === 'processing',
+                        'bg-indigo-100 text-indigo-800': order.status === 'shipped',
+                        'bg-green-100 text-green-800': order.status === 'delivered',
+                        'bg-red-100 text-red-800': order.status === 'cancelled'
+                      }">
+                  {{ order.status | titlecase }}
+                </span>
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div *ngIf="!(stats$ | async)" class="flex items-center justify-center h-64">
         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     </div>
   `,
-  styles: [`
+    styles: [`
     :host {
       display: block;
     }
   `]
 })
 export class AdminDashboardComponent implements OnInit {
-  private supabaseService = inject(SupabaseService);
-  private titleService = inject(Title);
+    private supabaseService = inject(SupabaseService);
+    private titleService = inject(Title);
+    private router = inject(Router);
 
-  stats$: Observable<DashboardStats>;
+    stats$: Observable<DashboardStats>;
 
-  constructor() {
-    this.stats$ = this.loadStats();
-  }
+    constructor() {
+        this.stats$ = this.loadStats();
+    }
 
-  ngOnInit(): void {
-    this.titleService.setTitle('Dashboard - Solar Shop Admin');
-  }
+    ngOnInit(): void {
+        this.titleService.setTitle('Dashboard - Solar Shop Admin');
+    }
 
-  refreshStats(): void {
-    this.stats$ = this.loadStats();
-  }
+    refreshStats(): void {
+        this.stats$ = this.loadStats();
+    }
 
-  private loadStats(): Observable<DashboardStats> {
-    const loadStatsAsync = async () => {
-      try {
-        const [products, categories, blogPosts, offers, users] = await Promise.all([
-          this.supabaseService.getTable('products'),
-          this.supabaseService.getTable('categories'),
-          this.supabaseService.getTable('blog_posts'),
-          this.supabaseService.getTable('offers'),
-          this.supabaseService.getTable('profiles')
-        ]);
+    viewOrderDetails(orderId: string): void {
+        this.router.navigate(['/admin/orders/edit', orderId]);
+    }
 
-        return {
-          totalProducts: products?.length || 0,
-          totalCategories: categories?.length || 0,
-          totalBlogPosts: blogPosts?.length || 0,
-          totalOffers: offers?.length || 0,
-          totalUsers: users?.length || 0,
-          recentActivity: []
+    private loadStats(): Observable<DashboardStats> {
+        const loadStatsAsync = async () => {
+            try {
+                const [products, categories, blogPosts, offers, users] = await Promise.all([
+                    this.supabaseService.getTable('products'),
+                    this.supabaseService.getTable('categories'),
+                    this.supabaseService.getTable('blog_posts'),
+                    this.supabaseService.getTable('offers'),
+                    this.supabaseService.getTable('profiles')
+                ]);
+
+                const orders = await this.supabaseService.getTable('orders');
+                const recentOrders = (orders || [])
+                    .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+                    .slice(0, 5);
+
+                return {
+                    totalProducts: products?.length || 0,
+                    totalCategories: categories?.length || 0,
+                    totalBlogPosts: blogPosts?.length || 0,
+                    totalOffers: offers?.length || 0,
+                    totalUsers: users?.length || 0,
+                    totalOrders: orders?.length || 0,
+                    recentOrders: recentOrders
+                };
+            } catch (error) {
+                console.error('Error loading dashboard stats:', error);
+                return {
+                    totalProducts: 0,
+                    totalCategories: 0,
+                    totalBlogPosts: 0,
+                    totalOffers: 0,
+                    totalUsers: 0,
+                    totalOrders: 0,
+                    recentOrders: []
+                };
+            }
         };
-      } catch (error) {
-        console.error('Error loading dashboard stats:', error);
-        return {
-          totalProducts: 0,
-          totalCategories: 0,
-          totalBlogPosts: 0,
-          totalOffers: 0,
-          totalUsers: 0,
-          recentActivity: []
-        };
-      }
-    };
 
-    return from(loadStatsAsync());
-  }
+        return from(loadStatsAsync());
+    }
 } 

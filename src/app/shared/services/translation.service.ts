@@ -335,6 +335,7 @@ export class TranslationService {
                 paymentMethod: 'Način plaćanja',
                 creditCard: 'Kreditna kartica',
                 paypal: 'PayPal',
+                payOnDelivery: 'Plaćanje pouzećem',
                 bankTransfer: 'Bankovni transfer',
                 cardNumber: 'Broj kartice',
                 expiryDate: 'Datum isteka',
@@ -343,6 +344,8 @@ export class TranslationService {
                 processing: 'Obrađujemo...',
                 orderPlaced: 'Narudžba je uspješno poslana!',
                 orderNumber: 'Broj narudžbe: {{number}}',
+                orderCompletedSuccessfully: 'Narudžba je uspješno dovršena!',
+                orderCreated: 'Narudžba #{{number}} je kreirana i čeka na pregled.',
                 backStep: 'Nazad na',
                 nextStep: 'Nastavi na'
             },
@@ -814,6 +817,7 @@ export class TranslationService {
                 paymentMethod: 'Payment Method',
                 creditCard: 'Credit Card',
                 paypal: 'PayPal',
+                payOnDelivery: 'Pay on Delivery',
                 bankTransfer: 'Bank Transfer',
                 cardNumber: 'Card Number',
                 expiryDate: 'Expiry Date',
@@ -822,6 +826,8 @@ export class TranslationService {
                 processing: 'Processing...',
                 orderPlaced: 'Order placed successfully!',
                 orderNumber: 'Order number: {{number}}',
+                orderCompletedSuccessfully: 'Order Completed Successfully!',
+                orderCreated: 'Order #{{number}} has been created and is pending review.',
                 backStep: 'Back to',
                 nextStep: 'Continue to'
             },

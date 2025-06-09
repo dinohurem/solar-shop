@@ -22,29 +22,31 @@ import { User } from '../../../../../shared/models/user.model';
         <div class="mb-8">
           <h3 class="text-lg font-semibold text-gray-900 mb-4 font-['Poppins']">{{ 'checkout.paymentMethod' | translate }}</h3>
           <div class="space-y-3">
-            <!-- PayPal Only -->
-            <label class="flex items-center p-4 border-2 border-blue-200 bg-blue-50 rounded-lg cursor-pointer">
+            <!-- Pay on Delivery Only -->
+            <label class="flex items-center p-4 border-2 border-green-200 bg-green-50 rounded-lg cursor-pointer">
               <input
                 type="radio"
                 name="paymentMethod"
-                value="paypal"
+                value="cash_on_delivery"
                 formControlName="paymentMethod"
-                class="text-blue-600 focus:ring-blue-600"
+                class="text-green-600 focus:ring-green-600"
                 checked
               >
               <div class="ml-3 flex-1 flex items-center justify-between">
                 <div class="flex items-center space-x-3">
-                  <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.421c-.315-.178-.7-.284-1.139-.284H12.85l-.523 3.322h1.139c1.524 0 2.71-.543 3.33-1.81.62-1.267.356-2.807-.574-3.807z"/>
+                  <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
                   </svg>
-                  <span class="font-medium text-blue-900 font-['DM_Sans']">PayPal</span>
+                  <span class="font-medium text-green-900 font-['DM_Sans']">{{ 'checkout.payOnDelivery' | translate }}</span>
                 </div>
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/PayPal.svg/2560px-PayPal.svg.png" alt="PayPal" class="h-6">
+                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
               </div>
             </label>
           </div>
           <p class="text-sm text-gray-600 mt-3 font-['DM_Sans']">
-            Secure payment with PayPal. You will be redirected to PayPal to complete your payment.
+            Pay when your order is delivered. Cash or card payment accepted at delivery.
           </p>
           
           <!-- Guest Checkout Notice -->
@@ -113,8 +115,8 @@ import { User } from '../../../../../shared/models/user.model';
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
         </svg>
         <div>
-          <p class="font-semibold">Order Completed Successfully!</p>
-          <p class="text-sm">Order #{{ orderNumber }} has been created and is pending review.</p>
+          <p class="font-semibold">{{ 'checkout.orderCompletedSuccessfully' | translate }}</p>
+          <p class="text-sm">{{ 'checkout.orderCreated' | translate: {number: orderNumber} }}</p>
         </div>
       </div>
     </div>
@@ -137,7 +139,7 @@ export class PaymentComponent {
 
   constructor() {
     this.paymentForm = this.fb.group({
-      paymentMethod: ['paypal', [Validators.required]],
+      paymentMethod: ['cash_on_delivery', [Validators.required]],
       acceptTerms: [false, [Validators.requiredTrue]]
     });
   }
@@ -296,7 +298,7 @@ export class PaymentComponent {
       status: 'pending' as const,
       payment_status: 'pending' as const,
       shipping_status: 'not_shipped' as const,
-      payment_method: 'paypal' as const,
+      payment_method: 'cash_on_delivery' as const,
 
       // Addresses as JSON
       shipping_address: shippingAddress,

@@ -125,6 +125,12 @@ export class AdminOrdersComponent implements OnInit {
                 icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>',
                 action: 'print',
                 class: 'text-gray-600 hover:text-gray-900'
+            },
+            {
+                label: 'Delete',
+                icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>',
+                action: 'delete',
+                class: 'text-red-600 hover:text-red-900'
             }
         ],
         searchable: true,
@@ -149,6 +155,9 @@ export class AdminOrdersComponent implements OnInit {
                 break;
             case 'print':
                 this.printOrder(item);
+                break;
+            case 'delete':
+                this.deleteOrder(item);
                 break;
         }
     }
@@ -202,5 +211,20 @@ export class AdminOrdersComponent implements OnInit {
         // Implement order printing functionality
         console.log('Printing order:', order);
         alert('Print functionality would be implemented here');
+    }
+
+    private async deleteOrder(order: any): Promise<void> {
+        if (!confirm(`Are you sure you want to delete order "${order.order_number}"? This action cannot be undone.`)) {
+            return;
+        }
+
+        try {
+            await this.supabaseService.deleteRecord('orders', order.id);
+            alert('Order deleted successfully');
+            this.loadOrders();
+        } catch (error) {
+            console.error('Error deleting order:', error);
+            alert('Error deleting order');
+        }
     }
 } 

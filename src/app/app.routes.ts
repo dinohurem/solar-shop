@@ -37,6 +37,7 @@ import { OfferFormComponent } from './features/admin/offers/offer-form/offer-for
 import { BlogFormComponent } from './features/admin/blog/blog-form/blog-form.component';
 import { UserFormComponent } from './features/admin/users/user-form/user-form.component';
 import { OrderFormComponent } from './features/admin/orders/order-form/order-form.component';
+import { OrderDetailsComponent } from './features/b2c/order-details/order-details.component';
 
 export const routes: Routes = [
     // Authentication routes (no layout) - no guards needed, Supabase handles auth state
@@ -64,6 +65,7 @@ export const routes: Routes = [
 
             // Protected routes
             { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
+            { path: 'order-details/:id', component: OrderDetailsComponent, canActivate: [AuthGuard] },
 
             // Checkout routes
             {
