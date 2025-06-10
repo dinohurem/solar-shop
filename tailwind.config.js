@@ -73,6 +73,48 @@ module.exports = {
           "900": "#1c1917",
           "950": "#0c0a09",
         },
+        // B2B theme colors (based on the provided image)
+        "b2b": {
+          "50": "#f0f9ff",               // Very light blue
+          "100": "#e0f2fe",              // Light blue
+          "200": "#bae6fd",              // Light blue
+          "300": "#7dd3fc",              // Medium light blue
+          "400": "#38bdf8",              // Light blue
+          "500": "#0ea5e9",              // Primary blue
+          "600": "#0284c7",              // Medium blue
+          "700": "#0369a1",              // Dark blue
+          "800": "#075985",              // Darker blue
+          "900": "#0c4a6e",              // Darkest blue
+          "950": "#082f49",              // Almost black blue
+        },
+        // B2B secondary colors (teal/green accents)
+        "b2b-secondary": {
+          "50": "#f0fdfa",               // Very light teal
+          "100": "#ccfbf1",              // Light teal
+          "200": "#99f6e4",              // Light teal
+          "300": "#5eead4",              // Medium light teal
+          "400": "#2dd4bf",              // Medium teal
+          "500": "#14b8a6",              // Base teal
+          "600": "#0d9488",              // Dark teal
+          "700": "#0f766e",              // Darker teal
+          "800": "#115e59",              // Very dark teal
+          "900": "#134e4a",              // Darkest teal
+          "950": "#042f2e",              // Almost black teal
+        },
+        // B2B neutral grays
+        "b2b-gray": {
+          "50": "#f8fafc",
+          "100": "#f1f5f9",
+          "200": "#e2e8f0",
+          "300": "#cbd5e1",
+          "400": "#94a3b8",
+          "500": "#64748b",
+          "600": "#475569",
+          "700": "#334155",
+          "800": "#1e293b",
+          "900": "#0f172a",
+          "950": "#020617",
+        },
       },
       fontFamily: {
         sans: ["Poppins", "sans-serif"],

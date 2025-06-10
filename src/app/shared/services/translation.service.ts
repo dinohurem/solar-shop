@@ -22,6 +22,7 @@ export class TranslationService {
                 blog: 'Blog',
                 company: 'O nama',
                 contact: 'Kontakt i Podrška',
+                partners: 'Partneri',
                 searchPlaceholder: 'Traži proizvode...'
             },
             // Authentication
@@ -755,6 +756,15 @@ export class TranslationService {
                         value: 'Ilica 1, 10000 Zagreb, Hrvatska'
                     }
                 }
+            },
+            // B2B Partners Portal
+            b2b: {
+                hero: {
+                    title: 'B2B partnerski portal',
+                    subtitle: 'Pristupite ekskluzivnim cijenama, posebnim ponudama i profesionalnoj podršci za vaš solarni biznis',
+                    getStarted: 'Počnite',
+                    learnMore: 'Saznajte više'
+                }
             }
         },
         en: {
@@ -766,6 +776,7 @@ export class TranslationService {
                 blog: 'Blog',
                 company: 'About us',
                 contact: 'Contact & Support',
+                partners: 'Partners',
                 searchPlaceholder: 'Search products...'
             },
             // Authentication
@@ -1498,6 +1509,15 @@ export class TranslationService {
                         label: 'Address',
                         value: 'Ilica 1, 10000 Zagreb, Croatia'
                     }
+                }
+            },
+            // B2B Partners Portal
+            b2b: {
+                hero: {
+                    title: 'B2B Partner Portal',
+                    subtitle: 'Access exclusive pricing, special offers and professional support for your solar business',
+                    getStarted: 'Get Started',
+                    learnMore: 'Learn More'
                 }
             }
         }

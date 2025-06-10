@@ -351,6 +351,9 @@ export class ProductListComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.store.dispatch(ProductListActions.loadProducts());
 
+    // Check if we should clear filters based on navigation source
+    this.checkAndClearFiltersIfNeeded();
+
     // Handle query parameters first (for initial load and external navigation)
     this.route.queryParams.pipe(
       takeUntil(this.destroy$)
@@ -397,6 +400,21 @@ export class ProductListComponent implements OnInit, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
     this.searchSubject.complete();
+  }
+
+  private checkAndClearFiltersIfNeeded(): void {
+    // Get navigation state to check if coming from navbar search or hero explore
+    const navigation = this.router.getCurrentNavigation();
+    const state = navigation?.extras?.state;
+
+    // Check if this navigation came from navbar search or hero explore buttons
+    if (state?.['clearFilters'] === true ||
+      state?.['fromNavbar'] === true ||
+      state?.['fromHero'] === true) {
+      // Clear all existing filters when navigating from navbar or hero
+      this.store.dispatch(ProductListActions.clearFilters());
+      this.store.dispatch(ProductListActions.searchProducts({ query: '' }));
+    }
   }
 
   onSearchChange(event: Event): void {

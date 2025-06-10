@@ -19,6 +19,7 @@ import { ContactComponent } from './features/b2c/contact/contact.component';
 import { PrivacyPolicyComponent } from './features/b2c/privacy-policy/privacy-policy.component';
 import { TermsOfServiceComponent } from './features/b2c/terms-of-service/terms-of-service.component';
 import { CookiePolicyComponent } from './features/b2c/cookie-policy/cookie-policy.component';
+import { PartnersComponent } from './features/b2b/partners/partners.component';
 import { CheckoutComponent } from './features/b2c/checkout/checkout.component';
 import { OrderReviewComponent } from './features/b2c/checkout/steps/order-review/order-review.component';
 import { ShippingComponent } from './features/b2c/checkout/steps/shipping/shipping.component';
@@ -66,6 +67,7 @@ export const routes: Routes = [
             { path: 'privacy', component: PrivacyPolicyComponent },
             { path: 'terms', component: TermsOfServiceComponent },
             { path: 'cookies', component: CookiePolicyComponent },
+            { path: 'partners', component: PartnersComponent },
 
             // Protected routes
             { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },

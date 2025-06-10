@@ -351,7 +351,9 @@ export class HeroComponent implements OnInit, OnDestroy {
   }
 
   onExploreProducts(): void {
-    this.router.navigate(['/products']);
+    this.router.navigate(['/products'], {
+      state: { fromHero: true, clearFilters: true }
+    });
   }
 
   onExploreOffers(): void {
