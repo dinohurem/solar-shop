@@ -15,8 +15,10 @@ import { HomeComponent } from './features/b2c/home/home.component';
 import { ProductDetailsComponent } from './features/b2c/products/product-details/product-details.component';
 import { OffersPageComponent } from './features/b2c/offers/offers-page.component';
 import { OfferDetailsComponent } from './features/b2c/offers/offer-details.component';
-import { MissionComponent } from './features/b2c/mission/mission.component';
 import { ContactComponent } from './features/b2c/contact/contact.component';
+import { PrivacyPolicyComponent } from './features/b2c/privacy-policy/privacy-policy.component';
+import { TermsOfServiceComponent } from './features/b2c/terms-of-service/terms-of-service.component';
+import { CookiePolicyComponent } from './features/b2c/cookie-policy/cookie-policy.component';
 import { CheckoutComponent } from './features/b2c/checkout/checkout.component';
 import { OrderReviewComponent } from './features/b2c/checkout/steps/order-review/order-review.component';
 import { ShippingComponent } from './features/b2c/checkout/steps/shipping/shipping.component';
@@ -57,11 +59,13 @@ export const routes: Routes = [
             { path: 'products/:id', component: ProductDetailsComponent },
             { path: 'offers', component: OffersPageComponent },
             { path: 'offers/:id', component: OfferDetailsComponent },
-            { path: 'mission', component: MissionComponent },
             { path: 'blog', component: BlogComponent },
             { path: 'blog/:id', component: BlogDetailComponent },
             { path: 'company', component: CompanyComponent },
             { path: 'contact', component: ContactComponent },
+            { path: 'privacy', component: PrivacyPolicyComponent },
+            { path: 'terms', component: TermsOfServiceComponent },
+            { path: 'cookies', component: CookiePolicyComponent },
 
             // Protected routes
             { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },

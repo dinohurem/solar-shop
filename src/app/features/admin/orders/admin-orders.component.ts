@@ -196,7 +196,12 @@ export class AdminOrdersComponent implements OnInit {
                 order_date: order.order_date,
                 created_at: order.created_at,
                 updated_at: order.updated_at
-            }));
+            })).sort((a, b) => {
+                // Sort by created_at date descending (most recent first)
+                const dateA = new Date(a.created_at || a.order_date);
+                const dateB = new Date(b.created_at || b.order_date);
+                return dateB.getTime() - dateA.getTime();
+            });
 
             this.ordersSubject.next(transformedOrders);
         } catch (error) {

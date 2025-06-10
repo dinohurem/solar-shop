@@ -222,12 +222,7 @@ import { FormsModule } from '@angular/forms';
               <div class="absolute bottom-0 left-0 w-0 h-0.5 bg-solar-600 transition-all duration-300 group-hover:w-full"></div>
             </a>
             
-            <a routerLink="/mission" 
-               routerLinkActive="text-solar-600 font-semibold" 
-               class="relative text-gray-900 hover:text-solar-600 font-medium transition-all duration-300 hover:scale-105 group">
-              <span>{{ 'nav.sustainability' | translate }}</span>
-              <div class="absolute bottom-0 left-0 w-0 h-0.5 bg-solar-600 transition-all duration-300 group-hover:w-full"></div>
-            </a>            
+
             
             <a routerLink="/company" 
                routerLinkActive="text-solar-600 font-semibold" 
@@ -459,11 +454,7 @@ import { FormsModule } from '@angular/forms';
             {{ 'nav.blog' | translate }}
           </a>
           
-          <a routerLink="/mission" 
-             routerLinkActive="text-solar-600 font-semibold bg-solar-50" 
-             class="block text-gray-900 hover:text-solar-600 font-medium transition-all duration-300 py-2 px-3 rounded-lg hover:bg-solar-50">
-            {{ 'nav.sustainability' | translate }}
-          </a>
+
 
           <a routerLink="/company" 
              routerLinkActive="text-solar-600 font-semibold bg-solar-50" 

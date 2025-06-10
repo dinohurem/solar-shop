@@ -493,6 +493,268 @@ export class TranslationService {
                 easyReturns: 'Jednostavan povrat',
                 // Product Photos
                 zoomImage: 'Povećaj sliku'
+            },
+            // Privacy Policy
+            privacyPolicy: {
+                title: 'Pravila privatnosti',
+                subtitle: 'Kako prikupljamo, koristimo i štitimo vaše osobne podatke',
+                lastUpdated: 'Zadnje ažurirano: siječanj 2024.',
+                informationWeCollect: {
+                    title: 'Informacije koje prikupljamo',
+                    intro: 'Prikupljamo informacije koje nam izravno pružate, kao i informacije koje automatski prikupljamo kada koristite naše usluge.',
+                    personalInfo: {
+                        title: 'Osobni podaci',
+                        name: 'Ime i kontaktni podaci',
+                        email: 'Email adresa',
+                        phone: 'Broj telefona',
+                        address: 'Adrese za naplatu i dostavu',
+                        payment: 'Podaci o plaćanju'
+                    },
+                    automaticInfo: {
+                        title: 'Automatski prikupljene informacije',
+                        ip: 'IP adresa i podaci o uređaju',
+                        browser: 'Tip i verzija preglednika',
+                        device: 'Tip uređaja i operacijski sustav',
+                        usage: 'Obrasci korištenja i preferencije',
+                        cookies: 'Kolačići i slične tehnologije'
+                    }
+                },
+                howWeUse: {
+                    title: 'Kako koristimo vaše informacije',
+                    processOrders: 'Obrađujemo i ispunjavamo vaše narudžbe',
+                    customerService: 'Pružamo korisničku službu i podršku',
+                    communication: 'Šaljemo vam važne obavijesti i komunikacije',
+                    marketing: 'Šaljemo marketinške komunikacije (uz pristanak)',
+                    analytics: 'Poboljšavamo naše usluge kroz analitiku',
+                    legal: 'Poštujemo pravne obveze'
+                },
+                sharing: {
+                    title: 'Dijeljenje informacija',
+                    intro: 'Ne prodajemo, trgovimo ili iznajmljujemo vaše osobne podatke. Možemo podijeliti vaše informacije samo u sljedećim okolnostima:',
+                    serviceProviders: 'S pouzdanim pružateljima usluga koji nam pomažu u poslovanju',
+                    legal: 'Kada to zahtijeva zakon ili radi zaštite naših prava',
+                    business: 'U vezi s poslovnom transakcijom',
+                    consent: 'Uz vaš izričiti pristanak'
+                },
+                security: {
+                    title: 'Sigurnost podataka',
+                    description: 'Provodimo odgovarajuće sigurnosne mjere za zaštitu vaših osobnih podataka od neovlaštenog pristupa, mijenjanja, otkrivanja ili uništavanja.'
+                },
+                rights: {
+                    title: 'Vaša prava',
+                    access: 'Pristup vašim osobnim podacima',
+                    correct: 'Ispravak netočnih informacija',
+                    delete: 'Zahtjev za brisanje vaših informacija',
+                    restrict: 'Ograničavanje obrade vaših informacija',
+                    portability: 'Prenosivost podataka',
+                    object: 'Prigovor obradi za izravni marketing'
+                },
+                contact: {
+                    title: 'Kontaktirajte nas',
+                    description: 'Ako imate pitanja o ovim Pravilima privatnosti, molimo kontaktirajte nas:',
+                    email: {
+                        label: 'Email',
+                        value: 'privatnost@solarshop.hr'
+                    },
+                    phone: {
+                        label: 'Telefon',
+                        value: '+385 1 234 5678'
+                    },
+                    address: {
+                        label: 'Adresa',
+                        value: 'Ilica 1, 10000 Zagreb, Hrvatska'
+                    }
+                },
+                changes: {
+                    title: 'Promjene u ovim pravilima',
+                    description: 'Možemo povremeno ažurirati ova Pravila privatnosti. Obavijestit ćemo vas o značajnim promjenama objavljivanjem nove politike na ovoj stranici.'
+                }
+            },
+            // Terms of Service
+            termsOfService: {
+                title: 'Uvjeti korištenja',
+                subtitle: 'Uvjeti i odredbe za korištenje naših usluga',
+                lastUpdated: 'Zadnje ažurirano: siječanj 2024.',
+                acceptance: {
+                    title: 'Prihvaćanje uvjeta',
+                    description: 'Pristupom i korištenjem ove web stranice prihvaćate i pristajete biti vezani uvjetima i odredbama ovog sporazuma.'
+                },
+                services: {
+                    title: 'Opis usluga',
+                    description: 'SolarShop pruža proizvode solarne energije i povezane usluge uključujući:',
+                    products: 'Solarne ploče, izmjenjivače, baterije i pribor',
+                    consultation: 'Energetsko savjetovanje i dizajn sustava',
+                    installation: 'Profesionalne usluge instalacije',
+                    support: 'Tehničku podršku i održavanje',
+                    maintenance: 'Kontinuirano praćenje i održavanje sustava'
+                },
+                accounts: {
+                    title: 'Korisnički računi',
+                    description: 'Kada stvarate račun kod nas, morate pružiti točne i potpune informacije. Odgovorni ste za:',
+                    accurate: 'Pružanje točnih i ažurnih informacija',
+                    secure: 'Održavanje sigurnosti vašeg računa',
+                    responsible: 'Sve aktivnosti koje se događaju pod vašim računom',
+                    notify: 'Trenutno obavještavanje o bilo kakvoj neovlaštenoj uporabi'
+                },
+                orders: {
+                    title: 'Narudžbe i plaćanje',
+                    description: 'Sve narudžbe podliježu prihvaćanju i dostupnosti. Zadržavamo pravo odbiti ili otkazati bilo koju narudžbu.',
+                    pricing: {
+                        title: 'Cijene',
+                        description: 'Sve cijene su navedene u EUR i uključuju primjenjive poreze osim ako nije drugačije navedeno.'
+                    },
+                    payment: {
+                        title: 'Plaćanje',
+                        description: 'Plaćanje mora biti primljeno prije slanja proizvoda. Prihvaćamo glavne kreditne kartice i bankovne transfere.'
+                    }
+                },
+                shipping: {
+                    title: 'Dostava i isporuka',
+                    processing: 'Narudžbe se obrađuju u roku od 1-3 radna dana',
+                    delivery: 'Vremena dostave variraju ovisno o lokaciji i dostupnosti proizvoda',
+                    risk: 'Rizik od gubitka prelazi na vas nakon dostave',
+                    damages: 'Pregledajte pakete pri dostavi i odmah prijavite štete'
+                },
+                returns: {
+                    title: 'Povrati i refundacije',
+                    description: 'Želimo da budete zadovoljni vašom kupovinom. Naša politika povrata uključuje:',
+                    timeLimit: '30-dnevni rok za povrat većine proizvoda',
+                    condition: 'Predmeti moraju biti u originalnom stanju i pakiranju',
+                    authorization: 'Potrebna je autorizacija povrata prije slanja predmeta natrag',
+                    refund: 'Refundacije se obrađuju u roku od 5-10 radnih dana'
+                },
+                warranties: {
+                    title: 'Jamstva',
+                    description: 'Proizvodi dolaze s jamstvima proizvođača. Pružamo dodatnu jamstvenu podršku kao ovlašteni diljer.'
+                },
+                liability: {
+                    title: 'Ograničavanje odgovornosti',
+                    description: 'Naša odgovornost je ograničena u najvećoj mjeri dozvoljenoj zakonom. Nismo odgovorni za neizravne, slučajne ili posledične štete.'
+                },
+                intellectual: {
+                    title: 'Intelektualno vlasništvo',
+                    description: 'Sav sadržaj na ovoj web stranici je zaštićen autorskim pravom i drugim pravima intelektualnog vlasništva. Ne smijete reproducirati ili distribuirati sadržaj bez dozvole.'
+                },
+                law: {
+                    title: 'Mjerodavno pravo',
+                    description: 'Ovi uvjeti su uređeni hrvatskim pravom. Svi sporovi će se rješavati pred hrvatskim sudovima.'
+                },
+                contact: {
+                    title: 'Kontaktne informacije',
+                    description: 'Za pitanja o ovim Uvjetima korištenja, kontaktirajte nas:',
+                    email: {
+                        label: 'Email',
+                        value: 'pravni@solarshop.hr'
+                    },
+                    phone: {
+                        label: 'Telefon',
+                        value: '+385 1 234 5678'
+                    },
+                    address: {
+                        label: 'Adresa',
+                        value: 'Ilica 1, 10000 Zagreb, Hrvatska'
+                    }
+                },
+                changes: {
+                    title: 'Promjene uvjeta',
+                    description: 'Zadržavamo pravo mijenjanja ovih uvjeta u bilo koje vrijeme. Promjene će stupiti na snagu odmah nakon objavljivanja.'
+                }
+            },
+            // Cookie Policy
+            cookiePolicy: {
+                title: 'Pravila o kolačićima',
+                subtitle: 'Kako koristimo kolačiće i slične tehnologije',
+                lastUpdated: 'Zadnje ažurirano: siječanj 2024.',
+                whatAreCookies: {
+                    title: 'Što su kolačići',
+                    description: 'Kolačići su male tekstualne datoteke koje se postavljaju na vaše računalo ili mobilni uređaj kada posjećujete našu web stranicu. Pomažu nam pružiti vam bolje iskustvo.'
+                },
+                typesOfCookies: {
+                    title: 'Vrste kolačića koje koristimo',
+                    essential: {
+                        title: 'Osnovni kolačići',
+                        description: 'Ovi kolačići su potrebni da web stranica ispravno funkcionira. Omogućavaju osnovne funkcije poput navigacije stranicama i pristupa sigurnim područjima.',
+                        authentication: 'Autentifikacija korisnika i status prijave',
+                        cart: 'Sadržaj košarice za kupovinu',
+                        security: 'Sigurnost i sprječavanje prijevara',
+                        preferences: 'Jezične i prikazne preferencije'
+                    },
+                    performance: {
+                        title: 'Kolačići performansi',
+                        description: 'Ovi kolačići prikupljaju informacije o tome kako posjetitelji koriste našu web stranicu, pomažući nam poboljšati performanse.',
+                        analytics: 'Analitika web stranice i statistike posjetitelja',
+                        usage: 'Pregledi stranica i korisničke interakcije',
+                        errors: 'Praćenje grešaka i otklanjanje problema'
+                    },
+                    functional: {
+                        title: 'Funkcionalni kolačići',
+                        description: 'Ovi kolačići poboljšavaju funkcionalnost naše web stranice pamteći vaše izbore i preferencije.',
+                        language: 'Odabir jezika',
+                        region: 'Postavke lokacije i regije',
+                        accessibility: 'Preferencije pristupačnosti'
+                    },
+                    marketing: {
+                        title: 'Marketing kolačići',
+                        description: 'Ovi kolačići se koriste za isporuku relevantnih oglasa i praćenje učinkovitosti marketinških kampanja.',
+                        advertising: 'Ciljani oglasi',
+                        social: 'Integracija društvenih medija',
+                        tracking: 'Praćenje konverzija'
+                    }
+                },
+                thirdParty: {
+                    title: 'Kolačići treće strane',
+                    description: 'Možemo koristiti usluge treće strane koje postavljaju kolačiće na vaš uređaj:',
+                    googleAnalytics: 'Google Analytics za statistike web stranice',
+                    socialMedia: 'Dodaci i widgeti društvenih medija',
+                    paymentProcessors: 'Usluge obrade plaćanja',
+                    supportTools: 'Alati korisničke podrške i chat'
+                },
+                management: {
+                    title: 'Upravljanje kolačićima',
+                    browserSettings: {
+                        title: 'Postavke preglednika',
+                        description: 'Možete kontrolirati kolačiće kroz postavke vašeg preglednika. Većina preglednika vam omogućava blokiranje ili brisanje kolačića.'
+                    },
+                    consent: {
+                        title: 'Pristanak za kolačiće',
+                        description: 'Tražit ćemo vaš pristanak prije postavljanja nebitnih kolačića na vaš uređaj.'
+                    },
+                    optOut: {
+                        title: 'Linkovi za odjavu',
+                        description: 'Možete se odjaviti od određenih kolačića putem sljedećih linkova: Google Analytics, Facebook, itd.'
+                    }
+                },
+                duration: {
+                    title: 'Trajanje kolačića',
+                    session: {
+                        title: 'Kolačići sesije',
+                        description: 'Ovi kolačići se brišu kada zatvorite vaš pregljednik.'
+                    },
+                    persistent: {
+                        title: 'Trajni kolačići',
+                        description: 'Ovi kolačići ostaju na vašem uređaju određeno vrijeme ili dok ih ne obrišete.'
+                    }
+                },
+                updates: {
+                    title: 'Ažuriranja ovih pravila',
+                    description: 'Možemo povremeno ažurirati ova Pravila o kolačićima. Molimo pregledajte ovu stranicu povremeno za promjene.'
+                },
+                contact: {
+                    title: 'Kontaktirajte nas',
+                    description: 'Ako imate pitanja o našoj uporabi kolačića, molimo kontaktirajte nas:',
+                    email: {
+                        label: 'Email',
+                        value: 'privatnost@solarshop.hr'
+                    },
+                    phone: {
+                        label: 'Telefon',
+                        value: '+385 1 234 5678'
+                    },
+                    address: {
+                        label: 'Adresa',
+                        value: 'Ilica 1, 10000 Zagreb, Hrvatska'
+                    }
+                }
             }
         },
         en: {
@@ -975,6 +1237,268 @@ export class TranslationService {
                 easyReturns: 'Easy returns',
                 // Product Photos
                 zoomImage: 'Zoom Image'
+            },
+            // Privacy Policy
+            privacyPolicy: {
+                title: 'Privacy Policy',
+                subtitle: 'How we collect, use, and protect your personal information',
+                lastUpdated: 'Last updated: January 2024',
+                informationWeCollect: {
+                    title: 'Information We Collect',
+                    intro: 'We collect information you provide directly to us, as well as information we gather automatically when you use our services.',
+                    personalInfo: {
+                        title: 'Personal Information',
+                        name: 'Name and contact information',
+                        email: 'Email address',
+                        phone: 'Phone number',
+                        address: 'Billing and shipping addresses',
+                        payment: 'Payment information'
+                    },
+                    automaticInfo: {
+                        title: 'Automatically Collected Information',
+                        ip: 'IP address and device information',
+                        browser: 'Browser type and version',
+                        device: 'Device type and operating system',
+                        usage: 'Usage patterns and preferences',
+                        cookies: 'Cookies and similar technologies'
+                    }
+                },
+                howWeUse: {
+                    title: 'How We Use Your Information',
+                    processOrders: 'Process and fulfill your orders',
+                    customerService: 'Provide customer service and support',
+                    communication: 'Send you important updates and communications',
+                    marketing: 'Send marketing communications (with consent)',
+                    analytics: 'Improve our services through analytics',
+                    legal: 'Comply with legal obligations'
+                },
+                sharing: {
+                    title: 'Information Sharing',
+                    intro: 'We do not sell, trade, or rent your personal information. We may share your information only in these circumstances:',
+                    serviceProviders: 'With trusted service providers who assist us in operating our business',
+                    legal: 'When required by law or to protect our rights',
+                    business: 'In connection with a business transaction',
+                    consent: 'With your explicit consent'
+                },
+                security: {
+                    title: 'Data Security',
+                    description: 'We implement appropriate security measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction.'
+                },
+                rights: {
+                    title: 'Your Rights',
+                    access: 'Access your personal information',
+                    correct: 'Correct inaccurate information',
+                    delete: 'Request deletion of your information',
+                    restrict: 'Restrict processing of your information',
+                    portability: 'Data portability',
+                    object: 'Object to processing for direct marketing'
+                },
+                contact: {
+                    title: 'Contact Us',
+                    description: 'If you have questions about this Privacy Policy, please contact us:',
+                    email: {
+                        label: 'Email',
+                        value: 'privacy@solarshop.hr'
+                    },
+                    phone: {
+                        label: 'Phone',
+                        value: '+385 1 234 5678'
+                    },
+                    address: {
+                        label: 'Address',
+                        value: 'Ilica 1, 10000 Zagreb, Croatia'
+                    }
+                },
+                changes: {
+                    title: 'Changes to This Policy',
+                    description: 'We may update this Privacy Policy from time to time. We will notify you of any significant changes by posting the new policy on this page.'
+                }
+            },
+            // Terms of Service
+            termsOfService: {
+                title: 'Terms of Service',
+                subtitle: 'Terms and conditions for using our services',
+                lastUpdated: 'Last updated: January 2024',
+                acceptance: {
+                    title: 'Acceptance of Terms',
+                    description: 'By accessing and using this website, you accept and agree to be bound by the terms and provision of this agreement.'
+                },
+                services: {
+                    title: 'Description of Services',
+                    description: 'SolarShop provides solar energy products and related services including:',
+                    products: 'Solar panels, inverters, batteries, and accessories',
+                    consultation: 'Energy consultation and system design',
+                    installation: 'Professional installation services',
+                    support: 'Technical support and maintenance',
+                    maintenance: 'Ongoing system monitoring and maintenance'
+                },
+                accounts: {
+                    title: 'User Accounts',
+                    description: 'When you create an account with us, you must provide accurate and complete information. You are responsible for:',
+                    accurate: 'Providing accurate and up-to-date information',
+                    secure: 'Maintaining the security of your account',
+                    responsible: 'All activities that occur under your account',
+                    notify: 'Notifying us immediately of any unauthorized use'
+                },
+                orders: {
+                    title: 'Orders and Payment',
+                    description: 'All orders are subject to acceptance and availability. We reserve the right to refuse or cancel any order.',
+                    pricing: {
+                        title: 'Pricing',
+                        description: 'All prices are listed in EUR and include applicable taxes unless otherwise stated.'
+                    },
+                    payment: {
+                        title: 'Payment',
+                        description: 'Payment must be received before products are shipped. We accept major credit cards and bank transfers.'
+                    }
+                },
+                shipping: {
+                    title: 'Shipping and Delivery',
+                    processing: 'Orders are processed within 1-3 business days',
+                    delivery: 'Delivery times vary based on location and product availability',
+                    risk: 'Risk of loss passes to you upon delivery',
+                    damages: 'Inspect packages upon delivery and report damages immediately'
+                },
+                returns: {
+                    title: 'Returns and Refunds',
+                    description: 'We want you to be satisfied with your purchase. Our return policy includes:',
+                    timeLimit: '30-day return window for most products',
+                    condition: 'Items must be in original condition and packaging',
+                    authorization: 'Return authorization required before sending items back',
+                    refund: 'Refunds processed within 5-10 business days'
+                },
+                warranties: {
+                    title: 'Warranties',
+                    description: 'Products come with manufacturer warranties. We provide additional warranty support as an authorized dealer.'
+                },
+                liability: {
+                    title: 'Limitation of Liability',
+                    description: 'Our liability is limited to the maximum extent permitted by law. We are not liable for indirect, incidental, or consequential damages.'
+                },
+                intellectual: {
+                    title: 'Intellectual Property',
+                    description: 'All content on this website is protected by copyright and other intellectual property rights. You may not reproduce or distribute content without permission.'
+                },
+                law: {
+                    title: 'Governing Law',
+                    description: 'These terms are governed by Croatian law. Any disputes will be resolved in Croatian courts.'
+                },
+                contact: {
+                    title: 'Contact Information',
+                    description: 'For questions about these Terms of Service, contact us:',
+                    email: {
+                        label: 'Email',
+                        value: 'legal@solarshop.hr'
+                    },
+                    phone: {
+                        label: 'Phone',
+                        value: '+385 1 234 5678'
+                    },
+                    address: {
+                        label: 'Address',
+                        value: 'Ilica 1, 10000 Zagreb, Croatia'
+                    }
+                },
+                changes: {
+                    title: 'Changes to Terms',
+                    description: 'We reserve the right to modify these terms at any time. Changes will be effective immediately upon posting.'
+                }
+            },
+            // Cookie Policy
+            cookiePolicy: {
+                title: 'Cookie Policy',
+                subtitle: 'How we use cookies and similar technologies',
+                lastUpdated: 'Last updated: January 2024',
+                whatAreCookies: {
+                    title: 'What Are Cookies',
+                    description: 'Cookies are small text files that are placed on your computer or mobile device when you visit our website. They help us provide you with a better experience.'
+                },
+                typesOfCookies: {
+                    title: 'Types of Cookies We Use',
+                    essential: {
+                        title: 'Essential Cookies',
+                        description: 'These cookies are necessary for the website to function properly. They enable basic functions like page navigation and access to secure areas.',
+                        authentication: 'User authentication and login status',
+                        cart: 'Shopping cart contents',
+                        security: 'Security and fraud prevention',
+                        preferences: 'Language and display preferences'
+                    },
+                    performance: {
+                        title: 'Performance Cookies',
+                        description: 'These cookies collect information about how visitors use our website, helping us improve performance.',
+                        analytics: 'Website analytics and visitor statistics',
+                        usage: 'Page views and user interactions',
+                        errors: 'Error tracking and debugging'
+                    },
+                    functional: {
+                        title: 'Functional Cookies',
+                        description: 'These cookies enhance the functionality of our website by remembering your choices and preferences.',
+                        language: 'Language selection',
+                        region: 'Location and region settings',
+                        accessibility: 'Accessibility preferences'
+                    },
+                    marketing: {
+                        title: 'Marketing Cookies',
+                        description: 'These cookies are used to deliver relevant advertisements and track the effectiveness of marketing campaigns.',
+                        advertising: 'Targeted advertising',
+                        social: 'Social media integration',
+                        tracking: 'Conversion tracking'
+                    }
+                },
+                thirdParty: {
+                    title: 'Third-Party Cookies',
+                    description: 'We may use third-party services that place cookies on your device:',
+                    googleAnalytics: 'Google Analytics for website statistics',
+                    socialMedia: 'Social media plugins and widgets',
+                    paymentProcessors: 'Payment processing services',
+                    supportTools: 'Customer support and chat tools'
+                },
+                management: {
+                    title: 'Managing Cookies',
+                    browserSettings: {
+                        title: 'Browser Settings',
+                        description: 'You can control cookies through your browser settings. Most browsers allow you to block or delete cookies.'
+                    },
+                    consent: {
+                        title: 'Cookie Consent',
+                        description: 'We will ask for your consent before placing non-essential cookies on your device.'
+                    },
+                    optOut: {
+                        title: 'Opt-Out Links',
+                        description: 'You can opt out of certain cookies through the following links: Google Analytics, Facebook, etc.'
+                    }
+                },
+                duration: {
+                    title: 'Cookie Duration',
+                    session: {
+                        title: 'Session Cookies',
+                        description: 'These cookies are deleted when you close your browser.'
+                    },
+                    persistent: {
+                        title: 'Persistent Cookies',
+                        description: 'These cookies remain on your device for a set period or until you delete them.'
+                    }
+                },
+                updates: {
+                    title: 'Updates to This Policy',
+                    description: 'We may update this Cookie Policy from time to time. Please review this page periodically for changes.'
+                },
+                contact: {
+                    title: 'Contact Us',
+                    description: 'If you have questions about our use of cookies, please contact us:',
+                    email: {
+                        label: 'Email',
+                        value: 'privacy@solarshop.hr'
+                    },
+                    phone: {
+                        label: 'Phone',
+                        value: '+385 1 234 5678'
+                    },
+                    address: {
+                        label: 'Address',
+                        value: 'Ilica 1, 10000 Zagreb, Croatia'
+                    }
+                }
             }
         }
     };

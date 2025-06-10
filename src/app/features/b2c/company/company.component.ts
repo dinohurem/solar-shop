@@ -258,28 +258,214 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
       </div>
     </section>
 
-    <!-- Social Responsibility Section -->
-    <section class="py-16 px-4 md:px-8 lg:px-32 bg-white">
+    <!-- Our Mission & Sustainability Section -->
+    <section class="py-16 px-4 md:px-8 lg:px-32 bg-gray-50">
       <div class="max-w-6xl mx-auto">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <!-- Content -->
-          <div class="space-y-6">
-            <h2 class="font-['Poppins'] font-semibold text-3xl md:text-4xl text-gray-800 leading-tight">
-              {{ 'company.socialResponsibility' | translate }}
-            </h2>
-            <p class="font-['DM_Sans'] text-base text-gray-600 leading-relaxed">
-              {{ 'company.responsibilityText' | translate }}
-            </p>
+        <div class="text-center mb-16">
+          <h2 class="font-['Poppins'] font-semibold text-3xl md:text-4xl text-gray-800 mb-8 leading-tight">
+            {{ 'mission.title' | translate }}
+          </h2>
+          <p class="font-['DM_Sans'] text-base md:text-lg text-gray-600 max-w-4xl mx-auto leading-relaxed">
+            {{ 'mission.subtitle' | translate }}
+          </p>
+        </div>
+
+        <!-- Our Philosophy -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
+          <!-- Image -->
+          <div class="order-2 lg:order-1">
+            <img 
+              src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+              alt="Sustainable Building" 
+              class="w-full h-96 lg:h-[500px] object-cover rounded-[40px]"
+            >
           </div>
           
-          <!-- Image -->
-          <div class="relative">
-            <div class="bg-gradient-to-br from-solar-400 to-solar-600 rounded-3xl h-96 flex items-center justify-center relative overflow-hidden">
-              <!-- Logo placeholder -->
-              <div class="bg-white rounded-lg p-8">
-                <div class="w-32 h-12 bg-gray-200 rounded"></div>
+          <!-- Content -->
+          <div class="order-1 lg:order-2">
+            <h3 class="text-2xl lg:text-3xl font-bold text-[#222529] mb-8 font-['Poppins']">
+              {{ 'mission.ourPhilosophy' | translate }}
+            </h3>
+            
+            <div class="space-y-6">
+              <!-- Environmental Responsibility -->
+              <div class="bg-solar-50 rounded-2xl p-6 flex items-start gap-4">
+                <div class="w-7 h-7 bg-white rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                  <svg class="w-4 h-4 text-solar-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 13l4 4L19 7"/>
+                  </svg>
+                </div>
+                <div>
+                  <h4 class="text-lg font-semibold text-solar-700 mb-2 font-['DM_Sans']">
+                    {{ 'mission.environmentalResponsibility' | translate }}
+                  </h4>
+                  <p class="text-solar-600 font-['DM_Sans']">
+                    {{ 'mission.environmentalText' | translate }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Quality and Durability -->
+              <div class="bg-solar-50 rounded-2xl p-6 flex items-start gap-4">
+                <div class="w-7 h-7 bg-white rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                  <svg class="w-4 h-4 text-solar-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h4 class="text-lg font-semibold text-solar-700 mb-2 font-['DM_Sans']">
+                    {{ 'mission.qualityDurability' | translate }}
+                  </h4>
+                  <p class="text-solar-600 font-['DM_Sans']">
+                    {{ 'mission.qualityText' | translate }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Technological Innovation -->
+              <div class="bg-solar-50 rounded-2xl p-6 flex items-start gap-4">
+                <div class="w-7 h-7 bg-white rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                  <svg class="w-4 h-4 text-solar-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h4 class="text-lg font-semibold text-solar-700 mb-2 font-['DM_Sans']">
+                    {{ 'mission.technologicalInnovation' | translate }}
+                  </h4>
+                  <p class="text-solar-600 font-['DM_Sans']">
+                    {{ 'mission.innovationText' | translate }}
+                  </p>
+                </div>
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- Our Commitment Beyond Product -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
+          <!-- Content -->
+          <div>
+            <h3 class="text-2xl lg:text-3xl font-bold text-[#222529] mb-8 font-['Poppins']">
+              {{ 'mission.commitmentBeyond' | translate }}
+            </h3>
+            
+            <div class="space-y-6">
+              <!-- Personalized Consulting -->
+              <div class="flex items-start gap-4">
+                <div class="w-6 h-6 flex-shrink-0 mt-1">
+                  <svg class="w-6 h-6 text-solar-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 13l4 4L19 7"/>
+                  </svg>
+                </div>
+                <div>
+                  <h4 class="text-lg font-semibold text-solar-700 mb-2 font-['DM_Sans']">
+                    {{ 'mission.personalizedConsulting' | translate }}
+                  </h4>
+                  <p class="text-solar-600 font-['DM_Sans']">
+                    {{ 'mission.consultingText' | translate }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Continuous Updates and Research -->
+              <div class="flex items-start gap-4">
+                <div class="w-6 h-6 flex-shrink-0 mt-1">
+                  <svg class="w-6 h-6 text-solar-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 13l4 4L19 7"/>
+                  </svg>
+                </div>
+                <div>
+                  <h4 class="text-lg font-semibold text-solar-700 mb-2 font-['DM_Sans']">
+                    {{ 'mission.continuousUpdates' | translate }}
+                  </h4>
+                  <p class="text-solar-600 font-['DM_Sans']">
+                    {{ 'mission.updatesText' | translate }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Awareness and Education -->
+              <div class="flex items-start gap-4">
+                <div class="w-6 h-6 flex-shrink-0 mt-1">
+                  <svg class="w-6 h-6 text-solar-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 13l4 4L19 7"/>
+                  </svg>
+                </div>
+                <div>
+                  <h4 class="text-lg font-semibold text-solar-700 mb-2 font-['DM_Sans']">
+                    {{ 'mission.awarenessEducation' | translate }}
+                  </h4>
+                  <p class="text-solar-600 font-['DM_Sans']">
+                    {{ 'mission.educationText' | translate }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Image -->
+          <div>
+            <img 
+              src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+              alt="Sustainable Consulting" 
+              class="w-full h-96 lg:h-[500px] object-cover rounded-[40px]"
+            >
+          </div>
+        </div>
+
+        <!-- How We Select Materials -->
+        <div class="text-center mb-16">
+          <h3 class="text-2xl lg:text-3xl font-bold text-[#222529] mb-4 font-['Poppins']">
+            {{ 'mission.materialSelection' | translate }}
+          </h3>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <!-- Raw Materials Analysis -->
+          <div class="text-center">
+            <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
+              <svg class="w-6 h-6 text-solar-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+              </svg>
+            </div>
+            <h4 class="text-xl font-bold text-[#222529] mb-4 font-['Poppins']">
+              {{ 'mission.rawMaterialsAnalysis' | translate }}
+            </h4>
+            <p class="text-[#324053] font-['DM_Sans']">
+              {{ 'mission.rawMaterialsText' | translate }}
+            </p>
+          </div>
+
+          <!-- Certification Evaluation -->
+          <div class="text-center">
+            <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
+              <svg class="w-6 h-6 text-solar-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+              </svg>
+            </div>
+            <h4 class="text-xl font-bold text-[#222529] mb-4 font-['Poppins']">
+              {{ 'mission.certificationEvaluation' | translate }}
+            </h4>
+            <p class="text-[#324053] font-['DM_Sans']">
+              {{ 'mission.certificationText' | translate }}
+            </p>
+          </div>
+
+          <!-- Energy Efficiency -->
+          <div class="text-center">
+            <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
+              <svg class="w-6 h-6 text-solar-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+              </svg>
+            </div>
+            <h4 class="text-xl font-bold text-[#222529] mb-4 font-['Poppins']">
+              {{ 'mission.energyEfficiency' | translate }}
+            </h4>
+            <p class="text-[#324053] font-['DM_Sans']">
+              {{ 'mission.efficiencyText' | translate }}
+            </p>
           </div>
         </div>
       </div>
