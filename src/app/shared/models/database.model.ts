@@ -419,6 +419,31 @@ export interface Database {
                     updated_at?: string;
                 };
             };
+            company_pricing: {
+                Row: {
+                    id: string;
+                    company_id: string;
+                    product_id: string;
+                    price: number;
+                    created_at: string;
+                    updated_at: string;
+                };
+                Insert: {
+                    id?: string;
+                    company_id: string;
+                    product_id: string;
+                    price: number;
+                    created_at?: string;
+                    updated_at?: string;
+                };
+                Update: {
+                    id?: string;
+                    company_id?: string;
+                    product_id?: string;
+                    price?: number;
+                    updated_at?: string;
+                };
+            };
             order_items: {
                 Row: {
                     id: string;

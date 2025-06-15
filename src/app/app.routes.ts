@@ -34,6 +34,8 @@ import { AdminOffersComponent } from './features/admin/offers/admin-offers.compo
 import { AdminUsersComponent } from './features/admin/users/admin-users.component';
 import { AdminOrdersComponent } from './features/admin/orders/admin-orders.component';
 import { AdminReviewsComponent } from './features/admin/reviews/admin-reviews.component';
+import { AdminCompanyPricingComponent } from './features/admin/company-pricing/admin-company-pricing.component';
+import { CompanyPricingFormComponent } from './features/admin/company-pricing/company-pricing-form/company-pricing-form.component';
 import { CategoryFormComponent } from './features/admin/categories/category-form/category-form.component';
 import { ProductFormComponent } from './features/admin/products/product-form/product-form.component';
 import { OfferFormComponent } from './features/admin/offers/offer-form/offer-form.component';
@@ -124,6 +126,11 @@ export const routes: Routes = [
             { path: 'orders', component: AdminOrdersComponent },
             { path: 'orders/create', component: OrderFormComponent },
             { path: 'orders/edit/:id', component: OrderFormComponent },
+
+            // Company Pricing
+            { path: 'company-pricing', component: AdminCompanyPricingComponent },
+            { path: 'company-pricing/create', component: CompanyPricingFormComponent },
+            { path: 'company-pricing/edit/:id', component: CompanyPricingFormComponent },
 
             // Reviews
             { path: 'reviews', component: AdminReviewsComponent }

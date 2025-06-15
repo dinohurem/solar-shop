@@ -74,9 +74,26 @@ import { AdminFormComponent } from '../../shared/admin-form/admin-form.component
                   class="pl-7 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   [class.border-red-300]="orderForm.get('total_amount')?.invalid && orderForm.get('total_amount')?.touched">
               </div>
-              <div *ngIf="orderForm.get('total_amount')?.invalid && orderForm.get('total_amount')?.touched" 
+              <div *ngIf="orderForm.get('total_amount')?.invalid && orderForm.get('total_amount')?.touched"
                    class="mt-1 text-sm text-red-600">
                 Total amount is required
+              </div>
+            </div>
+
+            <!-- Discount Amount -->
+            <div>
+              <label for="discount_amount" class="block text-sm font-medium text-gray-700">Discount</label>
+              <div class="mt-1 relative rounded-md shadow-sm">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <span class="text-gray-500 sm:text-sm">$</span>
+                </div>
+                <input
+                  type="number"
+                  id="discount_amount"
+                  formControlName="discount_amount"
+                  step="0.01"
+                  min="0"
+                  class="pl-7 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
               </div>
             </div>
 
@@ -261,6 +278,7 @@ export class OrderFormComponent implements OnInit {
       customer_name: [''],
       customer_phone: [''],
       total_amount: [0, [Validators.required, Validators.min(0)]],
+      discount_amount: [0, [Validators.min(0)]],
       order_date: ['', Validators.required],
       status: ['pending', Validators.required],
       payment_status: ['pending', Validators.required],
@@ -326,6 +344,10 @@ export class OrderFormComponent implements OnInit {
       // Convert datetime-local back to ISO string
       if (formData.order_date) {
         formData.order_date = new Date(formData.order_date).toISOString();
+      }
+
+      if (formData.discount_amount) {
+        formData.total_amount = Math.max(0, formData.total_amount - formData.discount_amount);
       }
 
       if (this.isEditMode && this.orderId) {
