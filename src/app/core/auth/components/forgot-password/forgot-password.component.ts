@@ -6,11 +6,12 @@ import { Store, select } from '@ngrx/store';
 import { State } from '../../../../reducers';
 import { sendResetPasswordEmail } from '../../store/auth.actions';
 import { LoaderComponent } from '../../../../shared/components/loader/loader.component';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-forgot-password',
   standalone: true,
-  imports: [CommonModule, RouterModule, LoaderComponent],
+  imports: [CommonModule, RouterModule, LoaderComponent, TranslatePipe],
   templateUrl: './forgot-password.component.html',
   styleUrl: './forgot-password.component.scss'
 })

@@ -13,6 +13,7 @@ export interface Offer {
     startDate?: string;
     endDate?: string;
     featured?: boolean;
+    isB2B?: boolean; // Flag to separate B2B offers from regular offers
 }
 
 export interface OfferFilters {

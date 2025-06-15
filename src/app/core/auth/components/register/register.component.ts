@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { LoaderComponent } from '../../../../shared/components/loader/loader.component';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import * as AuthActions from '../../store/auth.actions';
 import { selectAuthLoading, selectAuthError } from '../../store/auth.selectors';
 
@@ -14,7 +15,7 @@ import { selectAuthLoading, selectAuthError } from '../../store/auth.selectors';
     styleUrls: ['./register.component.scss'],
     standalone: true,
     schemas: [NO_ERRORS_SCHEMA],
-    imports: [CommonModule, RouterModule, LoaderComponent, ReactiveFormsModule],
+    imports: [CommonModule, RouterModule, LoaderComponent, ReactiveFormsModule, TranslatePipe],
     providers: [],
 })
 export class RegisterComponent {

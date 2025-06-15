@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 @Component({
@@ -17,10 +18,10 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
           {{ 'b2b.hero.subtitle' | translate }}
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <button class="bg-white text-b2b-600 px-8 py-4 rounded-lg font-semibold hover:bg-b2b-50 transition-all">
+          <button (click)="navigateToRegister()" class="bg-white text-b2b-600 px-8 py-4 rounded-lg font-semibold hover:bg-b2b-50 transition-all">
             {{ 'b2b.hero.getStarted' | translate }}
           </button>
-          <button class="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold hover:bg-white/10 transition-all">
+          <button (click)="navigateToAbout()" class="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold hover:bg-white/10 transition-all">
             {{ 'b2b.hero.learnMore' | translate }}
           </button>
         </div>
@@ -28,4 +29,14 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
     </section>
   `,
 })
-export class PartnersHeroComponent {}
+export class PartnersHeroComponent {
+  constructor(private router: Router) { }
+
+  navigateToRegister(): void {
+    this.router.navigate(['/partners/register']);
+  }
+
+  navigateToAbout(): void {
+    this.router.navigate(['/partners/about']);
+  }
+}

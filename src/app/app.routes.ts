@@ -20,6 +20,12 @@ import { PrivacyPolicyComponent } from './features/b2c/privacy-policy/privacy-po
 import { TermsOfServiceComponent } from './features/b2c/terms-of-service/terms-of-service.component';
 import { CookiePolicyComponent } from './features/b2c/cookie-policy/cookie-policy.component';
 import { PartnersComponent } from './features/b2b/partners/partners.component';
+import { PartnersRegisterComponent } from './features/b2b/partners/register/partners-register.component';
+import { PartnersAboutComponent } from './features/b2b/partners/about/partners-about.component';
+import { PartnersProductsComponent } from './features/b2b/partners/products/partners-products.component';
+import { PartnersOffersComponent } from './features/b2b/partners/offers/partners-offers.component';
+import { PartnersContactComponent } from './features/b2b/partners/contact/partners-contact.component';
+import { B2bLayoutComponent } from './features/b2b/shared/layout/b2b-layout.component';
 import { CheckoutComponent } from './features/b2c/checkout/checkout.component';
 import { OrderReviewComponent } from './features/b2c/checkout/steps/order-review/order-review.component';
 import { ShippingComponent } from './features/b2c/checkout/steps/shipping/shipping.component';
@@ -36,6 +42,7 @@ import { AdminOrdersComponent } from './features/admin/orders/admin-orders.compo
 import { AdminReviewsComponent } from './features/admin/reviews/admin-reviews.component';
 import { AdminCompanyPricingComponent } from './features/admin/company-pricing/admin-company-pricing.component';
 import { CompanyPricingFormComponent } from './features/admin/company-pricing/company-pricing-form/company-pricing-form.component';
+import { AdminCompaniesComponent } from './features/admin/companies/admin-companies.component';
 import { CategoryFormComponent } from './features/admin/categories/category-form/category-form.component';
 import { ProductFormComponent } from './features/admin/products/product-form/product-form.component';
 import { OfferFormComponent } from './features/admin/offers/offer-form/offer-form.component';
@@ -69,7 +76,7 @@ export const routes: Routes = [
             { path: 'privacy', component: PrivacyPolicyComponent },
             { path: 'terms', component: TermsOfServiceComponent },
             { path: 'cookies', component: CookiePolicyComponent },
-            { path: 'partners', component: PartnersComponent },
+
 
             // Protected routes
             { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
@@ -86,6 +93,20 @@ export const routes: Routes = [
                     { path: 'payment', component: PaymentComponent }
                 ]
             }
+        ]
+    },
+
+    // B2B routes (with B2B layout)
+    {
+        path: 'partners',
+        component: B2bLayoutComponent,
+        children: [
+            { path: '', component: PartnersComponent },
+            { path: 'register', component: PartnersRegisterComponent },
+            { path: 'about', component: PartnersAboutComponent },
+            { path: 'products', component: PartnersProductsComponent },
+            { path: 'offers', component: PartnersOffersComponent },
+            { path: 'contact', component: PartnersContactComponent },
         ]
     },
 
@@ -131,6 +152,9 @@ export const routes: Routes = [
             { path: 'company-pricing', component: AdminCompanyPricingComponent },
             { path: 'company-pricing/create', component: CompanyPricingFormComponent },
             { path: 'company-pricing/edit/:id', component: CompanyPricingFormComponent },
+
+            // Companies
+            { path: 'companies', component: AdminCompaniesComponent },
 
             // Reviews
             { path: 'reviews', component: AdminReviewsComponent }

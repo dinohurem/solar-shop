@@ -11,6 +11,7 @@ export interface User {
     gender?: 'male' | 'female' | 'other' | 'prefer_not_to_say';
     role: UserRole;
     status: UserStatus;
+    companyId?: string; // Reference to Company if user is a company user
     preferences: UserPreferences;
     addresses: UserAddress[];
     paymentMethods: PaymentMethod[];

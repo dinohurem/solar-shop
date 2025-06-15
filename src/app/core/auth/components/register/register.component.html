@@ -8,16 +8,17 @@
             <div class="w-full max-w-md">
                 <!-- Logo/Brand -->
                 <div class="mb-8">
-                    <h1 class="text-2xl lg:text-3xl font-bold text-[#222529] font-['Poppins']">Join SolarShop</h1>
-                    <p class="text-[#324053] text-sm mt-2 font-['DM_Sans']">Create your account to get started</p>
+                    <h1 class="text-2xl lg:text-3xl font-bold text-[#222529] font-['Poppins']">{{ 'register.title' |
+                        translate }}</h1>
+                    <p class="text-[#324053] text-sm mt-2 font-['DM_Sans']">{{ 'register.subtitle' | translate }}</p>
                 </div>
 
                 <!-- Sign in link -->
                 <div class="mb-8">
                     <p class="text-sm text-[#324053] font-['DM_Sans']">
-                        Already have an account?
-                        <a class="text-solar-600 hover:text-solar-700 font-medium ml-1" routerLink="/login">Sign
-                            in</a>
+                        {{ 'register.alreadyHaveAccount' | translate }}
+                        <a class="text-solar-600 hover:text-solar-700 font-medium ml-1" routerLink="/login">{{
+                            'register.signIn' | translate }}</a>
                     </p>
                 </div>
 
@@ -41,13 +42,13 @@
                         <div>
                             <label class="block text-sm font-medium text-[#222529] mb-2 font-['DM_Sans']"
                                 for="firstName">
-                                First Name*
+                                {{ 'register.firstName' | translate }}*
                             </label>
                             <input formControlName="firstName"
                                 class="w-full h-12 px-4 py-3 border rounded-lg text-sm text-[#222529] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-solar-500 focus:border-transparent transition-all duration-200 font-['DM_Sans']"
                                 [class.border-red-500]="isFieldInvalid('firstName')"
                                 [class.border-gray-300]="!isFieldInvalid('firstName')" id="firstName" type="text"
-                                placeholder="Enter your first name" autocomplete="given-name">
+                                [placeholder]="'register.enterFirstName' | translate" autocomplete="given-name">
                             <div *ngIf="isFieldInvalid('firstName')" class="mt-1 text-sm text-red-600 font-['DM_Sans']">
                                 {{ getFieldError('firstName') }}
                             </div>
@@ -57,13 +58,13 @@
                         <div>
                             <label class="block text-sm font-medium text-[#222529] mb-2 font-['DM_Sans']"
                                 for="lastName">
-                                Last Name*
+                                {{ 'register.lastName' | translate }}*
                             </label>
                             <input formControlName="lastName"
                                 class="w-full h-12 px-4 py-3 border rounded-lg text-sm text-[#222529] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-solar-500 focus:border-transparent transition-all duration-200 font-['DM_Sans']"
                                 [class.border-red-500]="isFieldInvalid('lastName')"
                                 [class.border-gray-300]="!isFieldInvalid('lastName')" id="lastName" type="text"
-                                placeholder="Enter your last name" autocomplete="family-name">
+                                [placeholder]="'register.enterLastName' | translate" autocomplete="family-name">
                             <div *ngIf="isFieldInvalid('lastName')" class="mt-1 text-sm text-red-600 font-['DM_Sans']">
                                 {{ getFieldError('lastName') }}
                             </div>
@@ -73,13 +74,13 @@
                     <!-- Email Field -->
                     <div>
                         <label class="block text-sm font-medium text-[#222529] mb-2 font-['DM_Sans']" for="email">
-                            Email address*
+                            {{ 'register.email' | translate }}*
                         </label>
                         <input formControlName="email"
                             class="w-full h-12 px-4 py-3 border rounded-lg text-sm text-[#222529] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-solar-500 focus:border-transparent transition-all duration-200 font-['DM_Sans']"
                             [class.border-red-500]="isFieldInvalid('email')"
                             [class.border-gray-300]="!isFieldInvalid('email')" id="email" type="email"
-                            placeholder="Enter your email address" autocomplete="email">
+                            [placeholder]="'register.enterEmail' | translate" autocomplete="email">
                         <div *ngIf="isFieldInvalid('email')" class="mt-1 text-sm text-red-600 font-['DM_Sans']">
                             {{ getFieldError('email') }}
                         </div>
@@ -88,13 +89,13 @@
                     <!-- Phone Number Field -->
                     <div>
                         <label class="block text-sm font-medium text-[#222529] mb-2 font-['DM_Sans']" for="phoneNumber">
-                            Phone Number
+                            {{ 'register.phoneNumber' | translate }}
                         </label>
                         <input formControlName="phoneNumber"
                             class="w-full h-12 px-4 py-3 border rounded-lg text-sm text-[#222529] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-solar-500 focus:border-transparent transition-all duration-200 font-['DM_Sans']"
                             [class.border-red-500]="isFieldInvalid('phoneNumber')"
                             [class.border-gray-300]="!isFieldInvalid('phoneNumber')" id="phoneNumber" type="tel"
-                            placeholder="Enter your phone number" autocomplete="tel">
+                            [placeholder]="'register.enterPhone' | translate" autocomplete="tel">
                         <div *ngIf="isFieldInvalid('phoneNumber')" class="mt-1 text-sm text-red-600 font-['DM_Sans']">
                             {{ getFieldError('phoneNumber') }}
                         </div>
@@ -103,13 +104,14 @@
                     <!-- Address Field -->
                     <div>
                         <label class="block text-sm font-medium text-[#222529] mb-2 font-['DM_Sans']" for="address">
-                            Address
+                            {{ 'register.address' | translate }}
                         </label>
                         <textarea formControlName="address"
                             class="w-full h-20 px-4 py-3 border rounded-lg text-sm text-[#222529] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-solar-500 focus:border-transparent transition-all duration-200 font-['DM_Sans'] resize-none"
                             [class.border-red-500]="isFieldInvalid('address')"
                             [class.border-gray-300]="!isFieldInvalid('address')" id="address"
-                            placeholder="Enter your full address" autocomplete="street-address"></textarea>
+                            [placeholder]="'register.enterAddress' | translate"
+                            autocomplete="street-address"></textarea>
                         <div *ngIf="isFieldInvalid('address')" class="mt-1 text-sm text-red-600 font-['DM_Sans']">
                             {{ getFieldError('address') }}
                         </div>
@@ -118,14 +120,14 @@
                     <!-- Password Field -->
                     <div>
                         <label class="block text-sm font-medium text-[#222529] mb-2 font-['DM_Sans']" for="password">
-                            Password*
+                            {{ 'register.password' | translate }}*
                         </label>
                         <div class="relative">
                             <input formControlName="password" [type]="showPassword ? 'text' : 'password'"
                                 class="w-full h-12 px-4 py-3 pr-12 border rounded-lg text-sm text-[#222529] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-solar-500 focus:border-transparent transition-all duration-200 font-['DM_Sans']"
                                 [class.border-red-500]="isFieldInvalid('password')"
                                 [class.border-gray-300]="!isFieldInvalid('password')" id="password"
-                                placeholder="Create a password" autocomplete="new-password">
+                                [placeholder]="'register.createPassword' | translate" autocomplete="new-password">
                             <button type="button"
                                 class="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#324053] hover:text-[#222529] transition-colors duration-200"
                                 (click)="showPassword = !showPassword">
@@ -152,14 +154,14 @@
                     <div>
                         <label class="block text-sm font-medium text-[#222529] mb-2 font-['DM_Sans']"
                             for="confirmPassword">
-                            Confirm Password*
+                            {{ 'register.confirmPassword' | translate }}*
                         </label>
                         <div class="relative">
                             <input formControlName="confirmPassword" [type]="showConfirmPassword ? 'text' : 'password'"
                                 class="w-full h-12 px-4 py-3 pr-12 border rounded-lg text-sm text-[#222529] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-solar-500 focus:border-transparent transition-all duration-200 font-['DM_Sans']"
                                 [class.border-red-500]="isFieldInvalid('confirmPassword')"
                                 [class.border-gray-300]="!isFieldInvalid('confirmPassword')" id="confirmPassword"
-                                placeholder="Confirm your password" autocomplete="new-password">
+                                [placeholder]="'register.confirmYourPassword' | translate" autocomplete="new-password">
                             <button type="button"
                                 class="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#324053] hover:text-[#222529] transition-colors duration-200"
                                 (click)="showConfirmPassword = !showConfirmPassword">
@@ -189,8 +191,8 @@
 
                         <app-loader *ngIf="loading$ | async" class="w-5 h-5 mr-2"></app-loader>
 
-                        <span *ngIf="!(loading$ | async)">Create Account</span>
-                        <span *ngIf="loading$ | async">Creating Account...</span>
+                        <span *ngIf="!(loading$ | async)">{{ 'register.createAccount' | translate }}</span>
+                        <span *ngIf="loading$ | async">{{ 'register.creatingAccount' | translate }}</span>
                     </button>
                 </form>
             </div>
