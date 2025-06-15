@@ -325,6 +325,7 @@ export class TranslationService {
                 total: 'Ukupno',
                 personalInfo: 'Osobne informacije',
                 firstName: 'Ime',
+                firstNameRequired: 'Ime je obavezno',
                 lastName: 'Prezime',
                 email: 'Email',
                 phone: 'Telefon',
@@ -765,6 +766,25 @@ export class TranslationService {
                     getStarted: 'Počnite',
                     learnMore: 'Saznajte više'
                 }
+            },
+            // Admin Panel
+            admin: {
+                dashboard: 'Nadzorna ploča',
+                products: 'Proizvodi',
+                categories: 'Kategorije',
+                blog: 'Blog postovi',
+                offers: 'Ponude',
+                users: 'Korisnici',
+                orders: 'Narudžbe',
+                reviews: 'Recenzije',
+                companyPricing: 'Cijene za tvrtke',
+                manageOffers: 'Upravljanje ponudama',
+                manageProducts: 'Upravljanje proizvodima',
+                manageUsers: 'Upravljanje korisnicima',
+                manageOrders: 'Upravljanje narudžbama',
+                contentManagement: 'Upravljanje sadržajem',
+                systemManagement: 'Upravljanje sustavom',
+                language: 'Jezik'
             }
         },
         en: {
@@ -1079,6 +1099,7 @@ export class TranslationService {
                 total: 'Total',
                 personalInfo: 'Personal Information',
                 firstName: 'First Name',
+                firstNameRequired: 'First name is required',
                 lastName: 'Last Name',
                 email: 'Email',
                 phone: 'Phone',
@@ -1519,6 +1540,25 @@ export class TranslationService {
                     getStarted: 'Get Started',
                     learnMore: 'Learn More'
                 }
+            },
+            // Admin Panel
+            admin: {
+                dashboard: 'Dashboard',
+                products: 'Products',
+                categories: 'Categories',
+                blog: 'Blog Posts',
+                offers: 'Offers',
+                users: 'Users',
+                orders: 'Orders',
+                reviews: 'Reviews',
+                companyPricing: 'Company Pricing',
+                manageOffers: 'Manage Offers',
+                manageProducts: 'Manage Products',
+                manageUsers: 'Manage Users',
+                manageOrders: 'Manage Orders',
+                contentManagement: 'Content Management',
+                systemManagement: 'System Management',
+                language: 'Language'
             }
         }
     };

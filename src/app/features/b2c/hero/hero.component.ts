@@ -15,7 +15,7 @@ import { Offer } from '../../../shared/models/offer.model';
   imports: [CommonModule, TranslatePipe],
   template: `
     <!-- Hero Section -->
-    <section class="relative min-h-screen overflow-hidden -mt-4">
+    <section class="relative min-h-screen lg:min-h-[80vh] xl:min-h-[85vh] overflow-hidden -mt-4">
       <!-- Background with rounded bottom -->
       <div class="absolute inset-0 bg-gradient-to-br from-solar-600 to-solar-800">
         <!-- Background Image -->
@@ -34,7 +34,7 @@ import { Offer } from '../../../shared/models/offer.model';
       <div class="absolute bottom-0 left-0 right-0 h-16 bg-white rounded-t-[40px]"></div>
 
       <!-- Content Container -->
-      <div class="relative z-10 flex flex-col min-h-screen justify-center px-4 sm:px-6 lg:px-8">
+      <div class="relative z-10 flex flex-col min-h-screen lg:min-h-[80vh] xl:min-h-[85vh] justify-center px-4 sm:px-6 lg:px-8">
         <div class="max-w-7xl mx-auto text-center">
           <!-- Main Heading -->
           <h1 class="text-white font-bold text-3xl sm:text-5xl lg:text-8xl xl:text-6xl leading-tight mb-6 font-['Poppins']">

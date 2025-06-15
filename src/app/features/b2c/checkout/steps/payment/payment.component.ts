@@ -22,7 +22,26 @@ import { User } from '../../../../../shared/models/user.model';
         <div class="mb-8">
           <h3 class="text-lg font-semibold text-gray-900 mb-4 font-['Poppins']">{{ 'checkout.paymentMethod' | translate }}</h3>
           <div class="space-y-3">
-            <!-- Pay on Delivery Only -->
+            <!-- Credit Card -->
+            <label class="flex items-center p-4 border-2 border-blue-200 bg-blue-50 rounded-lg cursor-pointer">
+              <input
+                type="radio"
+                name="paymentMethod"
+                value="credit_card"
+                formControlName="paymentMethod"
+                class="text-blue-600 focus:ring-blue-600"
+              >
+              <div class="ml-3 flex-1 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                  <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                  </svg>
+                  <span class="font-medium text-blue-900 font-['DM_Sans']">{{ 'checkout.creditCard' | translate }}</span>
+                </div>
+              </div>
+            </label>
+
+            <!-- Pay on Delivery -->
             <label class="flex items-center p-4 border-2 border-green-200 bg-green-50 rounded-lg cursor-pointer">
               <input
                 type="radio"
@@ -45,8 +64,58 @@ import { User } from '../../../../../shared/models/user.model';
               </div>
             </label>
           </div>
-          <p class="text-sm text-gray-600 mt-3 font-['DM_Sans']">
+          
+          <!-- Credit Card Form -->
+          <div *ngIf="paymentForm.get('paymentMethod')?.value === 'credit_card'" class="mt-6 p-4 bg-gray-50 rounded-lg">
+            <h4 class="text-lg font-semibold text-gray-900 mb-4 font-['Poppins']">Card Details</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="md:col-span-2">
+                <label for="cardNumber" class="block text-sm font-medium text-gray-700 mb-2 font-['DM_Sans']">{{ 'checkout.cardNumber' | translate }}</label>
+                <input
+                  type="text"
+                  id="cardNumber"
+                  formControlName="cardNumber"
+                  placeholder="1234 5678 9012 3456"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-['DM_Sans']"
+                >
+                <div *ngIf="paymentForm.get('cardNumber')?.invalid && paymentForm.get('cardNumber')?.touched" class="mt-1 text-sm text-red-600">
+                  Card number is required
+                </div>
+              </div>
+              <div>
+                <label for="expiryDate" class="block text-sm font-medium text-gray-700 mb-2 font-['DM_Sans']">{{ 'checkout.expiryDate' | translate }}</label>
+                <input
+                  type="text"
+                  id="expiryDate"
+                  formControlName="expiryDate"
+                  placeholder="MM/YY"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-['DM_Sans']"
+                >
+                <div *ngIf="paymentForm.get('expiryDate')?.invalid && paymentForm.get('expiryDate')?.touched" class="mt-1 text-sm text-red-600">
+                  Expiry date is required
+                </div>
+              </div>
+              <div>
+                <label for="cvv" class="block text-sm font-medium text-gray-700 mb-2 font-['DM_Sans']">{{ 'checkout.cvv' | translate }}</label>
+                <input
+                  type="text"
+                  id="cvv"
+                  formControlName="cvv"
+                  placeholder="123"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-['DM_Sans']"
+                >
+                <div *ngIf="paymentForm.get('cvv')?.invalid && paymentForm.get('cvv')?.touched" class="mt-1 text-sm text-red-600">
+                  CVV is required
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <p class="text-sm text-gray-600 mt-3 font-['DM_Sans']" *ngIf="paymentForm.get('paymentMethod')?.value === 'cash_on_delivery'">
             Pay when your order is delivered. Cash or card payment accepted at delivery.
+          </p>
+          <p class="text-sm text-gray-600 mt-3 font-['DM_Sans']" *ngIf="paymentForm.get('paymentMethod')?.value === 'credit_card'">
+            Your payment will be processed securely. All card information is encrypted.
           </p>
           
           <!-- Guest Checkout Notice -->
@@ -140,7 +209,31 @@ export class PaymentComponent {
   constructor() {
     this.paymentForm = this.fb.group({
       paymentMethod: ['cash_on_delivery', [Validators.required]],
+      cardNumber: [''],
+      expiryDate: [''],
+      cvv: [''],
       acceptTerms: [false, [Validators.requiredTrue]]
+    });
+
+    // Add conditional validators for credit card fields
+    this.paymentForm.get('paymentMethod')?.valueChanges.subscribe(method => {
+      const cardNumber = this.paymentForm.get('cardNumber');
+      const expiryDate = this.paymentForm.get('expiryDate');
+      const cvv = this.paymentForm.get('cvv');
+
+      if (method === 'credit_card') {
+        cardNumber?.setValidators([Validators.required]);
+        expiryDate?.setValidators([Validators.required]);
+        cvv?.setValidators([Validators.required]);
+      } else {
+        cardNumber?.clearValidators();
+        expiryDate?.clearValidators();
+        cvv?.clearValidators();
+      }
+
+      cardNumber?.updateValueAndValidity();
+      expiryDate?.updateValueAndValidity();
+      cvv?.updateValueAndValidity();
     });
   }
 
