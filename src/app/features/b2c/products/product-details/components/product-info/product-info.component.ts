@@ -54,7 +54,18 @@ import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
 
       <!-- Price -->
       <div class="border-t border-gray-200 pt-6">
-        <div class="flex items-center space-x-4 mb-4">
+        <!-- Company Pricing Badge -->
+        <div *ngIf="isCompanyPricing" class="mb-4">
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-solar-100 text-solar-800">
+            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            {{ 'b2b.products.partnerPrice' | translate }}
+          </span>
+        </div>
+
+        <!-- Regular Pricing -->
+        <div *ngIf="!isCompanyPricing" class="flex items-center space-x-4 mb-4">
           <span class="text-3xl font-bold text-gray-900 font-['DM_Sans']">
             €{{ product.price.toLocaleString() }}
           </span>
@@ -71,6 +82,34 @@ import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
             -{{ product.discount }}%
           </span>
         </div>
+
+        <!-- Company Pricing -->
+        <div *ngIf="isCompanyPricing" class="space-y-3 mb-4">
+          <!-- Retail Price -->
+          <div class="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+            <span class="text-sm text-gray-600 font-['DM_Sans']">{{ 'b2b.products.retailPrice' | translate }}:</span>
+            <span class="text-lg text-gray-500 line-through font-['DM_Sans']">
+              €{{ product.price.toLocaleString() }}
+            </span>
+          </div>
+          
+          <!-- Company Price -->
+          <div class="flex items-center justify-between bg-solar-50 p-4 rounded-lg border-2 border-solar-200">
+            <span class="text-base font-semibold text-solar-700 font-['DM_Sans']">{{ 'b2b.products.partnerPrice' | translate }}:</span>
+            <span class="text-3xl font-bold text-solar-600 font-['DM_Sans']">
+              €{{ getCompanyPrice().toLocaleString() }}
+            </span>
+          </div>
+          
+          <!-- Savings -->
+          <div class="flex items-center justify-between bg-green-50 p-3 rounded-lg">
+            <span class="text-sm font-medium text-green-700 font-['DM_Sans']">{{ 'b2b.products.savings' | translate }}:</span>
+            <span class="text-lg font-bold text-green-600 font-['DM_Sans']">
+              €{{ getCompanySavings().toLocaleString() }} ({{ COMPANY_DISCOUNT_PERCENTAGE }}% off)
+            </span>
+          </div>
+        </div>
+
         <p class="text-sm text-gray-600 font-['DM_Sans']">
           {{ 'productDetails.priceIncludesVat' | translate }}
         </p>
@@ -205,8 +244,12 @@ import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
 })
 export class ProductInfoComponent {
   @Input() product!: Product;
+  @Input() isCompanyPricing: boolean = false;
 
   quantity: number = 1;
+
+  // Partner discount percentage (additional discount for company pricing)
+  readonly COMPANY_DISCOUNT_PERCENTAGE = 15;
 
   getStarArray(rating: number): number[] {
     return Array(5).fill(0).map((_, i) => i < Math.floor(rating) ? 1 : 0);
@@ -241,5 +284,13 @@ export class ProductInfoComponent {
   addToWishlist(): void {
     // TODO: Implement add to wishlist functionality
     console.log('Add to wishlist:', this.product);
+  }
+
+  getCompanyPrice(): number {
+    return this.product.price * (1 - this.COMPANY_DISCOUNT_PERCENTAGE / 100);
+  }
+
+  getCompanySavings(): number {
+    return this.product.price - this.getCompanyPrice();
   }
 } 

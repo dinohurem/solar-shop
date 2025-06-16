@@ -1,14 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { Offer } from '../../../../shared/models/offer.model';
 
 @Component({
-    selector: 'app-partners-offers',
-    standalone: true,
-    imports: [CommonModule, RouterModule, TranslatePipe],
-    template: `
+  selector: 'app-partners-offers',
+  standalone: true,
+  imports: [CommonModule, RouterModule, TranslatePipe],
+  template: `
     <div class="min-h-screen bg-gray-50">
       <!-- Header -->
       <div class="bg-white shadow-sm border-b border-gray-200">
@@ -181,154 +181,153 @@ import { Offer } from '../../../../shared/models/offer.model';
   `,
 })
 export class PartnersOffersComponent implements OnInit {
-    isAuthenticated = false; // This should be connected to your auth service
+  isAuthenticated = false; // This should be connected to your auth service
 
-    // Sample B2B offers data
-    b2bOffers: Offer[] = [
-        {
-            id: '1',
-            title: 'Bulk Solar Panel Package - 50% Off Installation',
-            originalPrice: 15000,
-            discountedPrice: 12000,
-            discountPercentage: 20,
-            imageUrl: '/assets/images/offers/bulk-solar-panels.jpg',
-            description: 'Complete solar panel installation package for commercial properties. Includes 100+ high-efficiency panels, professional installation, and 5-year maintenance.',
-            shortDescription: 'Bulk solar installation with professional service',
-            type: 'bulk-discount',
-            status: 'active',
-            couponCode: 'BULK50PARTNER',
-            startDate: '2024-01-01',
-            endDate: '2024-12-31',
-            featured: true,
-            isB2B: true
-        },
-        {
-            id: '2',
-            title: 'Partner Exclusive: Premium Inverter Bundle',
-            originalPrice: 8500,
-            discountedPrice: 6800,
-            discountPercentage: 25,
-            imageUrl: '/assets/images/offers/inverter-bundle.jpg',
-            description: 'Exclusive bundle for certified partners including 3 premium inverters, monitoring system, and extended warranty coverage.',
-            shortDescription: 'Premium inverter bundle with monitoring',
-            type: 'partner-exclusive',
-            status: 'active',
-            couponCode: 'INVPARTNER25',
-            startDate: '2024-01-15',
-            endDate: '2024-06-30',
-            featured: true,
-            isB2B: true
-        },
-        {
-            id: '3',
-            title: 'Energy Storage Solution - Early Bird Pricing',
-            originalPrice: 12000,
-            discountedPrice: 9600,
-            discountPercentage: 20,
-            imageUrl: '/assets/images/offers/battery-storage.jpg',
-            description: 'Complete energy storage solution with lithium batteries, smart management system, and installation support.',
-            shortDescription: 'Complete energy storage with smart management',
-            type: 'early-bird',
-            status: 'active',
-            couponCode: 'STORAGE20EB',
-            startDate: '2024-02-01',
-            endDate: '2024-04-30',
-            featured: false,
-            isB2B: true
-        },
-        {
-            id: '4',
-            title: 'Commercial Mounting System Package',
-            originalPrice: 5000,
-            discountedPrice: 4000,
-            discountPercentage: 20,
-            imageUrl: '/assets/images/offers/mounting-system.jpg',
-            description: 'Professional-grade mounting systems designed for large-scale commercial installations. Includes all hardware and installation guides.',
-            shortDescription: 'Professional mounting systems for commercial use',
-            type: 'volume-discount',
-            status: 'active',
-            couponCode: 'MOUNT20COMM',
-            startDate: '2024-01-01',
-            endDate: '2024-08-31',
-            featured: false,
-            isB2B: true
-        }
-    ];
-
-    constructor() {
-        // TODO: Connect to auth service
-        // this.authService.isAuthenticated$.subscribe(isAuth => this.isAuthenticated = isAuth);
+  // Sample B2B offers data
+  b2bOffers: Offer[] = [
+    {
+      id: '1',
+      title: 'Bulk Solar Panel Package - 50% Off Installation',
+      originalPrice: 15000,
+      discountedPrice: 12000,
+      discountPercentage: 20,
+      imageUrl: '/assets/images/offers/bulk-solar-panels.jpg',
+      description: 'Complete solar panel installation package for commercial properties. Includes 100+ high-efficiency panels, professional installation, and 5-year maintenance.',
+      shortDescription: 'Bulk solar installation with professional service',
+      type: 'bulk-discount',
+      status: 'active',
+      couponCode: 'BULK50PARTNER',
+      startDate: '2024-01-01',
+      endDate: '2024-12-31',
+      featured: true,
+      isB2B: true
+    },
+    {
+      id: '2',
+      title: 'Partner Exclusive: Premium Inverter Bundle',
+      originalPrice: 8500,
+      discountedPrice: 6800,
+      discountPercentage: 25,
+      imageUrl: '/assets/images/offers/inverter-bundle.jpg',
+      description: 'Exclusive bundle for certified partners including 3 premium inverters, monitoring system, and extended warranty coverage.',
+      shortDescription: 'Premium inverter bundle with monitoring',
+      type: 'partner-exclusive',
+      status: 'active',
+      couponCode: 'INVPARTNER25',
+      startDate: '2024-01-15',
+      endDate: '2024-06-30',
+      featured: true,
+      isB2B: true
+    },
+    {
+      id: '3',
+      title: 'Energy Storage Solution - Early Bird Pricing',
+      originalPrice: 12000,
+      discountedPrice: 9600,
+      discountPercentage: 20,
+      imageUrl: '/assets/images/offers/battery-storage.jpg',
+      description: 'Complete energy storage solution with lithium batteries, smart management system, and installation support.',
+      shortDescription: 'Complete energy storage with smart management',
+      type: 'early-bird',
+      status: 'active',
+      couponCode: 'STORAGE20EB',
+      startDate: '2024-02-01',
+      endDate: '2024-04-30',
+      featured: false,
+      isB2B: true
+    },
+    {
+      id: '4',
+      title: 'Commercial Mounting System Package',
+      originalPrice: 5000,
+      discountedPrice: 4000,
+      discountPercentage: 20,
+      imageUrl: '/assets/images/offers/mounting-system.jpg',
+      description: 'Professional-grade mounting systems designed for large-scale commercial installations. Includes all hardware and installation guides.',
+      shortDescription: 'Professional mounting systems for commercial use',
+      type: 'volume-discount',
+      status: 'active',
+      couponCode: 'MOUNT20COMM',
+      startDate: '2024-01-01',
+      endDate: '2024-08-31',
+      featured: false,
+      isB2B: true
     }
+  ];
 
-    ngOnInit(): void {
-        // Filter offers to show only B2B offers
-        this.b2bOffers = this.b2bOffers.filter(offer => offer.isB2B);
-    }
+  constructor(private router: Router) {
+    // TODO: Connect to auth service
+    // this.authService.isAuthenticated$.subscribe(isAuth => this.isAuthenticated = isAuth);
+  }
 
-    navigateToLogin(): void {
-        // Navigate to login page
-        window.location.href = '/login';
-    }
+  ngOnInit(): void {
+    // Filter offers to show only B2B offers
+    this.b2bOffers = this.b2bOffers.filter(offer => offer.isB2B);
+  }
 
-    claimOffer(offer: Offer): void {
-        console.log('Claiming offer:', offer);
-        // TODO: Implement offer claiming logic
-        alert(`Offer "${offer.title}" has been added to your account!`);
-    }
+  navigateToLogin(): void {
+    // Navigate to login page
+    window.location.href = '/login';
+  }
 
-    viewOfferDetails(offer: Offer): void {
-        console.log('Viewing offer details:', offer);
-        // TODO: Navigate to offer details page or open modal
-    }
+  claimOffer(offer: Offer): void {
+    console.log('Claiming offer:', offer);
+    // TODO: Implement offer claiming logic
+    alert(`Offer "${offer.title}" has been added to your account!`);
+  }
 
-    copyCouponCode(couponCode: string): void {
-        navigator.clipboard.writeText(couponCode).then(() => {
-            // TODO: Show toast notification
-            alert('Coupon code copied to clipboard!');
-        });
-    }
+  viewOfferDetails(offer: Offer): void {
+    this.router.navigate(['/partners/offers', offer.id]);
+  }
 
-    formatDate(dateString: string): string {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-        });
-    }
+  copyCouponCode(couponCode: string): void {
+    navigator.clipboard.writeText(couponCode).then(() => {
+      // TODO: Show toast notification
+      alert('Coupon code copied to clipboard!');
+    });
+  }
 
-    isOfferExpired(endDate?: string): boolean {
-        if (!endDate) return false;
-        return new Date(endDate) < new Date();
-    }
+  formatDate(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  }
 
-    getOfferTypeClass(type?: string): string {
-        switch (type) {
-            case 'bulk-discount':
-                return 'bg-blue-100 text-blue-800';
-            case 'partner-exclusive':
-                return 'bg-purple-100 text-purple-800';
-            case 'early-bird':
-                return 'bg-green-100 text-green-800';
-            case 'volume-discount':
-                return 'bg-orange-100 text-orange-800';
-            default:
-                return 'bg-gray-100 text-gray-800';
-        }
-    }
+  isOfferExpired(endDate?: string): boolean {
+    if (!endDate) return false;
+    return new Date(endDate) < new Date();
+  }
 
-    getOfferTypeLabel(type?: string): string {
-        switch (type) {
-            case 'bulk-discount':
-                return 'Bulk Discount';
-            case 'partner-exclusive':
-                return 'Partner Exclusive';
-            case 'early-bird':
-                return 'Early Bird';
-            case 'volume-discount':
-                return 'Volume Discount';
-            default:
-                return 'Special Offer';
-        }
+  getOfferTypeClass(type?: string): string {
+    switch (type) {
+      case 'bulk-discount':
+        return 'bg-blue-100 text-blue-800';
+      case 'partner-exclusive':
+        return 'bg-purple-100 text-purple-800';
+      case 'early-bird':
+        return 'bg-green-100 text-green-800';
+      case 'volume-discount':
+        return 'bg-orange-100 text-orange-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
+  }
+
+  getOfferTypeLabel(type?: string): string {
+    switch (type) {
+      case 'bulk-discount':
+        return 'Bulk Discount';
+      case 'partner-exclusive':
+        return 'Partner Exclusive';
+      case 'early-bird':
+        return 'Early Bird';
+      case 'volume-discount':
+        return 'Volume Discount';
+      default:
+        return 'Special Offer';
+    }
+  }
 } 

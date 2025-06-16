@@ -1,29 +1,29 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 interface PartnerProduct {
-    id: string;
-    name: string;
-    description: string;
-    imageUrl: string;
-    category: string;
-    sku: string;
-    retailPrice: number;
-    partnerPrice?: number;
-    savings?: number;
-    minimumOrder: number;
-    inStock: boolean;
-    partnerOnly: boolean;
+  id: string;
+  name: string;
+  description: string;
+  imageUrl: string;
+  category: string;
+  sku: string;
+  retailPrice: number;
+  partnerPrice?: number;
+  savings?: number;
+  minimumOrder: number;
+  inStock: boolean;
+  partnerOnly: boolean;
 }
 
 @Component({
-    selector: 'app-partners-products',
-    standalone: true,
-    imports: [CommonModule, RouterModule, FormsModule, TranslatePipe],
-    template: `
+  selector: 'app-partners-products',
+  standalone: true,
+  imports: [CommonModule, RouterModule, FormsModule, TranslatePipe],
+  template: `
     <div class="min-h-screen bg-gray-50">
       <!-- Header -->
       <div class="bg-white shadow-sm border-b border-gray-200">
@@ -245,165 +245,167 @@ interface PartnerProduct {
   `,
 })
 export class PartnersProductsComponent implements OnInit {
-    isAuthenticated = false; // This should be connected to your auth service
-    selectedCategory = '';
-    searchTerm = '';
-    availabilityFilter = '';
-    sortBy = 'name';
+  isAuthenticated = false; // This should be connected to your auth service
+  selectedCategory = '';
+  searchTerm = '';
+  availabilityFilter = '';
+  sortBy = 'name';
 
-    allProducts: PartnerProduct[] = [
-        {
-            id: '1',
-            name: 'SolarMax Pro 400W Monocrystalline Panel',
-            description: 'High-efficiency monocrystalline solar panel with 21.5% efficiency rating and 25-year warranty.',
-            imageUrl: '/assets/images/products/solar-panel-1.jpg',
-            category: 'solar-panels',
-            sku: 'SM-400-MONO',
-            retailPrice: 299.99,
-            partnerPrice: 239.99,
-            savings: 60.00,
-            minimumOrder: 10,
-            inStock: true,
-            partnerOnly: false
-        },
-        {
-            id: '2',
-            name: 'PowerInvert 5000W Hybrid Inverter',
-            description: 'Advanced hybrid inverter with battery storage capability and smart grid integration.',
-            imageUrl: '/assets/images/products/inverter-1.jpg',
-            category: 'inverters',
-            sku: 'PI-5000-HYB',
-            retailPrice: 1899.99,
-            partnerPrice: 1519.99,
-            savings: 380.00,
-            minimumOrder: 1,
-            inStock: true,
-            partnerOnly: true
-        },
-        {
-            id: '3',
-            name: 'EnergyStore 10kWh Lithium Battery',
-            description: 'High-capacity lithium iron phosphate battery system with 6000+ cycle life.',
-            imageUrl: '/assets/images/products/battery-1.jpg',
-            category: 'batteries',
-            sku: 'ES-10KWH-LFP',
-            retailPrice: 4999.99,
-            partnerPrice: 3999.99,
-            savings: 1000.00,
-            minimumOrder: 1,
-            inStock: false,
-            partnerOnly: true
-        },
-        {
-            id: '4',
-            name: 'SecureMount Roof Mounting System',
-            description: 'Universal roof mounting system compatible with most panel types and roof materials.',
-            imageUrl: '/assets/images/products/mounting-1.jpg',
-            category: 'mounting',
-            sku: 'SM-ROOF-UNI',
-            retailPrice: 149.99,
-            partnerPrice: 119.99,
-            savings: 30.00,
-            minimumOrder: 5,
-            inStock: true,
-            partnerOnly: false
-        },
-        {
-            id: '5',
-            name: 'SmartMonitor Energy Management System',
-            description: 'Real-time energy monitoring and management system with mobile app integration.',
-            imageUrl: '/assets/images/products/monitor-1.jpg',
-            category: 'accessories',
-            sku: 'SM-EMS-001',
-            retailPrice: 599.99,
-            partnerPrice: 479.99,
-            savings: 120.00,
-            minimumOrder: 1,
-            inStock: true,
-            partnerOnly: false
-        },
-        {
-            id: '6',
-            name: 'Industrial Grade 600W Panel',
-            description: 'Heavy-duty solar panel designed for commercial and industrial applications.',
-            imageUrl: '/assets/images/products/solar-panel-2.jpg',
-            category: 'solar-panels',
-            sku: 'IG-600-COMM',
-            retailPrice: 449.99,
-            partnerPrice: undefined, // Contact for pricing
-            savings: undefined,
-            minimumOrder: 20,
-            inStock: true,
-            partnerOnly: true
-        }
-    ];
-
-    filteredProducts: PartnerProduct[] = [];
-
-    constructor() {
-        // TODO: Connect to auth service
-        // this.authService.isAuthenticated$.subscribe(isAuth => this.isAuthenticated = isAuth);
+  allProducts: PartnerProduct[] = [
+    {
+      id: '1',
+      name: 'SolarMax Pro 400W Monocrystalline Panel',
+      description: 'High-efficiency monocrystalline solar panel with 21.5% efficiency rating and 25-year warranty.',
+      imageUrl: '/assets/images/products/solar-panel-1.jpg',
+      category: 'solar-panels',
+      sku: 'SM-400-MONO',
+      retailPrice: 299.99,
+      partnerPrice: 239.99,
+      savings: 60.00,
+      minimumOrder: 10,
+      inStock: true,
+      partnerOnly: false
+    },
+    {
+      id: '2',
+      name: 'PowerInvert 5000W Hybrid Inverter',
+      description: 'Advanced hybrid inverter with battery storage capability and smart grid integration.',
+      imageUrl: '/assets/images/products/inverter-1.jpg',
+      category: 'inverters',
+      sku: 'PI-5000-HYB',
+      retailPrice: 1899.99,
+      partnerPrice: 1519.99,
+      savings: 380.00,
+      minimumOrder: 1,
+      inStock: true,
+      partnerOnly: true
+    },
+    {
+      id: '3',
+      name: 'EnergyStore 10kWh Lithium Battery',
+      description: 'High-capacity lithium iron phosphate battery system with 6000+ cycle life.',
+      imageUrl: '/assets/images/products/battery-1.jpg',
+      category: 'batteries',
+      sku: 'ES-10KWH-LFP',
+      retailPrice: 4999.99,
+      partnerPrice: 3999.99,
+      savings: 1000.00,
+      minimumOrder: 1,
+      inStock: false,
+      partnerOnly: true
+    },
+    {
+      id: '4',
+      name: 'SecureMount Roof Mounting System',
+      description: 'Universal roof mounting system compatible with most panel types and roof materials.',
+      imageUrl: '/assets/images/products/mounting-1.jpg',
+      category: 'mounting',
+      sku: 'SM-ROOF-UNI',
+      retailPrice: 149.99,
+      partnerPrice: 119.99,
+      savings: 30.00,
+      minimumOrder: 5,
+      inStock: true,
+      partnerOnly: false
+    },
+    {
+      id: '5',
+      name: 'SmartMonitor Energy Management System',
+      description: 'Real-time energy monitoring and management system with mobile app integration.',
+      imageUrl: '/assets/images/products/monitor-1.jpg',
+      category: 'accessories',
+      sku: 'SM-EMS-001',
+      retailPrice: 599.99,
+      partnerPrice: 479.99,
+      savings: 120.00,
+      minimumOrder: 1,
+      inStock: true,
+      partnerOnly: false
+    },
+    {
+      id: '6',
+      name: 'Industrial Grade 600W Panel',
+      description: 'Heavy-duty solar panel designed for commercial and industrial applications.',
+      imageUrl: '/assets/images/products/solar-panel-2.jpg',
+      category: 'solar-panels',
+      sku: 'IG-600-COMM',
+      retailPrice: 449.99,
+      partnerPrice: undefined, // Contact for pricing
+      savings: undefined,
+      minimumOrder: 20,
+      inStock: true,
+      partnerOnly: true
     }
+  ];
 
-    ngOnInit(): void {
-        this.filteredProducts = [...this.allProducts];
-    }
+  filteredProducts: PartnerProduct[] = [];
 
-    filterProducts(): void {
-        this.filteredProducts = this.allProducts.filter(product => {
-            const matchesCategory = !this.selectedCategory || product.category === this.selectedCategory;
-            const matchesSearch = !this.searchTerm ||
-                product.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-                product.description.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-                product.sku.toLowerCase().includes(this.searchTerm.toLowerCase());
-            const matchesAvailability = !this.availabilityFilter ||
-                (this.availabilityFilter === 'in-stock' && product.inStock) ||
-                (this.availabilityFilter === 'partner-only' && product.partnerOnly);
+  constructor(private router: Router) {
+    // TODO: Connect to auth service
+    // this.authService.isAuthenticated$.subscribe(isAuth => this.isAuthenticated = isAuth);
+  }
 
-            return matchesCategory && matchesSearch && matchesAvailability;
-        });
+  ngOnInit(): void {
+    this.filteredProducts = [...this.allProducts];
+  }
 
-        this.sortProducts();
-    }
+  filterProducts(): void {
+    this.filteredProducts = this.allProducts.filter(product => {
+      const matchesCategory = !this.selectedCategory || product.category === this.selectedCategory;
+      const matchesSearch = !this.searchTerm ||
+        product.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        product.description.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        product.sku.toLowerCase().includes(this.searchTerm.toLowerCase());
+      const matchesAvailability = !this.availabilityFilter ||
+        (this.availabilityFilter === 'in-stock' && product.inStock) ||
+        (this.availabilityFilter === 'partner-only' && product.partnerOnly);
 
-    sortProducts(): void {
-        this.filteredProducts.sort((a, b) => {
-            switch (this.sortBy) {
-                case 'name':
-                    return a.name.localeCompare(b.name);
-                case 'price-low':
-                    const priceA = a.partnerPrice || a.retailPrice;
-                    const priceB = b.partnerPrice || b.retailPrice;
-                    return priceA - priceB;
-                case 'price-high':
-                    const priceA2 = a.partnerPrice || a.retailPrice;
-                    const priceB2 = b.partnerPrice || b.retailPrice;
-                    return priceB2 - priceA2;
-                case 'savings':
-                    return (b.savings || 0) - (a.savings || 0);
-                default:
-                    return 0;
-            }
-        });
-    }
+      return matchesCategory && matchesSearch && matchesAvailability;
+    });
 
-    navigateToLogin(): void {
-        // Navigate to login page
-        window.location.href = '/login';
-    }
+    this.sortProducts();
+  }
 
-    addToCart(product: PartnerProduct): void {
-        console.log('Adding to cart:', product);
-        // TODO: Implement add to cart functionality
-    }
+  sortProducts(): void {
+    this.filteredProducts.sort((a, b) => {
+      switch (this.sortBy) {
+        case 'name':
+          return a.name.localeCompare(b.name);
+        case 'price-low':
+          const priceA = a.partnerPrice || a.retailPrice;
+          const priceB = b.partnerPrice || b.retailPrice;
+          return priceA - priceB;
+        case 'price-high':
+          const priceA2 = a.partnerPrice || a.retailPrice;
+          const priceB2 = b.partnerPrice || b.retailPrice;
+          return priceB2 - priceA2;
+        case 'savings':
+          return (b.savings || 0) - (a.savings || 0);
+        default:
+          return 0;
+      }
+    });
+  }
 
-    requestQuote(product: PartnerProduct): void {
-        console.log('Requesting quote for:', product);
-        // TODO: Implement quote request functionality
-    }
+  navigateToLogin(): void {
+    // Navigate to login page
+    window.location.href = '/login';
+  }
 
-    viewDetails(product: PartnerProduct): void {
-        console.log('Viewing details for:', product);
-        // TODO: Navigate to product details page
-    }
+  addToCart(product: PartnerProduct): void {
+    console.log('Adding to cart:', product);
+    // TODO: Implement add to cart functionality
+  }
+
+  requestQuote(product: PartnerProduct): void {
+    console.log('Requesting quote for:', product);
+    // TODO: Implement quote request functionality
+  }
+
+  viewDetails(product: PartnerProduct): void {
+    // Navigate to product details with company pricing flag
+    this.router.navigate(['/products', product.id], {
+      queryParams: { companyPricing: true }
+    });
+  }
 } 

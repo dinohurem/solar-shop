@@ -96,7 +96,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
           <!-- Product Info -->
           <div>
-            <app-product-info [product]="product"></app-product-info>
+            <app-product-info [product]="product" [isCompanyPricing]="isCompanyPricing"></app-product-info>
           </div>
         </div>
 
@@ -136,6 +136,7 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
   product$: Observable<Product | null>;
   isLoading$: Observable<boolean>;
   error$: Observable<string | null>;
+  isCompanyPricing = false;
 
   constructor() {
     this.product$ = this.store.select(selectProduct);
@@ -144,6 +145,13 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    // Check if this is company pricing mode
+    this.route.queryParams.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(queryParams => {
+      this.isCompanyPricing = queryParams['companyPricing'] === 'true';
+    });
+
     this.route.params.pipe(
       takeUntil(this.destroy$)
     ).subscribe(params => {

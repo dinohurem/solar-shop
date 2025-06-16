@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../shared/services/translation.service';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-b2b-navbar',
@@ -14,13 +16,13 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
           <!-- Logo and Brand -->
           <div class="flex items-center">
             <a routerLink="/partners" class="flex items-center space-x-3">
-              <div class="w-10 h-10 bg-gradient-to-br from-solar-500 to-solar-700 rounded-lg flex items-center justify-center">
-                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
-                </svg>
-              </div>
+              <img 
+                src="assets/images/logo.svg" 
+                alt="SolarShop" 
+                class="h-8 w-auto sm:h-10 lg:h-10 object-contain group-hover:scale-105 transition-transform duration-300 filter drop-shadow-sm"
+                onerror="console.error('Logo failed to load:', this.src); this.src='assets/images/logo.png'"
+              >
               <div>
-                <span class="text-xl font-bold text-gray-900 font-['Poppins']">SolarShop</span>
                 <span class="ml-2 px-2 py-1 bg-solar-100 text-solar-800 text-xs font-medium rounded-full">B2B</span>
               </div>
             </a>
@@ -28,6 +30,12 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
           <!-- Desktop Navigation -->
           <div class="hidden md:flex items-center space-x-8">
+            <a routerLink="/" 
+               routerLinkActive="text-solar-600 border-b-2 border-solar-600"
+               [routerLinkActiveOptions]="{exact: true}"
+               class="text-gray-700 hover:text-solar-600 px-3 py-2 text-sm font-medium transition-colors">
+              {{ 'b2bNav.home' | translate }}
+            </a>
             <a routerLink="/partners/products" 
                routerLinkActive="text-solar-600 border-b-2 border-solar-600"
                class="text-gray-700 hover:text-solar-600 px-3 py-2 text-sm font-medium transition-colors">
@@ -102,7 +110,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                   </svg>
                 </div>
-                <span>{{ currentUser?.name || 'Partner' }}</span>
+                <span>{{ currentUser?.name || ('b2bNav.partner' | translate) }}</span>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                 </svg>
@@ -147,6 +155,12 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
         <!-- Mobile Menu -->
         <div *ngIf="showMobileMenu" class="md:hidden border-t border-gray-200">
           <div class="px-2 pt-2 pb-3 space-y-1">
+            <a routerLink="/" 
+               routerLinkActive="bg-solar-50 text-solar-600"
+               [routerLinkActiveOptions]="{exact: true}"
+               class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-solar-600 hover:bg-gray-50 rounded-md">
+              {{ 'b2bNav.home' | translate }}
+            </a>
             <a routerLink="/partners/products" 
                routerLinkActive="bg-solar-50 text-solar-600"
                class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-solar-600 hover:bg-gray-50 rounded-md">
@@ -206,7 +220,10 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
     </nav>
   `,
 })
-export class B2bNavbarComponent implements OnInit {
+export class B2bNavbarComponent implements OnInit, OnDestroy {
+  private translationService = inject(TranslationService);
+  private destroy$ = new Subject<void>();
+
   showMobileMenu = false;
   showUserMenu = false;
   showLanguageMenu = false;
@@ -217,16 +234,23 @@ export class B2bNavbarComponent implements OnInit {
   constructor(private router: Router) { }
 
   ngOnInit(): void {
+    // Initialize language from translation service
+    this.translationService.currentLanguage$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(lang => {
+      this.currentLanguage = lang;
+    });
+
     // TODO: Initialize authentication state and user data
     // this.authService.currentUser$.subscribe(user => {
     //   this.isAuthenticated = !!user;
     //   this.currentUser = user;
     // });
+  }
 
-    // TODO: Initialize language from translation service
-    // this.translationService.currentLanguage$.subscribe(lang => {
-    //   this.currentLanguage = lang;
-    // });
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   toggleMobileMenu(): void {
@@ -252,10 +276,8 @@ export class B2bNavbarComponent implements OnInit {
   }
 
   changeLanguage(language: 'hr' | 'en'): void {
-    this.currentLanguage = language;
+    this.translationService.setLanguage(language);
     this.showLanguageMenu = false;
-    // TODO: Implement language change
-    // this.translationService.setLanguage(language);
   }
 
   signOut(): void {
