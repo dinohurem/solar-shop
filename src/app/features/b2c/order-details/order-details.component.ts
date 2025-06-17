@@ -6,10 +6,10 @@ import { SupabaseService } from '../../../services/supabase.service';
 import { Order } from '../../../shared/models/order.model';
 
 @Component({
-    selector: 'app-order-details',
-    standalone: true,
-    imports: [CommonModule, RouterModule],
-    template: `
+  selector: 'app-order-details',
+  standalone: true,
+  imports: [CommonModule, RouterModule],
+  template: `
     <div class="min-h-screen bg-gray-50 py-8">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header -->
@@ -130,6 +130,19 @@ import { Order } from '../../../shared/models/order.model';
                     <span>Qty: {{ item.quantity }}</span>
                     <span>Unit Price: {{ item.unitPrice | currency:'EUR':'symbol':'1.2-2' }}</span>
                   </div>
+                  <div class="mt-2">
+                    <a 
+                      *ngIf="item.productId; else disabledLink"
+                      [routerLink]="['/products', item.productId]"
+                      class="inline-flex items-center text-xs text-blue-600 hover:text-blue-800 font-medium cursor-pointer transition-colors">
+                      View Product Details
+                    </a>
+                    <ng-template #disabledLink>
+                      <span class="inline-flex items-center text-xs text-gray-400 font-medium">
+                        Product details not available
+                      </span>
+                    </ng-template>
+                  </div>
                 </div>
 
                 <!-- Item Total -->
@@ -223,91 +236,93 @@ import { Order } from '../../../shared/models/order.model';
       </div>
     </div>
   `,
-    styles: [`
+  styles: [`
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap');
   `]
 })
 export class OrderDetailsComponent implements OnInit {
-    private route = inject(ActivatedRoute);
-    private supabaseService = inject(SupabaseService);
+  private route = inject(ActivatedRoute);
+  private supabaseService = inject(SupabaseService);
 
-    order: Order | null = null;
-    loading = true;
-    error = false;
+  order: Order | null = null;
+  loading = true;
+  error = false;
 
-    ngOnInit(): void {
-        const orderId = this.route.snapshot.paramMap.get('id');
-        if (orderId) {
-            this.loadOrder(orderId);
-        } else {
-            this.error = true;
-            this.loading = false;
-        }
+  ngOnInit(): void {
+    const orderId = this.route.snapshot.paramMap.get('id');
+    if (orderId) {
+      this.loadOrder(orderId);
+    } else {
+      this.error = true;
+      this.loading = false;
     }
+  }
 
-    private async loadOrder(orderId: string): Promise<void> {
-        try {
-            this.loading = true;
-            this.error = false;
+  private async loadOrder(orderId: string): Promise<void> {
+    try {
+      this.loading = true;
+      this.error = false;
 
-            // Load order from database
-            const orderData = await this.supabaseService.getTableById('orders', orderId);
+      // Load order from database
+      const orderData = await this.supabaseService.getTableById('orders', orderId);
 
-            if (!orderData) {
-                this.error = true;
-                return;
-            }
+      if (!orderData) {
+        this.error = true;
+        return;
+      }
 
-            // Load order items
-            const orderItemsData = await this.supabaseService.getTable('order_items', {
-                order_id: orderId
-            });
+      // Load order items
+      const orderItemsData = await this.supabaseService.getTable('order_items', {
+        order_id: orderId
+      });
 
-            // Convert database order to Order model
-            this.order = {
-                id: orderData.id,
-                orderNumber: orderData.order_number,
-                userId: orderData.user_id,
-                customerEmail: orderData.customer_email,
-                customerName: orderData.customer_name,
-                customerPhone: orderData.customer_phone,
-                totalAmount: orderData.total_amount,
-                subtotal: orderData.subtotal,
-                taxAmount: orderData.tax_amount || 0,
-                shippingCost: orderData.shipping_cost || 0,
-                discountAmount: orderData.discount_amount || 0,
-                status: orderData.status,
-                paymentStatus: orderData.payment_status,
-                shippingStatus: orderData.shipping_status,
-                paymentMethod: orderData.payment_method,
-                orderDate: orderData.order_date,
-                shippingAddress: orderData.shipping_address,
-                billingAddress: orderData.billing_address,
-                trackingNumber: orderData.tracking_number,
-                notes: orderData.notes,
-                adminNotes: orderData.admin_notes,
-                items: (orderItemsData || []).map((itemData: any) => ({
-                    id: itemData.id,
-                    orderId: itemData.order_id,
-                    productId: itemData.product_id,
-                    productName: itemData.product_name,
-                    productSku: itemData.product_sku,
-                    quantity: itemData.quantity,
-                    unitPrice: itemData.unit_price,
-                    totalPrice: itemData.total_price,
-                    productImageUrl: itemData.product_image_url,
-                    productSpecifications: itemData.product_specifications,
-                    createdAt: itemData.created_at
-                })),
-                createdAt: orderData.created_at,
-                updatedAt: orderData.updated_at
-            };
+      // Convert database order to Order model
+      this.order = {
+        id: orderData.id,
+        orderNumber: orderData.order_number,
+        userId: orderData.user_id,
+        customerEmail: orderData.customer_email,
+        customerName: orderData.customer_name,
+        customerPhone: orderData.customer_phone,
+        totalAmount: orderData.total_amount,
+        subtotal: orderData.subtotal,
+        taxAmount: orderData.tax_amount || 0,
+        shippingCost: orderData.shipping_cost || 0,
+        discountAmount: orderData.discount_amount || 0,
+        status: orderData.status,
+        paymentStatus: orderData.payment_status,
+        shippingStatus: orderData.shipping_status,
+        paymentMethod: orderData.payment_method,
+        orderDate: orderData.order_date,
+        shippingAddress: orderData.shipping_address,
+        billingAddress: orderData.billing_address,
+        trackingNumber: orderData.tracking_number,
+        notes: orderData.notes,
+        adminNotes: orderData.admin_notes,
+        items: (orderItemsData || []).map((itemData: any) => ({
+          id: itemData.id,
+          orderId: itemData.order_id,
+          productId: itemData.product_id,
+          productName: itemData.product_name,
+          productSku: itemData.product_sku,
+          quantity: itemData.quantity,
+          unitPrice: itemData.unit_price,
+          totalPrice: itemData.total_price,
+          productImageUrl: itemData.product_image_url,
+          productSpecifications: itemData.product_specifications,
+          createdAt: itemData.created_at
+        })),
+        createdAt: orderData.created_at,
+        updatedAt: orderData.updated_at
+      };
 
-        } catch (error) {
-            console.error('Error loading order:', error);
-            this.error = true;
-        } finally {
-            this.loading = false;
-        }
+    } catch (error) {
+      console.error('Error loading order:', error);
+      this.error = true;
+    } finally {
+      this.loading = false;
     }
+  }
+
+
 } 

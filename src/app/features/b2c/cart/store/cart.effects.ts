@@ -39,6 +39,19 @@ export class CartEffects {
         )
     );
 
+    // Order Completion Effect - Automatically clear cart when order is completed
+    orderCompleted$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(CartActions.orderCompleted),
+            switchMap(() =>
+                this.cartService.clearCart().pipe(
+                    map(() => CartActions.clearCartSuccess()),
+                    catchError(error => of(CartActions.clearCartFailure({ error: error.message })))
+                )
+            )
+        )
+    );
+
     // Add to Cart Effect
     addToCart$ = createEffect(() =>
         this.actions$.pipe(

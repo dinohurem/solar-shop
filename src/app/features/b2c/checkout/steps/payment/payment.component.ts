@@ -8,6 +8,7 @@ import { selectCurrentUser } from '../../../../../core/auth/store/auth.selectors
 import { SupabaseService } from '../../../../../services/supabase.service';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { User } from '../../../../../shared/models/user.model';
+import * as CartActions from '../../../cart/store/cart.actions';
 
 @Component({
   selector: 'app-payment',
@@ -427,9 +428,15 @@ export class PaymentComponent {
       await this.supabaseService.createRecord('order_items', orderItemData);
     }
 
-    // Clear cart
+    // Clear cart - localStorage and NgRx store
     localStorage.removeItem('cart');
     localStorage.removeItem('shippingInfo');
+
+    // Dispatch order completion action which will automatically clear cart
+    this.store.dispatch(CartActions.orderCompleted({
+      orderId: order.id,
+      orderNumber: this.orderNumber
+    }));
   }
 
   private showSuccessToast() {

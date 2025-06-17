@@ -26,6 +26,12 @@ export const clearCartFailure = createAction(
     props<{ error: string }>()
 );
 
+// Order Completion Actions
+export const orderCompleted = createAction(
+    '[Cart] Order Completed',
+    props<{ orderId: string; orderNumber: string }>()
+);
+
 // Cart Item Actions
 export const addToCart = createAction(
     '[Cart] Add To Cart',
