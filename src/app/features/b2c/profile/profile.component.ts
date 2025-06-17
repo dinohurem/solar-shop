@@ -13,6 +13,21 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { Order } from '../../../shared/models/order.model';
 import { Review } from '../../../shared/models/review.model';
 import { SupabaseService } from '../../../services/supabase.service';
+import * as WishlistActions from '../wishlist/store/wishlist.actions';
+import { selectWishlistItems, selectWishlistLoading, selectWishlistError } from '../wishlist/store/wishlist.selectors';
+import { selectOrders, selectOrdersLoading } from '../../admin/orders/store/orders.selectors';
+import * as OrdersActions from '../../admin/orders/store/orders.actions';
+import { createSelector } from '@ngrx/store';
+
+// Create a selector for user-specific orders
+const selectUserOrders = createSelector(
+  selectOrders,
+  selectCurrentUser,
+  (orders, user) => {
+    if (!user || !orders) return [];
+    return orders.filter(order => order.userId === user.id);
+  }
+);
 
 @Component({
   selector: 'app-profile',
@@ -702,23 +717,20 @@ export class ProfileComponent implements OnInit {
   userInfoForm: FormGroup;
   showSuccessMessage = false;
 
-  // Orders
-  private ordersSubject = new BehaviorSubject<Order[]>([]);
-  private ordersLoadingSubject = new BehaviorSubject<boolean>(false);
-  orders$ = this.ordersSubject.asObservable();
-  ordersLoading$ = this.ordersLoadingSubject.asObservable();
+  // Orders - using NgRx
+  orders$: Observable<Order[]> = this.store.select(selectUserOrders);
+  ordersLoading$: Observable<boolean> = this.store.select(selectOrdersLoading);
 
-  // Reviews
+  // Reviews - keeping BehaviorSubject for now (to be migrated to NgRx later)
   private reviewsSubject = new BehaviorSubject<Review[]>([]);
   private reviewsLoadingSubject = new BehaviorSubject<boolean>(false);
   reviews$ = this.reviewsSubject.asObservable();
   reviewsLoading$ = this.reviewsLoadingSubject.asObservable();
 
-  // Wishlist
-  private wishlistSubject = new BehaviorSubject<any[]>([]);
-  private wishlistLoadingSubject = new BehaviorSubject<boolean>(false);
-  wishlist$ = this.wishlistSubject.asObservable();
-  wishlistLoading$ = this.wishlistLoadingSubject.asObservable();
+  // Wishlist - using NgRx
+  wishlist$ = this.store.select(selectWishlistItems);
+  wishlistLoading$ = this.store.select(selectWishlistLoading);
+  wishlistError$ = this.store.select(selectWishlistError);
 
   constructor() {
     this.currentUser$ = this.store.select(selectCurrentUser);
@@ -738,6 +750,10 @@ export class ProfileComponent implements OnInit {
   ngOnInit(): void {
     // Load user profile data
     this.store.dispatch(AuthActions.loadUserProfile());
+
+    // Load initial data
+    this.store.dispatch(OrdersActions.loadOrders());
+    this.store.dispatch(WishlistActions.loadWishlist());
 
     // Subscribe to user data and populate form
     this.currentUser$.subscribe(user => {
@@ -771,11 +787,13 @@ export class ProfileComponent implements OnInit {
 
     // Load data when switching to specific tabs
     if (tab === 'my-orders') {
-      this.loadUserOrders();
+      // Load orders using NgRx
+      this.store.dispatch(OrdersActions.loadOrders());
     } else if (tab === 'my-reviews') {
       this.loadUserReviews();
     } else if (tab === 'my-wishlist') {
-      this.loadUserWishlist();
+      // Load wishlist using NgRx
+      this.store.dispatch(WishlistActions.loadWishlist());
     }
   }
 
@@ -807,86 +825,7 @@ export class ProfileComponent implements OnInit {
     this.router.navigate(['/order-details', orderId]);
   }
 
-  private async loadUserOrders(): Promise<void> {
-    this.ordersLoadingSubject.next(true);
-    try {
-      // Get current user
-      const currentUser = await this.currentUser$.pipe(take(1)).toPromise();
 
-      if (!currentUser || !currentUser.id) {
-        // No authenticated user, cannot load orders
-        console.log('No authenticated user found, cannot load orders');
-        this.ordersSubject.next([]);
-        return;
-      }
-
-      // Load orders from database
-      const ordersData = await this.supabaseService.getTable('orders', {
-        user_id: currentUser.id
-      });
-
-      // Load order items for each order
-      const ordersWithItems: Order[] = [];
-
-      for (const orderData of ordersData) {
-        const orderItemsData = await this.supabaseService.getTable('order_items', {
-          order_id: orderData.id
-        });
-
-        // Convert database order to Order model
-        const order: Order = {
-          id: orderData.id,
-          orderNumber: orderData.order_number,
-          userId: orderData.user_id,
-          customerEmail: orderData.customer_email,
-          customerName: orderData.customer_name,
-          customerPhone: orderData.customer_phone,
-          totalAmount: orderData.total_amount,
-          subtotal: orderData.subtotal,
-          taxAmount: orderData.tax_amount || 0,
-          shippingCost: orderData.shipping_cost || 0,
-          discountAmount: orderData.discount_amount || 0,
-          status: orderData.status,
-          paymentStatus: orderData.payment_status,
-          shippingStatus: orderData.shipping_status,
-          paymentMethod: orderData.payment_method,
-          orderDate: orderData.order_date,
-          shippingAddress: orderData.shipping_address,
-          billingAddress: orderData.billing_address,
-          trackingNumber: orderData.tracking_number,
-          notes: orderData.notes,
-          adminNotes: orderData.admin_notes,
-          items: orderItemsData.map((itemData: any) => ({
-            id: itemData.id,
-            orderId: itemData.order_id,
-            productId: itemData.product_id,
-            productName: itemData.product_name,
-            productSku: itemData.product_sku,
-            quantity: itemData.quantity,
-            unitPrice: itemData.unit_price,
-            totalPrice: itemData.total_price,
-            productImageUrl: itemData.product_image_url,
-            productSpecifications: itemData.product_specifications,
-            createdAt: itemData.created_at
-          })),
-          createdAt: orderData.created_at,
-          updatedAt: orderData.updated_at
-        };
-
-        ordersWithItems.push(order);
-      }
-
-      // Sort by order date (newest first)
-      ordersWithItems.sort((a, b) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime());
-
-      this.ordersSubject.next(ordersWithItems);
-    } catch (error) {
-      console.error('Error loading user orders:', error);
-      this.ordersSubject.next([]);
-    } finally {
-      this.ordersLoadingSubject.next(false);
-    }
-  }
 
   private async loadUserReviews(): Promise<void> {
     this.reviewsLoadingSubject.next(true);
@@ -903,19 +842,12 @@ export class ProfileComponent implements OnInit {
     }
   }
 
-  private async loadUserWishlist(): Promise<void> {
-    // TODO: Implement actual wishlist loading from Supabase
-    // For now, return empty array as placeholder
-    const wishlist: any[] = [];
-    this.wishlistSubject.next(wishlist);
-  }
-
   removeFromWishlist(productId: string): void {
-    // TODO: Implement remove from wishlist functionality
-    console.log('Remove from wishlist:', productId);
+    this.store.dispatch(WishlistActions.removeFromWishlist({ productId }));
   }
 
-  getAvailabilityText(availability: string): string {
+  getAvailabilityText(availability: string | undefined): string {
+    if (!availability) return 'productDetails.unknown';
     switch (availability) {
       case 'available': return 'productDetails.inStock';
       case 'limited': return 'productDetails.limitedStock';
@@ -924,7 +856,7 @@ export class ProfileComponent implements OnInit {
     }
   }
 
-  viewProductDetails(productId: string): void {
+  viewProductDetails(productId: string | undefined): void {
     if (productId) {
       this.router.navigate(['/products', productId]);
     }

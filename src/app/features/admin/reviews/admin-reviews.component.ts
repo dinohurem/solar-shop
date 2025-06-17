@@ -5,11 +5,12 @@ import { BehaviorSubject } from 'rxjs';
 import { SupabaseService } from '../../../services/supabase.service';
 import { DataTableComponent, TableConfig } from '../shared/data-table/data-table.component';
 import { Review } from '../../../shared/models/review.model';
+import { SuccessModalComponent } from '../../../shared/components/modals/success-modal/success-modal.component';
 
 @Component({
     selector: 'app-admin-reviews',
     standalone: true,
-    imports: [CommonModule, DataTableComponent],
+    imports: [CommonModule, DataTableComponent, SuccessModalComponent],
     template: `
     <div class="w-full max-w-full overflow-hidden">
       <div class="space-y-4 sm:space-y-6 p-4 sm:p-6">
@@ -32,10 +33,17 @@ import { Review } from '../../../shared/models/review.model';
         (addClicked)="onAddReview()"
         (rowClicked)="onRowClick($event)"
         (csvImported)="onCsvImported($event)">
-      </app-data-table>
-        </div>
+      </app-data-table>        </div>
       </div>
     </div>
+
+    <!-- Success Modal -->
+    <app-success-modal
+      [isOpen]="showSuccessModal"
+      [title]="successModalTitle"
+      [message]="successModalMessage"
+      (closed)="onSuccessModalClosed()"
+    ></app-success-modal>
   `,
     styles: [`
     :host {
@@ -48,10 +56,13 @@ export class AdminReviewsComponent implements OnInit {
     private router = inject(Router);
 
     private reviewsSubject = new BehaviorSubject<Review[]>([]);
-    private loadingSubject = new BehaviorSubject<boolean>(true);
-
-    reviews$ = this.reviewsSubject.asObservable();
+    private loadingSubject = new BehaviorSubject<boolean>(true); reviews$ = this.reviewsSubject.asObservable();
     loading$ = this.loadingSubject.asObservable();
+
+    // Success modal properties
+    showSuccessModal = false;
+    successModalTitle = '';
+    successModalMessage = '';
 
     tableConfig: TableConfig = {
         columns: [
@@ -234,29 +245,37 @@ export class AdminReviewsComponent implements OnInit {
         } finally {
             this.loadingSubject.next(false);
         }
-    }
-
-    private async updateReviewStatus(reviewId: string, status: 'approved' | 'rejected' | 'hidden'): Promise<void> {
+    } private async updateReviewStatus(reviewId: string, status: 'approved' | 'rejected' | 'hidden'): Promise<void> {
         try {
             await this.supabaseService.updateRecord('reviews', reviewId, { status });
             await this.loadReviews(); // Reload data
-            alert(`Review ${status} successfully`);
+            this.showSuccess('Success', `Review ${status} successfully`);
         } catch (error) {
             console.error('Error updating review status:', error);
-            alert('Error updating review status');
+            this.showSuccess('Error', 'Error updating review status');
         }
     }
 
     private async deleteReview(reviewId: string): Promise<void> {
-        if (confirm('Are you sure you want to delete this review? This action cannot be undone.')) {
-            try {
-                await this.supabaseService.deleteRecord('reviews', reviewId);
-                await this.loadReviews(); // Reload data
-                alert('Review deleted successfully');
-            } catch (error) {
-                console.error('Error deleting review:', error);
-                alert('Error deleting review');
-            }
+        try {
+            await this.supabaseService.deleteRecord('reviews', reviewId);
+            await this.loadReviews(); // Reload data
+            this.showSuccess('Success', 'Review deleted successfully');
+        } catch (error) {
+            console.error('Error deleting review:', error);
+            this.showSuccess('Error', 'Error deleting review');
         }
     }
-} 
+
+    private showSuccess(title: string, message: string): void {
+        this.successModalTitle = title;
+        this.successModalMessage = message;
+        this.showSuccessModal = true;
+    }
+
+    onSuccessModalClosed(): void {
+        this.showSuccessModal = false;
+        this.successModalTitle = '';
+        this.successModalMessage = '';
+    }
+}

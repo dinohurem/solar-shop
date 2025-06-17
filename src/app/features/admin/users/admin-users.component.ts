@@ -5,12 +5,12 @@ import { Title } from '@angular/platform-browser';
 import { BehaviorSubject } from 'rxjs';
 import { SupabaseService } from '../../../services/supabase.service';
 import { DataTableComponent, TableConfig } from '../shared/data-table/data-table.component';
+import { SuccessModalComponent } from '../../../shared/components/modals/success-modal/success-modal.component';
 
 @Component({
     selector: 'app-admin-users',
     standalone: true,
-    imports: [CommonModule, DataTableComponent],
-    template: `
+    imports: [CommonModule, DataTableComponent, SuccessModalComponent], template: `
     <div class="space-y-6">
       <!-- Page Header -->
       <div class="flex items-center justify-between">
@@ -32,6 +32,14 @@ import { DataTableComponent, TableConfig } from '../shared/data-table/data-table
         (csvImported)="onCsvImported($event)">
       </app-data-table>
     </div>
+
+    <!-- Success Modal -->
+    <app-success-modal
+      [isOpen]="showSuccessModal"
+      [title]="successModalTitle"
+      [message]="successModalMessage"
+      (closed)="onSuccessModalClosed()"
+    ></app-success-modal>
   `,
     styles: [`
     :host {
@@ -45,10 +53,13 @@ export class AdminUsersComponent implements OnInit {
     private title = inject(Title);
 
     private usersSubject = new BehaviorSubject<any[]>([]);
-    private loadingSubject = new BehaviorSubject<boolean>(true);
-
-    users$ = this.usersSubject.asObservable();
+    private loadingSubject = new BehaviorSubject<boolean>(true); users$ = this.usersSubject.asObservable();
     loading$ = this.loadingSubject.asObservable();
+
+    // Modal properties
+    showSuccessModal = false;
+    successModalTitle = '';
+    successModalMessage = '';
 
     tableConfig: TableConfig = {
         columns: [
@@ -130,9 +141,7 @@ export class AdminUsersComponent implements OnInit {
     }
 
     onTableAction(event: { action: string, item: any }): void {
-        const { action, item } = event;
-
-        switch (action) {
+        const { action, item } = event; switch (action) {
             case 'edit':
                 this.router.navigate(['/admin/users/edit', item.id]);
                 break;
@@ -149,11 +158,9 @@ export class AdminUsersComponent implements OnInit {
 
     onAddUser(): void {
         this.router.navigate(['/admin/users/create']);
-    }
-
-    async onCsvImported(csvData: any[]): Promise<void> {
+    } async onCsvImported(csvData: any[]): Promise<void> {
         // This should not be called since CSV import is disabled
-        alert('CSV import is disabled for user management for security reasons');
+        this.showSuccess('Error', 'CSV import is disabled for user management for security reasons');
     }
 
     private async loadUsers(): Promise<void> {
@@ -168,20 +175,26 @@ export class AdminUsersComponent implements OnInit {
         } finally {
             this.loadingSubject.next(false);
         }
-    }
-
-    private async deleteUser(user: any): Promise<void> {
-        if (!confirm(`Are you sure you want to delete "${user.first_name} ${user.last_name}"? This action cannot be undone.`)) {
-            return;
-        }
-
+    } private async deleteUser(user: any): Promise<void> {
         try {
             await this.supabaseService.deleteRecord('profiles', user.id);
-            alert('User deleted successfully');
+            this.showSuccess('Success', 'User deleted successfully');
             this.loadUsers();
         } catch (error) {
             console.error('Error deleting user:', error);
-            alert('Error deleting user');
+            this.showSuccess('Error', 'Error deleting user');
         }
+    }
+
+    private showSuccess(title: string, message: string): void {
+        this.successModalTitle = title;
+        this.successModalMessage = message;
+        this.showSuccessModal = true;
+    }
+
+    onSuccessModalClosed(): void {
+        this.showSuccessModal = false;
+        this.successModalTitle = '';
+        this.successModalMessage = '';
     }
 } 

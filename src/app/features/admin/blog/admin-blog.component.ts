@@ -4,11 +4,12 @@ import { Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { SupabaseService } from '../../../services/supabase.service';
 import { DataTableComponent, TableConfig } from '../shared/data-table/data-table.component';
+import { SuccessModalComponent } from '../../../shared/components/modals/success-modal/success-modal.component';
 
 @Component({
     selector: 'app-admin-blog',
     standalone: true,
-    imports: [CommonModule, DataTableComponent],
+    imports: [CommonModule, DataTableComponent, SuccessModalComponent],
     template: `
     <div class="w-full">
       <div class="space-y-4 sm:space-y-6 p-4 sm:p-6">
@@ -29,12 +30,19 @@ import { DataTableComponent, TableConfig } from '../shared/data-table/data-table
         [loading]="(loading$ | async) || false"
         (actionClicked)="onTableAction($event)"
         (addClicked)="onAddPost()"
-        (rowClicked)="onRowClick($event)"
-        (csvImported)="onCsvImported($event)">
+        (rowClicked)="onRowClick($event)"        (csvImported)="onCsvImported($event)">
       </app-data-table>
         </div>
       </div>
     </div>
+
+    <!-- Success Modal -->
+    <app-success-modal
+      [isOpen]="showSuccessModal"
+      [title]="successModalTitle"
+      [message]="successModalMessage"
+      (closed)="onSuccessModalClosed()"
+    ></app-success-modal>
   `,
     styles: [`
     :host {
@@ -47,10 +55,13 @@ export class AdminBlogComponent implements OnInit {
     private router = inject(Router);
 
     private postsSubject = new BehaviorSubject<any[]>([]);
-    private loadingSubject = new BehaviorSubject<boolean>(true);
-
-    posts$ = this.postsSubject.asObservable();
+    private loadingSubject = new BehaviorSubject<boolean>(true); posts$ = this.postsSubject.asObservable();
     loading$ = this.loadingSubject.asObservable();
+
+    // Modal properties
+    showSuccessModal = false;
+    successModalTitle = '';
+    successModalMessage = '';
 
     tableConfig: TableConfig = {
         columns: [
@@ -183,20 +194,26 @@ export class AdminBlogComponent implements OnInit {
         } finally {
             this.loadingSubject.next(false);
         }
-    }
-
-    private async deletePost(post: any): Promise<void> {
-        if (!confirm(`Are you sure you want to delete "${post.title}"?`)) {
-            return;
-        }
-
+    } private async deletePost(post: any): Promise<void> {
         try {
             await this.supabaseService.deleteRecord('blog_posts', post.id);
-            alert('Blog post deleted successfully');
+            this.showSuccess('Success', 'Blog post deleted successfully');
             this.loadPosts();
         } catch (error) {
             console.error('Error deleting blog post:', error);
-            alert('Error deleting blog post');
+            this.showSuccess('Error', 'Error deleting blog post');
         }
     }
-} 
+
+    private showSuccess(title: string, message: string): void {
+        this.successModalTitle = title;
+        this.successModalMessage = message;
+        this.showSuccessModal = true;
+    }
+
+    onSuccessModalClosed(): void {
+        this.showSuccessModal = false;
+        this.successModalTitle = '';
+        this.successModalMessage = '';
+    }
+}

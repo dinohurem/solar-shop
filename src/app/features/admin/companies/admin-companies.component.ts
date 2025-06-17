@@ -7,6 +7,7 @@ import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { Company } from '../../../shared/models/company.model';
+import { DeleteConfirmationModalComponent } from '../../../shared/components/modals/delete-confirmation-modal/delete-confirmation-modal.component';
 import * as CompaniesActions from './store/companies.actions';
 import {
   selectFilteredCompanies,
@@ -24,7 +25,7 @@ import {
 @Component({
   selector: 'app-admin-companies',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, DeleteConfirmationModalComponent],
   template: `
     <div class="p-6">
       <!-- Header -->
@@ -400,10 +401,18 @@ import {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+          </div>        </div>
       </div>
     </div>
+
+    <!-- Delete Confirmation Modal -->
+    <app-delete-confirmation-modal
+      [isOpen]="showDeleteModal"
+      [title]="deleteModalTitle"
+      [message]="deleteModalMessage"
+      (confirmed)="onDeleteConfirmed()"
+      (cancelled)="onDeleteCancelled()"
+    ></app-delete-confirmation-modal>
   `,
 })
 export class AdminCompaniesComponent implements OnInit, OnDestroy {
@@ -420,8 +429,13 @@ export class AdminCompaniesComponent implements OnInit, OnDestroy {
   approving$: Observable<boolean>;
   rejecting$: Observable<boolean>;
   deleting$: Observable<boolean>;
-
   selectedCompany: Company | null = null;
+
+  // Delete modal properties
+  showDeleteModal = false;
+  deleteModalTitle = '';
+  deleteModalMessage = '';
+  pendingDeleteCompany: Company | null = null;
 
   // Filters
   selectedStatus = '';
@@ -566,15 +580,30 @@ export class AdminCompaniesComponent implements OnInit, OnDestroy {
     // TODO: Navigate to edit form or open edit modal
     console.log('Edit company:', company);
   }
-
   deleteCompany(company: Company): void {
-    if (confirm(`Are you sure you want to delete ${company.companyName}? This action cannot be undone.`)) {
-      this.store.dispatch(CompaniesActions.deleteCompany({ companyId: company.id }));
+    this.pendingDeleteCompany = company;
+    this.deleteModalTitle = 'Confirm Deletion';
+    this.deleteModalMessage = `Are you sure you want to delete ${company.companyName}? This action cannot be undone.`;
+    this.showDeleteModal = true;
+  }
+
+  onDeleteConfirmed(): void {
+    if (this.pendingDeleteCompany) {
+      this.store.dispatch(CompaniesActions.deleteCompany({ companyId: this.pendingDeleteCompany.id }));
 
       // Close modal if it's open
-      if (this.selectedCompany?.id === company.id) {
+      if (this.selectedCompany?.id === this.pendingDeleteCompany.id) {
         this.closeModal();
       }
+
+      this.onDeleteCancelled(); // Reset state
     }
   }
-} 
+
+  onDeleteCancelled(): void {
+    this.showDeleteModal = false;
+    this.pendingDeleteCompany = null;
+    this.deleteModalTitle = '';
+    this.deleteModalMessage = '';
+  }
+}

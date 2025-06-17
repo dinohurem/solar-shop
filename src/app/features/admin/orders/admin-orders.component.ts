@@ -2,14 +2,22 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Title } from '@angular/platform-browser';
-import { BehaviorSubject } from 'rxjs';
-import { SupabaseService } from '../../../services/supabase.service';
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
 import { DataTableComponent, TableConfig } from '../shared/data-table/data-table.component';
+import { SuccessModalComponent } from '../../../shared/components/modals/success-modal/success-modal.component';
+import { DeleteConfirmationModalComponent } from '../../../shared/components/modals/delete-confirmation-modal/delete-confirmation-modal.component';
+import * as OrdersActions from './store/orders.actions';
+import { selectOrders, selectOrdersLoading, selectOrdersError } from './store/orders.selectors';
+import { Order } from '../../../shared/models/order.model';
+import { Actions, ofType } from '@ngrx/effects';
+import { takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 
 @Component({
     selector: 'app-admin-orders',
     standalone: true,
-    imports: [CommonModule, DataTableComponent],
+    imports: [CommonModule, DataTableComponent, SuccessModalComponent, DeleteConfirmationModalComponent],
     template: `
     <div class="w-full max-w-full overflow-hidden">
       <div class="space-y-4 sm:space-y-6 p-4 sm:p-6">
@@ -20,6 +28,16 @@ import { DataTableComponent, TableConfig } from '../shared/data-table/data-table
             <p class="mt-1 sm:mt-2 text-sm sm:text-base text-gray-600">Manage customer orders and order details</p>
         </div>
       </div>
+
+        <!-- Error Message -->
+        <div *ngIf="error$ | async" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+          <div class="flex items-center">
+            <svg class="w-5 h-5 text-red-600 mr-3" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+            </svg>
+            <span class="text-red-800 font-medium">{{ (error$ | async) || 'Failed to load orders' }}</span>
+          </div>
+        </div>
 
         <!-- Data Table Container -->
         <div class="w-full overflow-hidden">
@@ -35,6 +53,23 @@ import { DataTableComponent, TableConfig } from '../shared/data-table/data-table
         </div>
       </div>
     </div>
+
+    <!-- Success Modal -->
+    <app-success-modal
+      [isOpen]="showSuccessModal"
+      [title]="successModalTitle"
+      [message]="successModalMessage"
+      (closed)="onSuccessModalClosed()"
+    ></app-success-modal>
+
+    <!-- Delete Confirmation Modal -->
+    <app-delete-confirmation-modal
+      [isOpen]="showDeleteModal"
+      [title]="'Confirm Order Deletion'"
+      [message]="'Are you sure you want to delete this order? This action cannot be undone.'"
+      (confirmed)="onDeleteConfirmed()"
+      (cancelled)="onDeleteCancelled()"
+    ></app-delete-confirmation-modal>
   `,
     styles: [`
     :host {
@@ -43,34 +78,41 @@ import { DataTableComponent, TableConfig } from '../shared/data-table/data-table
   `]
 })
 export class AdminOrdersComponent implements OnInit {
-    private supabaseService = inject(SupabaseService);
+    private store = inject(Store);
     private router = inject(Router);
     private title = inject(Title);
+    private actions$ = inject(Actions);
+    private destroy$ = new Subject<void>();
 
-    private ordersSubject = new BehaviorSubject<any[]>([]);
-    private loadingSubject = new BehaviorSubject<boolean>(true);
+    orders$: Observable<Order[]> = this.store.select(selectOrders);
+    loading$: Observable<boolean> = this.store.select(selectOrdersLoading);
+    error$: Observable<string | null> = this.store.select(selectOrdersError);
 
-    orders$ = this.ordersSubject.asObservable();
-    loading$ = this.loadingSubject.asObservable();
+    // Modal properties
+    showSuccessModal = false;
+    successModalTitle = '';
+    successModalMessage = '';
+    showDeleteModal = false;
+    pendingDeleteOrder: any = null;
 
     tableConfig: TableConfig = {
         columns: [
             {
-                key: 'order_number',
+                key: 'orderNumber',
                 label: 'Order #',
                 type: 'text',
                 sortable: true,
                 searchable: true
             },
             {
-                key: 'customer_email',
+                key: 'customerEmail',
                 label: 'Customer',
                 type: 'text',
                 sortable: true,
                 searchable: true
             },
             {
-                key: 'total_amount',
+                key: 'totalAmount',
                 label: 'Total',
                 type: 'number',
                 sortable: true,
@@ -96,7 +138,7 @@ export class AdminOrdersComponent implements OnInit {
                 }
             },
             {
-                key: 'payment_status',
+                key: 'paymentStatus',
                 label: 'Payment',
                 type: 'status',
                 sortable: true,
@@ -111,14 +153,14 @@ export class AdminOrdersComponent implements OnInit {
                 }
             },
             {
-                key: 'order_items_count',
+                key: 'items',
                 label: 'Items',
                 type: 'number',
                 sortable: true,
-                format: (value) => value || 0
+                format: (value) => Array.isArray(value) ? value.length.toString() : '0'
             },
             {
-                key: 'created_at',
+                key: 'createdAt',
                 label: 'Order Date',
                 type: 'date',
                 sortable: true
@@ -126,22 +168,10 @@ export class AdminOrdersComponent implements OnInit {
         ],
         actions: [
             {
-                label: 'View Details',
-                icon: 'eye',
-                action: 'details',
-                class: 'text-blue-600 hover:text-blue-900'
-            },
-            {
                 label: 'Edit',
                 icon: 'edit',
                 action: 'edit',
                 class: 'text-blue-600 hover:text-blue-900'
-            },
-            {
-                label: 'Print Invoice',
-                icon: 'printer',
-                action: 'print',
-                class: 'text-purple-600 hover:text-purple-900'
             },
             {
                 label: 'Delete',
@@ -161,24 +191,42 @@ export class AdminOrdersComponent implements OnInit {
 
     ngOnInit(): void {
         this.title.setTitle('Orders - Solar Shop Admin');
-        this.loadOrders();
+
+        // Load orders
+        this.store.dispatch(OrdersActions.loadOrders());
+
+        // Listen for successful delete operations
+        this.actions$.pipe(
+            ofType(OrdersActions.deleteOrderSuccess),
+            takeUntil(this.destroy$)
+        ).subscribe(() => {
+            this.showSuccess('Success', 'Order deleted successfully');
+        });
+
+        // Listen for failed delete operations
+        this.actions$.pipe(
+            ofType(OrdersActions.deleteOrderFailure),
+            takeUntil(this.destroy$)
+        ).subscribe(({ error }) => {
+            this.showSuccess('Error', `Failed to delete order: ${error}`);
+        });
+    }
+
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
     }
 
     onTableAction(event: { action: string, item: any }): void {
         const { action, item } = event;
 
         switch (action) {
-            case 'details':
-                this.router.navigate(['/admin/orders/details', item.id]);
-                break;
             case 'edit':
                 this.router.navigate(['/admin/orders/edit', item.id]);
                 break;
-            case 'print':
-                this.printInvoice(item);
-                break;
             case 'delete':
-                this.deleteOrder(item);
+                this.pendingDeleteOrder = item;
+                this.showDeleteModal = true;
                 break;
         }
     }
@@ -187,68 +235,33 @@ export class AdminOrdersComponent implements OnInit {
         this.router.navigate(['/admin/orders/details', item.id]);
     }
 
-    printInvoice(order: any): void {
-        // In a real implementation, this would generate and print an invoice
-        console.log('Printing invoice for order:', order.order_number);
-        alert(`Invoice printing for order ${order.order_number} would start here`);
+    onDeleteConfirmed(): void {
+        if (this.pendingDeleteOrder) {
+            this.store.dispatch(OrdersActions.deleteOrder({ orderId: this.pendingDeleteOrder.id }));
+        }
+        this.onDeleteCancelled();
+    }
+
+    onDeleteCancelled(): void {
+        this.showDeleteModal = false;
+        this.pendingDeleteOrder = null;
     }
 
     async onCsvImported(csvData: any[]): Promise<void> {
         // Orders typically aren't imported via CSV in most systems
         // But if needed, this would handle it
-        alert('Order import functionality would be implemented here');
+        this.showSuccess('Info', 'Order import functionality would be implemented here');
     }
 
-    private async loadOrders(): Promise<void> {
-        this.loadingSubject.next(true);
-
-        try {
-            // Load orders with related data
-            const orders = await this.supabaseService.getTable('orders');
-
-            // For each order, load related items
-            const ordersWithItems = await Promise.all(
-                (orders || []).map(async (order: any) => {
-                    try {
-                        // Load order items (simulate for now since getOrderItems doesn't exist)
-                        // In a real implementation, you would have an order_items table
-                        const orderItems: any[] = [];
-                        return {
-                            ...order,
-                            order_items: orderItems,
-                            order_items_count: orderItems.length
-                        };
-                    } catch {
-                        return {
-                            ...order,
-                            order_items: [],
-                            order_items_count: 0
-                        };
-                    }
-                })
-            );
-
-            this.ordersSubject.next(ordersWithItems);
-        } catch (error) {
-            console.error('Error loading orders:', error);
-            this.ordersSubject.next([]);
-        } finally {
-            this.loadingSubject.next(false);
-        }
+    private showSuccess(title: string, message: string): void {
+        this.successModalTitle = title;
+        this.successModalMessage = message;
+        this.showSuccessModal = true;
     }
 
-    private async deleteOrder(order: any): Promise<void> {
-        if (!confirm(`Are you sure you want to delete order "${order.order_number}"? This action cannot be undone.`)) {
-            return;
-        }
-
-        try {
-            await this.supabaseService.deleteRecord('orders', order.id);
-            alert('Order deleted successfully');
-            this.loadOrders();
-        } catch (error) {
-            console.error('Error deleting order:', error);
-            alert('Error deleting order');
-        }
+    onSuccessModalClosed(): void {
+        this.showSuccessModal = false;
+        this.successModalTitle = '';
+        this.successModalMessage = '';
     }
-} 
+}

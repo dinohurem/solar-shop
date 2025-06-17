@@ -1,6 +1,12 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
 import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
+import { ReviewModalComponent } from '../../../../../../shared/components/modals/review-modal/review-modal.component';
+import { SuccessModalComponent } from '../../../../../../shared/components/modals/success-modal/success-modal.component';
+import { SupabaseService } from '../../../../../../services/supabase.service';
+import { selectCurrentUser } from '../../../../../../core/auth/store/auth.selectors';
 
 export interface Review {
   id: string;
@@ -17,7 +23,7 @@ export interface Review {
 @Component({
   selector: 'app-product-reviews',
   standalone: true,
-  imports: [CommonModule, TranslatePipe],
+  imports: [CommonModule, TranslatePipe, ReviewModalComponent, SuccessModalComponent],
   template: `
     <div id="reviews" class="space-y-8">
       <!-- Reviews Header -->
@@ -189,11 +195,27 @@ export interface Review {
         <button 
           (click)="openWriteReview()"
           class="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors duration-200"
-        >
-          {{ 'reviewsSection.writeFirstReview' | translate }}
+        >          {{ 'reviewsSection.writeFirstReview' | translate }}
         </button>
       </div>
     </div>
+
+    <!-- Review Modal -->
+    <app-review-modal
+      [isOpen]="showReviewModal"
+      [productId]="productId"
+      [productName]="productName"
+      (submitted)="onReviewSubmitted($event)"
+      (cancelled)="onReviewCancelled()"
+    ></app-review-modal>
+
+    <!-- Success Modal -->
+    <app-success-modal
+      [isOpen]="showSuccessModal"
+      [title]="successModalTitle"
+      [message]="successModalMessage"
+      (closed)="onSuccessModalClosed()"
+    ></app-success-modal>
   `,
   styles: [`
     :host {
@@ -207,12 +229,24 @@ export interface Review {
 })
 export class ProductReviewsComponent implements OnInit {
   @Input() productId!: string;
+  @Input() productName?: string;
+
+  private store = inject(Store);
+  private supabaseService = inject(SupabaseService);
 
   reviews: Review[] = [];
   averageRating: number = 0;
+  currentUser$ = this.store.select(selectCurrentUser);
+  canWriteReview = false;
 
+  // Modal properties
+  showReviewModal = false;
+  showSuccessModal = false;
+  successModalTitle = '';
+  successModalMessage = '';
   ngOnInit(): void {
     this.loadReviews();
+    this.checkIfUserCanWriteReview();
   }
 
   private loadReviews(): void {
@@ -312,10 +346,96 @@ export class ProductReviewsComponent implements OnInit {
     console.log('Reporting review:', reviewId);
     // In a real app, this would show a report modal or send a report
   }
-
   openWriteReview(): void {
-    // Implementation for opening write review modal/form
-    console.log('Opening write review form');
+    if (this.canWriteReview) {
+      this.showReviewModal = true;
+    } else {
+      // Show message that user needs to purchase and have delivered order
+      this.showSuccess('Cannot Write Review', 'You can only write reviews for products you have purchased and received.');
+    }
+  }
+
+  onReviewSubmitted(reviewData: { rating: number; title: string; comment: string; productId: string }): void {
+    this.submitReview(reviewData);
+  }
+
+  onReviewCancelled(): void {
+    this.showReviewModal = false;
+  }
+
+  private async submitReview(reviewData: { rating: number; title: string; comment: string; productId: string }): Promise<void> {
+    try {
+      const user = await this.currentUser$.pipe().toPromise();
+      if (!user) {
+        this.showSuccess('Error', 'You must be logged in to write a review.');
+        return;
+      } const reviewRecord = {
+        user_id: user.id,
+        product_id: reviewData.productId,
+        rating: reviewData.rating,
+        title: reviewData.title,
+        comment: reviewData.comment,
+        status: 'pending' as const,
+        is_approved: false,
+        is_verified_purchase: true, // We already checked they purchased it
+        helpful_count: 0,
+        reported_count: 0,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      await this.supabaseService.createRecord('reviews', reviewRecord);
+      this.showReviewModal = false;
+      this.showSuccess('Review Submitted!', 'Thank you for your review. It will be published after admin approval.');
+
+      // Reload reviews to include the new one (if approved)
+      this.loadReviews();
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      this.showSuccess('Error', 'Failed to submit review. Please try again.');
+    }
+  }
+
+  private async checkIfUserCanWriteReview(): Promise<void> {
+    try {
+      const user = await this.currentUser$.pipe().toPromise();
+      if (!user) {
+        this.canWriteReview = false;
+        return;
+      }
+
+      // Check if user has purchased this product and order is delivered
+      const orders = await this.supabaseService.getTable('orders', { user_id: user.id });
+
+      for (const order of orders || []) {
+        if (order.status === 'delivered') {
+          const orderItems = await this.supabaseService.getTable('order_items', { order_id: order.id });
+          const hasPurchased = orderItems?.some((item: any) => item.product_id === this.productId);
+
+          if (hasPurchased) {
+            this.canWriteReview = true;
+            return;
+          }
+        }
+      }
+
+      this.canWriteReview = false;
+    } catch (error) {
+      console.error('Error checking if user can write review:', error);
+      this.canWriteReview = false;
+    }
+  }
+
+  private showSuccess(title: string, message: string): void {
+    this.successModalTitle = title;
+    this.successModalMessage = message;
+    this.showSuccessModal = true;
+  }
+
+  onSuccessModalClosed(): void {
+    this.showSuccessModal = false;
+    this.successModalTitle = '';
+    this.successModalMessage = '';
   }
 
   loadMoreReviews(): void {

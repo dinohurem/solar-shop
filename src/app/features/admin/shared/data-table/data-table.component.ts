@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { LucideAngularModule, Edit, Trash2, Upload, Download, Plus, Search, Eye, EyeOff, Check, X, Printer } from 'lucide-angular';
+import { DeleteConfirmationModalComponent } from '../../../../shared/components/modals/delete-confirmation-modal/delete-confirmation-modal.component';
 
 export interface TableColumn {
   key: string;
@@ -36,7 +37,7 @@ export interface TableConfig {
 @Component({
   selector: 'app-data-table',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, LucideAngularModule],
+  imports: [CommonModule, FormsModule, RouterModule, LucideAngularModule, DeleteConfirmationModalComponent],
   template: `
     <div class="bg-white rounded-lg shadow-sm border border-gray-200">
       <!-- Table Header -->
@@ -266,9 +267,7 @@ export interface TableConfig {
             Next
           </button>
         </div>
-      </div>
-
-      <!-- Empty State -->
+      </div>      <!-- Empty State -->
       <div *ngIf="filteredData.length === 0" class="text-center py-12">
         <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m8-8V3a1 1 0 00-1-1H9a1 1 0 00-1 1v2m4 0h0"/>
@@ -288,6 +287,15 @@ export interface TableConfig {
         </div>
       </div>
     </div>
+
+    <!-- Delete Confirmation Modal -->
+    <app-delete-confirmation-modal
+      [isOpen]="showDeleteModal"
+      [title]="deleteModalTitle"
+      [message]="deleteModalMessage"
+      (confirmed)="onDeleteConfirmed()"
+      (cancelled)="onDeleteCancelled()"
+    ></app-delete-confirmation-modal>
   `,
   styles: [`
     :host {
@@ -300,11 +308,16 @@ export class DataTableComponent implements OnInit, OnChanges {
   @Input() data: any[] = [];
   @Input() config!: TableConfig;
   @Input() loading: boolean = false;
-
   @Output() actionClicked = new EventEmitter<{ action: string, item: any }>();
   @Output() addClicked = new EventEmitter<void>();
   @Output() csvImported = new EventEmitter<any[]>();
   @Output() rowClicked = new EventEmitter<any>();
+
+  // Delete modal properties
+  showDeleteModal = false;
+  deleteModalTitle = '';
+  deleteModalMessage = '';
+  pendingDeleteItem: any = null;
 
   // Lucide Icons
   readonly SearchIcon = Search;
@@ -357,12 +370,17 @@ export class DataTableComponent implements OnInit, OnChanges {
     }
     this.updateDisplayData();
   }
-
   onAction(action: string, item: any, event?: Event): void {
     if (event) {
       event.stopPropagation();
     }
-    this.actionClicked.emit({ action, item });
+
+    // Handle delete actions with modal
+    if (action === 'delete') {
+      this.showDeleteConfirmation(item);
+    } else {
+      this.actionClicked.emit({ action, item });
+    }
   }
 
   onAdd(): void {
@@ -529,11 +547,35 @@ export class DataTableComponent implements OnInit, OnChanges {
       case 'check':
         return this.CheckIcon;
       case 'x':
-        return this.XIcon;
-      case 'printer':
+        return this.XIcon; case 'printer':
         return this.PrinterIcon;
       default:
         return this.EditIcon; // Default fallback
     }
   }
-} 
+
+  showDeleteConfirmation(item: any): void {
+    this.pendingDeleteItem = item;
+    this.deleteModalTitle = 'Confirm Deletion';
+
+    // Try to get a meaningful name for the item
+    const itemName = item.name || item.title || item.first_name || item.order_number || 'this item';
+    this.deleteModalMessage = `Are you sure you want to delete "${itemName}"? This action cannot be undone.`;
+
+    this.showDeleteModal = true;
+  }
+
+  onDeleteConfirmed(): void {
+    if (this.pendingDeleteItem) {
+      this.actionClicked.emit({ action: 'delete', item: this.pendingDeleteItem });
+      this.onDeleteCancelled(); // Reset state
+    }
+  }
+
+  onDeleteCancelled(): void {
+    this.showDeleteModal = false;
+    this.pendingDeleteItem = null;
+    this.deleteModalTitle = '';
+    this.deleteModalMessage = '';
+  }
+}

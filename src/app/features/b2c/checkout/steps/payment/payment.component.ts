@@ -328,21 +328,6 @@ export class PaymentComponent {
 
     // Get cart items from localStorage (or from cart service)
     const cartItems = JSON.parse(localStorage.getItem('cart') || '[]');
-
-    if (cartItems.length === 0) {
-      // For testing purposes, create a dummy cart item with a valid UUID
-      console.warn('Cart is empty, creating test order');
-      const testCartItems = [{
-        id: '00000000-0000-0000-0000-000000000001', // Valid UUID for testing
-        name: 'Test Solar Panel',
-        price: 299.99,
-        quantity: 1,
-        sku: 'TEST-001',
-        image: '/assets/images/placeholder.jpg'
-      }];
-      return this.processCartItems(currentUser, testCartItems);
-    }
-
     return this.processCartItems(currentUser, cartItems);
   }
 

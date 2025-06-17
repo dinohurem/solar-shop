@@ -5,11 +5,12 @@ import { Title } from '@angular/platform-browser';
 import { Observable, from, map, catchError, of, BehaviorSubject } from 'rxjs';
 import { SupabaseService } from '../../../services/supabase.service';
 import { DataTableComponent, TableConfig, TableColumn, TableAction } from '../shared/data-table/data-table.component';
+import { SuccessModalComponent } from '../../../shared/components/modals/success-modal/success-modal.component';
 
 @Component({
     selector: 'app-admin-products',
     standalone: true,
-    imports: [CommonModule, DataTableComponent],
+    imports: [CommonModule, DataTableComponent, SuccessModalComponent],
     template: `
     <div class="w-full max-w-full overflow-hidden">
       <div class="space-y-4 sm:space-y-6 p-4 sm:p-6">
@@ -30,12 +31,19 @@ import { DataTableComponent, TableConfig, TableColumn, TableAction } from '../sh
         [loading]="(loading$ | async) || false"
         (actionClicked)="onTableAction($event)"
         (addClicked)="onAddProduct()"
-        (rowClicked)="onRowClick($event)"
-        (csvImported)="onCsvImported($event)">
+        (rowClicked)="onRowClick($event)"        (csvImported)="onCsvImported($event)">
       </app-data-table>
         </div>
       </div>
     </div>
+
+    <!-- Success Modal -->
+    <app-success-modal
+      [isOpen]="showSuccessModal"
+      [title]="successModalTitle"
+      [message]="successModalMessage"
+      (closed)="onSuccessModalClosed()"
+    ></app-success-modal>
   `,
     styles: [`
     :host {
@@ -49,10 +57,13 @@ export class AdminProductsComponent implements OnInit {
     private title = inject(Title);
 
     private productsSubject = new BehaviorSubject<any[]>([]);
-    private loadingSubject = new BehaviorSubject<boolean>(true);
-
-    products$ = this.productsSubject.asObservable();
+    private loadingSubject = new BehaviorSubject<boolean>(true); products$ = this.productsSubject.asObservable();
     loading$ = this.loadingSubject.asObservable();
+
+    // Modal properties
+    showSuccessModal = false;
+    successModalTitle = '';
+    successModalMessage = '';
 
     tableConfig: TableConfig = {
         columns: [
@@ -256,20 +267,26 @@ export class AdminProductsComponent implements OnInit {
         } finally {
             this.loadingSubject.next(false);
         }
-    }
-
-    private async deleteProduct(product: any): Promise<void> {
-        if (!confirm(`Are you sure you want to delete "${product.name}"?`)) {
-            return;
-        }
-
+    } private async deleteProduct(product: any): Promise<void> {
         try {
             await this.supabaseService.deleteRecord('products', product.id);
-            alert('Product deleted successfully');
+            this.showSuccess('Success', 'Product deleted successfully');
             this.loadProducts();
         } catch (error) {
             console.error('Error deleting product:', error);
-            alert('Error deleting product');
+            this.showSuccess('Error', 'Error deleting product');
         }
     }
-} 
+
+    private showSuccess(title: string, message: string): void {
+        this.successModalTitle = title;
+        this.successModalMessage = message;
+        this.showSuccessModal = true;
+    }
+
+    onSuccessModalClosed(): void {
+        this.showSuccessModal = false;
+        this.successModalTitle = '';
+        this.successModalMessage = '';
+    }
+}

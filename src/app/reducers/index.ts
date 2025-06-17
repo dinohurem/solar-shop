@@ -29,6 +29,8 @@ import { wishlistReducer } from '../features/b2c/wishlist/store/wishlist.reducer
 import { WishlistState } from '../shared/models/wishlist.model';
 import { companiesReducer } from '../features/admin/companies/store/companies.reducer';
 import { CompaniesState } from '../features/admin/companies/store/companies.state';
+import { ordersReducer } from '../features/admin/orders/store/orders.reducer';
+import { OrdersState } from '../features/admin/orders/store/orders.state';
 
 export interface State {
   auth: AuthState;
@@ -44,6 +46,7 @@ export interface State {
   cart: CartState;
   wishlist: WishlistState;
   companies: CompaniesState;
+  adminOrders: OrdersState;
 }
 
 export const reducers: ActionReducerMap<State> = {
@@ -60,6 +63,7 @@ export const reducers: ActionReducerMap<State> = {
   cart: cartReducer,
   wishlist: wishlistReducer,
   companies: companiesReducer,
+  adminOrders: ordersReducer,
 };
 
 export const metaReducers: MetaReducer<State>[] = isDevMode() ? [] : [];
