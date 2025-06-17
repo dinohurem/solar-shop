@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Router, RouterModule } from '@angular/router';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { CompanyRegistrationData } from '../../../../shared/models/company.model';
+import { PartnerRegistrationService } from '../services/partner-registration.service';
 
 @Component({
     selector: 'app-partners-register',
@@ -349,7 +350,8 @@ export class PartnersRegisterComponent {
 
     constructor(
         private fb: FormBuilder,
-        public router: Router
+        public router: Router,
+        private registrationService: PartnerRegistrationService
     ) {
         this.registrationForm = this.fb.group({
             // Personal Information
@@ -432,15 +434,17 @@ export class PartnersRegisterComponent {
 
             const formData = this.registrationForm.value as CompanyRegistrationData;
 
-            // Simulate API call
-            setTimeout(() => {
-                console.log('Partner registration data:', formData);
+            this.registrationService.registerPartner(formData).then(result => {
                 this.isSubmitting = false;
-                this.currentStep = 3;
-            }, 2000);
+                if (!result.error) {
+                    this.currentStep = 3;
+                } else {
+                    console.error('Partner registration failed:', result.error);
+                }
+            });
         } else {
             // Mark all fields as touched to show validation errors
             this.registrationForm.markAllAsTouched();
         }
     }
-} 
+}

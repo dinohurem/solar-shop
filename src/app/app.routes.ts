@@ -26,6 +26,7 @@ import { PartnersOffersComponent } from './features/b2b/partners/offers/partners
 import { PartnersOfferDetailsComponent } from './features/b2b/partners/offers/partners-offer-details.component';
 import { PartnersContactComponent } from './features/b2b/partners/contact/partners-contact.component';
 import { B2bLayoutComponent } from './features/b2b/shared/layout/b2b-layout.component';
+import { CompanyApprovedGuard } from './guards/company-approved.guard';
 import { CheckoutComponent } from './features/b2c/checkout/checkout.component';
 import { OrderReviewComponent } from './features/b2c/checkout/steps/order-review/order-review.component';
 import { ShippingComponent } from './features/b2c/checkout/steps/shipping/shipping.component';
@@ -108,9 +109,9 @@ export const routes: Routes = [
         children: [
             { path: '', component: PartnersComponent },
             { path: 'register', component: PartnersRegisterComponent },
-            { path: 'products', component: PartnersProductsComponent },
-            { path: 'offers', component: PartnersOffersComponent },
-            { path: 'offers/:id', component: PartnersOfferDetailsComponent },
+            { path: 'products', component: PartnersProductsComponent, canActivate: [CompanyApprovedGuard] },
+            { path: 'offers', component: PartnersOffersComponent, canActivate: [CompanyApprovedGuard] },
+            { path: 'offers/:id', component: PartnersOfferDetailsComponent, canActivate: [CompanyApprovedGuard] },
             { path: 'contact', component: PartnersContactComponent },
         ]
     },
