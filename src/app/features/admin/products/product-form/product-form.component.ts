@@ -41,100 +41,146 @@ interface Product {
       [backRoute]="'/admin/products'"
       (formSubmit)="onSubmit($event)"
     >
-      <div [formGroup]="productForm">
+      <div [formGroup]="productForm" class="space-y-8">
         <!-- Product Basic Info -->
-        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-          <div>
-            <label for="name" class="block text-sm font-medium text-gray-700">Product Name *</label>
-            <input
-              type="text"
-              id="name"
-              formControlName="name"
-              (input)="onNameChange($event)"
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-solar-500 focus:border-solar-500 sm:text-sm"
-              placeholder="Enter product name"
-            >
-            <div *ngIf="productForm.get('name')?.invalid && productForm.get('name')?.touched" class="mt-1 text-sm text-red-600">
-              Product name is required
+        <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+            </svg>
+            Basic Information
+          </h3>
+          
+          <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div class="relative">
+              <input
+                type="text"
+                id="name"
+                formControlName="name"
+                (input)="onNameChange($event)"
+                class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
+                placeholder="Product Name"
+              >
+              <label for="name" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+                Product Name *
+              </label>
+              <div *ngIf="productForm.get('name')?.invalid && productForm.get('name')?.touched" class="mt-2 text-sm text-red-600 flex items-center">
+                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+                Product name is required
+              </div>
+            </div>
+
+            <div class="relative">
+              <input
+                type="text"
+                id="slug"
+                formControlName="slug"
+                class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
+                placeholder="URL Slug"
+              >
+              <label for="slug" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+                URL Slug *
+              </label>
+              <div *ngIf="productForm.get('slug')?.invalid && productForm.get('slug')?.touched" class="mt-2 text-sm text-red-600 flex items-center">
+                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+                URL slug is required
+              </div>
             </div>
           </div>
 
-          <div>
-            <label for="slug" class="block text-sm font-medium text-gray-700">URL Slug *</label>
-            <input
-              type="text"
-              id="slug"
-              formControlName="slug"
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-solar-500 focus:border-solar-500 sm:text-sm"
-              placeholder="product-url-slug"
-            >
-            <div *ngIf="productForm.get('slug')?.invalid && productForm.get('slug')?.touched" class="mt-1 text-sm text-red-600">
-              URL slug is required
+          <div class="mt-6">
+            <div class="relative">
+              <textarea
+                id="description"
+                formControlName="description"
+                rows="4"
+                class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent resize-none"
+                placeholder="Product Description"
+              ></textarea>
+              <label for="description" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+                Description
+              </label>
             </div>
           </div>
         </div>
 
-        <!-- SKU, Brand and Category -->
-        <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
-          <div>
-            <label for="sku" class="block text-sm font-medium text-gray-700">SKU *</label>
-            <input
-              type="text"
-              id="sku"
-              formControlName="sku"
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-solar-500 focus:border-solar-500 sm:text-sm"
-              placeholder="PROD-001"
-            >
-            <div *ngIf="productForm.get('sku')?.invalid && productForm.get('sku')?.touched" class="mt-1 text-sm text-red-600">
-              SKU is required
+        <!-- Product Details -->
+        <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+            </svg>
+            Product Details
+          </h3>
+          
+          <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            <div class="relative">
+              <input
+                type="text"
+                id="sku"
+                formControlName="sku"
+                class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
+                placeholder="SKU"
+              >
+              <label for="sku" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+                SKU *
+              </label>
+              <div *ngIf="productForm.get('sku')?.invalid && productForm.get('sku')?.touched" class="mt-2 text-sm text-red-600 flex items-center">
+                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+                SKU is required
+              </div>
+            </div>
+
+            <div class="relative">
+              <input
+                type="text"
+                id="brand"
+                formControlName="brand"
+                class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
+                placeholder="Brand"
+              >
+              <label for="brand" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+                Brand
+              </label>
+            </div>
+
+            <div class="relative">
+              <select
+                id="category_id"
+                formControlName="category_id"
+                class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 bg-white"
+              >
+                <option value="">Select a category</option>
+                <option *ngFor="let category of categories" [value]="category.id">
+                  {{ category.name }}
+                </option>
+              </select>
+              <label class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700">
+                Category
+              </label>
             </div>
           </div>
-
-          <div>
-            <label for="brand" class="block text-sm font-medium text-gray-700">Brand</label>
-            <input
-              type="text"
-              id="brand"
-              formControlName="brand"
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-solar-500 focus:border-solar-500 sm:text-sm"
-              placeholder="Enter brand name"
-            >
-          </div>
-
-          <div>
-            <label for="category_id" class="block text-sm font-medium text-gray-700">Category</label>
-            <select
-              id="category_id"
-              formControlName="category_id"
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-solar-500 focus:border-solar-500 sm:text-sm"
-            >
-              <option value="">Select a category</option>
-              <option *ngFor="let category of categories" [value]="category.id">
-                {{ category.name }}
-              </option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Description -->
-        <div>
-          <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
-          <textarea
-            id="description"
-            formControlName="description"
-            rows="4"
-            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-solar-500 focus:border-solar-500 sm:text-sm"
-            placeholder="Enter product description"
-          ></textarea>
         </div>
 
         <!-- Pricing -->
-        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-          <div>
-            <label for="price" class="block text-sm font-medium text-gray-700">Price *</label>
-            <div class="mt-1 relative rounded-md shadow-sm">
-              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <span class="text-gray-500 sm:text-sm">€</span>
+        <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
+            </svg>
+            Pricing
+          </h3>
+          
+          <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <span class="text-gray-500 text-lg">€</span>
               </div>
               <input
                 type="number"
@@ -142,20 +188,23 @@ interface Product {
                 formControlName="price"
                 step="0.01"
                 min="0"
-                class="block w-full pl-7 border-gray-300 rounded-md shadow-sm focus:ring-solar-500 focus:border-solar-500 sm:text-sm"
+                class="peer w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
                 placeholder="0.00"
               >
+              <label for="price" class="absolute left-10 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+                Price *
+              </label>
+              <div *ngIf="productForm.get('price')?.invalid && productForm.get('price')?.touched" class="mt-2 text-sm text-red-600 flex items-center">
+                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+                Price is required and must be greater than 0
+              </div>
             </div>
-            <div *ngIf="productForm.get('price')?.invalid && productForm.get('price')?.touched" class="mt-1 text-sm text-red-600">
-              Price is required and must be greater than 0
-            </div>
-          </div>
 
-          <div>
-            <label for="compare_at_price" class="block text-sm font-medium text-gray-700">Compare at Price</label>
-            <div class="mt-1 relative rounded-md shadow-sm">
-              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <span class="text-gray-500 sm:text-sm">€</span>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <span class="text-gray-500 text-lg">€</span>
               </div>
               <input
                 type="number"
@@ -163,91 +212,159 @@ interface Product {
                 formControlName="compare_at_price"
                 step="0.01"
                 min="0"
-                class="block w-full pl-7 border-gray-300 rounded-md shadow-sm focus:ring-solar-500 focus:border-solar-500 sm:text-sm"
+                class="peer w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
                 placeholder="0.00"
               >
+              <label for="compare_at_price" class="absolute left-10 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+                Compare at Price
+              </label>
             </div>
           </div>
         </div>
 
-        <!-- Stock and Weight -->
-        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-          <div>
-            <label for="stock_quantity" class="block text-sm font-medium text-gray-700">Stock Quantity *</label>
-            <input
-              type="number"
-              id="stock_quantity"
-              formControlName="stock_quantity"
-              min="0"
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-solar-500 focus:border-solar-500 sm:text-sm"
-              placeholder="0"
-            >
-            <div *ngIf="productForm.get('stock_quantity')?.invalid && productForm.get('stock_quantity')?.touched" class="mt-1 text-sm text-red-600">
-              Stock quantity is required
+        <!-- Inventory -->
+        <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+            </svg>
+            Inventory & Shipping
+          </h3>
+          
+          <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div class="relative">
+              <input
+                type="number"
+                id="stock_quantity"
+                formControlName="stock_quantity"
+                min="0"
+                class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
+                placeholder="0"
+              >
+              <label for="stock_quantity" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+                Stock Quantity *
+              </label>
+              <div *ngIf="productForm.get('stock_quantity')?.invalid && productForm.get('stock_quantity')?.touched" class="mt-2 text-sm text-red-600 flex items-center">
+                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+                Stock quantity is required
+              </div>
             </div>
-          </div>
 
-          <div>
-            <label for="weight" class="block text-sm font-medium text-gray-700">Weight (kg)</label>
-            <input
-              type="number"
-              id="weight"
-              formControlName="weight"
-              step="0.1"
-              min="0"
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-solar-500 focus:border-solar-500 sm:text-sm"
-              placeholder="0.0"
-            >
+            <div class="relative">
+              <input
+                type="number"
+                id="weight"
+                formControlName="weight"
+                step="0.1"
+                min="0"
+                class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
+                placeholder="0.0"
+              >
+              <label for="weight" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+                Weight (kg)
+              </label>
+            </div>
           </div>
         </div>
 
         <!-- Product Status -->
-        <div class="space-y-4">
-          <h4 class="text-lg font-medium text-gray-900">Product Status</h4>
+        <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Product Status
+          </h3>
+          
           <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div class="flex items-center">
+            <label class="relative flex items-center p-4 rounded-lg border-2 border-gray-200 cursor-pointer hover:border-blue-300 transition-colors duration-200">
               <input
                 id="is_active"
                 type="checkbox"
                 formControlName="is_active"
-                class="focus:ring-solar-500 h-4 w-4 text-solar-600 border-gray-300 rounded"
+                class="sr-only"
               >
-              <label for="is_active" class="ml-2 text-sm font-medium text-gray-700">Active</label>
-            </div>
+              <span class="flex items-center">
+                <span class="flex-shrink-0 w-5 h-5 border-2 border-gray-300 rounded mr-3 transition-colors duration-200" 
+                      [class.bg-blue-600]="productForm.get('is_active')?.value"
+                      [class.border-blue-600]="productForm.get('is_active')?.value">
+                  <svg *ngIf="productForm.get('is_active')?.value" class="w-3 h-3 text-white mx-auto mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                  </svg>
+                </span>
+                <span class="text-sm font-medium text-gray-700">Active</span>
+              </span>
+            </label>
 
-            <div class="flex items-center">
+            <label class="relative flex items-center p-4 rounded-lg border-2 border-gray-200 cursor-pointer hover:border-blue-300 transition-colors duration-200">
               <input
                 id="is_featured"
                 type="checkbox"
                 formControlName="is_featured"
-                class="focus:ring-solar-500 h-4 w-4 text-solar-600 border-gray-300 rounded"
+                class="sr-only"
               >
-              <label for="is_featured" class="ml-2 text-sm font-medium text-gray-700">Featured</label>
-            </div>
+              <span class="flex items-center">
+                <span class="flex-shrink-0 w-5 h-5 border-2 border-gray-300 rounded mr-3 transition-colors duration-200" 
+                      [class.bg-blue-600]="productForm.get('is_featured')?.value"
+                      [class.border-blue-600]="productForm.get('is_featured')?.value">
+                  <svg *ngIf="productForm.get('is_featured')?.value" class="w-3 h-3 text-white mx-auto mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                  </svg>
+                </span>
+                <span class="text-sm font-medium text-gray-700">Featured</span>
+              </span>
+            </label>
 
-            <div class="flex items-center">
+            <label class="relative flex items-center p-4 rounded-lg border-2 border-gray-200 cursor-pointer hover:border-blue-300 transition-colors duration-200">
               <input
                 id="is_on_sale"
                 type="checkbox"
                 formControlName="is_on_sale"
-                class="focus:ring-solar-500 h-4 w-4 text-solar-600 border-gray-300 rounded"
+                class="sr-only"
               >
-              <label for="is_on_sale" class="ml-2 text-sm font-medium text-gray-700">On Sale</label>
-            </div>
+              <span class="flex items-center">
+                <span class="flex-shrink-0 w-5 h-5 border-2 border-gray-300 rounded mr-3 transition-colors duration-200" 
+                      [class.bg-blue-600]="productForm.get('is_on_sale')?.value"
+                      [class.border-blue-600]="productForm.get('is_on_sale')?.value">
+                  <svg *ngIf="productForm.get('is_on_sale')?.value" class="w-3 h-3 text-white mx-auto mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                  </svg>
+                </span>
+                <span class="text-sm font-medium text-gray-700">On Sale</span>
+              </span>
+            </label>
           </div>
         </div>
 
         <!-- Images -->
-        <div>
-          <label for="images" class="block text-sm font-medium text-gray-700">Product Images</label>
-          <textarea
-            id="images"
-            formControlName="images"
-            rows="3"
-            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-solar-500 focus:border-solar-500 sm:text-sm"
-            placeholder="Enter image URLs, one per line"
-          ></textarea>
-          <p class="mt-2 text-sm text-gray-500">Enter one image URL per line</p>
+        <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+            Product Images
+          </h3>
+          
+          <div class="relative">
+            <textarea
+              id="images"
+              formControlName="images"
+              rows="3"
+              class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent resize-none"
+              placeholder="Image URLs"
+            ></textarea>
+            <label for="images" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+              Product Images
+            </label>
+            <p class="mt-3 text-sm text-gray-500 flex items-center">
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              Enter one image URL per line
+            </p>
+          </div>
         </div>
       </div>
     </app-admin-form>

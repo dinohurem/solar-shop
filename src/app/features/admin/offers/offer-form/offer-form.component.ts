@@ -20,183 +20,287 @@ import { SupabaseService } from '../../../../services/supabase.service';
       [backRoute]="'/admin/offers'"
       (formSubmit)="onSubmit($event)"
     >
-      <div [formGroup]="offerForm">
+      <div [formGroup]="offerForm" class="space-y-8">
         <!-- Basic Info -->
-        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-          <div>
-            <label for="title" class="block text-sm font-medium text-gray-700">Offer Title *</label>
-            <input
-              type="text"
-              id="title"
-              formControlName="title"
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-solar-500 focus:border-solar-500 sm:text-sm"
-              placeholder="Enter offer title"
-            >
-            <div *ngIf="offerForm.get('title')?.invalid && offerForm.get('title')?.touched" class="mt-1 text-sm text-red-600">
-              Title is required
+        <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+            </svg>
+            Basic Information
+          </h3>
+          
+          <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div class="relative">
+              <input
+                type="text"
+                id="title"
+                formControlName="title"
+                class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
+                placeholder="Offer Title"
+              >
+              <label for="title" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+                Offer Title *
+              </label>
+              <div *ngIf="offerForm.get('title')?.invalid && offerForm.get('title')?.touched" class="mt-2 text-sm text-red-600 flex items-center">
+                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+                Title is required
+              </div>
+            </div>
+
+            <div class="relative">
+              <select
+                id="type"
+                formControlName="type"
+                class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 bg-white"
+              >
+                <option value="">Select offer type</option>
+                <option value="percentage">Percentage Discount</option>
+                <option value="fixed">Fixed Amount</option>
+                <option value="bogo">Buy One Get One</option>
+                <option value="bundle">Bundle Deal</option>
+              </select>
+              <label class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700">
+                Offer Type *
+              </label>
+              <div *ngIf="offerForm.get('type')?.invalid && offerForm.get('type')?.touched" class="mt-2 text-sm text-red-600 flex items-center">
+                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+                Offer type is required
+              </div>
             </div>
           </div>
 
-          <div>
-            <label for="type" class="block text-sm font-medium text-gray-700">Offer Type *</label>
-            <select
-              id="type"
-              formControlName="type"
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-solar-500 focus:border-solar-500 sm:text-sm"
-            >
-              <option value="">Select offer type</option>
-              <option value="percentage">Percentage Discount</option>
-              <option value="fixed">Fixed Amount</option>
-              <option value="bogo">Buy One Get One</option>
-              <option value="bundle">Bundle Deal</option>
-            </select>
-            <div *ngIf="offerForm.get('type')?.invalid && offerForm.get('type')?.touched" class="mt-1 text-sm text-red-600">
-              Offer type is required
+          <div class="mt-6">
+            <div class="relative">
+              <textarea
+                id="description"
+                formControlName="description"
+                rows="3"
+                class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent resize-none"
+                placeholder="Offer Description"
+              ></textarea>
+              <label for="description" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+                Description
+              </label>
             </div>
           </div>
-        </div>
-
-        <!-- Description -->
-        <div>
-          <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
-          <textarea
-            id="description"
-            formControlName="description"
-            rows="3"
-            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-solar-500 focus:border-solar-500 sm:text-sm"
-            placeholder="Enter offer description"
-          ></textarea>
         </div>
 
         <!-- Discount Details -->
-        <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
-          <div>
-            <label for="discount_type" class="block text-sm font-medium text-gray-700">Discount Type *</label>
-            <select
-              id="discount_type"
-              formControlName="discount_type"
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-solar-500 focus:border-solar-500 sm:text-sm"
-            >
-              <option value="">Select discount type</option>
-              <option value="percentage">Percentage (%)</option>
-              <option value="amount">Fixed Amount (€)</option>
-            </select>
-            <div *ngIf="offerForm.get('discount_type')?.invalid && offerForm.get('discount_type')?.touched" class="mt-1 text-sm text-red-600">
-              Discount type is required
+        <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
+            </svg>
+            Discount Configuration
+          </h3>
+          
+          <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            <div class="relative">
+              <select
+                id="discount_type"
+                formControlName="discount_type"
+                class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 bg-white"
+              >
+                <option value="">Select discount type</option>
+                <option value="percentage">Percentage (%)</option>
+                <option value="amount">Fixed Amount (€)</option>
+              </select>
+              <label class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700">
+                Discount Type *
+              </label>
+              <div *ngIf="offerForm.get('discount_type')?.invalid && offerForm.get('discount_type')?.touched" class="mt-2 text-sm text-red-600 flex items-center">
+                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+                Discount type is required
+              </div>
             </div>
-          </div>
 
-          <div>
-            <label for="discount_value" class="block text-sm font-medium text-gray-700">Discount Value *</label>
-            <input
-              type="number"
-              id="discount_value"
-              formControlName="discount_value"
-              step="0.01"
-              min="0"
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-solar-500 focus:border-solar-500 sm:text-sm"
-              [placeholder]="offerForm.get('discount_type')?.value === 'percentage' ? '10' : '50.00'"
-            >
-            <div *ngIf="offerForm.get('discount_value')?.invalid && offerForm.get('discount_value')?.touched" class="mt-1 text-sm text-red-600">
-              Discount value is required
+            <div class="relative">
+              <input
+                type="number"
+                id="discount_value"
+                formControlName="discount_value"
+                step="0.01"
+                min="0"
+                class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
+                [placeholder]="offerForm.get('discount_type')?.value === 'percentage' ? '10' : '50.00'"
+              >
+              <label for="discount_value" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+                Discount Value *
+              </label>
+              <div *ngIf="offerForm.get('discount_value')?.invalid && offerForm.get('discount_value')?.touched" class="mt-2 text-sm text-red-600 flex items-center">
+                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+                Discount value is required
+              </div>
             </div>
-          </div>
 
-          <div>
-            <label for="minimum_purchase" class="block text-sm font-medium text-gray-700">Minimum Purchase (€)</label>
-            <input
-              type="number"
-              id="minimum_purchase"
-              formControlName="minimum_purchase"
-              step="0.01"
-              min="0"
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-solar-500 focus:border-solar-500 sm:text-sm"
-              placeholder="0.00"
-            >
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <span class="text-gray-500 text-lg">€</span>
+              </div>
+              <input
+                type="number"
+                id="minimum_purchase"
+                formControlName="minimum_purchase"
+                step="0.01"
+                min="0"
+                class="peer w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
+                placeholder="0.00"
+              >
+              <label for="minimum_purchase" class="absolute left-10 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+                Minimum Purchase (€)
+              </label>
+            </div>
           </div>
         </div>
 
         <!-- Date Range -->
-        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-          <div>
-            <label for="start_date" class="block text-sm font-medium text-gray-700">Start Date *</label>
-            <input
-              type="datetime-local"
-              id="start_date"
-              formControlName="start_date"
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-solar-500 focus:border-solar-500 sm:text-sm"
-            >
-            <div *ngIf="offerForm.get('start_date')?.invalid && offerForm.get('start_date')?.touched" class="mt-1 text-sm text-red-600">
-              Start date is required
+        <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+            Validity Period
+          </h3>
+          
+          <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div class="relative">
+              <input
+                type="datetime-local"
+                id="start_date"
+                formControlName="start_date"
+                class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200"
+              >
+              <label for="start_date" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700">
+                Start Date *
+              </label>
+              <div *ngIf="offerForm.get('start_date')?.invalid && offerForm.get('start_date')?.touched" class="mt-2 text-sm text-red-600 flex items-center">
+                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+                Start date is required
+              </div>
             </div>
-          </div>
 
-          <div>
-            <label for="end_date" class="block text-sm font-medium text-gray-700">End Date</label>
-            <input
-              type="datetime-local"
-              id="end_date"
-              formControlName="end_date"
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-solar-500 focus:border-solar-500 sm:text-sm"
-            >
+            <div class="relative">
+              <input
+                type="datetime-local"
+                id="end_date"
+                formControlName="end_date"
+                class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200"
+              >
+              <label for="end_date" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700">
+                End Date
+              </label>
+            </div>
           </div>
         </div>
 
         <!-- Usage Limits -->
-        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-          <div>
-            <label for="usage_limit" class="block text-sm font-medium text-gray-700">Usage Limit</label>
-            <input
-              type="number"
-              id="usage_limit"
-              formControlName="usage_limit"
-              min="1"
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-solar-500 focus:border-solar-500 sm:text-sm"
-              placeholder="Unlimited"
-            >
-            <p class="mt-1 text-sm text-gray-500">Leave empty for unlimited usage</p>
-          </div>
+        <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+            Usage Configuration
+          </h3>
+          
+          <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div class="relative">
+              <input
+                type="number"
+                id="usage_limit"
+                formControlName="usage_limit"
+                min="1"
+                class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
+                placeholder="Unlimited"
+              >
+              <label for="usage_limit" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+                Usage Limit
+              </label>
+              <p class="mt-2 text-sm text-gray-500 flex items-center">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Leave empty for unlimited usage
+              </p>
+            </div>
 
-          <div>
-            <label for="priority" class="block text-sm font-medium text-gray-700">Priority</label>
-            <input
-              type="number"
-              id="priority"
-              formControlName="priority"
-              min="0"
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-solar-500 focus:border-solar-500 sm:text-sm"
-              placeholder="0"
-            >
-            <p class="mt-1 text-sm text-gray-500">Higher numbers = higher priority</p>
+            <div class="relative">
+              <input
+                type="number"
+                id="priority"
+                formControlName="priority"
+                min="0"
+                class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
+                placeholder="0"
+              >
+              <label for="priority" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+                Priority
+              </label>
+              <p class="mt-2 text-sm text-gray-500 flex items-center">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Higher numbers = higher priority
+              </p>
+            </div>
           </div>
         </div>
 
         <!-- Status -->
-        <div class="space-y-4">
-          <h4 class="text-lg font-medium text-gray-900">Offer Status</h4>
-          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <label for="status" class="block text-sm font-medium text-gray-700">Status *</label>
+        <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Offer Status
+          </h3>
+          
+          <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div class="relative">
               <select
                 id="status"
                 formControlName="status"
-                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-solar-500 focus:border-solar-500 sm:text-sm"
+                class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 bg-white"
               >
                 <option value="draft">Draft</option>
                 <option value="active">Active</option>
                 <option value="paused">Paused</option>
                 <option value="expired">Expired</option>
               </select>
+              <label class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700">
+                Status *
+              </label>
             </div>
 
-            <div class="flex items-center pt-6">
-              <input
-                id="is_active"
-                type="checkbox"
-                formControlName="is_active"
-                class="focus:ring-solar-500 h-4 w-4 text-solar-600 border-gray-300 rounded"
-              >
-              <label for="is_active" class="ml-2 text-sm font-medium text-gray-700">Active</label>
+            <div class="flex items-center">
+              <label class="relative flex items-center p-4 rounded-lg border-2 border-gray-200 cursor-pointer hover:border-blue-300 transition-colors duration-200 w-full">
+                <input
+                  id="is_active"
+                  type="checkbox"
+                  formControlName="is_active"
+                  class="sr-only"
+                >
+                <span class="flex items-center">
+                  <span class="flex-shrink-0 w-5 h-5 border-2 border-gray-300 rounded mr-3 transition-colors duration-200" 
+                        [class.bg-blue-600]="offerForm.get('is_active')?.value"
+                        [class.border-blue-600]="offerForm.get('is_active')?.value">
+                    <svg *ngIf="offerForm.get('is_active')?.value" class="w-3 h-3 text-white mx-auto mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                    </svg>
+                  </span>
+                  <span class="text-sm font-medium text-gray-700">Active</span>
+                </span>
+              </label>
             </div>
           </div>
         </div>

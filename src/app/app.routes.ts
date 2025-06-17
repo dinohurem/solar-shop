@@ -42,6 +42,7 @@ import { AdminOrdersComponent } from './features/admin/orders/admin-orders.compo
 import { AdminReviewsComponent } from './features/admin/reviews/admin-reviews.component';
 import { AdminCompanyPricingComponent } from './features/admin/company-pricing/admin-company-pricing.component';
 import { CompanyPricingFormComponent } from './features/admin/company-pricing/company-pricing-form/company-pricing-form.component';
+import { CompanyPricingDetailsComponent } from './features/admin/company-pricing/company-pricing-details/company-pricing-details.component';
 import { AdminCompaniesComponent } from './features/admin/companies/admin-companies.component';
 import { CategoryFormComponent } from './features/admin/categories/category-form/category-form.component';
 import { ProductFormComponent } from './features/admin/products/product-form/product-form.component';
@@ -50,6 +51,9 @@ import { BlogFormComponent } from './features/admin/blog/blog-form/blog-form.com
 import { UserFormComponent } from './features/admin/users/user-form/user-form.component';
 import { OrderFormComponent } from './features/admin/orders/order-form/order-form.component';
 import { OrderDetailsComponent } from './features/b2c/order-details/order-details.component';
+// Import admin detail components
+import { OfferDetailsComponent as AdminOfferDetailsComponent } from './features/admin/offers/offer-details/offer-details.component';
+import { OrderDetailsComponent as AdminOrderDetailsComponent } from './features/admin/orders/order-details/order-details.component';
 
 export const routes: Routes = [
     // Authentication routes (no layout) - no guards needed, Supabase handles auth state
@@ -137,6 +141,7 @@ export const routes: Routes = [
             { path: 'offers', component: AdminOffersComponent },
             { path: 'offers/create', component: OfferFormComponent },
             { path: 'offers/edit/:id', component: OfferFormComponent },
+            { path: 'offers/details/:id', component: AdminOfferDetailsComponent },
 
             // Users
             { path: 'users', component: AdminUsersComponent },
@@ -147,11 +152,13 @@ export const routes: Routes = [
             { path: 'orders', component: AdminOrdersComponent },
             { path: 'orders/create', component: OrderFormComponent },
             { path: 'orders/edit/:id', component: OrderFormComponent },
+            { path: 'orders/details/:id', component: AdminOrderDetailsComponent },
 
             // Company Pricing
             { path: 'company-pricing', component: AdminCompanyPricingComponent },
             { path: 'company-pricing/create', component: CompanyPricingFormComponent },
             { path: 'company-pricing/edit/:id', component: CompanyPricingFormComponent },
+            { path: 'company-pricing/company/:companyId', component: CompanyPricingDetailsComponent },
 
             // Companies
             { path: 'companies', component: AdminCompaniesComponent },

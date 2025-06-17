@@ -20,184 +20,286 @@ import { SupabaseService } from '../../../../services/supabase.service';
       [backRoute]="'/admin/blog'"
       (formSubmit)="onSubmit($event)"
     >
-      <div [formGroup]="blogForm">
+      <div [formGroup]="blogForm" class="space-y-8">
         <!-- Basic Info -->
-        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-          <div>
-            <label for="title" class="block text-sm font-medium text-gray-700">Title *</label>
-            <input
-              type="text"
-              id="title"
-              formControlName="title"
-              (input)="onTitleChange($event)"
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-solar-500 focus:border-solar-500 sm:text-sm"
-              placeholder="Enter blog post title"
-            >
-            <div *ngIf="blogForm.get('title')?.invalid && blogForm.get('title')?.touched" class="mt-1 text-sm text-red-600">
-              Title is required
+        <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+            </svg>
+            Basic Information
+          </h3>
+          
+          <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div class="relative">
+              <input
+                type="text"
+                id="title"
+                formControlName="title"
+                (input)="onTitleChange($event)"
+                class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
+                placeholder="Blog Post Title"
+              >
+              <label for="title" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+                Title *
+              </label>
+              <div *ngIf="blogForm.get('title')?.invalid && blogForm.get('title')?.touched" class="mt-2 text-sm text-red-600 flex items-center">
+                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+                Title is required
+              </div>
+            </div>
+
+            <div class="relative">
+              <input
+                type="text"
+                id="slug"
+                formControlName="slug"
+                class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
+                placeholder="URL Slug"
+              >
+              <label for="slug" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+                URL Slug *
+              </label>
+              <div *ngIf="blogForm.get('slug')?.invalid && blogForm.get('slug')?.touched" class="mt-2 text-sm text-red-600 flex items-center">
+                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+                URL slug is required
+              </div>
             </div>
           </div>
 
-          <div>
-            <label for="slug" class="block text-sm font-medium text-gray-700">URL Slug *</label>
-            <input
-              type="text"
-              id="slug"
-              formControlName="slug"
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-solar-500 focus:border-solar-500 sm:text-sm"
-              placeholder="blog-post-url-slug"
-            >
-            <div *ngIf="blogForm.get('slug')?.invalid && blogForm.get('slug')?.touched" class="mt-1 text-sm text-red-600">
-              URL slug is required
+          <div class="mt-6">
+            <div class="relative">
+              <textarea
+                id="excerpt"
+                formControlName="excerpt"
+                rows="3"
+                class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent resize-none"
+                placeholder="Brief excerpt of the blog post"
+              ></textarea>
+              <label for="excerpt" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+                Excerpt *
+              </label>
+              <div *ngIf="blogForm.get('excerpt')?.invalid && blogForm.get('excerpt')?.touched" class="mt-2 text-sm text-red-600 flex items-center">
+                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+                Excerpt is required
+              </div>
             </div>
-          </div>
-        </div>
-
-        <!-- Summary -->
-        <div>
-          <label for="excerpt" class="block text-sm font-medium text-gray-700">Excerpt *</label>
-          <textarea
-            id="excerpt"
-            formControlName="excerpt"
-            rows="3"
-            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-solar-500 focus:border-solar-500 sm:text-sm"
-            placeholder="Enter a brief excerpt of the blog post"
-          ></textarea>
-          <div *ngIf="blogForm.get('excerpt')?.invalid && blogForm.get('excerpt')?.touched" class="mt-1 text-sm text-red-600">
-            Excerpt is required
           </div>
         </div>
 
         <!-- Content -->
-        <div>
-          <label for="content" class="block text-sm font-medium text-gray-700">Content *</label>
-          <textarea
-            id="content"
-            formControlName="content"
-            rows="12"
-            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-solar-500 focus:border-solar-500 sm:text-sm"
-            placeholder="Enter the full blog post content (supports Markdown)"
-          ></textarea>
-          <div *ngIf="blogForm.get('content')?.invalid && blogForm.get('content')?.touched" class="mt-1 text-sm text-red-600">
-            Content is required
-          </div>
-          <p class="mt-2 text-sm text-gray-500">You can use Markdown formatting for rich text</p>
-        </div>
-
-        <!-- Images and Category -->
-        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-          <div>
-            <label for="featured_image_url" class="block text-sm font-medium text-gray-700">Featured Image URL</label>
-            <input
-              type="url"
-              id="featured_image_url"
-              formControlName="featured_image_url"
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-solar-500 focus:border-solar-500 sm:text-sm"
-              placeholder="https://example.com/image.jpg"
-            >
-          </div>
-
-          <div>
-            <label for="category_id" class="block text-sm font-medium text-gray-700">Category</label>
-            <select
-              id="category_id"
-              formControlName="category_id"
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-solar-500 focus:border-solar-500 sm:text-sm"
-            >
-              <option value="">Select a category</option>
-              <option *ngFor="let category of categories" [value]="category.id">
-                {{ category.name }}
-              </option>
-            </select>
+        <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            Content
+          </h3>
+          
+          <div class="relative">
+            <textarea
+              id="content"
+              formControlName="content"
+              rows="12"
+              class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent resize-none"
+              placeholder="Full blog post content (supports Markdown)"
+            ></textarea>
+            <label for="content" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+              Content *
+            </label>
+            <div *ngIf="blogForm.get('content')?.invalid && blogForm.get('content')?.touched" class="mt-2 text-sm text-red-600 flex items-center">
+              <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+              </svg>
+              Content is required
+            </div>
+            <p class="mt-3 text-sm text-gray-500 flex items-center">
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              You can use Markdown formatting for rich text
+            </p>
           </div>
         </div>
 
-        <!-- Reading Time -->
-        <div>
-          <label for="reading_time" class="block text-sm font-medium text-gray-700">Reading Time (minutes)</label>
-          <input
-            type="number"
-            id="reading_time"
-            formControlName="reading_time"
-            min="1"
-            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-solar-500 focus:border-solar-500 sm:text-sm"
-            placeholder="5"
-          >
+        <!-- Media & Organization -->
+        <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+            Media & Organization
+          </h3>
+          
+          <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div class="relative">
+              <input
+                type="url"
+                id="featured_image_url"
+                formControlName="featured_image_url"
+                class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
+                placeholder="https://example.com/image.jpg"
+              >
+              <label for="featured_image_url" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+                Featured Image URL
+              </label>
+            </div>
+
+            <div class="relative">
+              <select
+                id="category_id"
+                formControlName="category_id"
+                class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 bg-white"
+              >
+                <option value="">Select a category</option>
+                <option *ngFor="let category of categories" [value]="category.id">
+                  {{ category.name }}
+                </option>
+              </select>
+              <label class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700">
+                Category
+              </label>
+            </div>
+          </div>
+
+          <div class="mt-6">
+            <div class="relative">
+              <input
+                type="number"
+                id="reading_time"
+                formControlName="reading_time"
+                min="1"
+                class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
+                placeholder="5"
+              >
+              <label for="reading_time" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+                Reading Time (minutes)
+              </label>
+            </div>
+          </div>
+
+          <div class="mt-6">
+            <div class="relative">
+              <input
+                type="text"
+                id="tags"
+                formControlName="tags"
+                class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
+                placeholder="solar, energy, sustainability, environment"
+              >
+              <label for="tags" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+                Tags
+              </label>
+              <p class="mt-3 text-sm text-gray-500 flex items-center">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Separate tags with commas
+              </p>
+            </div>
+          </div>
         </div>
 
         <!-- SEO Meta -->
-        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-          <div>
-            <label for="seo_title" class="block text-sm font-medium text-gray-700">SEO Title</label>
-            <input
-              type="text"
-              id="seo_title"
-              formControlName="seo_title"
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-solar-500 focus:border-solar-500 sm:text-sm"
-              placeholder="SEO optimized title"
-            >
-          </div>
+        <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            SEO Optimization
+          </h3>
+          
+          <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div class="relative">
+              <input
+                type="text"
+                id="seo_title"
+                formControlName="seo_title"
+                class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
+                placeholder="SEO optimized title"
+              >
+              <label for="seo_title" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+                SEO Title
+              </label>
+            </div>
 
-          <div>
-            <label for="seo_description" class="block text-sm font-medium text-gray-700">SEO Description</label>
-            <textarea
-              id="seo_description"
-              formControlName="seo_description"
-              rows="2"
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-solar-500 focus:border-solar-500 sm:text-sm"
-              placeholder="SEO description (160 characters max)"
-            ></textarea>
+            <div class="relative">
+              <textarea
+                id="seo_description"
+                formControlName="seo_description"
+                rows="2"
+                class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent resize-none"
+                placeholder="SEO description (160 characters max)"
+              ></textarea>
+              <label for="seo_description" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+                SEO Description
+              </label>
+            </div>
           </div>
-        </div>
-
-        <!-- Tags -->
-        <div>
-          <label for="tags" class="block text-sm font-medium text-gray-700">Tags</label>
-          <input
-            type="text"
-            id="tags"
-            formControlName="tags"
-            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-solar-500 focus:border-solar-500 sm:text-sm"
-            placeholder="solar, energy, sustainability, environment"
-          >
-          <p class="mt-2 text-sm text-gray-500">Separate tags with commas</p>
         </div>
 
         <!-- Publishing -->
-        <div class="space-y-4">
-          <h4 class="text-lg font-medium text-gray-900">Publishing Settings</h4>
-          <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
-            <div>
-              <label for="status" class="block text-sm font-medium text-gray-700">Status *</label>
+        <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Publishing Settings
+          </h3>
+          
+          <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            <div class="relative">
               <select
                 id="status"
                 formControlName="status"
-                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-solar-500 focus:border-solar-500 sm:text-sm"
+                class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 bg-white"
               >
                 <option value="draft">Draft</option>
                 <option value="published">Published</option>
                 <option value="archived">Archived</option>
               </select>
+              <label class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700">
+                Status *
+              </label>
             </div>
 
-            <div>
-              <label for="published_at" class="block text-sm font-medium text-gray-700">Publish Date</label>
+            <div class="relative">
               <input
                 type="datetime-local"
                 id="published_at"
                 formControlName="published_at"
-                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-solar-500 focus:border-solar-500 sm:text-sm"
+                class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200"
               >
+              <label for="published_at" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700">
+                Publish Date
+              </label>
             </div>
 
-            <div class="flex items-center pt-6">
-              <input
-                id="is_featured"
-                type="checkbox"
-                formControlName="is_featured"
-                class="focus:ring-solar-500 h-4 w-4 text-solar-600 border-gray-300 rounded"
-              >
-              <label for="is_featured" class="ml-2 text-sm font-medium text-gray-700">Featured Post</label>
+            <div class="flex items-center">
+              <label class="relative flex items-center p-4 rounded-lg border-2 border-gray-200 cursor-pointer hover:border-blue-300 transition-colors duration-200 w-full">
+                <input
+                  id="is_featured"
+                  type="checkbox"
+                  formControlName="is_featured"
+                  class="sr-only"
+                >
+                <span class="flex items-center">
+                  <span class="flex-shrink-0 w-5 h-5 border-2 border-gray-300 rounded mr-3 transition-colors duration-200" 
+                        [class.bg-blue-600]="blogForm.get('is_featured')?.value"
+                        [class.border-blue-600]="blogForm.get('is_featured')?.value">
+                    <svg *ngIf="blogForm.get('is_featured')?.value" class="w-3 h-3 text-white mx-auto mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                    </svg>
+                  </span>
+                  <span class="text-sm font-medium text-gray-700">Featured Post</span>
+                </span>
+              </label>
             </div>
           </div>
         </div>

@@ -192,8 +192,7 @@ export class AdminReviewsComponent implements OnInit {
     }
 
     onAddReview(): void {
-        // Reviews are typically created by customers, not admins
-        alert('Reviews are created by customers after purchase');
+        this.router.navigate(['/admin/reviews/create']);
     }
 
     async onCsvImported(csvData: any[]): Promise<void> {

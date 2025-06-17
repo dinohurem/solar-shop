@@ -32,91 +32,142 @@ interface Category {
       [backRoute]="'/admin/categories'"
       (formSubmit)="onSubmit($event)"
     >
-      <div [formGroup]="categoryForm">
+      <div [formGroup]="categoryForm" class="space-y-8">
         <!-- Category Basic Info -->
-        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-          <div>
-            <label for="name" class="block text-sm font-medium text-gray-700">Name *</label>
-            <input
-              type="text"
-              id="name"
-              formControlName="name"
-              (input)="onNameChange($event)"
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-solar-500 focus:border-solar-500 sm:text-sm"
-              placeholder="Enter category name"
-            >
-            <div *ngIf="categoryForm.get('name')?.invalid && categoryForm.get('name')?.touched" class="mt-1 text-sm text-red-600">
-              Name is required
-            </div>
-          </div>
-
-          <div>
-            <label for="slug" class="block text-sm font-medium text-gray-700">Slug *</label>
-            <input
-              type="text"
-              id="slug"
-              formControlName="slug"
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-solar-500 focus:border-solar-500 sm:text-sm"
-              placeholder="category-url-slug"
-            >
-            <div *ngIf="categoryForm.get('slug')?.invalid && categoryForm.get('slug')?.touched" class="mt-1 text-sm text-red-600">
-              Slug is required
-            </div>
-          </div>
-        </div>
-
-        <!-- Description -->
-        <div>
-          <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
-          <textarea
-            id="description"
-            formControlName="description"
-            rows="3"
-            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-solar-500 focus:border-solar-500 sm:text-sm"
-            placeholder="Enter category description"
-          ></textarea>
-        </div>
-
-        <!-- Image URL -->
-        <div>
-          <label for="image_url" class="block text-sm font-medium text-gray-700">Image URL</label>
-          <input
-            type="url"
-            id="image_url"
-            formControlName="image_url"
-            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-solar-500 focus:border-solar-500 sm:text-sm"
-            placeholder="https://example.com/image.jpg"
-          >
-        </div>
-
-        <!-- Sort Order and Status -->
-        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-          <div>
-            <label for="sort_order" class="block text-sm font-medium text-gray-700">Sort Order</label>
-            <input
-              type="number"
-              id="sort_order"
-              formControlName="sort_order"
-              min="0"
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-solar-500 focus:border-solar-500 sm:text-sm"
-              placeholder="0"
-            >
-          </div>
-
-          <div class="flex items-center">
-            <div class="flex items-center h-5">
+        <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+            </svg>
+            Basic Information
+          </h3>
+          
+          <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div class="relative">
               <input
-                id="is_active"
-                type="checkbox"
-                formControlName="is_active"
-                class="focus:ring-solar-500 h-4 w-4 text-solar-600 border-gray-300 rounded"
+                type="text"
+                id="name"
+                formControlName="name"
+                (input)="onNameChange($event)"
+                class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
+                placeholder="Category Name"
               >
+              <label for="name" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+                Name *
+              </label>
+              <div *ngIf="categoryForm.get('name')?.invalid && categoryForm.get('name')?.touched" class="mt-2 text-sm text-red-600 flex items-center">
+                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+                Name is required
+              </div>
             </div>
-            <div class="ml-3 text-sm">
-              <label for="is_active" class="font-medium text-gray-700">Active</label>
-              <p class="text-gray-500">Enable this category in the store</p>
+
+            <div class="relative">
+              <input
+                type="text"
+                id="slug"
+                formControlName="slug"
+                class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
+                placeholder="URL Slug"
+              >
+              <label for="slug" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+                Slug *
+              </label>
+              <div *ngIf="categoryForm.get('slug')?.invalid && categoryForm.get('slug')?.touched" class="mt-2 text-sm text-red-600 flex items-center">
+                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+                Slug is required
+              </div>
             </div>
           </div>
+
+          <div class="mt-6">
+            <div class="relative">
+              <textarea
+                id="description"
+                formControlName="description"
+                rows="3"
+                class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent resize-none"
+                placeholder="Category Description"
+              ></textarea>
+              <label for="description" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+                Description
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Media & Settings -->
+        <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+            Media & Configuration
+          </h3>
+          
+          <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div class="relative">
+              <input
+                type="url"
+                id="image_url"
+                formControlName="image_url"
+                class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
+                placeholder="https://example.com/image.jpg"
+              >
+              <label for="image_url" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+                Image URL
+              </label>
+            </div>
+
+            <div class="relative">
+              <input
+                type="number"
+                id="sort_order"
+                formControlName="sort_order"
+                min="0"
+                class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
+                placeholder="0"
+              >
+              <label for="sort_order" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+                Sort Order
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Status -->
+        <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Category Status
+          </h3>
+          
+          <label class="relative flex items-center p-4 rounded-lg border-2 border-gray-200 cursor-pointer hover:border-blue-300 transition-colors duration-200">
+            <input
+              id="is_active"
+              type="checkbox"
+              formControlName="is_active"
+              class="sr-only"
+            >
+            <span class="flex items-center">
+              <span class="flex-shrink-0 w-5 h-5 border-2 border-gray-300 rounded mr-3 transition-colors duration-200" 
+                    [class.bg-blue-600]="categoryForm.get('is_active')?.value"
+                    [class.border-blue-600]="categoryForm.get('is_active')?.value">
+                <svg *ngIf="categoryForm.get('is_active')?.value" class="w-3 h-3 text-white mx-auto mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+              </span>
+              <div>
+                <span class="text-sm font-medium text-gray-700">Active</span>
+                <p class="text-sm text-gray-500">Enable this category in the store</p>
+              </div>
+            </span>
+          </label>
         </div>
       </div>
     </app-admin-form>
