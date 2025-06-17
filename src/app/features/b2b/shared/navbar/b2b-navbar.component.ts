@@ -31,6 +31,14 @@ import { Subject, takeUntil } from 'rxjs';
           <!-- Desktop Navigation -->
           <div class="hidden md:flex items-center space-x-8">
             <a routerLink="/" 
+               class="text-gray-700 hover:text-solar-600 px-3 py-2 text-sm font-medium transition-colors flex items-center space-x-1">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+              </svg>
+              <span>{{ 'b2bFooter.backToB2C' | translate }}</span>
+            </a>
+            <div class="h-6 w-px bg-gray-300"></div>
+            <a routerLink="/partners" 
                routerLinkActive="text-solar-600 border-b-2 border-solar-600"
                [routerLinkActiveOptions]="{exact: true}"
                class="text-gray-700 hover:text-solar-600 px-3 py-2 text-sm font-medium transition-colors">
@@ -45,11 +53,6 @@ import { Subject, takeUntil } from 'rxjs';
                routerLinkActive="text-solar-600 border-b-2 border-solar-600"
                class="text-gray-700 hover:text-solar-600 px-3 py-2 text-sm font-medium transition-colors">
               {{ 'b2bNav.offers' | translate }}
-            </a>
-            <a routerLink="/partners/about" 
-               routerLinkActive="text-solar-600 border-b-2 border-solar-600"
-               class="text-gray-700 hover:text-solar-600 px-3 py-2 text-sm font-medium transition-colors">
-              {{ 'b2bNav.about' | translate }}
             </a>
             <a routerLink="/partners/contact" 
                routerLinkActive="text-solar-600 border-b-2 border-solar-600"
@@ -156,6 +159,14 @@ import { Subject, takeUntil } from 'rxjs';
         <div *ngIf="showMobileMenu" class="md:hidden border-t border-gray-200">
           <div class="px-2 pt-2 pb-3 space-y-1">
             <a routerLink="/" 
+               class="flex items-center space-x-2 px-3 py-2 text-base font-medium text-gray-700 hover:text-solar-600 hover:bg-gray-50 rounded-md">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+              </svg>
+              <span>{{ 'b2bFooter.backToB2C' | translate }}</span>
+            </a>
+            <div class="border-t border-gray-200 my-2"></div>
+            <a routerLink="/partners" 
                routerLinkActive="bg-solar-50 text-solar-600"
                [routerLinkActiveOptions]="{exact: true}"
                class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-solar-600 hover:bg-gray-50 rounded-md">

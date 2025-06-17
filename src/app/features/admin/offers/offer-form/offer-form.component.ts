@@ -32,10 +32,10 @@ import { SupabaseService } from '../../../../services/supabase.service';
           
           <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <div class="relative">
-              <input
-                type="text"
-                id="title"
-                formControlName="title"
+            <input
+              type="text"
+              id="title"
+              formControlName="title"
                 class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
                 placeholder="Offer Title"
               >
@@ -46,22 +46,22 @@ import { SupabaseService } from '../../../../services/supabase.service';
                 <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                 </svg>
-                Title is required
-              </div>
+              Title is required
             </div>
+          </div>
 
             <div class="relative">
-              <select
-                id="type"
-                formControlName="type"
+            <select
+              id="type"
+              formControlName="type"
                 class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 bg-white"
-              >
-                <option value="">Select offer type</option>
-                <option value="percentage">Percentage Discount</option>
-                <option value="fixed">Fixed Amount</option>
-                <option value="bogo">Buy One Get One</option>
-                <option value="bundle">Bundle Deal</option>
-              </select>
+            >
+              <option value="">Select offer type</option>
+              <option value="percentage">Percentage Discount</option>
+              <option value="fixed">Fixed Amount</option>
+              <option value="bogo">Buy One Get One</option>
+              <option value="bundle">Bundle Deal</option>
+            </select>
               <label class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700">
                 Offer Type *
               </label>
@@ -69,20 +69,20 @@ import { SupabaseService } from '../../../../services/supabase.service';
                 <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                 </svg>
-                Offer type is required
-              </div>
+              Offer type is required
             </div>
           </div>
+        </div>
 
           <div class="mt-6">
             <div class="relative">
-              <textarea
-                id="description"
-                formControlName="description"
-                rows="3"
+          <textarea
+            id="description"
+            formControlName="description"
+            rows="3"
                 class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent resize-none"
                 placeholder="Offer Description"
-              ></textarea>
+          ></textarea>
               <label for="description" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
                 Description
               </label>
@@ -101,15 +101,15 @@ import { SupabaseService } from '../../../../services/supabase.service';
           
           <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
             <div class="relative">
-              <select
-                id="discount_type"
-                formControlName="discount_type"
+            <select
+              id="discount_type"
+              formControlName="discount_type"
                 class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 bg-white"
-              >
-                <option value="">Select discount type</option>
-                <option value="percentage">Percentage (%)</option>
-                <option value="amount">Fixed Amount (€)</option>
-              </select>
+            >
+              <option value="">Select discount type</option>
+              <option value="percentage">Percentage (%)</option>
+              <option value="amount">Fixed Amount (€)</option>
+            </select>
               <label class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700">
                 Discount Type *
               </label>
@@ -117,20 +117,20 @@ import { SupabaseService } from '../../../../services/supabase.service';
                 <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                 </svg>
-                Discount type is required
-              </div>
+              Discount type is required
             </div>
+          </div>
 
             <div class="relative">
-              <input
-                type="number"
-                id="discount_value"
-                formControlName="discount_value"
-                step="0.01"
-                min="0"
+            <input
+              type="number"
+              id="discount_value"
+              formControlName="discount_value"
+              step="0.01"
+              min="0"
                 class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
-                [placeholder]="offerForm.get('discount_type')?.value === 'percentage' ? '10' : '50.00'"
-              >
+              [placeholder]="offerForm.get('discount_type')?.value === 'percentage' ? '10' : '50.00'"
+            >
               <label for="discount_value" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
                 Discount Value *
               </label>
@@ -138,23 +138,23 @@ import { SupabaseService } from '../../../../services/supabase.service';
                 <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                 </svg>
-                Discount value is required
-              </div>
+              Discount value is required
             </div>
+          </div>
 
             <div class="relative">
               <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                 <span class="text-gray-500 text-lg">€</span>
               </div>
-              <input
-                type="number"
-                id="minimum_purchase"
-                formControlName="minimum_purchase"
-                step="0.01"
-                min="0"
+            <input
+              type="number"
+              id="minimum_purchase"
+              formControlName="minimum_purchase"
+              step="0.01"
+              min="0"
                 class="peer w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
-                placeholder="0.00"
-              >
+              placeholder="0.00"
+            >
               <label for="minimum_purchase" class="absolute left-10 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
                 Minimum Purchase (€)
               </label>
@@ -173,10 +173,10 @@ import { SupabaseService } from '../../../../services/supabase.service';
           
           <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <div class="relative">
-              <input
-                type="datetime-local"
-                id="start_date"
-                formControlName="start_date"
+            <input
+              type="datetime-local"
+              id="start_date"
+              formControlName="start_date"
                 class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200"
               >
               <label for="start_date" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700">
@@ -186,17 +186,17 @@ import { SupabaseService } from '../../../../services/supabase.service';
                 <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                 </svg>
-                Start date is required
-              </div>
+              Start date is required
             </div>
+          </div>
 
             <div class="relative">
-              <input
-                type="datetime-local"
-                id="end_date"
-                formControlName="end_date"
+            <input
+              type="datetime-local"
+              id="end_date"
+              formControlName="end_date"
                 class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200"
-              >
+            >
               <label for="end_date" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700">
                 End Date
               </label>
@@ -215,14 +215,14 @@ import { SupabaseService } from '../../../../services/supabase.service';
           
           <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <div class="relative">
-              <input
-                type="number"
-                id="usage_limit"
-                formControlName="usage_limit"
-                min="1"
+            <input
+              type="number"
+              id="usage_limit"
+              formControlName="usage_limit"
+              min="1"
                 class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
-                placeholder="Unlimited"
-              >
+              placeholder="Unlimited"
+            >
               <label for="usage_limit" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
                 Usage Limit
               </label>
@@ -232,17 +232,17 @@ import { SupabaseService } from '../../../../services/supabase.service';
                 </svg>
                 Leave empty for unlimited usage
               </p>
-            </div>
+          </div>
 
             <div class="relative">
-              <input
-                type="number"
-                id="priority"
-                formControlName="priority"
-                min="0"
+            <input
+              type="number"
+              id="priority"
+              formControlName="priority"
+              min="0"
                 class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
-                placeholder="0"
-              >
+              placeholder="0"
+            >
               <label for="priority" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
                 Priority
               </label>
@@ -284,10 +284,10 @@ import { SupabaseService } from '../../../../services/supabase.service';
 
             <div class="flex items-center">
               <label class="relative flex items-center p-4 rounded-lg border-2 border-gray-200 cursor-pointer hover:border-blue-300 transition-colors duration-200 w-full">
-                <input
-                  id="is_active"
-                  type="checkbox"
-                  formControlName="is_active"
+              <input
+                id="is_active"
+                type="checkbox"
+                formControlName="is_active"
                   class="sr-only"
                 >
                 <span class="flex items-center">

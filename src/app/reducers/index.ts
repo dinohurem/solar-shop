@@ -25,6 +25,10 @@ import { footerReducer } from '../features/b2c/footer/store/footer.reducer';
 import { FooterState } from '../features/b2c/footer/store/footer.state';
 import { cartReducer } from '../features/b2c/cart/store/cart.reducer';
 import { CartState } from '../features/b2c/cart/store/cart.state';
+import { wishlistReducer } from '../features/b2c/wishlist/store/wishlist.reducer';
+import { WishlistState } from '../shared/models/wishlist.model';
+import { companiesReducer } from '../features/admin/companies/store/companies.reducer';
+import { CompaniesState } from '../features/admin/companies/store/companies.state';
 
 export interface State {
   auth: AuthState;
@@ -38,6 +42,8 @@ export interface State {
   blog: BlogState;
   footer: FooterState;
   cart: CartState;
+  wishlist: WishlistState;
+  companies: CompaniesState;
 }
 
 export const reducers: ActionReducerMap<State> = {
@@ -52,6 +58,8 @@ export const reducers: ActionReducerMap<State> = {
   blog: blogReducer,
   footer: footerReducer,
   cart: cartReducer,
+  wishlist: wishlistReducer,
+  companies: companiesReducer,
 };
 
 export const metaReducers: MetaReducer<State>[] = isDevMode() ? [] : [];

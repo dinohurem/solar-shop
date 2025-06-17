@@ -30,7 +30,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
             </svg>
             {{ 'adminUsers.personalInformation' | translate }}
           </h3>
-
+            
           <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <!-- First Name -->
             <div class="relative">
@@ -108,8 +108,8 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
                 {{ 'adminUsers.phone' | translate }}
               </label>
             </div>
+            </div>
           </div>
-        </div>
 
         <!-- Profile Information Section -->
         <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-6">
@@ -200,7 +200,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
             </svg>
             {{ 'adminUsers.addressInformation' | translate }}
           </h3>
-
+          
           <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <!-- Street Address -->
             <div class="relative lg:col-span-2">

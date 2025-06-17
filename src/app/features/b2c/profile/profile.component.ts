@@ -84,6 +84,16 @@ import { SupabaseService } from '../../../services/supabase.service';
                 </button>
 
                 <button
+                  (click)="setActiveTab('my-wishlist')"
+                  [class]="activeTab === 'my-wishlist' ? 'bg-solar-600 text-white' : 'text-gray-700 hover:bg-gray-50'"
+                  class="w-full text-left px-4 py-3 rounded-lg font-['DM_Sans'] font-medium transition-colors duration-200 flex items-center space-x-3">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                  </svg>
+                  <span>{{ 'profile.myWishlist' | translate }}</span>
+                </button>
+
+                <button
                   (click)="setActiveTab('my-reviews')"
                   [class]="activeTab === 'my-reviews' ? 'bg-solar-600 text-white' : 'text-gray-700 hover:bg-gray-50'"
                   class="w-full text-left px-4 py-3 rounded-lg font-['DM_Sans'] font-medium transition-colors duration-200 flex items-center space-x-3">
@@ -460,6 +470,110 @@ import { SupabaseService } from '../../../services/supabase.service';
               </ng-template>
             </div>
 
+            <!-- My Wishlist Tab -->
+            <div *ngIf="activeTab === 'my-wishlist'" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div class="mb-6">
+                <h2 class="text-2xl font-semibold text-gray-900 font-['Poppins'] mb-2">{{ 'profile.myWishlist' | translate }}</h2>
+                <p class="text-gray-600 font-['DM_Sans']">{{ 'profile.viewWishlistItems' | translate }}</p>
+              </div>
+
+              <!-- Loading State -->
+              <div *ngIf="wishlistLoading$ | async" class="flex justify-center py-8">
+                <svg class="animate-spin w-8 h-8 text-solar-600" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              </div>
+
+              <!-- Wishlist Items Grid -->
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" *ngIf="!(wishlistLoading$ | async) && (wishlist$ | async)?.length; else noWishlistItems">
+                <div 
+                  *ngFor="let item of wishlist$ | async" 
+                  class="border border-gray-200 rounded-lg p-4 hover:border-solar-600 transition-colors group">
+                  <div class="flex flex-col space-y-4">
+                    <!-- Product Image -->
+                    <div class="relative">
+                      <img 
+                        [src]="item.product?.images?.[0]?.url || '/assets/images/placeholder.jpg'" 
+                        [alt]="item.product?.name"
+                        class="w-full h-48 object-cover rounded-lg bg-gray-100">
+                      
+                      <!-- Remove from wishlist button -->
+                      <button 
+                        (click)="removeFromWishlist(item.productId)"
+                        class="absolute top-2 right-2 p-2 bg-white rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50 hover:text-red-600">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                        </svg>
+                      </button>
+                    </div>
+
+                    <!-- Product Info -->
+                    <div class="flex-1">
+                      <h3 class="text-lg font-semibold text-gray-900 font-['Poppins'] mb-2 truncate">{{ item.product?.name }}</h3>
+                      
+                      <div class="flex items-center justify-between mb-3">
+                        <span class="text-xl font-bold text-solar-600 font-['DM_Sans']">
+                          €{{ item.product?.price?.toLocaleString() }}
+                        </span>
+                        <span 
+                          *ngIf="item.product?.originalPrice && item.product?.originalPrice !== item.product?.price" 
+                          class="text-sm text-gray-500 line-through font-['DM_Sans']">
+                          €{{ item.product?.originalPrice?.toLocaleString() }}
+                        </span>
+                      </div>
+
+                      <!-- Availability -->
+                      <div class="mb-3">
+                        <span 
+                          class="inline-flex px-2 py-1 text-xs font-medium rounded-full font-['DM_Sans']"
+                          [ngClass]="{
+                            'bg-green-100 text-green-800': item.product?.availability === 'available',
+                            'bg-yellow-100 text-yellow-800': item.product?.availability === 'limited',
+                            'bg-red-100 text-red-800': item.product?.availability === 'out-of-stock'
+                          }">
+                          {{ getAvailabilityText(item.product?.availability) | translate }}
+                        </span>
+                      </div>
+
+                      <!-- Product Category -->
+                      <p class="text-sm text-gray-600 font-['DM_Sans'] mb-4">{{ item.product?.categoryName || 'Uncategorized' }}</p>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="space-y-2">
+                      <button 
+                        (click)="viewProductDetails(item.product?.id)"
+                        class="w-full px-4 py-2 bg-solar-600 text-white rounded-lg font-['DM_Sans'] font-medium hover:bg-solar-700 transition-colors">
+                        {{ 'profile.viewDetails' | translate }}
+                      </button>
+                      
+                      <button 
+                        *ngIf="item.product?.availability !== 'out-of-stock'"
+                        class="w-full px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg font-['DM_Sans'] font-medium hover:bg-gray-50 transition-colors">
+                        {{ 'profile.addToCart' | translate }}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <ng-template #noWishlistItems>
+                <div *ngIf="!(wishlistLoading$ | async)" class="text-center py-12">
+                  <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                  </svg>
+                  <h3 class="text-lg font-medium text-gray-900 font-['Poppins'] mb-2">{{ 'profile.noWishlistItems' | translate }}</h3>
+                  <p class="text-gray-600 font-['DM_Sans'] mb-6">{{ 'profile.startAddingToWishlist' | translate }}</p>
+                  <button
+                    (click)="router.navigate(['/products'])"
+                    class="px-6 py-3 bg-solar-600 text-white rounded-lg font-['DM_Sans'] font-medium hover:bg-solar-700 transition-colors">
+                    {{ 'profile.browseProducts' | translate }}
+                  </button>
+                </div>
+              </ng-template>
+            </div>
+
             <!-- My Reviews Tab -->
             <div *ngIf="activeTab === 'my-reviews'" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <div class="mb-6">
@@ -584,7 +698,7 @@ export class ProfileComponent implements OnInit {
   loading$: Observable<boolean>;
   error$: Observable<any>;
 
-  activeTab: 'user-info' | 'billing-shipping' | 'my-orders' | 'my-reviews' = 'user-info';
+  activeTab: 'user-info' | 'billing-shipping' | 'my-orders' | 'my-wishlist' | 'my-reviews' = 'user-info';
   userInfoForm: FormGroup;
   showSuccessMessage = false;
 
@@ -599,6 +713,12 @@ export class ProfileComponent implements OnInit {
   private reviewsLoadingSubject = new BehaviorSubject<boolean>(false);
   reviews$ = this.reviewsSubject.asObservable();
   reviewsLoading$ = this.reviewsLoadingSubject.asObservable();
+
+  // Wishlist
+  private wishlistSubject = new BehaviorSubject<any[]>([]);
+  private wishlistLoadingSubject = new BehaviorSubject<boolean>(false);
+  wishlist$ = this.wishlistSubject.asObservable();
+  wishlistLoading$ = this.wishlistLoadingSubject.asObservable();
 
   constructor() {
     this.currentUser$ = this.store.select(selectCurrentUser);
@@ -645,7 +765,7 @@ export class ProfileComponent implements OnInit {
     });
   }
 
-  setActiveTab(tab: 'user-info' | 'billing-shipping' | 'my-orders' | 'my-reviews'): void {
+  setActiveTab(tab: 'user-info' | 'billing-shipping' | 'my-orders' | 'my-wishlist' | 'my-reviews'): void {
     this.activeTab = tab;
     this.showSuccessMessage = false; // Hide success message when switching tabs
 
@@ -654,6 +774,8 @@ export class ProfileComponent implements OnInit {
       this.loadUserOrders();
     } else if (tab === 'my-reviews') {
       this.loadUserReviews();
+    } else if (tab === 'my-wishlist') {
+      this.loadUserWishlist();
     }
   }
 
@@ -778,6 +900,33 @@ export class ProfileComponent implements OnInit {
       this.reviewsSubject.next([]);
     } finally {
       this.reviewsLoadingSubject.next(false);
+    }
+  }
+
+  private async loadUserWishlist(): Promise<void> {
+    // TODO: Implement actual wishlist loading from Supabase
+    // For now, return empty array as placeholder
+    const wishlist: any[] = [];
+    this.wishlistSubject.next(wishlist);
+  }
+
+  removeFromWishlist(productId: string): void {
+    // TODO: Implement remove from wishlist functionality
+    console.log('Remove from wishlist:', productId);
+  }
+
+  getAvailabilityText(availability: string): string {
+    switch (availability) {
+      case 'available': return 'productDetails.inStock';
+      case 'limited': return 'productDetails.limitedStock';
+      case 'out-of-stock': return 'productDetails.outOfStock';
+      default: return 'productDetails.unknown';
+    }
+  }
+
+  viewProductDetails(productId: string): void {
+    if (productId) {
+      this.router.navigate(['/products', productId]);
     }
   }
 } 

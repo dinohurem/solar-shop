@@ -684,4 +684,9 @@ export class SupabaseService {
     isAuthenticated(): Observable<boolean> {
         return this.currentUser.pipe(map(user => !!user));
     }
+
+    // Getter for direct client access (for special operations)
+    get client(): SupabaseClient<Database> {
+        return this.supabase;
+    }
 } 

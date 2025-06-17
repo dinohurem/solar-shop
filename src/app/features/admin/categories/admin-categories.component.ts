@@ -11,16 +11,18 @@ import { DataTableComponent, TableConfig } from '../shared/data-table/data-table
     standalone: true,
     imports: [CommonModule, DataTableComponent],
     template: `
-    <div class="space-y-6">
+    <div class="w-full">
+      <div class="space-y-4 sm:space-y-6 p-4 sm:p-6">
       <!-- Page Header -->
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="text-3xl font-bold text-gray-900">Categories</h1>
-          <p class="mt-2 text-gray-600">Manage product categories</p>
+        <div class="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+          <div class="min-w-0 flex-1">
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 truncate">Categories</h1>
+            <p class="mt-1 sm:mt-2 text-sm sm:text-base text-gray-600">Manage product categories</p>
         </div>
       </div>
 
-      <!-- Data Table -->
+        <!-- Data Table Container -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
       <app-data-table
         title="Categories"
         [data]="(categories$ | async) || []"
@@ -31,6 +33,8 @@ import { DataTableComponent, TableConfig } from '../shared/data-table/data-table
         (rowClicked)="onRowClick($event)"
         (csvImported)="onCsvImported($event)">
       </app-data-table>
+        </div>
+      </div>
     </div>
   `,
     styles: [`
@@ -67,13 +71,6 @@ export class AdminCategoriesComponent implements OnInit {
                 searchable: true
             },
             {
-                key: 'slug',
-                label: 'Slug',
-                type: 'text',
-                sortable: true,
-                searchable: true
-            },
-            {
                 key: 'description',
                 label: 'Description',
                 type: 'text',
@@ -81,21 +78,9 @@ export class AdminCategoriesComponent implements OnInit {
                 searchable: true
             },
             {
-                key: 'sort_order',
-                label: 'Sort Order',
-                type: 'number',
-                sortable: true
-            },
-            {
                 key: 'is_active',
                 label: 'Status',
                 type: 'boolean',
-                sortable: true
-            },
-            {
-                key: 'created_at',
-                label: 'Created',
-                type: 'date',
                 sortable: true
             }
         ],

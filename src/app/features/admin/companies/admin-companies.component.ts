@@ -1,9 +1,25 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { Store } from '@ngrx/store';
+import { Observable, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { Company } from '../../../shared/models/company.model';
+import * as CompaniesActions from './store/companies.actions';
+import {
+  selectFilteredCompanies,
+  selectCompaniesLoading,
+  selectCompaniesError,
+  selectTotalCompanies,
+  selectPendingCompanies,
+  selectApprovedCompanies,
+  selectRejectedCompanies,
+  selectCompaniesApproving,
+  selectCompaniesRejecting,
+  selectCompaniesDeleting
+} from './store/companies.selectors';
 
 @Component({
   selector: 'app-admin-companies',
@@ -23,6 +39,16 @@ import { Company } from '../../../shared/models/company.model';
         </div>
       </div>
 
+      <!-- Loading State -->
+      <div *ngIf="loading$ | async" class="flex justify-center items-center py-12">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-solar-600"></div>
+      </div>
+
+      <!-- Error State -->
+      <div *ngIf="error$ | async as error" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+        <p class="text-red-700">{{ error }}</p>
+      </div>
+
       <!-- Filters -->
       <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -31,7 +57,7 @@ import { Company } from '../../../shared/models/company.model';
             <label class="block text-sm font-medium text-gray-700 mb-2">
               Status
             </label>
-            <select [(ngModel)]="selectedStatus" (ngModelChange)="filterCompanies()" 
+            <select [(ngModel)]="selectedStatus" (ngModelChange)="onFilterChange()" 
                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-solar-500">
               <option value="">All Statuses</option>
               <option value="pending">Pending</option>
@@ -45,7 +71,7 @@ import { Company } from '../../../shared/models/company.model';
             <label class="block text-sm font-medium text-gray-700 mb-2">
               Business Type
             </label>
-            <select [(ngModel)]="selectedBusinessType" (ngModelChange)="filterCompanies()" 
+            <select [(ngModel)]="selectedBusinessType" (ngModelChange)="onFilterChange()" 
                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-solar-500">
               <option value="">All Types</option>
               <option value="retailer">Retailer</option>
@@ -61,7 +87,7 @@ import { Company } from '../../../shared/models/company.model';
             <label class="block text-sm font-medium text-gray-700 mb-2">
               Search
             </label>
-            <input [(ngModel)]="searchTerm" (ngModelChange)="filterCompanies()" 
+            <input [(ngModel)]="searchTerm" (ngModelChange)="onFilterChange()" 
                    type="text" placeholder="Search companies..."
                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-solar-500">
           </div>
@@ -71,7 +97,7 @@ import { Company } from '../../../shared/models/company.model';
             <label class="block text-sm font-medium text-gray-700 mb-2">
               Date Range
             </label>
-            <select [(ngModel)]="selectedDateRange" (ngModelChange)="filterCompanies()" 
+            <select [(ngModel)]="selectedDateRange" (ngModelChange)="onFilterChange()" 
                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-solar-500">
               <option value="">All Dates</option>
               <option value="today">Today</option>
@@ -95,7 +121,7 @@ import { Company } from '../../../shared/models/company.model';
             </div>
             <div class="ml-4">
               <p class="text-sm font-medium text-gray-500">Total Companies</p>
-              <p class="text-2xl font-bold text-gray-900">{{ getTotalCompanies() }}</p>
+              <p class="text-2xl font-bold text-gray-900">{{ totalCompanies$ | async }}</p>
             </div>
           </div>
         </div>
@@ -111,7 +137,7 @@ import { Company } from '../../../shared/models/company.model';
             </div>
             <div class="ml-4">
               <p class="text-sm font-medium text-gray-500">Pending Approval</p>
-              <p class="text-2xl font-bold text-gray-900">{{ getPendingCount() }}</p>
+              <p class="text-2xl font-bold text-gray-900">{{ pendingCompanies$ | async }}</p>
             </div>
           </div>
         </div>
@@ -127,7 +153,7 @@ import { Company } from '../../../shared/models/company.model';
             </div>
             <div class="ml-4">
               <p class="text-sm font-medium text-gray-500">Approved Companies</p>
-              <p class="text-2xl font-bold text-gray-900">{{ getApprovedCount() }}</p>
+              <p class="text-2xl font-bold text-gray-900">{{ approvedCompanies$ | async }}</p>
             </div>
           </div>
         </div>
@@ -143,7 +169,7 @@ import { Company } from '../../../shared/models/company.model';
             </div>
             <div class="ml-4">
               <p class="text-sm font-medium text-gray-500">Rejected Companies</p>
-              <p class="text-2xl font-bold text-gray-900">{{ getRejectedCount() }}</p>
+              <p class="text-2xl font-bold text-gray-900">{{ rejectedCompanies$ | async }}</p>
             </div>
           </div>
         </div>
@@ -182,7 +208,7 @@ import { Company } from '../../../shared/models/company.model';
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-              <tr *ngFor="let company of filteredCompanies" class="hover:bg-gray-50">
+              <tr *ngFor="let company of filteredCompanies$ | async" class="hover:bg-gray-50">
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div>
                     <div class="text-sm font-medium text-gray-900">{{ company.companyName }}</div>
@@ -218,12 +244,14 @@ import { Company } from '../../../shared/models/company.model';
                     </button>
                     <button *ngIf="company.status === 'pending'" 
                             (click)="approveCompany(company)" 
-                            class="text-green-600 hover:text-green-900">
+                            [disabled]="approving$ | async"
+                            class="text-green-600 hover:text-green-900 disabled:opacity-50">
                       Approve
                     </button>
                     <button *ngIf="company.status === 'pending'" 
                             (click)="rejectCompany(company)" 
-                            class="text-red-600 hover:text-red-900">
+                            [disabled]="rejecting$ | async"
+                            class="text-red-600 hover:text-red-900 disabled:opacity-50">
                       Reject
                     </button>
                     <button (click)="editCompany(company)" 
@@ -231,7 +259,8 @@ import { Company } from '../../../shared/models/company.model';
                       Edit
                     </button>
                     <button (click)="deleteCompany(company)" 
-                            class="text-red-600 hover:text-red-900">
+                            [disabled]="deleting$ | async"
+                            class="text-red-600 hover:text-red-900 disabled:opacity-50">
                       Delete
                     </button>
                   </div>
@@ -242,7 +271,7 @@ import { Company } from '../../../shared/models/company.model';
         </div>
 
         <!-- Empty State -->
-        <div *ngIf="filteredCompanies.length === 0" class="text-center py-12">
+        <div *ngIf="(filteredCompanies$ | async)?.length === 0 && !(loading$ | async)" class="text-center py-12">
           <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
           </svg>
@@ -358,12 +387,14 @@ import { Company } from '../../../shared/models/company.model';
                 <div class="flex space-x-2">
                   <button *ngIf="selectedCompany.status === 'pending'" 
                           (click)="approveCompany(selectedCompany)" 
-                          class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700">
+                          [disabled]="approving$ | async"
+                          class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 disabled:opacity-50">
                     Approve
                   </button>
                   <button *ngIf="selectedCompany.status === 'pending'" 
                           (click)="rejectCompany(selectedCompany)" 
-                          class="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700">
+                          [disabled]="rejecting$ | async"
+                          class="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700 disabled:opacity-50">
                     Reject
                   </button>
                 </div>
@@ -375,9 +406,21 @@ import { Company } from '../../../shared/models/company.model';
     </div>
   `,
 })
-export class AdminCompaniesComponent implements OnInit {
-  companies: Company[] = [];
-  filteredCompanies: Company[] = [];
+export class AdminCompaniesComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
+
+  // Observables
+  filteredCompanies$: Observable<Company[]>;
+  loading$: Observable<boolean>;
+  error$: Observable<string | null>;
+  totalCompanies$: Observable<number>;
+  pendingCompanies$: Observable<number>;
+  approvedCompanies$: Observable<number>;
+  rejectedCompanies$: Observable<number>;
+  approving$: Observable<boolean>;
+  rejecting$: Observable<boolean>;
+  deleting$: Observable<boolean>;
+
   selectedCompany: Company | null = null;
 
   // Filters
@@ -386,131 +429,40 @@ export class AdminCompaniesComponent implements OnInit {
   searchTerm = '';
   selectedDateRange = '';
 
-  constructor() { }
+  constructor(private store: Store) {
+    // Initialize observables
+    this.filteredCompanies$ = this.store.select(selectFilteredCompanies);
+    this.loading$ = this.store.select(selectCompaniesLoading);
+    this.error$ = this.store.select(selectCompaniesError);
+    this.totalCompanies$ = this.store.select(selectTotalCompanies);
+    this.pendingCompanies$ = this.store.select(selectPendingCompanies);
+    this.approvedCompanies$ = this.store.select(selectApprovedCompanies);
+    this.rejectedCompanies$ = this.store.select(selectRejectedCompanies);
+    this.approving$ = this.store.select(selectCompaniesApproving);
+    this.rejecting$ = this.store.select(selectCompaniesRejecting);
+    this.deleting$ = this.store.select(selectCompaniesDeleting);
+  }
 
   ngOnInit(): void {
     this.loadCompanies();
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   loadCompanies(): void {
-    // Sample data - replace with actual API call
-    this.companies = [
-      {
-        id: '1',
-        contactPersonId: 'user1',
-        contactPersonName: 'John Smith',
-        companyName: 'Solar Solutions Ltd.',
-        taxNumber: 'HR12345678901',
-        companyAddress: 'Ilica 10, 10000 Zagreb, Croatia',
-        companyPhone: '+385 1 234 5678',
-        companyEmail: 'info@solarsolutions.hr',
-        website: 'https://solarsolutions.hr',
-        businessType: 'installer',
-        yearsInBusiness: 5,
-        annualRevenue: 500000,
-        numberOfEmployees: 15,
-        description: 'Professional solar panel installation company with 5 years of experience.',
-        status: 'pending',
-        approved: false,
-        createdAt: new Date('2024-01-15'),
-        updatedAt: new Date('2024-01-15')
-      },
-      {
-        id: '2',
-        contactPersonId: 'user2',
-        contactPersonName: 'Ana Marić',
-        companyName: 'Green Energy d.o.o.',
-        taxNumber: 'HR98765432109',
-        companyAddress: 'Vukovarska 20, 21000 Split, Croatia',
-        companyPhone: '+385 21 123 456',
-        companyEmail: 'contact@greenenergy.hr',
-        website: 'https://greenenergy.hr',
-        businessType: 'retailer',
-        yearsInBusiness: 8,
-        annualRevenue: 1200000,
-        numberOfEmployees: 25,
-        description: 'Leading retailer of renewable energy solutions in Dalmatia region.',
-        status: 'approved',
-        approved: true,
-        approvedAt: new Date('2024-01-10'),
-        approvedBy: 'admin1',
-        createdAt: new Date('2024-01-05'),
-        updatedAt: new Date('2024-01-10')
-      },
-      {
-        id: '3',
-        contactPersonId: 'user3',
-        contactPersonName: 'Marko Novak',
-        companyName: 'EcoTech Systems',
-        taxNumber: 'HR11223344556',
-        companyAddress: 'Savska 15, 10000 Zagreb, Croatia',
-        companyPhone: '+385 1 987 654',
-        companyEmail: 'info@ecotech.hr',
-        businessType: 'distributor',
-        yearsInBusiness: 3,
-        annualRevenue: 800000,
-        numberOfEmployees: 12,
-        description: 'Distributor of high-quality solar equipment and components.',
-        status: 'rejected',
-        approved: false,
-        rejectedAt: new Date('2024-01-12'),
-        rejectedBy: 'admin1',
-        rejectionReason: 'Insufficient business experience',
-        createdAt: new Date('2024-01-08'),
-        updatedAt: new Date('2024-01-12')
-      }
-    ];
-
-    this.filteredCompanies = [...this.companies];
+    this.store.dispatch(CompaniesActions.loadCompanies());
   }
 
-  filterCompanies(): void {
-    this.filteredCompanies = this.companies.filter(company => {
-      const matchesStatus = !this.selectedStatus || company.status === this.selectedStatus;
-      const matchesBusinessType = !this.selectedBusinessType || company.businessType === this.selectedBusinessType;
-      const matchesSearch = !this.searchTerm ||
-        company.companyName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        (company.contactPersonName && company.contactPersonName.toLowerCase().includes(this.searchTerm.toLowerCase())) ||
-        company.companyEmail.toLowerCase().includes(this.searchTerm.toLowerCase());
-
-      let matchesDate = true;
-      if (this.selectedDateRange) {
-        const now = new Date();
-        const companyDate = new Date(company.createdAt);
-
-        switch (this.selectedDateRange) {
-          case 'today':
-            matchesDate = companyDate.toDateString() === now.toDateString();
-            break;
-          case 'week':
-            const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-            matchesDate = companyDate >= weekAgo;
-            break;
-          case 'month':
-            const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-            matchesDate = companyDate >= monthAgo;
-            break;
-        }
-      }
-
-      return matchesStatus && matchesBusinessType && matchesSearch && matchesDate;
-    });
-  }
-
-  getTotalCompanies(): number {
-    return this.companies.length;
-  }
-
-  getPendingCount(): number {
-    return this.companies.filter(c => c.status === 'pending').length;
-  }
-
-  getApprovedCount(): number {
-    return this.companies.filter(c => c.status === 'approved').length;
-  }
-
-  getRejectedCount(): number {
-    return this.companies.filter(c => c.status === 'rejected').length;
+  onFilterChange(): void {
+    this.store.dispatch(CompaniesActions.setFilters({
+      status: this.selectedStatus || undefined,
+      businessType: this.selectedBusinessType || undefined,
+      searchTerm: this.searchTerm || undefined,
+      dateRange: this.selectedDateRange || undefined
+    }));
   }
 
   getStatusClass(status: string): string {
@@ -589,45 +541,24 @@ export class AdminCompaniesComponent implements OnInit {
 
   approveCompany(company: Company): void {
     if (confirm(`Are you sure you want to approve ${company.companyName}?`)) {
-      company.status = 'approved';
-      company.approved = true;
-      company.approvedAt = new Date();
-      company.approvedBy = 'current-admin-id'; // Replace with actual admin ID
-      company.updatedAt = new Date();
-
-      // TODO: Implement API call to update company status
-      console.log('Approved company:', company);
+      this.store.dispatch(CompaniesActions.approveCompany({ companyId: company.id }));
 
       // Close modal if it's open
       if (this.selectedCompany?.id === company.id) {
         this.closeModal();
       }
-
-      // Refresh filtered list
-      this.filterCompanies();
     }
   }
 
   rejectCompany(company: Company): void {
     const reason = prompt('Please provide a reason for rejection:');
     if (reason && confirm(`Are you sure you want to reject ${company.companyName}?`)) {
-      company.status = 'rejected';
-      company.approved = false;
-      company.rejectedAt = new Date();
-      company.rejectedBy = 'current-admin-id'; // Replace with actual admin ID
-      company.rejectionReason = reason;
-      company.updatedAt = new Date();
-
-      // TODO: Implement API call to update company status
-      console.log('Rejected company:', company);
+      this.store.dispatch(CompaniesActions.rejectCompany({ companyId: company.id, reason }));
 
       // Close modal if it's open
       if (this.selectedCompany?.id === company.id) {
         this.closeModal();
       }
-
-      // Refresh filtered list
-      this.filterCompanies();
     }
   }
 
@@ -638,18 +569,11 @@ export class AdminCompaniesComponent implements OnInit {
 
   deleteCompany(company: Company): void {
     if (confirm(`Are you sure you want to delete ${company.companyName}? This action cannot be undone.`)) {
-      const index = this.companies.findIndex(c => c.id === company.id);
-      if (index > -1) {
-        this.companies.splice(index, 1);
-        this.filterCompanies();
+      this.store.dispatch(CompaniesActions.deleteCompany({ companyId: company.id }));
 
-        // Close modal if it's open
-        if (this.selectedCompany?.id === company.id) {
-          this.closeModal();
-        }
-
-        // TODO: Implement API call to delete company
-        console.log('Deleted company:', company);
+      // Close modal if it's open
+      if (this.selectedCompany?.id === company.id) {
+        this.closeModal();
       }
     }
   }

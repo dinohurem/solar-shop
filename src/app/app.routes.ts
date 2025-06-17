@@ -21,7 +21,6 @@ import { TermsOfServiceComponent } from './features/b2c/terms-of-service/terms-o
 import { CookiePolicyComponent } from './features/b2c/cookie-policy/cookie-policy.component';
 import { PartnersComponent } from './features/b2b/partners/partners.component';
 import { PartnersRegisterComponent } from './features/b2b/partners/register/partners-register.component';
-import { PartnersAboutComponent } from './features/b2b/partners/about/partners-about.component';
 import { PartnersProductsComponent } from './features/b2b/partners/products/partners-products.component';
 import { PartnersOffersComponent } from './features/b2b/partners/offers/partners-offers.component';
 import { PartnersContactComponent } from './features/b2b/partners/contact/partners-contact.component';
@@ -44,6 +43,7 @@ import { AdminCompanyPricingComponent } from './features/admin/company-pricing/a
 import { CompanyPricingFormComponent } from './features/admin/company-pricing/company-pricing-form/company-pricing-form.component';
 import { CompanyPricingDetailsComponent } from './features/admin/company-pricing/company-pricing-details/company-pricing-details.component';
 import { AdminCompaniesComponent } from './features/admin/companies/admin-companies.component';
+import { AdminWishlistComponent } from './features/admin/wishlist/admin-wishlist.component';
 import { CategoryFormComponent } from './features/admin/categories/category-form/category-form.component';
 import { ProductFormComponent } from './features/admin/products/product-form/product-form.component';
 import { OfferFormComponent } from './features/admin/offers/offer-form/offer-form.component';
@@ -107,7 +107,6 @@ export const routes: Routes = [
         children: [
             { path: '', component: PartnersComponent },
             { path: 'register', component: PartnersRegisterComponent },
-            { path: 'about', component: PartnersAboutComponent },
             { path: 'products', component: PartnersProductsComponent },
             { path: 'offers', component: PartnersOffersComponent },
             { path: 'contact', component: PartnersContactComponent },
@@ -162,6 +161,9 @@ export const routes: Routes = [
 
             // Companies
             { path: 'companies', component: AdminCompaniesComponent },
+
+            // Wishlist
+            { path: 'wishlist', component: AdminWishlistComponent },
 
             // Reviews
             { path: 'reviews', component: AdminReviewsComponent }

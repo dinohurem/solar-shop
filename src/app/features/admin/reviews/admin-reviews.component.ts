@@ -11,16 +11,18 @@ import { Review } from '../../../shared/models/review.model';
     standalone: true,
     imports: [CommonModule, DataTableComponent],
     template: `
-    <div class="space-y-6">
+    <div class="w-full max-w-full overflow-hidden">
+      <div class="space-y-4 sm:space-y-6 p-4 sm:p-6">
       <!-- Page Header -->
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="text-3xl font-bold text-gray-900">Reviews</h1>
-          <p class="mt-2 text-gray-600">Manage product reviews and ratings</p>
+        <div class="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+          <div class="min-w-0 flex-1">
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 truncate">Reviews</h1>
+            <p class="mt-1 sm:mt-2 text-sm sm:text-base text-gray-600">Manage product reviews and ratings</p>
         </div>
       </div>
 
-      <!-- Data Table -->
+        <!-- Data Table Container -->
+        <div class="w-full overflow-hidden">
       <app-data-table
         title="Reviews"
         [data]="(reviews$ | async) || []"
@@ -31,6 +33,8 @@ import { Review } from '../../../shared/models/review.model';
         (rowClicked)="onRowClick($event)"
         (csvImported)="onCsvImported($event)">
       </app-data-table>
+        </div>
+      </div>
     </div>
   `,
     styles: [`

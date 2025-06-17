@@ -12,6 +12,8 @@ import { CartEffects } from './features/b2c/cart/store/cart.effects';
 import { NavbarEffects } from './features/b2c/navbar/store/navbar.effects';
 import { OffersEffects } from './features/b2c/offers/store/offers.effects';
 import { BlogEffects } from './features/b2c/blog/store/blog.effects';
+import { WishlistEffects } from './features/b2c/wishlist/store/wishlist.effects';
+import { CompaniesEffects } from './features/admin/companies/store/companies.effects';
 import { reducers, metaReducers } from './reducers';
 import { provideLottieOptions } from 'ngx-lottie';
 import { playerFactory } from './shared/components/loader/loader.component';
@@ -27,7 +29,7 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(),
     { provide: LOCALE_ID, useValue: 'en-US' },
     provideStore(reducers, { metaReducers }),
-    provideEffects([AuthEffects, ProductListEffects, ProductDetailsEffects, CartEffects, NavbarEffects, OffersEffects, BlogEffects]),
+    provideEffects([AuthEffects, ProductListEffects, ProductDetailsEffects, CartEffects, NavbarEffects, OffersEffects, BlogEffects, WishlistEffects, CompaniesEffects]),
     provideStoreDevtools({
       maxAge: 25, // Retains last 25 states
       logOnly: environment.production, // Restrict extension to log-only mode

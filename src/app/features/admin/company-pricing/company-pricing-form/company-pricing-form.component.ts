@@ -115,7 +115,7 @@ interface Product {
             <!-- Selected Product Display -->
             <div *ngIf="selectedProduct" class="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <div class="flex items-center justify-between">
-                <div>
+        <div>
                   <h4 class="font-medium text-blue-900">{{ selectedProduct.name }}</h4>
                   <p class="text-sm text-blue-700">SKU: {{ selectedProduct.sku }} | Current Price: €{{ selectedProduct.price }}</p>
                 </div>

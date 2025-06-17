@@ -465,13 +465,9 @@ export class ProductFormComponent implements OnInit {
   }
 
   private formatImages(data: any): string {
-    // Handle different possible image field formats
+    // Handle JSONB images array format from database
     if (data.images && Array.isArray(data.images)) {
-      return data.images.join('\n');
-    } else if (data.image_url) {
-      return data.image_url;
-    } else if (data.gallery_urls && Array.isArray(data.gallery_urls)) {
-      return data.gallery_urls.join('\n');
+      return data.images.map((img: any) => img.url || img).join('\n');
     } else if (typeof data.images === 'string') {
       return data.images;
     }
@@ -497,13 +493,25 @@ export class ProductFormComponent implements OnInit {
     this.isSubmitting = true;
 
     try {
+      // Process images - convert from text input to JSONB array format
+      const imageUrls = formValue.images ? formValue.images.split('\n').filter((url: string) => url.trim()) : [];
+      const imagesArray = imageUrls.map((url: string, index: number) => ({
+        url: url.trim(),
+        alt: `${formValue.name} - Image ${index + 1}`,
+        is_primary: index === 0,
+        order: index,
+        type: index === 0 ? 'main' : 'gallery'
+      }));
+
       // Map form fields to database fields
       const productData = {
         name: formValue.name,
+        slug: formValue.slug,
         description: formValue.description,
         short_description: formValue.description, // Use description as short_description if not provided
         price: Number(formValue.price),
         original_price: formValue.compare_at_price ? Number(formValue.compare_at_price) : undefined,
+        currency: 'EUR', // Default currency
         sku: formValue.sku,
         brand: formValue.brand,
         category_id: formValue.category_id || undefined,
@@ -512,15 +520,15 @@ export class ProductFormComponent implements OnInit {
         is_active: Boolean(formValue.is_active),
         is_featured: Boolean(formValue.is_featured),
         is_on_sale: Boolean(formValue.is_on_sale),
-        image_url: formValue.images ? formValue.images.split('\n').filter((url: string) => url.trim())[0] : undefined,
-        gallery_urls: formValue.images ? formValue.images.split('\n').filter((url: string) => url.trim()) : [],
+        images: imagesArray, // Use JSONB array format
+        specifications: [], // Default empty specifications array
+        features: [], // Default empty features
+        certifications: [], // Default empty certifications
+        tags: [], // Default empty tags
+        in_stock: Number(formValue.stock_quantity) > 0, // Derive from stock quantity
+        stock_status: Number(formValue.stock_quantity) > 0 ? 'in_stock' as const : 'out_of_stock' as const,
         updated_at: new Date().toISOString()
       };
-
-      // Add slug if it doesn't exist in database schema
-      if (formValue.slug) {
-        (productData as any).slug = formValue.slug;
-      }
 
       console.log('Saving product data:', productData); // Debug log
 

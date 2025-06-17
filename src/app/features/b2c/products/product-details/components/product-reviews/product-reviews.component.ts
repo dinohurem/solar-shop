@@ -92,9 +92,9 @@ export interface Review {
           <div class="flex items-start justify-between mb-4">
             <div class="flex items-center">
               <div class="relative">
-                <img 
-                  [src]="review.userAvatar" 
-                  [alt]="review.userName"
+              <img 
+                [src]="review.userAvatar" 
+                [alt]="review.userName"
                   class="w-12 h-12 rounded-full mr-4 object-cover border-2 border-gray-100"
                 >
                 <div *ngIf="review.verified" class="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">

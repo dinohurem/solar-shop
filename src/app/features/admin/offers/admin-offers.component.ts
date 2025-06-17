@@ -12,26 +12,30 @@ import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
   standalone: true,
   imports: [CommonModule, DataTableComponent, ReactiveFormsModule],
   template: `
-    <div class="space-y-6">
-      <!-- Page Header -->
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="text-3xl font-bold text-gray-900">Offers</h1>
-          <p class="mt-2 text-gray-600">Manage promotional offers and discounts</p>
+    <div class="w-full">
+      <div class="space-y-4 sm:space-y-6 p-4 sm:p-6">
+        <!-- Page Header -->
+        <div class="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+          <div class="min-w-0 flex-1">
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 truncate">Offers</h1>
+            <p class="mt-1 sm:mt-2 text-sm sm:text-base text-gray-600">Manage promotional offers and discounts</p>
+          </div>
+        </div>
+
+        <!-- Data Table Container -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <app-data-table
+            title="Offers"
+            [data]="(offers$ | async) || []"
+            [config]="tableConfig"
+            [loading]="(loading$ | async) || false"
+            (actionClicked)="onTableAction($event)"
+            (addClicked)="onAddOffer()"
+            (rowClicked)="onRowClick($event)"
+            (csvImported)="onCsvImported($event)">
+          </app-data-table>
         </div>
       </div>
-
-      <!-- Data Table -->
-      <app-data-table
-        title="Offers"
-        [data]="(offers$ | async) || []"
-        [config]="tableConfig"
-        [loading]="(loading$ | async) || false"
-        (actionClicked)="onTableAction($event)"
-        (addClicked)="onAddOffer()"
-        (rowClicked)="onRowClick($event)"
-        (csvImported)="onCsvImported($event)">
-      </app-data-table>
     </div>
   `,
   styles: [`
@@ -76,41 +80,16 @@ export class AdminOffersComponent implements OnInit {
         searchable: true
       },
       {
-        key: 'discount_type',
-        label: 'Discount Type',
-        type: 'status',
-        sortable: true,
-        searchable: true
-      },
-      {
         key: 'discount_value',
-        label: 'Discount Value',
+        label: 'Discount',
         type: 'number',
         sortable: true,
-        format: (value) => value ? `${value}${this.getDiscountSymbol(value)}` : ''
-      },
-      {
-        key: 'start_date',
-        label: 'Start Date',
-        type: 'date',
-        sortable: true
-      },
-      {
-        key: 'end_date',
-        label: 'End Date',
-        type: 'date',
-        sortable: true
+        format: (value) => value ? `${value}%` : ''
       },
       {
         key: 'is_active',
         label: 'Status',
         type: 'boolean',
-        sortable: true
-      },
-      {
-        key: 'created_at',
-        label: 'Created',
-        type: 'date',
         sortable: true
       }
     ],
@@ -170,10 +149,6 @@ export class AdminOffersComponent implements OnInit {
 
   onAddOffer(): void {
     this.router.navigate(['/admin/offers/create']);
-  }
-
-  getDiscountSymbol(value: any): string {
-    return '%';
   }
 
   async onCsvImported(csvData: any[]): Promise<void> {

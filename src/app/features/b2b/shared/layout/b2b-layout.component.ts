@@ -2,13 +2,13 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { B2bNavbarComponent } from '../navbar/b2b-navbar.component';
-import { FooterComponent } from '../../../b2c/footer/footer.component';
+import { PartnersFooterComponent } from '../footer/partners-footer.component';
 
 @Component({
-    selector: 'app-b2b-layout',
-    standalone: true,
-    imports: [CommonModule, RouterOutlet, B2bNavbarComponent, FooterComponent],
-    template: `
+  selector: 'app-b2b-layout',
+  standalone: true,
+  imports: [CommonModule, RouterOutlet, B2bNavbarComponent, PartnersFooterComponent],
+  template: `
     <div class="min-h-screen flex flex-col">
       <!-- B2B Navbar -->
       <app-b2b-navbar></app-b2b-navbar>
@@ -18,8 +18,8 @@ import { FooterComponent } from '../../../b2c/footer/footer.component';
         <router-outlet></router-outlet>
       </main>
       
-      <!-- Footer -->
-      <app-footer></app-footer>
+      <!-- Partners Footer -->
+      <app-partners-footer></app-partners-footer>
     </div>
   `,
 })

@@ -32,11 +32,11 @@ import { SupabaseService } from '../../../../services/supabase.service';
           
           <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <div class="relative">
-              <input
-                type="text"
-                id="title"
-                formControlName="title"
-                (input)="onTitleChange($event)"
+            <input
+              type="text"
+              id="title"
+              formControlName="title"
+              (input)="onTitleChange($event)"
                 class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
                 placeholder="Blog Post Title"
               >
@@ -47,15 +47,15 @@ import { SupabaseService } from '../../../../services/supabase.service';
                 <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                 </svg>
-                Title is required
-              </div>
+              Title is required
             </div>
+          </div>
 
             <div class="relative">
-              <input
-                type="text"
-                id="slug"
-                formControlName="slug"
+            <input
+              type="text"
+              id="slug"
+              formControlName="slug"
                 class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
                 placeholder="URL Slug"
               >
@@ -66,20 +66,20 @@ import { SupabaseService } from '../../../../services/supabase.service';
                 <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                 </svg>
-                URL slug is required
-              </div>
+              URL slug is required
             </div>
           </div>
+        </div>
 
           <div class="mt-6">
             <div class="relative">
-              <textarea
-                id="excerpt"
-                formControlName="excerpt"
-                rows="3"
+          <textarea
+            id="excerpt"
+            formControlName="excerpt"
+            rows="3"
                 class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent resize-none"
                 placeholder="Brief excerpt of the blog post"
-              ></textarea>
+          ></textarea>
               <label for="excerpt" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
                 Excerpt *
               </label>
@@ -87,7 +87,7 @@ import { SupabaseService } from '../../../../services/supabase.service';
                 <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                 </svg>
-                Excerpt is required
+            Excerpt is required
               </div>
             </div>
           </div>
@@ -103,13 +103,13 @@ import { SupabaseService } from '../../../../services/supabase.service';
           </h3>
           
           <div class="relative">
-            <textarea
-              id="content"
-              formControlName="content"
-              rows="12"
+          <textarea
+            id="content"
+            formControlName="content"
+            rows="12"
               class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent resize-none"
               placeholder="Full blog post content (supports Markdown)"
-            ></textarea>
+          ></textarea>
             <label for="content" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
               Content *
             </label>
@@ -117,7 +117,7 @@ import { SupabaseService } from '../../../../services/supabase.service';
               <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
               </svg>
-              Content is required
+            Content is required
             </div>
             <p class="mt-3 text-sm text-gray-500 flex items-center">
               <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -139,45 +139,45 @@ import { SupabaseService } from '../../../../services/supabase.service';
           
           <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <div class="relative">
-              <input
-                type="url"
-                id="featured_image_url"
-                formControlName="featured_image_url"
+            <input
+              type="url"
+              id="featured_image_url"
+              formControlName="featured_image_url"
                 class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
-                placeholder="https://example.com/image.jpg"
-              >
+              placeholder="https://example.com/image.jpg"
+            >
               <label for="featured_image_url" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
                 Featured Image URL
               </label>
-            </div>
+          </div>
 
             <div class="relative">
-              <select
-                id="category_id"
-                formControlName="category_id"
+            <select
+              id="category_id"
+              formControlName="category_id"
                 class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 bg-white"
-              >
-                <option value="">Select a category</option>
-                <option *ngFor="let category of categories" [value]="category.id">
-                  {{ category.name }}
-                </option>
-              </select>
+            >
+              <option value="">Select a category</option>
+              <option *ngFor="let category of categories" [value]="category.id">
+                {{ category.name }}
+              </option>
+            </select>
               <label class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700">
                 Category
               </label>
-            </div>
           </div>
+        </div>
 
           <div class="mt-6">
             <div class="relative">
-              <input
-                type="number"
-                id="reading_time"
-                formControlName="reading_time"
-                min="1"
+          <input
+            type="number"
+            id="reading_time"
+            formControlName="reading_time"
+            min="1"
                 class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
-                placeholder="5"
-              >
+            placeholder="5"
+          >
               <label for="reading_time" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
                 Reading Time (minutes)
               </label>
@@ -217,26 +217,26 @@ import { SupabaseService } from '../../../../services/supabase.service';
           
           <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <div class="relative">
-              <input
-                type="text"
-                id="seo_title"
-                formControlName="seo_title"
+            <input
+              type="text"
+              id="seo_title"
+              formControlName="seo_title"
                 class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
-                placeholder="SEO optimized title"
-              >
+              placeholder="SEO optimized title"
+            >
               <label for="seo_title" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
                 SEO Title
               </label>
-            </div>
+          </div>
 
             <div class="relative">
-              <textarea
-                id="seo_description"
-                formControlName="seo_description"
-                rows="2"
+            <textarea
+              id="seo_description"
+              formControlName="seo_description"
+              rows="2"
                 class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent resize-none"
-                placeholder="SEO description (160 characters max)"
-              ></textarea>
+              placeholder="SEO description (160 characters max)"
+            ></textarea>
               <label for="seo_description" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
                 SEO Description
               </label>
@@ -283,10 +283,10 @@ import { SupabaseService } from '../../../../services/supabase.service';
 
             <div class="flex items-center">
               <label class="relative flex items-center p-4 rounded-lg border-2 border-gray-200 cursor-pointer hover:border-blue-300 transition-colors duration-200 w-full">
-                <input
-                  id="is_featured"
-                  type="checkbox"
-                  formControlName="is_featured"
+              <input
+                id="is_featured"
+                type="checkbox"
+                formControlName="is_featured"
                   class="sr-only"
                 >
                 <span class="flex items-center">

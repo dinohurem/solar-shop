@@ -44,11 +44,11 @@ interface Category {
           
           <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <div class="relative">
-              <input
-                type="text"
-                id="name"
-                formControlName="name"
-                (input)="onNameChange($event)"
+            <input
+              type="text"
+              id="name"
+              formControlName="name"
+              (input)="onNameChange($event)"
                 class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
                 placeholder="Category Name"
               >
@@ -59,15 +59,15 @@ interface Category {
                 <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                 </svg>
-                Name is required
-              </div>
+              Name is required
             </div>
+          </div>
 
             <div class="relative">
-              <input
-                type="text"
-                id="slug"
-                formControlName="slug"
+            <input
+              type="text"
+              id="slug"
+              formControlName="slug"
                 class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
                 placeholder="URL Slug"
               >
@@ -78,20 +78,20 @@ interface Category {
                 <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                 </svg>
-                Slug is required
-              </div>
+              Slug is required
             </div>
           </div>
+        </div>
 
           <div class="mt-6">
             <div class="relative">
-              <textarea
-                id="description"
-                formControlName="description"
-                rows="3"
+          <textarea
+            id="description"
+            formControlName="description"
+            rows="3"
                 class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent resize-none"
                 placeholder="Category Description"
-              ></textarea>
+          ></textarea>
               <label for="description" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
                 Description
               </label>
@@ -110,27 +110,27 @@ interface Category {
           
           <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <div class="relative">
-              <input
-                type="url"
-                id="image_url"
-                formControlName="image_url"
+          <input
+            type="url"
+            id="image_url"
+            formControlName="image_url"
                 class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
-                placeholder="https://example.com/image.jpg"
-              >
+            placeholder="https://example.com/image.jpg"
+          >
               <label for="image_url" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
                 Image URL
               </label>
-            </div>
+        </div>
 
             <div class="relative">
-              <input
-                type="number"
-                id="sort_order"
-                formControlName="sort_order"
-                min="0"
+            <input
+              type="number"
+              id="sort_order"
+              formControlName="sort_order"
+              min="0"
                 class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
-                placeholder="0"
-              >
+              placeholder="0"
+            >
               <label for="sort_order" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
                 Sort Order
               </label>
@@ -148,10 +148,10 @@ interface Category {
           </h3>
           
           <label class="relative flex items-center p-4 rounded-lg border-2 border-gray-200 cursor-pointer hover:border-blue-300 transition-colors duration-200">
-            <input
-              id="is_active"
-              type="checkbox"
-              formControlName="is_active"
+              <input
+                id="is_active"
+                type="checkbox"
+                formControlName="is_active"
               class="sr-only"
             >
             <span class="flex items-center">
@@ -165,7 +165,7 @@ interface Category {
               <div>
                 <span class="text-sm font-medium text-gray-700">Active</span>
                 <p class="text-sm text-gray-500">Enable this category in the store</p>
-              </div>
+            </div>
             </span>
           </label>
         </div>
