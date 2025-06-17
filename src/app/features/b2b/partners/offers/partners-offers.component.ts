@@ -23,7 +23,7 @@ import { Offer } from '../../../../shared/models/offer.model';
       </div>
 
       <!-- Login Required Banner (for non-authenticated users) -->
-      <div *ngIf="!isAuthenticated" class="bg-solar-50 border-b border-solar-200">
+      <div *ngIf="!isAuthenticated || !hasCompanyId" class="bg-solar-50 border-b border-solar-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div class="flex items-center justify-between">
             <div class="flex items-center space-x-3">
@@ -32,13 +32,20 @@ import { Offer } from '../../../../shared/models/offer.model';
               </svg>
               <div>
                 <p class="text-sm font-medium text-solar-800">
-                  {{ 'b2b.offers.loginRequired' | translate }}
+                  <span *ngIf="!isAuthenticated">{{ 'b2b.offers.loginRequired' | translate }}</span>
+                  <span *ngIf="isAuthenticated && !hasCompanyId">Partner verification required to view exclusive offers</span>
                 </p>
               </div>
             </div>
-            <button (click)="navigateToLogin()" 
+            <button *ngIf="!isAuthenticated" 
+                    (click)="navigateToLogin()" 
                     class="bg-solar-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-solar-700 transition-colors">
               {{ 'b2b.offers.loginToViewOffers' | translate }}
+            </button>
+            <button *ngIf="isAuthenticated && !hasCompanyId" 
+                    (click)="navigateToPartnerRegistration()" 
+                    class="bg-solar-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-solar-700 transition-colors">
+              Become a Partner
             </button>
           </div>
         </div>
@@ -90,7 +97,7 @@ import { Offer } from '../../../../shared/models/offer.model';
               </p>
 
               <!-- Pricing -->
-              <div *ngIf="isAuthenticated" class="mb-4">
+              <div *ngIf="isAuthenticated && hasCompanyId" class="mb-4">
                 <div class="flex items-center justify-between">
                   <div>
                     <span class="text-2xl font-bold text-solar-600">
@@ -110,17 +117,18 @@ import { Offer } from '../../../../shared/models/offer.model';
               </div>
 
               <!-- Login Required Pricing -->
-              <div *ngIf="!isAuthenticated" class="mb-4 text-center py-4 bg-gray-50 rounded-lg">
+              <div *ngIf="!isAuthenticated || !hasCompanyId" class="mb-4 text-center py-4 bg-gray-50 rounded-lg">
                 <svg class="w-8 h-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                 </svg>
                 <p class="text-sm text-gray-500 font-medium">
-                  {{ 'b2b.offers.loginToViewPrices' | translate }}
+                  <span *ngIf="!isAuthenticated">{{ 'b2b.offers.loginToViewPrices' | translate }}</span>
+                  <span *ngIf="isAuthenticated && !hasCompanyId">Partner verification required to view pricing</span>
                 </p>
               </div>
 
               <!-- Coupon Code -->
-              <div *ngIf="offer.couponCode && isAuthenticated" class="mb-4">
+              <div *ngIf="offer.couponCode && isAuthenticated && hasCompanyId" class="mb-4">
                 <div class="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-3">
                   <div class="flex items-center justify-between">
                     <div>
@@ -145,7 +153,7 @@ import { Offer } from '../../../../shared/models/offer.model';
 
               <!-- Actions -->
               <div class="space-y-2">
-                <button *ngIf="isAuthenticated" 
+                <button *ngIf="isAuthenticated && hasCompanyId" 
                         (click)="claimOffer(offer)"
                         [disabled]="isOfferExpired(offer.endDate)"
                         class="w-full bg-solar-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-solar-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors">
@@ -157,6 +165,12 @@ import { Offer } from '../../../../shared/models/offer.model';
                         (click)="navigateToLogin()"
                         class="w-full bg-solar-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-solar-700 transition-colors">
                   {{ 'b2b.offers.signInToClaim' | translate }}
+                </button>
+
+                <button *ngIf="isAuthenticated && !hasCompanyId" 
+                        (click)="navigateToPartnerRegistration()"
+                        class="w-full bg-solar-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-solar-700 transition-colors">
+                  Become a Partner to Claim
                 </button>
                 
                 <button (click)="viewOfferDetails(offer)" 
@@ -182,6 +196,8 @@ import { Offer } from '../../../../shared/models/offer.model';
 })
 export class PartnersOffersComponent implements OnInit {
   isAuthenticated = false; // This should be connected to your auth service
+  hasCompanyId = false; // Check if user has company association
+  isPartner = false; // Check if user is verified partner
 
   // Sample B2B offers data
   b2bOffers: Offer[] = [
@@ -191,7 +207,7 @@ export class PartnersOffersComponent implements OnInit {
       originalPrice: 15000,
       discountedPrice: 12000,
       discountPercentage: 20,
-      imageUrl: '/assets/images/offers/bulk-solar-panels.jpg',
+      imageUrl: 'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=800&h=600&fit=crop',
       description: 'Complete solar panel installation package for commercial properties. Includes 100+ high-efficiency panels, professional installation, and 5-year maintenance.',
       shortDescription: 'Bulk solar installation with professional service',
       type: 'bulk-discount',
@@ -208,7 +224,7 @@ export class PartnersOffersComponent implements OnInit {
       originalPrice: 8500,
       discountedPrice: 6800,
       discountPercentage: 25,
-      imageUrl: '/assets/images/offers/inverter-bundle.jpg',
+      imageUrl: 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=800&h=600&fit=crop',
       description: 'Exclusive bundle for certified partners including 3 premium inverters, monitoring system, and extended warranty coverage.',
       shortDescription: 'Premium inverter bundle with monitoring',
       type: 'partner-exclusive',
@@ -225,7 +241,7 @@ export class PartnersOffersComponent implements OnInit {
       originalPrice: 12000,
       discountedPrice: 9600,
       discountPercentage: 20,
-      imageUrl: '/assets/images/offers/battery-storage.jpg',
+      imageUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800&h=600&fit=crop',
       description: 'Complete energy storage solution with lithium batteries, smart management system, and installation support.',
       shortDescription: 'Complete energy storage with smart management',
       type: 'early-bird',
@@ -242,7 +258,7 @@ export class PartnersOffersComponent implements OnInit {
       originalPrice: 5000,
       discountedPrice: 4000,
       discountPercentage: 20,
-      imageUrl: '/assets/images/offers/mounting-system.jpg',
+      imageUrl: 'https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?w=800&h=600&fit=crop',
       description: 'Professional-grade mounting systems designed for large-scale commercial installations. Includes all hardware and installation guides.',
       shortDescription: 'Professional mounting systems for commercial use',
       type: 'volume-discount',
@@ -252,12 +268,38 @@ export class PartnersOffersComponent implements OnInit {
       endDate: '2024-08-31',
       featured: false,
       isB2B: true
+    },
+    {
+      id: '5',
+      title: 'Smart Monitoring System Bundle',
+      originalPrice: 3500,
+      discountedPrice: 2800,
+      discountPercentage: 20,
+      imageUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop',
+      description: 'Advanced monitoring and analytics system for tracking solar performance across multiple installations.',
+      shortDescription: 'Smart monitoring and analytics system',
+      type: 'partner-exclusive',
+      status: 'active',
+      couponCode: 'MONITOR20SMART',
+      startDate: '2024-01-01',
+      endDate: '2024-07-15',
+      featured: true,
+      isB2B: true
     }
   ];
 
   constructor(private router: Router) {
-    // TODO: Connect to auth service
+    // TODO: Connect to auth service and check user status
     // this.authService.isAuthenticated$.subscribe(isAuth => this.isAuthenticated = isAuth);
+    // this.authService.user$.subscribe(user => {
+    //   this.hasCompanyId = !!user?.companyId;
+    //   this.isPartner = user?.role === 'partner' || user?.isVerifiedPartner;
+    // });
+
+    // For demo purposes, simulate authenticated partner
+    this.isAuthenticated = true;
+    this.hasCompanyId = true;
+    this.isPartner = true;
   }
 
   ngOnInit(): void {
@@ -268,6 +310,11 @@ export class PartnersOffersComponent implements OnInit {
   navigateToLogin(): void {
     // Navigate to login page
     window.location.href = '/login';
+  }
+
+  navigateToPartnerRegistration(): void {
+    // Navigate to partner registration page
+    this.router.navigate(['/partners/register']);
   }
 
   claimOffer(offer: Offer): void {

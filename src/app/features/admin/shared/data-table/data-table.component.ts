@@ -1,7 +1,8 @@
-import { Component, Input, Output, EventEmitter, OnInit, inject } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, inject, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { LucideAngularModule, Edit, Trash2, Upload, Download, Plus, Search, Eye, EyeOff, Check, X, Printer } from 'lucide-angular';
 
 export interface TableColumn {
   key: string;
@@ -35,7 +36,7 @@ export interface TableConfig {
 @Component({
   selector: 'app-data-table',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, LucideAngularModule],
   template: `
     <div class="bg-white rounded-lg shadow-sm border border-gray-200">
       <!-- Table Header -->
@@ -56,9 +57,11 @@ export interface TableConfig {
                 (input)="onSearch()"
                 placeholder="Search..."
                 class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-              <svg class="absolute left-3 top-2.5 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-              </svg>
+              <lucide-angular 
+                name="search" 
+                class="absolute left-3 top-2.5 w-4 h-4 text-gray-400"
+                [img]="SearchIcon">
+              </lucide-angular>
             </div>
             
             <!-- CSV Import -->
@@ -72,9 +75,11 @@ export interface TableConfig {
               <button
                 (click)="fileInput.click()"
                 class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-                <svg class="w-4 h-4 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
-                </svg>
+                <lucide-angular 
+                  name="upload" 
+                  class="w-4 h-4 inline-block mr-2"
+                  [img]="UploadIcon">
+                </lucide-angular>
                 Import CSV
               </button>
             </div>
@@ -84,9 +89,11 @@ export interface TableConfig {
               *ngIf="config.allowExport"
               (click)="exportToCsv()"
               class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-              <svg class="w-4 h-4 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-              </svg>
+              <lucide-angular 
+                name="download" 
+                class="w-4 h-4 inline-block mr-2"
+                [img]="DownloadIcon">
+              </lucide-angular>
               Export
             </button>
             
@@ -94,9 +101,11 @@ export interface TableConfig {
             <button
               (click)="onAdd()"
               class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-              <svg class="w-4 h-4 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-              </svg>
+              <lucide-angular 
+                name="plus" 
+                class="w-4 h-4 inline-block mr-2"
+                [img]="PlusIcon">
+              </lucide-angular>
               Add New
             </button>
           </div>
@@ -136,18 +145,6 @@ export interface TableConfig {
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
-            <!-- No data message -->
-            <tr *ngIf="paginatedData.length === 0 && !loading" class="text-center">
-              <td [attr.colspan]="config.columns.length + 1" class="px-6 py-12 text-gray-500">
-                <div class="flex flex-col items-center">
-                  <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m8-4h.01M9 9h1m4 0h.01M9 12h1m4 0h.01"/>
-                  </svg>
-                  <p class="text-lg font-medium">No data available</p>
-                  <p class="text-sm">{{ searchTerm ? 'No results found for your search.' : 'Get started by adding your first record.' }}</p>
-                </div>
-              </td>
-            </tr>
 
             <!-- Loading state -->
             <tr *ngIf="loading" class="text-center">
@@ -227,8 +224,11 @@ export interface TableConfig {
                             [class]="action.class || 'text-blue-600 hover:text-blue-900'"
                             class="p-1 rounded hover:bg-gray-100 transition-colors"
                             [title]="action.label">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" [innerHTML]="action.icon">
-                      </svg>
+                      <lucide-angular 
+                        [name]="action.icon" 
+                        class="w-4 h-4"
+                        [img]="getIconForAction(action.icon)">
+                      </lucide-angular>
                       <span class="sr-only">{{ action.label }}</span>
                     </button>
                   </ng-container>
@@ -278,9 +278,11 @@ export interface TableConfig {
         <div class="mt-6">
           <button (click)="onAdd()" 
                   class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-            </svg>
+            <lucide-angular 
+              name="plus" 
+              class="w-4 h-4 mr-2"
+              [img]="PlusIcon">
+            </lucide-angular>
             Add {{ title.toLowerCase().slice(0, -1) }}
           </button>
         </div>
@@ -293,7 +295,7 @@ export interface TableConfig {
     }
   `]
 })
-export class DataTableComponent implements OnInit {
+export class DataTableComponent implements OnInit, OnChanges {
   @Input() title: string = '';
   @Input() data: any[] = [];
   @Input() config!: TableConfig;
@@ -303,6 +305,19 @@ export class DataTableComponent implements OnInit {
   @Output() addClicked = new EventEmitter<void>();
   @Output() csvImported = new EventEmitter<any[]>();
   @Output() rowClicked = new EventEmitter<any>();
+
+  // Lucide Icons
+  readonly SearchIcon = Search;
+  readonly UploadIcon = Upload;
+  readonly DownloadIcon = Download;
+  readonly PlusIcon = Plus;
+  readonly EditIcon = Edit;
+  readonly Trash2Icon = Trash2;
+  readonly EyeIcon = Eye;
+  readonly EyeOffIcon = EyeOff;
+  readonly CheckIcon = Check;
+  readonly XIcon = X;
+  readonly PrinterIcon = Printer;
 
   searchTerm: string = '';
   sortColumn: string = '';
@@ -488,6 +503,37 @@ export class DataTableComponent implements OnInit {
       this.paginatedData = this.filteredData.slice(startIndex, startIndex + this.pageSize);
     } else {
       this.paginatedData = this.filteredData;
+    }
+  }
+
+  getIconForAction(iconName: string): any {
+    switch (iconName) {
+      case 'edit':
+        return this.EditIcon;
+      case 'delete':
+        return this.Trash2Icon;
+      case 'trash2':
+        return this.Trash2Icon;
+      case 'upload':
+        return this.UploadIcon;
+      case 'download':
+        return this.DownloadIcon;
+      case 'plus':
+        return this.PlusIcon;
+      case 'search':
+        return this.SearchIcon;
+      case 'eye':
+        return this.EyeIcon;
+      case 'eye-off':
+        return this.EyeOffIcon;
+      case 'check':
+        return this.CheckIcon;
+      case 'x':
+        return this.XIcon;
+      case 'printer':
+        return this.PrinterIcon;
+      default:
+        return this.EditIcon; // Default fallback
     }
   }
 } 

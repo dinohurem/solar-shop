@@ -354,6 +354,40 @@ export class SupabaseService {
         return data;
     }
 
+    async getB2BOffers(filters?: {
+        featured?: boolean;
+        limit?: number;
+        offset?: number;
+    }) {
+        let query = this.supabase
+            .from('offers')
+            .select('*')
+            .eq('is_active', true)
+            .eq('is_b2b', true)
+            .eq('status', 'active')
+            .lte('start_date', new Date().toISOString())
+            .or('end_date.is.null,end_date.gte.' + new Date().toISOString());
+
+        if (filters?.featured !== undefined) {
+            query = query.eq('featured', filters.featured);
+        }
+
+        if (filters?.limit) {
+            query = query.limit(filters.limit);
+        }
+
+        if (filters?.offset) {
+            query = query.range(filters.offset, (filters.offset + (filters.limit || 10)) - 1);
+        }
+
+        // Order by featured first, then by priority
+        const { data, error } = await query.order('featured', { ascending: false })
+            .order('priority', { ascending: true });
+
+        if (error) throw error;
+        return data;
+    }
+
     async getCartItems(userId?: string, sessionId?: string) {
         let query = this.supabase
             .from('cart_items')

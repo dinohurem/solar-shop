@@ -27,7 +27,7 @@ interface CompanyPricingSummary {
         </div>
       </div>
       <app-data-table
-        title="Companies with Custom Pricing"
+        title="Company Prices"
         [data]="(companyPricing$ | async) || []"
         [config]="tableConfig"
         [loading]="(loading$ | async) || false"
@@ -57,7 +57,7 @@ export class AdminCompanyPricingComponent implements OnInit {
       { key: 'updated_at', label: 'Last Updated', type: 'date', sortable: true }
     ],
     actions: [
-      { label: 'Delete All', icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>', action: 'delete', class: 'text-red-600 hover:text-red-900' }
+      { label: 'Delete All', icon: 'trash2', action: 'delete', class: 'text-red-600 hover:text-red-900' }
     ],
     searchable: true,
     sortable: true,

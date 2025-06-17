@@ -132,10 +132,11 @@ import { Order } from '../../../shared/models/order.model';
                   </div>
                   <div class="mt-2">
                     <a 
-                      *ngIf="item.productId; else disabledLink"
-                      [routerLink]="['/products', item.productId]"
+                      *ngIf="item.productId || item.productName; else disabledLink"
+                      [routerLink]="item.productId ? ['/products', item.productId] : ['/products']"
+                      [queryParams]="!item.productId && item.productName ? { search: item.productName } : null"
                       class="inline-flex items-center text-xs text-blue-600 hover:text-blue-800 font-medium cursor-pointer transition-colors">
-                      View Product Details
+                      {{ item.productId ? 'View Product Details' : 'Search for Product' }}
                     </a>
                     <ng-template #disabledLink>
                       <span class="inline-flex items-center text-xs text-gray-400 font-medium">

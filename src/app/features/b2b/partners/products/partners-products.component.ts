@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
@@ -373,7 +373,7 @@ export class PartnersProductsComponent implements OnInit {
       id: '1',
       name: 'SolarMax Pro 400W Monocrystalline Panel',
       description: 'High-efficiency monocrystalline solar panel with 21.5% efficiency rating and 25-year warranty.',
-      imageUrl: '/assets/images/products/solar-panel-1.jpg',
+      imageUrl: 'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=500&h=500&fit=crop',
       category: 'solar-panels',
       sku: 'SM-400-MONO',
       retailPrice: 299.99,
@@ -387,7 +387,7 @@ export class PartnersProductsComponent implements OnInit {
       id: '2',
       name: 'PowerInvert 5000W Hybrid Inverter',
       description: 'Advanced hybrid inverter with battery storage capability and smart grid integration.',
-      imageUrl: '/assets/images/products/inverter-1.jpg',
+      imageUrl: 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=500&h=500&fit=crop',
       category: 'inverters',
       sku: 'PI-5000-HYB',
       retailPrice: 1899.99,
@@ -401,7 +401,7 @@ export class PartnersProductsComponent implements OnInit {
       id: '3',
       name: 'EnergyStore 10kWh Lithium Battery',
       description: 'High-capacity lithium iron phosphate battery system with 6000+ cycle life.',
-      imageUrl: '/assets/images/products/battery-1.jpg',
+      imageUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=500&h=500&fit=crop',
       category: 'batteries',
       sku: 'ES-10KWH-LFP',
       retailPrice: 4999.99,
@@ -415,7 +415,7 @@ export class PartnersProductsComponent implements OnInit {
       id: '4',
       name: 'SecureMount Roof Mounting System',
       description: 'Universal roof mounting system compatible with most panel types and roof materials.',
-      imageUrl: '/assets/images/products/mounting-1.jpg',
+      imageUrl: 'https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?w=500&h=500&fit=crop',
       category: 'mounting',
       sku: 'SM-ROOF-UNI',
       retailPrice: 149.99,
@@ -429,7 +429,7 @@ export class PartnersProductsComponent implements OnInit {
       id: '5',
       name: 'SmartMonitor Energy Management System',
       description: 'Real-time energy monitoring and management system with mobile app integration.',
-      imageUrl: '/assets/images/products/monitor-1.jpg',
+      imageUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=500&h=500&fit=crop',
       category: 'accessories',
       sku: 'SM-EMS-001',
       retailPrice: 599.99,
@@ -443,7 +443,7 @@ export class PartnersProductsComponent implements OnInit {
       id: '6',
       name: 'Industrial Grade 600W Panel',
       description: 'Heavy-duty solar panel designed for commercial and industrial applications.',
-      imageUrl: '/assets/images/products/solar-panel-2.jpg',
+      imageUrl: 'https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?w=500&h=500&fit=crop',
       category: 'solar-panels',
       sku: 'IG-600-COMM',
       retailPrice: 449.99,
@@ -452,18 +452,52 @@ export class PartnersProductsComponent implements OnInit {
       minimumOrder: 20,
       inStock: true,
       partnerOnly: true
+    },
+    {
+      id: '7',
+      name: 'Premium DC Cables 10AWG',
+      description: 'High-quality DC cables with MC4 connectors for solar panel installations.',
+      imageUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=500&fit=crop',
+      category: 'cables',
+      sku: 'PDC-10AWG-MC4',
+      retailPrice: 89.99,
+      partnerPrice: 71.99,
+      savings: 18.00,
+      minimumOrder: 25,
+      inStock: true,
+      partnerOnly: false
+    },
+    {
+      id: '8',
+      name: 'Professional Installation Tool Kit',
+      description: 'Complete tool kit for professional solar panel installation and maintenance.',
+      imageUrl: 'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=500&h=500&fit=crop',
+      category: 'tools',
+      sku: 'PIT-COMPLETE',
+      retailPrice: 299.99,
+      partnerPrice: 239.99,
+      savings: 60.00,
+      minimumOrder: 1,
+      inStock: true,
+      partnerOnly: true
     }
   ];
 
   filteredProducts: PartnerProduct[] = [];
 
-  constructor(private router: Router) {
+  constructor(private router: Router, private activatedRoute: ActivatedRoute) {
     // TODO: Connect to auth service
     // this.authService.isAuthenticated$.subscribe(isAuth => this.isAuthenticated = isAuth);
   }
 
   ngOnInit(): void {
     this.filteredProducts = [...this.allProducts];
+    this.activatedRoute.queryParams.subscribe(params => {
+      if (params['category']) {
+        this.selectedCategory = params['category'];
+        this.filterProducts();
+      }
+    });
   }
 
   filterProducts(): void {

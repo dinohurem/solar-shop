@@ -23,6 +23,7 @@ import { PartnersComponent } from './features/b2b/partners/partners.component';
 import { PartnersRegisterComponent } from './features/b2b/partners/register/partners-register.component';
 import { PartnersProductsComponent } from './features/b2b/partners/products/partners-products.component';
 import { PartnersOffersComponent } from './features/b2b/partners/offers/partners-offers.component';
+import { PartnersOfferDetailsComponent } from './features/b2b/partners/offers/partners-offer-details.component';
 import { PartnersContactComponent } from './features/b2b/partners/contact/partners-contact.component';
 import { B2bLayoutComponent } from './features/b2b/shared/layout/b2b-layout.component';
 import { CheckoutComponent } from './features/b2c/checkout/checkout.component';
@@ -109,6 +110,7 @@ export const routes: Routes = [
             { path: 'register', component: PartnersRegisterComponent },
             { path: 'products', component: PartnersProductsComponent },
             { path: 'offers', component: PartnersOffersComponent },
+            { path: 'offers/:id', component: PartnersOfferDetailsComponent },
             { path: 'contact', component: PartnersContactComponent },
         ]
     },

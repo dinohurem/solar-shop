@@ -231,6 +231,7 @@ export class TranslationService {
                 offers: {
                     title: 'Ponude za partnere',
                     subtitle: 'Ekskluzivne ponude i popusti za naše partnere',
+                    currentHighlights: 'Trenutni istaknuti sadržaj',
                     loginRequired: 'Potrebna je prijava da biste vidjeli ponude',
                     loginToViewOffers: 'Prijavite se za pregled ponuda',
                     loginToViewPrices: 'Prijavite se za pregled cijena',
@@ -1160,19 +1161,18 @@ export class TranslationService {
             },
             // Partners Footer
             b2bFooter: {
-                partnerResources: 'Resursi za partnere',
-                dashboard: 'Nadzorna ploča',
-                orderHistory: 'Povijest narudžbi',
-                training: 'Obuka',
-                support: 'Podrška',
-                phone: 'Telefon',
+                partnerResources: 'Partner Resources',
+                dashboard: 'Dashboard',
+                orderHistory: 'Order History',
+                training: 'Training',
+                support: 'Support',
+                phone: 'Phone',
                 email: 'Email',
-                helpCenter: 'Centar za pomoć',
-                quickAccess: 'Brzi pristup',
-                backToB2C: '← Povratak na B2C',
-                becomePartner: 'Postanite partner'
-            },
-
+                helpCenter: 'Help Center',
+                quickAccess: 'Quick Access',
+                backToB2C: 'Back to B2C',
+                becomePartner: 'Become a Partner'
+            }
         },
         en: {
             // Navigation
@@ -1392,6 +1392,7 @@ export class TranslationService {
                 offers: {
                     title: 'Offers for Partners',
                     subtitle: 'Exclusive offers and discounts for our partners',
+                    currentHighlights: 'Current Highlights',
                     loginRequired: 'Login required to view offers',
                     loginToViewOffers: 'Login to view offers',
                     loginToViewPrices: 'Login to view prices',
@@ -2330,10 +2331,9 @@ export class TranslationService {
                 email: 'Email',
                 helpCenter: 'Help Center',
                 quickAccess: 'Quick Access',
-                backToB2C: '← Back to B2C',
+                backToB2C: 'Back to B2C',
                 becomePartner: 'Become a Partner'
-            },
-
+            }
         }
     };
 

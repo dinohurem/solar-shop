@@ -63,7 +63,12 @@ export const selectFilteredPosts = createSelector(
             );
         }
 
-        return filteredPosts;
+        // Sort by updatedAt (most recently updated first), fallback to publishedAt
+        return [...filteredPosts].sort((a, b) => {
+            const aDate = new Date(a.updatedAt || a.publishedAt).getTime();
+            const bDate = new Date(b.updatedAt || b.publishedAt).getTime();
+            return bDate - aDate;
+        });
     }
 );
 

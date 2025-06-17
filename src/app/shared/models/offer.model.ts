@@ -9,6 +9,7 @@ export interface Offer {
     shortDescription?: string;
     type?: string;
     status?: string;
+    code?: string;
     couponCode?: string;
     startDate?: string;
     endDate?: string;

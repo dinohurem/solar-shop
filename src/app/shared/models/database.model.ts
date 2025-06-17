@@ -294,6 +294,7 @@ export interface Database {
             offers: {
                 Row: {
                     id: string;
+                    code?: string;
                     title: string;
                     description: string;
                     short_description: string;
@@ -307,7 +308,8 @@ export interface Database {
                     discount_value: number;
                     max_discount_amount?: number;
                     currency?: string;
-                    coupon_code?: string;
+                    original_price?: number;
+                    discounted_price?: number;
                     auto_apply: boolean;
                     min_order_amount?: number;
                     max_order_amount?: number;
@@ -315,17 +317,19 @@ export interface Database {
                     applicable_category_ids?: string[];
                     excluded_product_ids?: string[];
                     excluded_category_ids?: string[];
-                    max_total_usage?: number;
+                    max_usage?: number;
                     max_usage_per_customer?: number;
                     current_usage: number;
                     start_date: string;
                     end_date?: string;
                     is_active: boolean;
+                    is_b2b: boolean;
                     created_at: string;
                     updated_at: string;
                 };
                 Insert: {
                     id?: string;
+                    code?: string;
                     title: string;
                     description: string;
                     short_description: string;
@@ -339,7 +343,8 @@ export interface Database {
                     discount_value: number;
                     max_discount_amount?: number;
                     currency?: string;
-                    coupon_code?: string;
+                    original_price?: number;
+                    discounted_price?: number;
                     auto_apply?: boolean;
                     min_order_amount?: number;
                     max_order_amount?: number;
@@ -347,17 +352,19 @@ export interface Database {
                     applicable_category_ids?: string[];
                     excluded_product_ids?: string[];
                     excluded_category_ids?: string[];
-                    max_total_usage?: number;
+                    max_usage?: number;
                     max_usage_per_customer?: number;
                     current_usage?: number;
                     start_date: string;
                     end_date?: string;
                     is_active?: boolean;
+                    is_b2b?: boolean;
                     created_at?: string;
                     updated_at?: string;
                 };
                 Update: {
                     id?: string;
+                    code?: string;
                     title?: string;
                     description?: string;
                     short_description?: string;
@@ -371,7 +378,8 @@ export interface Database {
                     discount_value?: number;
                     max_discount_amount?: number;
                     currency?: string;
-                    coupon_code?: string;
+                    original_price?: number;
+                    discounted_price?: number;
                     auto_apply?: boolean;
                     min_order_amount?: number;
                     max_order_amount?: number;
@@ -379,12 +387,13 @@ export interface Database {
                     applicable_category_ids?: string[];
                     excluded_product_ids?: string[];
                     excluded_category_ids?: string[];
-                    max_total_usage?: number;
+                    max_usage?: number;
                     max_usage_per_customer?: number;
                     current_usage?: number;
                     start_date?: string;
                     end_date?: string;
                     is_active?: boolean;
+                    is_b2b?: boolean;
                     updated_at?: string;
                 };
             };

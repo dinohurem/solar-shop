@@ -23,6 +23,7 @@
     "@ngrx/store-devtools": "^19.2.0",
     "@supabase/supabase-js": "^2.49.7",
     "lottie-web": "^5.12.2",
+    "lucide-angular": "^0.515.0",
     "ngx-lottie": "^13.0.1",
     "postcss-apply": "^0.12.0",
     "rxjs": "^7.8.1",
