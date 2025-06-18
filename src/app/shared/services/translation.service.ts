@@ -814,7 +814,6 @@ export class TranslationService {
                 issueResolution: 'Pomoći vam s bilo kojim problemima, osiguravajući brza i učinkovita rješenja.',
                 technicalSupport: 'Tehnička podrška i izložbeni salon',
                 technicalSupportText: 'Ako želite direktniji kontakt, ili ako vaš projekt zahtijeva specifičnu tehničku podršku, možete posjetiti jedan od naših centara za pomoć, gdje možete razgovarati s našim stručnjacima i vidjeti proizvode izbliza.',
-                viewNearestPoint: 'Pogledajte najbliže mjesto',
                 returnsShipping: 'Politika povrata i dostave',
                 returnsShippingText: 'Konzultirajte naš odjel posvećen Politici povrata i dostave da biste saznali o postupcima povrata, rokovima dostave i uvjetima za bilo kakve povrate novca. Uvijek smo transparentni, tako da možete kupovati s povjerenjem znajući da se možete osloniti na nas u slučaju promjena ili problema.',
                 learnMore: 'Saznajte više',
@@ -1170,7 +1169,7 @@ export class TranslationService {
                 email: 'Email',
                 helpCenter: 'Help Center',
                 quickAccess: 'Quick Access',
-                backToB2C: 'Back to B2C',
+                backToB2C: 'Nazad na korisnički portal',
                 becomePartner: 'Become a Partner'
             }
         },
@@ -1975,7 +1974,6 @@ export class TranslationService {
                 issueResolution: 'Help you with any issues, ensuring quick and effective solutions.',
                 technicalSupport: 'Technical Support & Showroom',
                 technicalSupportText: 'If you want a more direct contact, or if your project requires specific technical support, you may visit one of our showrooms or assistance centers, where you can talk to our experts and see the products up close.',
-                viewNearestPoint: 'View the nearest point',
                 returnsShipping: 'Returns & Shipping Policy',
                 returnsShippingText: 'Consult our section dedicated to Returns and Shipping Policy to learn about the return procedures, delivery times and conditions for any refunds. We are always transparent, so you can shop with confidence knowing that you can count on us in case of changes or issues.',
                 learnMore: 'Learn more',
@@ -2331,7 +2329,7 @@ export class TranslationService {
                 email: 'Email',
                 helpCenter: 'Help Center',
                 quickAccess: 'Quick Access',
-                backToB2C: 'Back to B2C',
+                backToB2C: 'Back to User Portal',
                 becomePartner: 'Become a Partner'
             }
         }

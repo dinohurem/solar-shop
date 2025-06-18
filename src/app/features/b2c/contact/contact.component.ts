@@ -210,14 +210,6 @@ interface FAQItem {
               <p class="text-gray-600 font-['DM_Sans'] leading-relaxed">
                 {{ 'contactSupport.technicalSupportText' | translate }}
               </p>
-              <div class="pt-4">
-                <button class="inline-flex items-center space-x-2 text-solar-600 font-semibold hover:text-solar-700 transition-colors font-['DM_Sans']">
-                  <span>{{ 'contactSupport.viewNearestPoint' | translate }}</span>
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                  </svg>
-                </button>
-              </div>
             </div>
           </div>
 

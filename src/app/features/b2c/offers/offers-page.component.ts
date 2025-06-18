@@ -29,23 +29,6 @@ import { Offer } from '../../../shared/models/offer.model';
 
       <!-- Offers Grid -->
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <!-- Filter Bar -->
-        <div class="flex flex-wrap items-center justify-between mb-12 gap-4">
-          <div class="flex items-center space-x-4">
-            <span class="text-lg font-semibold text-[#324053] font-['Poppins']">Filter by:</span>
-            <select class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-solar-500 focus:border-transparent font-['DM_Sans']">
-              <option value="">{{ 'offers.allCategories' | translate }}</option>
-              <option value="solar-panels">{{ 'offers.solarPanels' | translate }}</option>
-              <option value="inverters">{{ 'offers.inverters' | translate }}</option>
-              <option value="batteries">{{ 'offers.batteries' | translate }}</option>
-              <option value="accessories">{{ 'offers.accessories' | translate }}</option>
-            </select>
-          </div>
-          <div class="text-sm text-gray-600 font-['DM_Sans']">
-            {{ 'offers.offersAvailable' | translate:{ count: ((offers$ | async)?.length || 0) } }}
-          </div>
-        </div>
-
         <!-- Offers Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           <div 

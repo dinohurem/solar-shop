@@ -22,9 +22,6 @@ import { Subject, takeUntil } from 'rxjs';
                 class="h-8 w-auto sm:h-10 lg:h-10 object-contain group-hover:scale-105 transition-transform duration-300 filter drop-shadow-sm"
                 onerror="console.error('Logo failed to load:', this.src); this.src='assets/images/logo.png'"
               >
-              <div>
-                <span class="ml-2 px-2 py-1 bg-solar-100 text-solar-800 text-xs font-medium rounded-full">B2B</span>
-              </div>
             </a>
           </div>
 

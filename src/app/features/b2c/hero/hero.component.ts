@@ -24,7 +24,6 @@ import { Offer } from '../../../shared/models/offer.model';
           alt="Sustainable Building Materials" 
           class="w-full h-full object-cover opacity-20"
           onerror="console.error('Hero background image failed to load:', this.src); this.style.display='none'"
-          onload="console.log('Hero background image loaded successfully')"
         >
         <!-- Gradient Overlay -->
         <!-- <div class="absolute inset-0 bg-gradient-to-br from-solar-600/80 to-solar-800/80 opacity-55"></div> -->
