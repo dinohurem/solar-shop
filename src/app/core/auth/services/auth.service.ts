@@ -48,8 +48,6 @@ export class AuthService {
 
   private async fetchUserProfile(userId: string): Promise<User | null> {
     try {
-      console.log('Fetching user profile for userId:', userId);
-
       // Get the Supabase client from the service
       const supabaseClient = (this.supabase as any).supabase;
 
@@ -64,8 +62,6 @@ export class AuthService {
         console.error('Profile fetch error:', profileError);
         throw profileError;
       }
-
-      console.log('Profile data fetched successfully:', profile);
 
       // Get auth user data for email
       const { data: { user: authUser } } = await supabaseClient.auth.getUser();
@@ -143,14 +139,6 @@ export class AuthService {
         createdAt: profile.created_at,
         updatedAt: profile.updated_at
       };
-
-      console.log('User model created successfully:', {
-        id: user.id,
-        email: user.email,
-        fullName: user.fullName,
-        avatar: user.avatar,
-        role: user.role.name
-      });
 
       return user;
     } catch (error) {

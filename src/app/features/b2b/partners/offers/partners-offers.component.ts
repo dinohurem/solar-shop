@@ -318,7 +318,6 @@ export class PartnersOffersComponent implements OnInit {
   }
 
   claimOffer(offer: Offer): void {
-    console.log('Claiming offer:', offer);
     // TODO: Implement offer claiming logic
     alert(`Offer "${offer.title}" has been added to your account!`);
   }

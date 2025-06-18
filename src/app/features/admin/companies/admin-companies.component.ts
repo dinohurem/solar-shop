@@ -578,7 +578,6 @@ export class AdminCompaniesComponent implements OnInit, OnDestroy {
 
   editCompany(company: Company): void {
     // TODO: Navigate to edit form or open edit modal
-    console.log('Edit company:', company);
   }
   deleteCompany(company: Company): void {
     this.pendingDeleteCompany = company;

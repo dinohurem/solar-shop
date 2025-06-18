@@ -354,7 +354,6 @@ export class ProductInfoComponent implements OnInit, OnDestroy {
 
   addToCart(): void {
     // TODO: Implement add to cart functionality
-    console.log('Add to cart:', this.product, 'Quantity:', this.quantity);
   }
 
   toggleWishlist(): void {

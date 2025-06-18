@@ -85,6 +85,5 @@ export class ProductPhotosComponent implements OnInit {
 
   openZoom(): void {
     // TODO: Implement image zoom functionality
-    console.log('Open zoom for image:', this.selectedImage);
   }
 } 

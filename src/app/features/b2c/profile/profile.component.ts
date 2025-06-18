@@ -813,12 +813,10 @@ export class ProfileComponent implements OnInit {
 
   addNewAddress(): void {
     // TODO: Implement add address modal/form
-    console.log('Add new address');
   }
 
   addNewPaymentMethod(): void {
     // TODO: Implement add payment method modal/form
-    console.log('Add new payment method');
   }
 
   viewOrderDetails(orderId: string): void {

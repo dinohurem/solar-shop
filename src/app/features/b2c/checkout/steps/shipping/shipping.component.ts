@@ -226,7 +226,6 @@ export class ShippingComponent {
     const shippingData = this.shippingForm.value;
     localStorage.setItem('shippingInfo', JSON.stringify(shippingData));
 
-    console.log('Shipping form data saved:', shippingData);
     this.router.navigate(['/checkout/payment']);
   }
 

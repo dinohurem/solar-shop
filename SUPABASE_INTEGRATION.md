@@ -120,12 +120,10 @@ const response = await this.supabaseService.signIn({
 ```typescript
 // Get current user
 this.supabaseService.getCurrentUser().subscribe(user => {
-  console.log('Current user:', user);
 });
 
 // Check authentication status
 this.supabaseService.isAuthenticated().subscribe(isAuth => {
-  console.log('Is authenticated:', isAuth);
 });
 ```
 
@@ -135,12 +133,10 @@ this.supabaseService.isAuthenticated().subscribe(isAuth => {
 ```typescript
 // Get featured products
 this.productListService.getFeaturedProducts(6).subscribe(products => {
-  console.log('Featured products:', products);
 });
 
 // Search products
 this.productListService.searchProducts('solar panel').subscribe(results => {
-  console.log('Search results:', results);
 });
 ```
 
@@ -148,12 +144,10 @@ this.productListService.searchProducts('solar panel').subscribe(results => {
 ```typescript
 // Get all categories
 this.categoriesService.getActiveCategories().subscribe(categories => {
-  console.log('Categories:', categories);
 });
 
 // Get category by slug
 this.categoriesService.getCategoryBySlug('solar-panels').subscribe(category => {
-  console.log('Category:', category);
 });
 ```
 
@@ -164,12 +158,10 @@ await this.cartService.addToCart('product-id', 2);
 
 // Get cart items
 this.cartService.getCartItems().subscribe(items => {
-  console.log('Cart items:', items);
 });
 
 // Get cart summary
 this.cartService.getCartSummary().subscribe(summary => {
-  console.log('Cart total:', summary.total);
 });
 ```
 
@@ -177,12 +169,10 @@ this.cartService.getCartSummary().subscribe(summary => {
 ```typescript
 // Get active offers
 this.offersService.getActiveOffers().subscribe(offers => {
-  console.log('Active offers:', offers);
 });
 
 // Get featured offers
 this.offersService.getFeaturedOffers(4).subscribe(offers => {
-  console.log('Featured offers:', offers);
 });
 ```
 
@@ -190,12 +180,10 @@ this.offersService.getFeaturedOffers(4).subscribe(offers => {
 ```typescript
 // Get published posts
 this.blogService.getPublishedPosts(10).subscribe(posts => {
-  console.log('Blog posts:', posts);
 });
 
 // Get featured posts
 this.blogService.getFeaturedPosts(3).subscribe(posts => {
-  console.log('Featured posts:', posts);
 });
 ```
 

@@ -341,28 +341,23 @@ export class CartSidebarComponent implements OnInit {
   constructor() {
     // Debug: Log cart state changes
     this.isCartOpen$.subscribe(isOpen => {
-      console.log('Cart sidebar - isCartOpen:', isOpen);
     });
 
     this.cartItems$.subscribe(items => {
-      console.log('Cart sidebar - cart items:', items);
     });
 
     // Debug: Log cart loading state
     this.store.select(CartSelectors.selectIsCartLoading).subscribe(isLoading => {
-      console.log('Cart sidebar - isLoading:', isLoading);
     });
 
     // Debug: Log cart errors
     this.store.select(CartSelectors.selectCartError).subscribe(error => {
       if (error) {
-        console.log('Cart sidebar - error:', error);
       }
     });
 
     // Debug: Log the entire cart state
     this.store.select(CartSelectors.selectCartState).subscribe(cartState => {
-      console.log('Cart sidebar - full cart state:', cartState);
     });
   }
 

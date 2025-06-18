@@ -129,23 +129,6 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
                 </div>
               </div>
 
-              <!-- Certificates Filter -->
-              <div class="mb-6">
-                <h4 class="text-sm font-medium text-gray-900 mb-3 font-['DM_Sans']">{{ 'productList.certificates' | translate }}</h4>
-                <div class="space-y-2">
-                  <label *ngFor="let certificate of certificates$ | async" class="flex items-center">
-                    <input 
-                      type="checkbox" 
-                      [value]="certificate"
-                      [checked]="(filters$ | async)?.certificates?.includes(certificate) || false"
-                      (change)="onCertificateChange(certificate, $event)"
-                      class="rounded border-gray-300 text-solar-600 focus:ring-solar-500"
-                    >
-                    <span class="ml-2 text-sm text-gray-700 font-['DM_Sans']">{{ certificate }}</span>
-                  </label>
-                </div>
-              </div>
-
               <!-- Manufacturer Filter -->
               <div class="mb-6">
                 <h4 class="text-sm font-medium text-gray-900 mb-3 font-['DM_Sans']">{{ 'productList.manufacturer' | translate }}</h4>

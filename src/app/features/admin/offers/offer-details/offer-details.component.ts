@@ -452,15 +452,6 @@ export class OfferDetailsComponent implements OnInit {
     try {
       // For now, just simulate saving changes
       // In a real implementation, you would save to an offer_products table
-      console.log('Saving offer changes:', {
-        products: this.offerProductsForm.value.products,
-        summary: {
-          total_original: this.getTotalOriginalPrice(),
-          total_discounted: this.getTotalDiscountedPrice(),
-          total_savings: this.getTotalSavings()
-        }
-      });
-
       this.originalOfferProducts = JSON.parse(JSON.stringify(this.offerProductsForm.value.products));
       this.hasChanges = false;
 

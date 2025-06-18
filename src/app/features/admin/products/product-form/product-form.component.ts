@@ -434,7 +434,6 @@ export class ProductFormComponent implements OnInit {
 
     try {
       const data = await this.supabaseService.getTableById('products', this.productId);
-      console.log('Loaded product data:', data); // Debug log
 
       if (data) {
         // Map database fields to form fields
@@ -456,7 +455,6 @@ export class ProductFormComponent implements OnInit {
           images: this.formatImages(data)
         };
 
-        console.log('Mapped form data:', formData); // Debug log
         this.productForm.patchValue(formData);
       }
     } catch (error) {
@@ -529,8 +527,6 @@ export class ProductFormComponent implements OnInit {
         stock_status: Number(formValue.stock_quantity) > 0 ? 'in_stock' as const : 'out_of_stock' as const,
         updated_at: new Date().toISOString()
       };
-
-      console.log('Saving product data:', productData); // Debug log
 
       if (this.isEditMode && this.productId) {
         await this.supabaseService.updateRecord('products', this.productId, productData);

@@ -353,7 +353,6 @@ export class ContactComponent implements OnInit {
 
       // Simulate form submission
       setTimeout(() => {
-        console.log('Form submitted:', this.contactForm.value);
         this.isSubmitting = false;
         this.contactForm.reset();
         // In a real app, you would send this to your backend

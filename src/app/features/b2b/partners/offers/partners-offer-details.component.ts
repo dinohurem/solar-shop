@@ -507,13 +507,11 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
   }
 
   claimOffer(offer: PartnerOffer): void {
-    console.log('Partner claiming offer:', offer);
     alert(`Partner offer "${offer.title}" has been claimed!`);
   }
 
   addToCart(product: PartnerProduct, offer: PartnerOffer): void {
     const partnerPrice = this.getProductPartnerPrice(product, offer);
-    console.log('Adding product to cart with partner pricing:', product, offer);
     alert(`Added "${product.name}" to cart at partner price: €${partnerPrice.toFixed(2)}`);
   }
 

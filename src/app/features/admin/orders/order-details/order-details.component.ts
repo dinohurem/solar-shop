@@ -695,7 +695,6 @@ export class OrderDetailsComponent implements OnInit {
 
       if (itemsChanged) {
         // In a real implementation, you would update order_items table
-        console.log('Order items changes:', currentItems);
       }
 
       // Reset tracking variables
@@ -724,7 +723,6 @@ export class OrderDetailsComponent implements OnInit {
   }
 
   printInvoice(): void {
-    console.log('Printing invoice for order:', this.order.order_number);
     this.statusUpdateMessage = `Invoice printing for order ${this.order.order_number} initiated successfully!`;
     this.statusUpdateSuccess = true;
 

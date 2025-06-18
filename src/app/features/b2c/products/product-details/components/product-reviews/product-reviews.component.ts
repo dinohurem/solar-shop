@@ -343,7 +343,6 @@ export class ProductReviewsComponent implements OnInit {
   }
 
   reportReview(reviewId: string): void {
-    console.log('Reporting review:', reviewId);
     // In a real app, this would show a report modal or send a report
   }
   openWriteReview(): void {
@@ -440,7 +439,6 @@ export class ProductReviewsComponent implements OnInit {
 
   loadMoreReviews(): void {
     // Implementation for loading more reviews
-    console.log('Loading more reviews');
   }
 
   trackByReviewId(index: number, review: Review): string {

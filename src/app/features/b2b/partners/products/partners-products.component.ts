@@ -544,12 +544,10 @@ export class PartnersProductsComponent implements OnInit {
   }
 
   addToCart(product: PartnerProduct): void {
-    console.log('Adding to cart:', product);
     // TODO: Implement add to cart functionality
   }
 
   requestQuote(product: PartnerProduct): void {
-    console.log('Requesting quote for:', product);
     // TODO: Implement quote request functionality
   }
 

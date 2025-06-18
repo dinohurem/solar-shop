@@ -135,7 +135,6 @@ export class AddToCartButtonComponent {
 
   addToCart() {
     if (this.productId) {
-      console.log('Add to cart clicked for product:', this.productId);
 
       // Dispatch the add to cart action
       this.store.dispatch(CartActions.addToCart({
@@ -143,8 +142,6 @@ export class AddToCartButtonComponent {
         quantity: this.quantity,
         variantId: this.variantId
       }));
-
-      console.log('Add to cart action dispatched');
 
       // Add success animation to button
       this.addButtonSuccessAnimation();

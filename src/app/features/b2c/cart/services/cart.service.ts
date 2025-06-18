@@ -86,14 +86,12 @@ export class CartService {
     // Apply coupon - returns Cart for NgRx compatibility
     applyCoupon(code: string): Observable<Cart> {
         // Mock implementation - in real app, this would validate and apply coupon
-        console.log('Applying coupon:', code);
         return of(this.createCartFromItems(this.getCartItemsArray()));
     }
 
     // Remove coupon - returns Cart for NgRx compatibility
     removeCoupon(couponId: string): Observable<Cart> {
         // Mock implementation - in real app, this would remove applied coupon
-        console.log('Removing coupon:', couponId);
         return of(this.createCartFromItems(this.getCartItemsArray()));
     }
 

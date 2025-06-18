@@ -320,7 +320,6 @@ export class PartnersContactComponent {
 
       // Simulate API call
       setTimeout(() => {
-        console.log('Contact form data:', this.contactForm.value);
         this.isSubmitting = false;
         this.messageSent = true;
         this.contactForm.reset();

@@ -69,9 +69,6 @@ export const cartReducer = createReducer(
     })),
 
     on(CartActions.addToCartSuccess, (state, { cart }) => {
-        console.log('Cart Reducer - addToCartSuccess called with cart:', cart);
-        console.log('Cart Reducer - previous state:', state);
-        console.log('Cart Reducer - previous isCartOpen:', state.isCartOpen);
         const newState = {
             ...state,
             cart,
@@ -79,8 +76,6 @@ export const cartReducer = createReducer(
             error: null,
             isCartOpen: true
         };
-        console.log('Cart Reducer - new state:', newState);
-        console.log('Cart Reducer - new isCartOpen:', newState.isCartOpen);
         return newState;
     }),
 

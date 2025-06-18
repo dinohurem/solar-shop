@@ -270,13 +270,10 @@ export class PaymentComponent {
       take(1)
     ).toPromise();
 
-    console.log('Current user from store:', currentUser);
-
     // If no authenticated user, proceed with guest checkout
     if (!currentUser) {
       try {
         const session = await this.supabaseService.getSession();
-        console.log('Supabase session:', session);
 
         if (session?.user) {
           // Use authenticated user data
@@ -287,11 +284,9 @@ export class PaymentComponent {
             lastName: session.user.user_metadata?.lastName || '',
             phone: session.user.user_metadata?.phone || ''
           };
-          console.log('Using authenticated session user:', sessionUser);
           return this.createOrderWithUser(sessionUser);
         } else {
           // Proceed with guest checkout
-          console.log('Proceeding with guest checkout');
           return this.createGuestOrder();
         }
       } catch (sessionError) {
@@ -320,7 +315,6 @@ export class PaymentComponent {
       phone: shippingInfo.phone || ''
     };
 
-    console.log('Creating order for guest user:', guestUser);
     return this.createOrderWithUser(guestUser);
   }
 

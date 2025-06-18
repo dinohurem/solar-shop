@@ -213,7 +213,6 @@ export class BlogHomeComponent implements OnInit, OnDestroy {
   }
 
   loadBlogPosts() {
-    console.log('BlogHomeComponent: Dispatching loadBlogPosts action');
     this.store.dispatch(BlogActions.loadBlogPosts());
   }
 
