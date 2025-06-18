@@ -71,7 +71,14 @@ export class AuthEffects {
     loginSuccess$ = createEffect(() =>
         this.actions$.pipe(
             ofType(AuthActions.loginSuccess),
-            tap(() => this.router.navigate(['/']))
+            tap((action) => {
+                // Only navigate to home if this is a fresh login (not from checkAuthToken)
+                // We can detect this by checking if the token is 'supabase-managed' (from checkAuthToken)
+                // vs a real token (from actual login)
+                if (action.token !== 'supabase-managed') {
+                    this.router.navigate(['/']);
+                }
+            })
         ),
         { dispatch: false }
     );
@@ -85,10 +92,9 @@ export class AuthEffects {
                     this.router.navigate(['/confirmation'], {
                         queryParams: { email: user.email }
                     });
-                } else {
-                    // User is automatically signed in and verified
-                    this.router.navigate(['/']);
                 }
+                // If user is automatically signed in and verified, don't navigate
+                // Let them stay on their current page to avoid unwanted redirects
             })
         ),
         { dispatch: false }
