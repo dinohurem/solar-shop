@@ -30,9 +30,6 @@ import { Offer } from '../../../shared/models/offer.model';
         <!-- <div class="absolute inset-0 bg-gradient-to-br from-solar-600/80 to-solar-800/80 opacity-55"></div> -->
       </div>
 
-      <!-- Rounded bottom shape -->
-      <div class="absolute bottom-0 left-0 right-0 h-16 bg-white rounded-t-[40px]"></div>
-
       <!-- Content Container -->
       <div class="relative z-10 flex flex-col min-h-screen lg:min-h-[60vh] xl:min-h-[65vh] justify-center px-4 sm:px-6 lg:px-8 pt-8 lg:pt-16">
         <div class="max-w-7xl mx-auto text-center">
@@ -110,7 +107,7 @@ import { Offer } from '../../../shared/models/offer.model';
                     >
                       <!-- Compact Card Container -->
                       <div class="bg-white/15 backdrop-blur-sm rounded-3xl border border-white/30 hover:bg-white/20 transition-all duration-500 cursor-pointer relative overflow-hidden"
-                           style="min-height: 400px; height: 400px;"
+                           style="min-height: 450px; height: auto;"
                            (click)="viewOffer(offer.id)">
                         
                         <!-- Prime Deal Ribbon with Corner Wrap -->
@@ -147,28 +144,28 @@ import { Offer } from '../../../shared/models/offer.model';
                           
                           <!-- Compact Content Area -->
                           <div class="order-1 lg:order-2 text-center lg:text-left flex flex-col justify-center">
-                            <div class="space-y-2 lg:space-y-3">
+                            <div class="space-y-3 lg:space-y-4">
                               <!-- Offer Type Badge -->
                               <div class="inline-block bg-white/20 text-white text-xs font-semibold px-3 py-1 rounded-full">
                                 Special Offer
                               </div>
                               
                               <!-- Compact Title -->
-                              <div style="min-height: 60px;" class="flex items-center justify-center lg:justify-start">
+                              <div class="flex items-center justify-center lg:justify-start">
                                 <h3 class="text-white text-lg lg:text-xl xl:text-2xl font-bold font-['Poppins'] leading-tight line-clamp-2">
                                   {{ offer.title }}
                                 </h3>
                               </div>
                               
                               <!-- Compact Description -->
-                              <div style="min-height: 40px;" class="flex items-start">
+                              <div class="flex items-start">
                                 <p class="text-white/90 text-sm lg:text-base font-['DM_Sans'] leading-relaxed line-clamp-2">
                                   {{ offer.shortDescription || offer.description }}
                                 </p>
                               </div>
                               
                               <!-- Compact Price Section -->
-                              <div style="min-height: 40px;" class="flex items-center justify-center lg:justify-start space-x-3">
+                              <div class="flex items-center justify-center lg:justify-start space-x-3">
                                 <span class="text-white text-lg lg:text-xl font-bold font-['DM_Sans']">
                                   {{ offer.discountedPrice | currency:'EUR':'symbol':'1.2-2' }}
                                 </span>
@@ -178,14 +175,14 @@ import { Offer } from '../../../shared/models/offer.model';
                               </div>
                               
                               <!-- Compact Savings Display -->
-                              <div style="min-height: 35px;" class="flex items-center justify-center lg:justify-start">
+                              <div class="flex items-center justify-center lg:justify-start">
                                 <div class="inline-block bg-solar-400/20 text-white text-sm font-semibold px-4 py-2 rounded-lg">
                                   Save {{ (offer.originalPrice - offer.discountedPrice) | currency:'EUR':'symbol':'1.2-2' }}!
                                 </div>
                               </div>
                               
                               <!-- Compact CTA Button -->
-                              <div style="min-height: 50px;" class="flex items-center justify-center lg:justify-start">
+                              <div class="flex items-center justify-center lg:justify-start">
                                 <button 
                                   (click)="viewOffer(offer.id); $event.stopPropagation()"
                                   class="bg-white text-solar-600 font-bold text-base px-8 py-3 rounded-xl hover:bg-solar-50 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 font-['DM_Sans'] border-2 border-white"
@@ -220,7 +217,7 @@ import { Offer } from '../../../shared/models/offer.model';
           </div>
           
           <!-- CTA Buttons -->
-          <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <div class="flex flex-col sm:flex-row gap-4 justify-center items-center pb-16 mb-4">
             <button 
               (click)="onExploreProducts()"
               [disabled]="isLoading$ | async"
@@ -245,6 +242,9 @@ import { Offer } from '../../../shared/models/offer.model';
           </div>
         </div>
       </div>
+
+      <!-- Rounded bottom shape - moved to bottom after content -->
+      <div class="absolute bottom-0 left-0 right-0 h-16 bg-white rounded-t-[40px]"></div>
     </section>
   `,
   styles: [`
