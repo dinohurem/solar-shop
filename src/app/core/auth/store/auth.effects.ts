@@ -71,13 +71,9 @@ export class AuthEffects {
     loginSuccess$ = createEffect(() =>
         this.actions$.pipe(
             ofType(AuthActions.loginSuccess),
-            tap((action) => {
-                // Only navigate to home if this is a fresh login (not from checkAuthToken)
-                // We can detect this by checking if the token is 'supabase-managed' (from checkAuthToken)
-                // vs a real token (from actual login)
-                if (action.token !== 'supabase-managed') {
-                    this.router.navigate(['/']);
-                }
+            tap(() => {
+                // Navigate to home on successful login
+                this.router.navigate(['/']);
             })
         ),
         { dispatch: false }
@@ -148,10 +144,7 @@ export class AuthEffects {
                 this.authService.getCurrentUser().pipe(
                     map(user => {
                         if (user) {
-                            return AuthActions.loginSuccess({
-                                token: 'supabase-managed', // Supabase manages tokens internally
-                                user: user
-                            });
+                            return AuthActions.loadUserProfileSuccess({ user });
                         } else {
                             return AuthActions.clearAuthToken();
                         }

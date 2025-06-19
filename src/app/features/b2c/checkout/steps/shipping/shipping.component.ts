@@ -31,7 +31,7 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
               </div>
             </div>
             <div>
-              <label for="lastName" class="block text-sm font-medium text-gray-700 mb-2 font-['DM_Sans']">Last Name *</label>
+              <label for="lastName" class="block text-sm font-medium text-gray-700 mb-2 font-['DM_Sans']">{{ 'checkout.lastName' | translate }} *</label>
               <input
                 type="text"
                 id="lastName"
@@ -40,7 +40,7 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
                 [placeholder]="'checkout.lastName' | translate"
               >
               <div *ngIf="shippingForm.get('lastName')?.invalid && shippingForm.get('lastName')?.touched" class="mt-1 text-sm text-red-600">
-                The last name is required
+              {{ 'checkout.lastNameRequired' | translate }}
               </div>
             </div>
             <div class="md:col-span-2">
@@ -53,11 +53,11 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
                 [placeholder]="'checkout.email' | translate"
               >
               <div *ngIf="shippingForm.get('email')?.invalid && shippingForm.get('email')?.touched" class="mt-1 text-sm text-red-600">
-                Insert a valid email
+                {{ 'checkout.emailRequired' | translate }}
               </div>
             </div>
             <div class="md:col-span-2">
-              <label for="phone" class="block text-sm font-medium text-gray-700 mb-2 font-['DM_Sans']">Phone *</label>
+              <label for="phone" class="block text-sm font-medium text-gray-700 mb-2 font-['DM_Sans']">{{ 'checkout.phone' | translate }} *</label>
               <input
                 type="tel"
                 id="phone"
@@ -66,7 +66,7 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
                 [placeholder]="'checkout.phone' | translate"
               >
               <div *ngIf="shippingForm.get('phone')?.invalid && shippingForm.get('phone')?.touched" class="mt-1 text-sm text-red-600">
-                The phone number is required
+                {{ 'checkout.phoneRequired' | translate }}
               </div>
             </div>
           </div>
@@ -74,10 +74,10 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 
         <!-- Shipping Address -->
         <div class="mb-8">
-          <h3 class="text-lg font-semibold text-[#324053] mb-4 font-['Poppins']">Shipping Address</h3>
+          <h3 class="text-lg font-semibold text-[#324053] mb-4 font-['Poppins']">{{ 'checkout.shippingAddress' | translate }}</h3>
           <div class="space-y-4">
             <div>
-              <label for="address" class="block text-sm font-medium text-gray-700 mb-2 font-['DM_Sans']">Address *</label>
+              <label for="address" class="block text-sm font-medium text-gray-700 mb-2 font-['DM_Sans']">{{ 'checkout.address' | translate }} *</label>
               <input
                 type="text"
                 id="address"
@@ -86,12 +86,12 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
                 [placeholder]="'checkout.address' | translate"
               >
               <div *ngIf="shippingForm.get('address')?.invalid && shippingForm.get('address')?.touched" class="mt-1 text-sm text-red-600">
-                The address is required
+                {{ 'checkout.addressRequired' | translate }}
               </div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label for="city" class="block text-sm font-medium text-gray-700 mb-2 font-['DM_Sans']">City *</label>
+                <label for="city" class="block text-sm font-medium text-gray-700 mb-2 font-['DM_Sans']">{{ 'checkout.city' | translate }} *</label>
                 <input
                   type="text"
                   id="city"
@@ -100,11 +100,11 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
                   [placeholder]="'checkout.city' | translate"
                 >
                 <div *ngIf="shippingForm.get('city')?.invalid && shippingForm.get('city')?.touched" class="mt-1 text-sm text-red-600">
-                  The city is required
+                  {{ 'checkout.cityRequired' | translate }}
                 </div>
               </div>
               <div>
-                <label for="postalCode" class="block text-sm font-medium text-gray-700 mb-2 font-['DM_Sans']">Postal Code *</label>
+                <label for="postalCode" class="block text-sm font-medium text-gray-700 mb-2 font-['DM_Sans']">{{ 'checkout.postalCode' | translate }} *</label>
                 <input
                   type="text"
                   id="postalCode"
@@ -113,24 +113,23 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
                   [placeholder]="'checkout.postalCode' | translate"
                 >
                 <div *ngIf="shippingForm.get('postalCode')?.invalid && shippingForm.get('postalCode')?.touched" class="mt-1 text-sm text-red-600">
-                  The postal code is required
+                  {{ 'checkout.postalCodeRequired' | translate }}
                 </div>
               </div>
               <div>
-                <label for="country" class="block text-sm font-medium text-gray-700 mb-2 font-['DM_Sans']">Country *</label>
+                <label for="country" class="block text-sm font-medium text-gray-700 mb-2 font-['DM_Sans']">{{ 'checkout.country' | translate }} *</label>
                 <select
                   id="country"
                   formControlName="country"
                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0ACF83] focus:border-transparent font-['DM_Sans']"
                 >
-                  <option value="">Select country</option>
-                  <option value="IT">Italy</option>
-                  <option value="FR">France</option>
-                  <option value="DE">Germany</option>
-                  <option value="ES">Spain</option>
+                  <option value="">{{ 'checkout.selectCountry' | translate }}</option>
+                  <option value="Bosnia">{{ 'checkout.countryBosnia' | translate }}</option>
+                  <option value="Croatia">{{ 'checkout.countryCroatia' | translate }}</option>
+                  <option value="Serbia">{{ 'checkout.countrySerbia' | translate }}</option>
                 </select>
                 <div *ngIf="shippingForm.get('country')?.invalid && shippingForm.get('country')?.touched" class="mt-1 text-sm text-red-600">
-                  Select a country
+                  {{ 'checkout.countryRequired' | translate }}
                 </div>
               </div>
             </div>
@@ -139,7 +138,7 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 
         <!-- Shipping Options -->
         <div class="mb-8">
-          <h3 class="text-lg font-semibold text-[#324053] mb-4 font-['Poppins']">Shipping Options</h3>
+          <h3 class="text-lg font-semibold text-[#324053] mb-4 font-['Poppins']">{{ 'checkout.shippingOptions' | translate }}</h3>
           <div class="space-y-3">
             <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
               <input
@@ -151,10 +150,10 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
               >
               <div class="ml-3 flex-1">
                 <div class="flex justify-between items-center">
-                  <span class="font-medium text-[#324053] font-['DM_Sans']">Standard Shipping</span>
-                  <span class="font-semibold text-[#324053] font-['DM_Sans']">Free</span>
+                  <span class="font-medium text-[#324053] font-['DM_Sans']">{{ 'checkout.standardShipping' | translate }}</span>
+                  <span class="font-semibold text-[#324053] font-['DM_Sans']">{{ 'checkout.free' | translate }}</span>
                 </div>
-                <p class="text-sm text-gray-600 font-['DM_Sans']">5-7 working days</p>
+                <p class="text-sm text-gray-600 font-['DM_Sans']">{{ 'checkout.standardShippingDays' | translate }}</p>
               </div>
             </label>
             <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
@@ -167,10 +166,10 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
               >
               <div class="ml-3 flex-1">
                 <div class="flex justify-between items-center">
-                  <span class="font-medium text-[#324053] font-['DM_Sans']">Express Shipping</span>
-                  <span class="font-semibold text-[#324053] font-['DM_Sans']">€15.00</span>
+                  <span class="font-medium text-[#324053] font-['DM_Sans']">{{ 'checkout.expressShipping' | translate }}</span>
+                  <span class="font-semibold text-[#324053] font-['DM_Sans']">{{ 'checkout.expressShippingPrice' | translate }}</span>
                 </div>
-                <p class="text-sm text-gray-600 font-['DM_Sans']">2-3 working days</p>
+                <p class="text-sm text-gray-600 font-['DM_Sans']">{{ 'checkout.expressShippingDays' | translate }}</p>
               </div>
             </label>
           </div>

@@ -20,7 +20,10 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
       (click)="onOverlayClick($event)"
     >
       <!-- Background overlay -->
-      <div class="absolute inset-0 bg-black bg-opacity-50 transition-opacity duration-300"></div>
+      <div 
+        class="absolute inset-0 bg-black bg-opacity-50 transition-opacity duration-300"
+        (click)="closeCart()"
+      ></div>
       
       <!-- Cart sidebar -->
       <div 
@@ -257,11 +260,13 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 
     .cart-overlay {
       backdrop-filter: blur(4px);
+      pointer-events: auto;
     }
 
     .cart-sidebar {
       will-change: transform;
       backface-visibility: hidden;
+      pointer-events: auto;
     }
 
     @keyframes fadeIn {
@@ -377,7 +382,12 @@ export class CartSidebarComponent implements OnInit {
 
   onOverlayClick(event: MouseEvent) {
     // Close cart if clicking on the overlay (not the sidebar content)
-    if (event.target === event.currentTarget) {
+    const target = event.target as HTMLElement;
+    const currentTarget = event.currentTarget as HTMLElement;
+
+    // Check if the click target is the overlay itself or the background div
+    if (target === currentTarget || target.classList.contains('cart-overlay') || target.classList.contains('bg-black')) {
+      console.log('Overlay clicked - closing cart');
       this.closeCart();
     }
   }

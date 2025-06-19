@@ -1,26 +1,58 @@
 import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { of } from 'rxjs';
-import { map, catchError, switchMap, tap } from 'rxjs/operators';
+import { map, catchError, switchMap, tap, take } from 'rxjs/operators';
 import { CartService } from '../services/cart.service';
 import * as CartActions from './cart.actions';
+import * as AuthActions from '../../../../core/auth/store/auth.actions';
+import { from } from 'rxjs';
+import { Store } from '@ngrx/store';
+import { selectCartItems } from './cart.selectors';
 
 @Injectable()
 export class CartEffects {
     private actions$ = inject(Actions);
     private cartService = inject(CartService);
+    private store = inject(Store);
 
-    // Load Cart Effect
+    // Load Cart Effect - initializes cart if needed
     loadCart$ = createEffect(() =>
         this.actions$.pipe(
             ofType(CartActions.loadCart),
             switchMap(() =>
-                this.cartService.loadCart().pipe(
+                from(this.cartService.initializeCart()).pipe(
+                    switchMap(() => this.cartService.loadCart()),
                     map(cart => cart
                         ? CartActions.loadCartSuccess({ cart })
                         : CartActions.loadCartSuccess({ cart: null as any })
                     ),
                     catchError(error => of(CartActions.loadCartFailure({ error: error.message })))
+                )
+            )
+        )
+    );
+
+    // Handle user profile load success - initialize cart for already authenticated user
+    loadUserProfileSuccess$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(AuthActions.loadUserProfileSuccess),
+            switchMap(({ user }) =>
+                from(this.cartService.handleUserLogin(user.id)).pipe(
+                    switchMap(() => this.cartService.loadCart()),
+                    map(cart => CartActions.loadCartSuccess({ cart })),
+                    catchError(error => of(CartActions.loadCartFailure({ error: error.message })))
+                )
+            )
+        )
+    );
+
+    // Handle logout - clear cart
+    logoutSuccess$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(AuthActions.logoutSuccess),
+            switchMap(() =>
+                from(this.cartService.handleUserLogout()).pipe(
+                    map(() => CartActions.clearCartSuccess())
                 )
             )
         )
@@ -106,17 +138,16 @@ export class CartEffects {
         this.actions$.pipe(
             ofType(CartActions.increaseQuantity),
             switchMap(({ itemId }) =>
-                // Get current cart state and calculate new quantity
-                this.cartService.loadCart().pipe(
-                    switchMap(cart => {
-                        if (!cart) return of(CartActions.updateCartItemFailure({ error: 'Cart not found' }));
-
-                        const item = cart.items.find(i => i.id === itemId);
+                this.store.select(selectCartItems).pipe(
+                    take(1),
+                    switchMap(items => {
+                        const item = items.find(i => i.id === itemId);
                         if (!item) return of(CartActions.updateCartItemFailure({ error: 'Item not found' }));
 
                         const newQuantity = Math.min(item.quantity + 1, item.maxQuantity);
+
                         return this.cartService.updateCartItem(itemId, newQuantity).pipe(
-                            map(updatedCart => CartActions.updateCartItemSuccess({ cart: updatedCart })),
+                            map(cart => CartActions.updateCartItemSuccess({ cart })),
                             catchError(error => of(CartActions.updateCartItemFailure({ error: error.message })))
                         );
                     })
@@ -130,26 +161,28 @@ export class CartEffects {
         this.actions$.pipe(
             ofType(CartActions.decreaseQuantity),
             switchMap(({ itemId }) =>
-                this.cartService.loadCart().pipe(
-                    switchMap(cart => {
-                        if (!cart) return of(CartActions.updateCartItemFailure({ error: 'Cart not found' }));
+                this.store.select(selectCartItems).pipe(
+                    take(1),
+                    switchMap((items) => {
+                        const item = items.find(i => i.id === itemId);
+                        if (!item) {
+                            return of(CartActions.updateCartItemFailure({ error: 'Item not found' }));
+                        }
 
-                        const item = cart.items.find(i => i.id === itemId);
-                        if (!item) return of(CartActions.updateCartItemFailure({ error: 'Item not found' }));
+                        const newQuantity = Math.max(item.quantity - 1, item.minQuantity || 1);
 
-                        const newQuantity = Math.max(item.quantity - 1, item.minQuantity);
-                        if (newQuantity === 0) {
-                            // Remove item if quantity becomes 0
+                        if (newQuantity <= 0 || newQuantity < item.minQuantity) {
+                            // Remove if quantity drops to zero or below min
                             return this.cartService.removeFromCart(itemId).pipe(
-                                map(updatedCart => CartActions.removeFromCartSuccess({ cart: updatedCart })),
+                                map(cart => CartActions.removeFromCartSuccess({ cart })),
                                 catchError(error => of(CartActions.removeFromCartFailure({ error: error.message })))
                             );
-                        } else {
-                            return this.cartService.updateCartItem(itemId, newQuantity).pipe(
-                                map(updatedCart => CartActions.updateCartItemSuccess({ cart: updatedCart })),
-                                catchError(error => of(CartActions.updateCartItemFailure({ error: error.message })))
-                            );
                         }
+
+                        return this.cartService.updateCartItem(itemId, newQuantity).pipe(
+                            map(cart => CartActions.updateCartItemSuccess({ cart })),
+                            catchError(error => of(CartActions.updateCartItemFailure({ error: error.message })))
+                        );
                     })
                 )
             )
@@ -192,14 +225,6 @@ export class CartEffects {
                     catchError(error => of(CartActions.loadAvailableCouponsFailure({ error: error.message })))
                 )
             )
-        )
-    );
-
-    // Auto-load cart on app initialization
-    autoLoadCart$ = createEffect(() =>
-        this.actions$.pipe(
-            ofType('[App] Init'), // This would be dispatched on app initialization
-            map(() => CartActions.loadCart())
         )
     );
 } 

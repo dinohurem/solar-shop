@@ -125,57 +125,6 @@ export const cartReducer = createReducer(
         error
     })),
 
-    // Quantity Actions (optimistic updates)
-    on(CartActions.increaseQuantity, (state, { itemId }) => {
-        if (!state.cart) return state;
-
-        const updatedItems = state.cart.items.map(item =>
-            item.id === itemId
-                ? { ...item, quantity: Math.min(item.quantity + 1, item.maxQuantity) }
-                : item
-        );
-
-        const updatedCart = {
-            ...state.cart,
-            items: updatedItems,
-            // Recalculate totals (simplified - in real app this would be done by service)
-            subtotal: updatedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
-        };
-
-        return {
-            ...state,
-            cart: {
-                ...updatedCart,
-                total: updatedCart.subtotal + updatedCart.tax + updatedCart.shipping - updatedCart.discount
-            }
-        };
-    }),
-
-    on(CartActions.decreaseQuantity, (state, { itemId }) => {
-        if (!state.cart) return state;
-
-        const updatedItems = state.cart.items.map(item =>
-            item.id === itemId
-                ? { ...item, quantity: Math.max(item.quantity - 1, item.minQuantity) }
-                : item
-        );
-
-        const updatedCart = {
-            ...state.cart,
-            items: updatedItems,
-            // Recalculate totals (simplified - in real app this would be done by service)
-            subtotal: updatedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
-        };
-
-        return {
-            ...state,
-            cart: {
-                ...updatedCart,
-                total: updatedCart.subtotal + updatedCart.tax + updatedCart.shipping - updatedCart.discount
-            }
-        };
-    }),
-
     // Coupon Actions
     on(CartActions.setCouponCode, (state, { code }) => ({
         ...state,

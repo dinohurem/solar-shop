@@ -16,15 +16,14 @@ import * as CartActions from '../../../cart/store/cart.actions';
   imports: [CommonModule, ReactiveFormsModule, TranslatePipe],
   template: `
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <h2 class="text-2xl font-bold text-gray-900 mb-6 font-['Poppins']">{{ 'checkout.payment' | translate }}</h2>
+      <h2 class="text-2xl font-bold text-gray-900 mb-6 font-['Poppins']">{{ 'checkout.paymentMethod' | translate }}</h2>
       
       <form [formGroup]="paymentForm" (ngSubmit)="onSubmit()">
         <!-- Payment Method Selection -->
         <div class="mb-8">
-          <h3 class="text-lg font-semibold text-gray-900 mb-4 font-['Poppins']">{{ 'checkout.paymentMethod' | translate }}</h3>
           <div class="space-y-3">
             <!-- Credit Card -->
-            <label class="flex items-center p-4 border-2 border-blue-200 bg-blue-50 rounded-lg cursor-pointer">
+            <!-- <label class="flex items-center p-4 border-2 border-blue-200 bg-blue-50 rounded-lg cursor-pointer">
               <input
                 type="radio"
                 name="paymentMethod"
@@ -40,7 +39,7 @@ import * as CartActions from '../../../cart/store/cart.actions';
                   <span class="font-medium text-blue-900 font-['DM_Sans']">{{ 'checkout.creditCard' | translate }}</span>
                 </div>
               </div>
-            </label>
+            </label> -->
 
             <!-- Pay on Delivery -->
             <label class="flex items-center p-4 border-2 border-green-200 bg-green-50 rounded-lg cursor-pointer">
@@ -113,10 +112,10 @@ import * as CartActions from '../../../cart/store/cart.actions';
           </div>
 
           <p class="text-sm text-gray-600 mt-3 font-['DM_Sans']" *ngIf="paymentForm.get('paymentMethod')?.value === 'cash_on_delivery'">
-            Pay when your order is delivered. Cash or card payment accepted at delivery.
+            {{ 'checkout.payOnDeliveryDescription' | translate }}
           </p>
           <p class="text-sm text-gray-600 mt-3 font-['DM_Sans']" *ngIf="paymentForm.get('paymentMethod')?.value === 'credit_card'">
-            Your payment will be processed securely. All card information is encrypted.
+            {{ 'checkout.creditCardDescription' | translate }}
           </p>
           
           <!-- Guest Checkout Notice -->
@@ -126,8 +125,7 @@ import * as CartActions from '../../../cart/store/cart.actions';
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
               <p class="text-sm text-blue-800 font-['DM_Sans']">
-                <span class="font-medium">Guest Checkout:</span> You can complete your order without creating an account. 
-                Your order will be processed and you'll receive confirmation via email.
+                <span class="font-medium">{{ 'checkout.guestCheckout' | translate }}:</span> {{ 'checkout.guestCheckoutDescription' | translate }}
               </p>
             </div>
           </div>
@@ -142,12 +140,12 @@ import * as CartActions from '../../../cart/store/cart.actions';
               class="mt-1 text-blue-600 focus:ring-blue-600 rounded"
             >
             <span class="text-sm text-gray-600 font-['DM_Sans']">
-              I accept the <a href="#" class="text-blue-600 hover:underline">terms and conditions</a> and the 
-              <a href="#" class="text-blue-600 hover:underline">privacy policy</a> *
+              {{ 'checkout.termsAndConditions' | translate }} <a href="#" class="text-blue-600 hover:underline">{{ 'checkout.terms' | translate }}</a> {{ 'checkout.and' | translate }}
+              <a href="#" class="text-blue-600 hover:underline">{{ 'checkout.privacyPolicy' | translate }}</a> *
             </span>
           </label>
           <div *ngIf="paymentForm.get('acceptTerms')?.invalid && paymentForm.get('acceptTerms')?.touched" class="mt-1 text-sm text-red-600">
-            You must accept the terms and conditions
+            {{ 'checkout.termsAndConditionsRequired' | translate }}
           </div>
         </div>
 
@@ -171,7 +169,7 @@ import * as CartActions from '../../../cart/store/cart.actions';
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              Processing...
+              {{ 'checkout.processing' | translate }}
             </span>
           </button>
         </div>

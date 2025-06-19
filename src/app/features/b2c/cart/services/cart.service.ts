@@ -17,7 +17,6 @@ export interface CartSummary {
     providedIn: 'root'
 })
 export class CartService {
-    private readonly CART_STORAGE_KEY = 'solar_shop_cart';
     private cartItems = new BehaviorSubject<CartItem[]>([]);
     private cartSummary = new BehaviorSubject<CartSummary>({
         subtotal: 0,
@@ -27,9 +26,53 @@ export class CartService {
         total: 0,
         itemCount: 0
     });
+    private isAuthenticated = false;
+    private currentUserId: string | null = null;
 
-    constructor(private supabaseService: SupabaseService) {
-        this.loadCartFromStorage();
+    constructor(private supabaseService: SupabaseService) { }
+
+    // Initialize cart based on authentication status
+    async initializeCart(): Promise<void> {
+        try {
+            const user = await this.supabaseService.getCurrentUser().pipe(
+                map(user => user),
+                catchError(() => of(null))
+            ).toPromise();
+
+            this.isAuthenticated = !!user;
+            this.currentUserId = user?.id || null;
+
+            if (this.isAuthenticated && this.currentUserId) {
+                await this.loadCartFromSupabase();
+            } else {
+                // For guest users, start with empty cart
+                this.updateCartItems([]);
+            }
+        } catch (error) {
+            console.error('Error initializing cart:', error);
+            this.updateCartItems([]);
+        }
+    }
+
+    // Handle user login - migrate guest cart to Supabase
+    async handleUserLogin(userId: string): Promise<void> {
+        try {
+            this.isAuthenticated = true;
+            this.currentUserId = userId;
+
+            // Load user's existing cart from Supabase
+            await this.loadCartFromSupabase();
+        } catch (error) {
+            console.error('Error handling user login:', error);
+            await this.loadCartFromSupabase();
+        }
+    }
+
+    // Handle user logout - clear cart
+    async handleUserLogout(): Promise<void> {
+        this.isAuthenticated = false;
+        this.currentUserId = null;
+        this.updateCartItems([]);
     }
 
     // Observable streams
@@ -61,26 +104,24 @@ export class CartService {
 
     // Update cart item - returns Cart for NgRx compatibility
     updateCartItem(itemId: string, quantity: number): Observable<Cart> {
-        const currentItems = this.getCartItemsArray();
-        const item = currentItems.find(i => i.id === itemId);
-
-        if (item) {
-            this.updateQuantity(item.productId, quantity);
-        }
-
-        return of(this.createCartFromItems(this.getCartItemsArray()));
+        return from(this.updateCartItemAsync(itemId, quantity)).pipe(
+            map(() => this.createCartFromItems(this.getCartItemsArray())),
+            catchError(error => {
+                console.error('Error updating cart item:', error);
+                return of(this.createCartFromItems(this.getCartItemsArray()));
+            })
+        );
     }
 
     // Remove from cart - returns Cart for NgRx compatibility
     removeFromCart(itemId: string): Observable<Cart> {
-        const currentItems = this.getCartItemsArray();
-        const item = currentItems.find(i => i.id === itemId);
-
-        if (item) {
-            this.removeFromCartByProductId(item.productId);
-        }
-
-        return of(this.createCartFromItems(this.getCartItemsArray()));
+        return from(this.removeFromCartAsync(itemId)).pipe(
+            map(() => this.createCartFromItems(this.getCartItemsArray())),
+            catchError(error => {
+                console.error('Error removing from cart:', error);
+                return of(this.createCartFromItems(this.getCartItemsArray()));
+            })
+        );
     }
 
     // Apply coupon - returns Cart for NgRx compatibility
@@ -103,8 +144,13 @@ export class CartService {
 
     // Clear cart - returns void for compatibility
     clearCart(): Observable<void> {
-        this.updateCartItems([]);
-        return of(undefined);
+        return from(this.clearCartAsync()).pipe(
+            map(() => undefined),
+            catchError(error => {
+                console.error('Error clearing cart:', error);
+                return of(undefined);
+            })
+        );
     }
 
     // Add item to cart (async version)
@@ -121,15 +167,23 @@ export class CartService {
             const existingItemIndex = currentItems.findIndex(item => item.productId === productId);
 
             if (existingItemIndex > -1) {
-                // Update quantity of existing item - create a proper copy to avoid readonly issues
+                // Update quantity of existing item
                 const updatedItems = [...currentItems];
                 const existingItem = updatedItems[existingItemIndex];
+                const newQuantity = existingItem.quantity + quantity;
+
                 updatedItems[existingItemIndex] = {
                     ...existingItem,
-                    quantity: existingItem.quantity + quantity,
+                    quantity: newQuantity,
                     updatedAt: new Date().toISOString()
                 };
+
                 this.updateCartItems(updatedItems);
+
+                // Sync to Supabase if authenticated
+                if (this.isAuthenticated && this.currentUserId) {
+                    await this.syncItemToSupabase(productId, newQuantity, product.price);
+                }
             } else {
                 // Add new item
                 const now = new Date().toISOString();
@@ -171,16 +225,11 @@ export class CartService {
 
                 const updatedItems = [...currentItems, cartItem];
                 this.updateCartItems(updatedItems);
-            }
 
-            // Also add to Supabase cart if user is authenticated
-            const currentUser = await this.supabaseService.getCurrentUser().pipe(
-                map(user => user),
-                catchError(() => of(null))
-            ).toPromise();
-
-            if (currentUser) {
-                await this.supabaseService.addToCart(productId, quantity, product.price, currentUser.id);
+                // Sync to Supabase if authenticated
+                if (this.isAuthenticated && this.currentUserId) {
+                    await this.supabaseService.addToCart(productId, quantity, product.price, this.currentUserId);
+                }
             }
 
         } catch (error) {
@@ -189,38 +238,194 @@ export class CartService {
         }
     }
 
-    // Remove item from cart by product ID
-    removeFromCartByProductId(productId: string): void {
-        const currentItems = this.getCartItemsArray();
-        const updatedItems = currentItems.filter(item => item.productId !== productId);
-        this.updateCartItems(updatedItems);
+    // Update cart item (async version)
+    async updateCartItemAsync(itemId: string, quantity: number): Promise<void> {
+        try {
+            const currentItems = this.getCartItemsArray();
+            const item = currentItems.find(i => i.id === itemId);
+
+            if (!item) {
+                throw new Error('Cart item not found');
+            }
+
+            if (quantity <= 0) {
+                await this.removeFromCartAsync(itemId);
+                return;
+            }
+
+            const updatedItems = currentItems.map(cartItem =>
+                cartItem.id === itemId
+                    ? {
+                        ...cartItem,
+                        quantity: Math.min(quantity, cartItem.maxQuantity || 999),
+                        updatedAt: new Date().toISOString()
+                    }
+                    : cartItem
+            );
+
+            this.updateCartItems(updatedItems);
+
+            // Sync to Supabase if authenticated
+            if (this.isAuthenticated && this.currentUserId) {
+                await this.syncItemToSupabase(item.productId, quantity, item.price);
+            }
+        } catch (error) {
+            console.error('Error updating cart item:', error);
+            throw error;
+        }
     }
 
-    // Update item quantity
-    updateQuantity(productId: string, quantity: number): void {
-        if (quantity <= 0) {
-            this.removeFromCartByProductId(productId);
-            return;
-        }
+    // Remove from cart (async version)
+    async removeFromCartAsync(itemId: string): Promise<void> {
+        try {
+            const currentItems = this.getCartItemsArray();
+            const item = currentItems.find(i => i.id === itemId);
 
-        const currentItems = this.getCartItemsArray();
-        const updatedItems = currentItems.map(item =>
-            item.productId === productId
-                ? {
-                    ...item,
-                    quantity: Math.min(quantity, item.maxQuantity || 999),
-                    updatedAt: new Date().toISOString()
+            if (!item) {
+                throw new Error('Cart item not found');
+            }
+
+            const updatedItems = currentItems.filter(cartItem => cartItem.id !== itemId);
+            this.updateCartItems(updatedItems);
+
+            // Sync to Supabase if authenticated
+            if (this.isAuthenticated && this.currentUserId) {
+                await this.removeItemFromSupabase(itemId);
+            }
+        } catch (error) {
+            console.error('Error removing from cart:', error);
+            throw error;
+        }
+    }
+
+    // Clear cart (async version)
+    async clearCartAsync(): Promise<void> {
+        try {
+            this.updateCartItems([]);
+
+            // Clear from Supabase if authenticated
+            if (this.isAuthenticated && this.currentUserId) {
+                await this.clearCartFromSupabase();
+            }
+        } catch (error) {
+            console.error('Error clearing cart:', error);
+            throw error;
+        }
+    }
+
+    // Load cart from Supabase
+    private async loadCartFromSupabase(): Promise<void> {
+        try {
+            if (!this.currentUserId) return;
+
+            const supabaseCartItems = await this.supabaseService.getCartItems(this.currentUserId);
+
+            // Convert Supabase cart items to local cart format
+            const cartItems: CartItem[] = [];
+
+            for (const item of supabaseCartItems) {
+                const product = await this.supabaseService.getTableById('products', item.product_id);
+                if (product) {
+                    const now = new Date().toISOString();
+                    cartItems.push({
+                        id: item.id,
+                        productId: product.id,
+                        name: product.name,
+                        description: product.short_description,
+                        sku: product.sku,
+                        price: item.price,
+                        originalPrice: product.original_price || undefined,
+                        quantity: item.quantity,
+                        minQuantity: 1,
+                        maxQuantity: product.stock_quantity,
+                        image: this.getProductImage(product.images),
+                        category: await this.getCategoryName(product.category_id),
+                        brand: product.brand,
+                        addedAt: item.created_at,
+                        updatedAt: item.updated_at,
+                        availability: {
+                            inStock: product.in_stock,
+                            quantity: product.stock_quantity,
+                            stockStatus: product.stock_status,
+                            backorderAllowed: false
+                        },
+                        shippingInfo: {
+                            weight: product.weight || 0,
+                            dimensions: product.dimensions || { length: 0, width: 0, height: 0, unit: 'cm' },
+                            shippingClass: 'standard',
+                            freeShipping: product.free_shipping
+                        },
+                        taxInfo: {
+                            taxable: true,
+                            taxClass: 'standard',
+                            taxRate: 0.10,
+                            taxAmount: item.price * 0.10 * item.quantity
+                        }
+                    });
                 }
-                : item
-        );
-        this.updateCartItems(updatedItems);
+            }
+
+            this.updateCartItems(cartItems);
+        } catch (error) {
+            console.error('Error loading cart from Supabase:', error);
+            // Fallback to empty cart
+            this.updateCartItems([]);
+        }
+    }
+
+    // Sync item to Supabase
+    private async syncItemToSupabase(productId: string, quantity: number, price: number): Promise<void> {
+        try {
+            if (!this.currentUserId) return;
+
+            // Check if item exists in Supabase
+            const existingItems = await this.supabaseService.getCartItems(this.currentUserId);
+            const existingItem = existingItems.find(item => item.product_id === productId);
+
+            if (existingItem) {
+                // Update existing item
+                await this.supabaseService.updateRecord('cart_items', existingItem.id, {
+                    quantity: quantity,
+                    updated_at: new Date().toISOString()
+                });
+            } else {
+                // Add new item
+                await this.supabaseService.addToCart(productId, quantity, price, this.currentUserId);
+            }
+        } catch (error) {
+            console.error('Error syncing item to Supabase:', error);
+        }
+    }
+
+    // Remove item from Supabase
+    private async removeItemFromSupabase(itemId: string): Promise<void> {
+        try {
+            if (!this.currentUserId) return;
+
+            await this.supabaseService.deleteRecord('cart_items', itemId);
+        } catch (error) {
+            console.error('Error removing item from Supabase:', error);
+        }
+    }
+
+    // Clear cart from Supabase
+    private async clearCartFromSupabase(): Promise<void> {
+        try {
+            if (!this.currentUserId) return;
+
+            const cartItems = await this.supabaseService.getCartItems(this.currentUserId);
+            for (const item of cartItems) {
+                await this.supabaseService.deleteRecord('cart_items', item.id);
+            }
+        } catch (error) {
+            console.error('Error clearing cart from Supabase:', error);
+        }
     }
 
     // Get cart item count
     getCartItemCount(): Observable<number> {
         return this.cartItems.pipe(
             map(items => {
-                // Ensure items is an array
                 if (!Array.isArray(items)) {
                     console.warn('getCartItemCount received non-array items:', items);
                     return 0;
@@ -234,7 +439,6 @@ export class CartService {
     isInCart(productId: string): Observable<boolean> {
         return this.cartItems.pipe(
             map(items => {
-                // Ensure items is an array
                 if (!Array.isArray(items)) {
                     console.warn('isInCart received non-array items:', items);
                     return false;
@@ -248,7 +452,6 @@ export class CartService {
     getCartItem(productId: string): Observable<CartItem | undefined> {
         return this.cartItems.pipe(
             map(items => {
-                // Ensure items is an array
                 if (!Array.isArray(items)) {
                     console.warn('getCartItem received non-array items:', items);
                     return undefined;
@@ -263,7 +466,7 @@ export class CartService {
         const summary = this.calculateCartSummary(items);
 
         return {
-            id: 'local-cart',
+            id: this.isAuthenticated ? `user-${this.currentUserId}` : 'guest-cart',
             items: items,
             subtotal: summary.subtotal,
             tax: summary.tax,
@@ -284,7 +487,6 @@ export class CartService {
 
     // Calculate cart summary
     private calculateCartSummary(items: CartItem[]): CartSummary {
-        // Ensure items is an array
         if (!Array.isArray(items)) {
             console.warn('calculateCartSummary received non-array items:', items);
             items = [];
@@ -307,73 +509,9 @@ export class CartService {
         };
     }
 
-    // Sync cart with Supabase for authenticated users
-    async syncCartWithSupabase(): Promise<void> {
-        try {
-            const currentUser = await this.supabaseService.getCurrentUser().pipe(
-                map(user => user),
-                catchError(() => of(null))
-            ).toPromise();
-
-            if (currentUser) {
-                const supabaseCartItems = await this.supabaseService.getCartItems(currentUser.id);
-
-                // Convert Supabase cart items to local cart format
-                const cartItems: CartItem[] = [];
-
-                for (const item of supabaseCartItems) {
-                    const product = await this.supabaseService.getTableById('products', item.product_id);
-                    if (product) {
-                        const now = new Date().toISOString();
-                        cartItems.push({
-                            id: item.id,
-                            productId: product.id,
-                            name: product.name,
-                            description: product.short_description,
-                            sku: product.sku,
-                            price: item.price,
-                            originalPrice: product.original_price || undefined,
-                            quantity: item.quantity,
-                            minQuantity: 1,
-                            maxQuantity: product.stock_quantity,
-                            image: this.getProductImage(product.images),
-                            category: await this.getCategoryName(product.category_id),
-                            brand: product.brand,
-                            addedAt: item.created_at,
-                            updatedAt: item.updated_at,
-                            availability: {
-                                inStock: product.in_stock,
-                                quantity: product.stock_quantity,
-                                stockStatus: product.stock_status,
-                                backorderAllowed: false
-                            },
-                            shippingInfo: {
-                                weight: product.weight || 0,
-                                dimensions: product.dimensions || { length: 0, width: 0, height: 0, unit: 'cm' },
-                                shippingClass: 'standard',
-                                freeShipping: product.free_shipping
-                            },
-                            taxInfo: {
-                                taxable: true,
-                                taxClass: 'standard',
-                                taxRate: 0.10,
-                                taxAmount: item.price * 0.10 * item.quantity
-                            }
-                        });
-                    }
-                }
-
-                this.updateCartItems(cartItems);
-            }
-        } catch (error) {
-            console.error('Error syncing cart with Supabase:', error);
-        }
-    }
-
     private updateCartItems(items: CartItem[]): void {
         this.cartItems.next(items);
         this.updateCartSummary(items);
-        this.saveCartToStorage(items);
     }
 
     private updateCartSummary(items: CartItem[]): void {
@@ -389,42 +527,6 @@ export class CartService {
             return [];
         }
         return items;
-    }
-
-    private loadCartFromStorage(): void {
-        try {
-            const stored = localStorage.getItem(this.CART_STORAGE_KEY);
-            if (stored) {
-                const parsedData = JSON.parse(stored);
-
-                // Validate that the parsed data is an array
-                if (Array.isArray(parsedData)) {
-                    const items: CartItem[] = parsedData;
-                    this.cartItems.next(items);
-                    this.updateCartSummary(items);
-                } else {
-                    console.warn('Invalid cart data in localStorage, clearing cart');
-                    // Clear invalid data and start with empty cart
-                    localStorage.removeItem(this.CART_STORAGE_KEY);
-                    this.cartItems.next([]);
-                    this.updateCartSummary([]);
-                }
-            }
-        } catch (error) {
-            console.error('Error loading cart from storage:', error);
-            // Clear corrupted data and start with empty cart
-            localStorage.removeItem(this.CART_STORAGE_KEY);
-            this.cartItems.next([]);
-            this.updateCartSummary([]);
-        }
-    }
-
-    private saveCartToStorage(items: CartItem[]): void {
-        try {
-            localStorage.setItem(this.CART_STORAGE_KEY, JSON.stringify(items));
-        } catch (error) {
-            console.error('Error saving cart to storage:', error);
-        }
     }
 
     private generateCartItemId(): string {
