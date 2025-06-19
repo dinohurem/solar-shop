@@ -31,5 +31,10 @@ export const footerReducer = createReducer(
         ...state,
         newsletterSubscriptionStatus: 'error' as const,
         newsletterMessage: error,
+    })),
+    on(FooterActions.resetNewsletterState, (state) => ({
+        ...state,
+        newsletterSubscriptionStatus: 'idle' as const,
+        newsletterMessage: null,
     }))
 ); 

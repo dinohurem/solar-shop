@@ -1,9 +1,10 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule, NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { FooterActions } from './store/footer.actions';
-import { selectFooterData } from './store/footer.selectors';
+import { selectFooterData, selectNewsletterState } from './store/footer.selectors';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
@@ -42,7 +43,7 @@ export interface FooterData {
 @Component({
   selector: 'app-footer',
   standalone: true,
-  imports: [CommonModule, TranslatePipe],
+  imports: [CommonModule, FormsModule, TranslatePipe],
   template: `
     <!-- Footer -->
     <footer class="bg-black text-white">
@@ -125,20 +126,24 @@ export interface FooterData {
               {{ 'footer.newsletterDescription' | translate }}
             </p>
             
-            <form class="space-y-4" (ngSubmit)="onNewsletterSubmit($event)">
+            <form class="space-y-4" #newsletterForm="ngForm" (ngSubmit)="onNewsletterSubmit($event, newsletterForm)">
               <div class="relative">
                 <input 
                   type="email" 
+                  name="email"
                   [placeholder]="'footer.yourEmail' | translate"
                   class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-solar-400 focus:border-transparent transition-all duration-300"
                   required
+                  #emailInput
+                  ngModel
                 >
               </div>
               <button 
                 type="submit"
-                class="w-full bg-solar-500 text-white font-semibold py-3 rounded-xl hover:bg-solar-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                [class]="(newsletterState$ | async)?.success ? 'w-full bg-green-500 text-white font-semibold py-3 rounded-xl transition-all duration-300 shadow-lg' : 'w-full bg-solar-500 text-white font-semibold py-3 rounded-xl hover:bg-solar-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'"
+                [disabled]="(newsletterState$ | async)?.loading || !newsletterForm.valid"
               >
-                {{ 'footer.subscribe' | translate }}
+                {{ (newsletterState$ | async)?.success ? ('footer.subscribed' | translate) : ('footer.subscribe' | translate) }}
               </button>
             </form>
           </div>
@@ -218,11 +223,16 @@ export class FooterComponent implements OnInit {
   private store = inject(Store);
   private sanitizer = inject(DomSanitizer);
 
+  @ViewChild('emailInput') emailInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('newsletterForm') newsletterForm!: NgForm;
+
   footerData$: Observable<FooterData | null>;
+  newsletterState$: Observable<{ loading: boolean; success: boolean; error: string | null }>;
   currentYear = new Date().getFullYear();
 
   constructor() {
     this.footerData$ = this.store.select(selectFooterData);
+    this.newsletterState$ = this.store.select(selectNewsletterState);
   }
 
   ngOnInit(): void {
@@ -233,14 +243,20 @@ export class FooterComponent implements OnInit {
     return this.sanitizer.bypassSecurityTrustHtml(icon);
   }
 
-  onNewsletterSubmit(event: Event): void {
+  onNewsletterSubmit(event: Event, form: NgForm): void {
     event.preventDefault();
-    const form = event.target as HTMLFormElement;
-    const emailInput = form.querySelector('input[type="email"]') as HTMLInputElement;
 
-    if (emailInput && emailInput.value) {
-      this.store.dispatch(FooterActions.subscribeNewsletter({ email: emailInput.value }));
-      emailInput.value = '';
+    if (form.valid) {
+      const emailValue = this.emailInput.nativeElement.value;
+      console.log('Submitting newsletter with email:', emailValue); // Debug log
+
+      this.store.dispatch(FooterActions.subscribeNewsletter({ email: emailValue }));
+      form.resetForm();
+
+      // Reset success state after 3 seconds
+      setTimeout(() => {
+        this.store.dispatch(FooterActions.resetNewsletterState());
+      }, 3000);
     }
   }
 } 

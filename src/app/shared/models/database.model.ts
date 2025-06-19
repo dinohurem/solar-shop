@@ -2,6 +2,46 @@
 export interface Database {
     public: {
         Tables: {
+            contacts: {
+                Row: {
+                    id: string;
+                    first_name?: string;
+                    last_name?: string;
+                    email: string;
+                    phone?: string;
+                    company?: string;
+                    subject?: string;
+                    message?: string;
+                    is_newsletter: boolean;
+                    created_at: string;
+                    updated_at: string;
+                };
+                Insert: {
+                    id?: string;
+                    first_name?: string;
+                    last_name?: string;
+                    email: string;
+                    phone?: string;
+                    company?: string;
+                    subject?: string;
+                    message?: string;
+                    is_newsletter?: boolean;
+                    created_at?: string;
+                    updated_at?: string;
+                };
+                Update: {
+                    id?: string;
+                    first_name?: string;
+                    last_name?: string;
+                    email?: string;
+                    phone?: string;
+                    company?: string;
+                    subject?: string;
+                    message?: string;
+                    is_newsletter?: boolean;
+                    updated_at?: string;
+                };
+            };
             profiles: {
                 Row: {
                     id: string;

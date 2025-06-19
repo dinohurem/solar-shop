@@ -10,5 +10,6 @@ export const FooterActions = createActionGroup({
         'Subscribe Newsletter': props<{ email: string }>(),
         'Subscribe Newsletter Success': props<{ message: string }>(),
         'Subscribe Newsletter Failure': props<{ error: string }>(),
+        'Reset Newsletter State': emptyProps(),
     },
 }); 

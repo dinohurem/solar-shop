@@ -1,5 +1,6 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule, NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
@@ -8,11 +9,13 @@ import { selectOffers, selectIsLoading } from './store/offers.selectors';
 import { AddToCartButtonComponent } from '../cart/components/add-to-cart-button/add-to-cart-button.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { Offer } from '../../../shared/models/offer.model';
+import { FooterActions } from '../footer/store/footer.actions';
+import { selectNewsletterState } from '../footer/store/footer.selectors';
 
 @Component({
   selector: 'app-offers-page',
   standalone: true,
-  imports: [CommonModule, AddToCartButtonComponent, TranslatePipe],
+  imports: [CommonModule, FormsModule, AddToCartButtonComponent, TranslatePipe],
   template: `
     <div class="min-h-screen bg-gray-50">
       <!-- Hero Section -->
@@ -131,16 +134,29 @@ import { Offer } from '../../../shared/models/offer.model';
           <p class="text-xl mb-8 max-w-2xl mx-auto font-['DM_Sans']">
             {{ 'offers.subscribeText' | translate }}
           </p>
-          <div class="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+          <form #newsletterForm="ngForm" (ngSubmit)="onNewsletterSubmit($event, newsletterForm)" class="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
             <input 
               type="email" 
+              name="email"
               [placeholder]="'offers.enterEmail' | translate"
               class="flex-1 px-4 py-3 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white font-['DM_Sans']"
+              required
+              #emailInput
+              ngModel
             >
-            <button class="px-8 py-3 bg-white text-solar-600 font-semibold rounded-lg hover:bg-gray-100 transition-colors font-['DM_Sans']">
-              {{ 'offers.subscribe' | translate }}
+            <button 
+              type="submit"
+              class="px-8 py-3 rounded-lg font-semibold transition-colors font-['DM_Sans']"
+              [class.bg-green-500]="(newsletterState$ | async)?.success"
+              [class.text-white]="(newsletterState$ | async)?.success"
+              [class.bg-white]="!(newsletterState$ | async)?.success"
+              [class.text-solar-600]="!(newsletterState$ | async)?.success"
+              [class.hover:bg-gray-100]="!(newsletterState$ | async)?.success"
+              [disabled]="(newsletterState$ | async)?.loading || !newsletterForm.valid"
+            >
+              {{ (newsletterState$ | async)?.success ? ('footer.subscribed' | translate) : ('offers.subscribe' | translate) }}
             </button>
-          </div>
+          </form>
         </div>
       </div>
     </div>
@@ -172,12 +188,17 @@ export class OffersPageComponent implements OnInit {
   private store = inject(Store);
   private router = inject(Router);
 
+  @ViewChild('emailInput') emailInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('newsletterForm') newsletterForm!: NgForm;
+
   offers$: Observable<Offer[]>;
   isLoading$: Observable<boolean>;
+  newsletterState$: Observable<{ loading: boolean; success: boolean; error: string | null }>;
 
   constructor() {
     this.offers$ = this.store.select(selectOffers);
     this.isLoading$ = this.store.select(selectIsLoading);
+    this.newsletterState$ = this.store.select(selectNewsletterState);
   }
 
   ngOnInit(): void {
@@ -196,8 +217,25 @@ export class OffersPageComponent implements OnInit {
     this.router.navigate(['/products']);
   }
 
+  onNewsletterSubmit(event: Event, form: NgForm): void {
+    event.preventDefault();
+
+    if (form.valid) {
+      const emailValue = this.emailInput.nativeElement.value;
+      console.log('Submitting newsletter from offers page with email:', emailValue); // Debug log
+
+      this.store.dispatch(FooterActions.subscribeNewsletter({ email: emailValue }));
+      form.resetForm();
+
+      // Reset success state after 3 seconds
+      setTimeout(() => {
+        this.store.dispatch(FooterActions.resetNewsletterState());
+      }, 3000);
+    }
+  }
+
   getSavingsAmount(offer: Offer): string {
     const savingsAmount = offer.originalPrice - offer.discountedPrice;
-    return savingsAmount.toLocaleString('en-US', { style: 'currency', currency: 'EUR' });
+    return savingsAmount.toFixed(2);
   }
 } 

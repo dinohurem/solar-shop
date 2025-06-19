@@ -21,4 +21,14 @@ export const selectNewsletterSubscriptionStatus = createSelector(
 export const selectNewsletterMessage = createSelector(
     selectFooterState,
     (state: FooterState) => state.newsletterMessage
+);
+
+export const selectNewsletterState = createSelector(
+    selectNewsletterSubscriptionStatus,
+    selectNewsletterMessage,
+    (status, message) => ({
+        loading: status === 'loading',
+        success: status === 'success',
+        error: status === 'error' ? message : null
+    })
 ); 

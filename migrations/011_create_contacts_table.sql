@@ -38,19 +38,26 @@ CREATE TRIGGER update_contacts_updated_at
 -- Enable Row Level Security
 ALTER TABLE public.contacts ENABLE ROW LEVEL SECURITY;
 
--- Allow public insertion
-CREATE POLICY "Public can insert contacts" ON public.contacts
-    FOR INSERT WITH CHECK (true);
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Public can insert contacts" ON public.contacts;
+DROP POLICY IF EXISTS "Admins can manage contacts" ON public.contacts;
+
+-- Allow anonymous and authenticated users to insert contacts
+CREATE POLICY "Anyone can insert contacts" ON public.contacts
+    FOR INSERT TO anon, authenticated
+    WITH CHECK (true);
 
 -- Admins can manage contacts
 CREATE POLICY "Admins can manage contacts" ON public.contacts
     FOR ALL USING (
+        auth.role() = 'authenticated' AND
         EXISTS (
             SELECT 1 FROM public.profiles
             WHERE user_id = auth.uid()
             AND role IN ('admin', 'company_admin')
         )
     ) WITH CHECK (
+        auth.role() = 'authenticated' AND
         EXISTS (
             SELECT 1 FROM public.profiles
             WHERE user_id = auth.uid()
@@ -60,7 +67,8 @@ CREATE POLICY "Admins can manage contacts" ON public.contacts
 
 -- Grant permissions
 GRANT USAGE ON SCHEMA public TO anon, authenticated;
-GRANT ALL ON public.contacts TO authenticated;
+GRANT ALL ON public.contacts TO anon, authenticated;
+GRANT SELECT, INSERT ON public.contacts TO anon;
 
 -- Comments
 COMMENT ON TABLE public.contacts IS 'Contact form submissions and newsletter signups';
