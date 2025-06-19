@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { SupabaseService } from '../../../services/supabase.service';
 
 interface FAQItem {
   id: string;
@@ -67,6 +68,9 @@ interface FAQItem {
               <p class="text-gray-600 font-['DM_Sans']">
                 {{ 'contactSupport.contactFormText' | translate }}
               </p>
+              <div *ngIf="messageSent" class="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                <p class="text-sm text-green-800 font-['DM_Sans']">{{ 'contactSupport.messageSent' | translate }}</p>
+              </div>
             </div>
 
             <form [formGroup]="contactForm" (ngSubmit)="onSubmit()" class="space-y-6">
@@ -294,6 +298,15 @@ interface FAQItem {
 export class ContactComponent implements OnInit {
   contactForm: FormGroup;
   isSubmitting = false;
+  messageSent = false;
+  constructor(private fb: FormBuilder, private supabase: SupabaseService) {
+    this.contactForm = this.fb.group({
+      firstName: ['', [Validators.required]],
+      lastName: ['', [Validators.required]],
+      email: ['', [Validators.required, Validators.email]],
+      message: ['', [Validators.required, Validators.minLength(10)]]
+    });
+  }
 
   faqs: FAQItem[] = [
     {
@@ -334,14 +347,7 @@ export class ContactComponent implements OnInit {
     }
   ];
 
-  constructor(private fb: FormBuilder) {
-    this.contactForm = this.fb.group({
-      firstName: ['', [Validators.required]],
-      lastName: ['', [Validators.required]],
-      email: ['', [Validators.required, Validators.email]],
-      message: ['', [Validators.required, Validators.minLength(10)]]
-    });
-  }
+
 
   ngOnInit(): void {
     // Component initialization
@@ -350,13 +356,23 @@ export class ContactComponent implements OnInit {
   onSubmit(): void {
     if (this.contactForm.valid) {
       this.isSubmitting = true;
-
-      // Simulate form submission
-      setTimeout(() => {
+      const formValue = this.contactForm.value;
+      this.supabase.createRecord('contacts', {
+        first_name: formValue.firstName,
+        last_name: formValue.lastName,
+        email: formValue.email,
+        message: formValue.message,
+        is_newsletter: false
+      }).then(() => {
         this.isSubmitting = false;
+        this.messageSent = true;
         this.contactForm.reset();
-        // In a real app, you would send this to your backend
-      }, 2000);
+        setTimeout(() => { this.messageSent = false; }, 5000);
+      }).catch(error => {
+        console.error('Error sending contact form:', error);
+        this.isSubmitting = false;
+        alert('Error sending message');
+      });
     }
   }
 

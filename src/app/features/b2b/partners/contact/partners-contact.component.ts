@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { SupabaseService } from '../../../../services/supabase.service';
 
 @Component({
   selector: 'app-partners-contact',
@@ -294,7 +295,7 @@ export class PartnersContactComponent {
   isSubmitting = false;
   messageSent = false;
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private supabase: SupabaseService) {
     this.contactForm = this.fb.group({
       firstName: ['', [Validators.required]],
       lastName: ['', [Validators.required]],
@@ -314,18 +315,26 @@ export class PartnersContactComponent {
   onSubmit(): void {
     if (this.contactForm.valid) {
       this.isSubmitting = true;
-
-      // Simulate API call
-      setTimeout(() => {
+      const value = this.contactForm.value;
+      this.supabase.createRecord('contacts', {
+        first_name: value.firstName,
+        last_name: value.lastName,
+        email: value.email,
+        phone: value.phone,
+        company: value.company,
+        subject: value.subject,
+        message: value.message,
+        is_newsletter: false
+      }).then(() => {
         this.isSubmitting = false;
         this.messageSent = true;
         this.contactForm.reset();
-
-        // Hide success message after 5 seconds
-        setTimeout(() => {
-          this.messageSent = false;
-        }, 5000);
-      }, 2000);
+        setTimeout(() => { this.messageSent = false; }, 5000);
+      }).catch(error => {
+        console.error('Error sending partner contact:', error);
+        this.isSubmitting = false;
+        alert('Error sending message');
+      });
     } else {
       // Mark all fields as touched to show validation errors
       this.contactForm.markAllAsTouched();
