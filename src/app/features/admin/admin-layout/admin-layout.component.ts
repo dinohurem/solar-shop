@@ -139,7 +139,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
                   <span>{{ 'admin.companies' | translate }}</span>
                 </a>
 
-                <a routerLink="/admin/company-pricing" 
+                <a routerLink="/admin/company-pricing"
                    routerLinkActive="bg-blue-50 text-blue-700 border-blue-300"
                    class="flex items-center space-x-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors border border-transparent">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -148,7 +148,16 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
                   <span>{{ 'admin.companyPricing' | translate }}</span>
                 </a>
 
-                <a routerLink="/admin/wishlist" 
+                <a routerLink="/admin/contacts"
+                   routerLinkActive="bg-blue-50 text-blue-700 border-blue-300"
+                   class="flex items-center space-x-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors border border-transparent">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12H8m0 0l4-4m-4 4l4 4"/>
+                  </svg>
+                  <span>{{ 'admin.contacts' | translate }}</span>
+                </a>
+
+                <a routerLink="/admin/wishlist"
                    routerLinkActive="bg-blue-50 text-blue-700 border-blue-300"
                    class="flex items-center space-x-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors border border-transparent">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -46,6 +46,7 @@ import { CompanyPricingFormComponent } from './features/admin/company-pricing/co
 import { CompanyPricingDetailsComponent } from './features/admin/company-pricing/company-pricing-details/company-pricing-details.component';
 import { AdminCompaniesComponent } from './features/admin/companies/admin-companies.component';
 import { AdminWishlistComponent } from './features/admin/wishlist/admin-wishlist.component';
+import { AdminContactsComponent } from './features/admin/contacts/admin-contacts.component';
 import { CategoryFormComponent } from './features/admin/categories/category-form/category-form.component';
 import { ProductFormComponent } from './features/admin/products/product-form/product-form.component';
 import { OfferFormComponent } from './features/admin/offers/offer-form/offer-form.component';
@@ -164,6 +165,9 @@ export const routes: Routes = [
 
             // Companies
             { path: 'companies', component: AdminCompaniesComponent },
+
+            // Contacts
+            { path: 'contacts', component: AdminContactsComponent },
 
             // Wishlist
             { path: 'wishlist', component: AdminWishlistComponent },

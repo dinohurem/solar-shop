@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { of } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { of, from } from 'rxjs';
+import { map, catchError, mergeMap } from 'rxjs/operators';
 import { FooterActions } from './footer.actions';
+import { SupabaseService } from '../../../services/supabase.service';
 import { FooterData } from '../footer.component';
 
 @Injectable()
@@ -88,8 +89,21 @@ export class FooterEffects {
         );
     });
 
+    subscribeNewsletter$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(FooterActions.subscribeNewsletter),
+            mergeMap(({ email }) =>
+                from(this.supabaseService.createRecord('contacts', { email, is_newsletter: true })).pipe(
+                    map(() => FooterActions.subscribeNewsletterSuccess({ message: 'Subscribed' })),
+                    catchError(error => of(FooterActions.subscribeNewsletterFailure({ error: error.message || 'Subscription failed' })))
+                )
+            )
+        )
+    );
+
     constructor(
         private actions$: Actions,
-        private store: Store
+        private store: Store,
+        private supabaseService: SupabaseService
     ) { }
-} 
+}
