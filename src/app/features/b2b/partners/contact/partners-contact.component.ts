@@ -49,11 +49,10 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
                   </p>
                   <div class="space-y-1">
                     <p class="text-sm text-gray-600">
-                      <span class="font-medium">{{ 'b2b.contact.phone' | translate }}:</span> 
-                      <a href="tel:+385123456789" class="text-solar-600 hover:text-solar-700">{{ 'b2b.contact.phoneNumber' | translate }}</a>
+                      <a href="tel:+385123456789" class="text-solar-600 hover:text-solar-700">{{ 'b2b.contact.phone' | translate }}</a>
                     </p>
                     <p class="text-sm text-gray-600">
-                      <span class="font-medium">{{ 'b2b.contact.email' | translate }}:</span> 
+                      <span class="font-medium">{{ 'b2b.contact.email' | translate }}: </span> 
                       <a href="mailto:partners@solarshop.hr" class="text-solar-600 hover:text-solar-700">{{ 'b2b.contact.supportEmail' | translate }}</a>
                     </p>
                   </div>
@@ -78,12 +77,11 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
                   </p>
                   <div class="space-y-1">
                     <p class="text-sm text-gray-600">
-                      <span class="font-medium">{{ 'b2b.contact.phone' | translate }}:</span> 
-                      <a href="tel:+385123456790" class="text-solar-600 hover:text-solar-700">+385 1 234 5679</a>
+                      <a href="tel:+385123456790" class="text-solar-600 hover:text-solar-700">{{ 'b2b.contact.salesTeamPhone' | translate }}</a>
                     </p>
                     <p class="text-sm text-gray-600">
-                      <span class="font-medium">{{ 'b2b.contact.email' | translate }}:</span> 
-                      <a href="mailto:sales@solarshop.hr" class="text-solar-600 hover:text-solar-700">sales&#64;solarshop.hr</a>
+                      <span class="font-medium">{{ 'b2b.contact.email' | translate }}: </span> 
+                      <a href="mailto:sales@solarshop.hr" class="text-solar-600 hover:text-solar-700">{{ 'b2b.contact.salesTeamEmail' | translate }}</a>
                     </p>
                   </div>
                 </div>
@@ -108,12 +106,11 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
                   </p>
                   <div class="space-y-1">
                     <p class="text-sm text-gray-600">
-                      <span class="font-medium">{{ 'b2b.contact.phone' | translate }}:</span> 
-                      <a href="tel:+385123456791" class="text-solar-600 hover:text-solar-700">+385 1 234 5680</a>
+                      <a href="tel:+385123456791" class="text-solar-600 hover:text-solar-700"> {{ 'b2b.contact.technicalSupportPhone' | translate }}</a>
                     </p>
                     <p class="text-sm text-gray-600">
-                      <span class="font-medium">{{ 'b2b.contact.email' | translate }}:</span> 
-                      <a href="mailto:tech@solarshop.hr" class="text-solar-600 hover:text-solar-700">tech&#64;solarshop.hr</a>
+                      <span class="font-medium">{{ 'b2b.contact.email' | translate }}: </span> 
+                      <a href="mailto:tech@solarshop.hr" class="text-solar-600 hover:text-solar-700">{{ 'b2b.contact.technicalSupportEmail' | translate }}</a>
                     </p>
                   </div>
                 </div>

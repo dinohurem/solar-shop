@@ -18,8 +18,7 @@ export class CompaniesService {
                 .select(`
           *,
           contact_person:profiles!companies_contact_person_id_fkey(
-            full_name,
-            email
+            full_name
           )
         `)
                 .order('created_at', { ascending: false })
@@ -48,8 +47,7 @@ export class CompaniesService {
                     .select(`
             *,
             contact_person:profiles!companies_contact_person_id_fkey(
-              full_name,
-              email
+              full_name
             )
           `)
                     .single();
@@ -80,8 +78,7 @@ export class CompaniesService {
                     .select(`
             *,
             contact_person:profiles!companies_contact_person_id_fkey(
-              full_name,
-              email
+              full_name
             )
           `)
                     .single();

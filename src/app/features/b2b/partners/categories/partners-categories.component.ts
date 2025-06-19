@@ -2,6 +2,8 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { SupabaseService } from '../../../../services/supabase.service';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 interface CategoryItem {
   id: string;
@@ -15,11 +17,11 @@ interface CategoryItem {
 @Component({
   selector: 'app-partners-categories',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, TranslatePipe],
   template: `
     <section class="py-16 bg-b2b-gray-50" *ngIf="categories.length">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-3xl font-bold text-b2b-gray-900 mb-12 text-center font-['Poppins']">Product Categories</h2>
+        <h2 class="text-3xl font-bold text-b2b-gray-900 mb-12 text-center font-['Poppins']">{{ 'b2b.products.productCategories' | translate }}</h2>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
           <div *ngFor="let category of categories" 
                (click)="navigateToProducts(category.slug)"
@@ -126,6 +128,8 @@ export class PartnersCategoriesComponent implements OnInit {
     }
   ];
 
+  private sanitizer = inject(DomSanitizer);
+
   async ngOnInit() {
     try {
       // Try to load categories from database
@@ -160,17 +164,20 @@ export class PartnersCategoriesComponent implements OnInit {
     });
   }
 
-  getCategoryIcon(iconType: string): string {
+  getCategoryIcon(iconType: string): SafeHtml {
     const icons: { [key: string]: string } = {
       'solar-panel': `
-        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12 2L2 7v10c0 5.55 3.84 10 9 11 1.34-.24 2.59-.69 3.71-1.32C16.24 26.31 18 25.19 19 24V7l-7-5z"/>
-          <rect x="4" y="9" width="4" height="3" rx="0.5"/>
-          <rect x="10" y="9" width="4" height="3" rx="0.5"/>
-          <rect x="16" y="9" width="4" height="3" rx="0.5"/>
-          <rect x="4" y="14" width="4" height="3" rx="0.5"/>
-          <rect x="10" y="14" width="4" height="3" rx="0.5"/>
-          <rect x="16" y="14" width="4" height="3" rx="0.5"/>
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <rect x="2" y="2" width="20" height="20" rx="2" stroke-width="2"/>
+          <rect x="4" y="4" width="4" height="4" rx="0.5" fill="currentColor"/>
+          <rect x="10" y="4" width="4" height="4" rx="0.5" fill="currentColor"/>
+          <rect x="16" y="4" width="4" height="4" rx="0.5" fill="currentColor"/>
+          <rect x="4" y="10" width="4" height="4" rx="0.5" fill="currentColor"/>
+          <rect x="10" y="10" width="4" height="4" rx="0.5" fill="currentColor"/>
+          <rect x="16" y="10" width="4" height="4" rx="0.5" fill="currentColor"/>
+          <rect x="4" y="16" width="4" height="4" rx="0.5" fill="currentColor"/>
+          <rect x="10" y="16" width="4" height="4" rx="0.5" fill="currentColor"/>
+          <rect x="16" y="16" width="4" height="4" rx="0.5" fill="currentColor"/>
         </svg>
       `,
       'inverter': `
@@ -180,7 +187,7 @@ export class PartnersCategoriesComponent implements OnInit {
           <circle cx="7" cy="15" r="1" fill="currentColor"/>
           <rect x="11" y="8" width="8" height="2" rx="1" fill="currentColor"/>
           <rect x="11" y="14" width="6" height="2" rx="1" fill="currentColor"/>
-          <path d="m9 12 2-2v4l-2-2z" stroke-width="2"/>
+          <path d="M9 12l2-2v4l-2-2z" stroke-width="2"/>
         </svg>
       `,
       'battery': `
@@ -210,11 +217,16 @@ export class PartnersCategoriesComponent implements OnInit {
       `,
       'cables': `
         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path d="M17 21v-2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2" stroke-width="2"/>
-          <path d="M19 15V6.5a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1V15" stroke-width="2"/>
-          <path d="M7 21v-2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2" stroke-width="2"/>
-          <path d="M9 15V6.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1V15" stroke-width="2"/>
-          <path d="M12 11h3" stroke-width="2"/>
+          <path d="M4 6h16" stroke-width="2"/>
+          <path d="M4 10h16" stroke-width="2"/>
+          <path d="M4 14h16" stroke-width="2"/>
+          <path d="M4 18h16" stroke-width="2"/>
+          <circle cx="6" cy="8" r="1" fill="currentColor"/>
+          <circle cx="6" cy="12" r="1" fill="currentColor"/>
+          <circle cx="6" cy="16" r="1" fill="currentColor"/>
+          <circle cx="18" cy="8" r="1" fill="currentColor"/>
+          <circle cx="18" cy="12" r="1" fill="currentColor"/>
+          <circle cx="18" cy="16" r="1" fill="currentColor"/>
         </svg>
       `,
       'tools': `
@@ -230,7 +242,8 @@ export class PartnersCategoriesComponent implements OnInit {
       `
     };
 
-    return icons[iconType] || icons['solar-panel'];
+    const iconSvg = icons[iconType] || icons['solar-panel'];
+    return this.sanitizer.bypassSecurityTrustHtml(iconSvg);
   }
 
   private createSlug(name: string): string {

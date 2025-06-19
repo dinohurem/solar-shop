@@ -4,10 +4,10 @@ import { RouterModule } from '@angular/router';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 @Component({
-    selector: 'app-partners-footer',
-    standalone: true,
-    imports: [CommonModule, RouterModule, TranslatePipe],
-    template: `
+  selector: 'app-partners-footer',
+  standalone: true,
+  imports: [CommonModule, RouterModule, TranslatePipe],
+  template: `
     <footer class="bg-gray-900 text-white">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -19,7 +19,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
               <span class="px-2 py-1 bg-solar-600 text-white text-xs font-medium rounded-full">B2B</span>
             </div>
             <p class="text-gray-300 text-sm font-['DM_Sans']">
-              {{ 'footer.description' | translate }}
+              {{ 'b2bFooter.joinThousands' | translate }}
             </p>
           </div>
 
@@ -99,5 +99,5 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
   `,
 })
 export class PartnersFooterComponent {
-    currentYear = new Date().getFullYear();
+  currentYear = new Date().getFullYear();
 } 
