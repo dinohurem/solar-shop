@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { FooterActions } from './store/footer.actions';
 import { selectFooterData } from './store/footer.selectors';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 export interface FooterLink {
   label: string;
@@ -159,7 +160,7 @@ export interface FooterData {
                   class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-solar-500 transition-all duration-300 group"
                   [title]="social.platform"
                 >
-                  <div [innerHTML]="social.icon" class="w-5 h-5 text-gray-300 group-hover:text-white"></div>
+                  <div [innerHTML]="sanitizeIcon(social.icon)" class="w-5 h-5 text-gray-300 group-hover:text-white"></div>
                 </a>
               </div>
             </div>
@@ -215,6 +216,7 @@ export interface FooterData {
 })
 export class FooterComponent implements OnInit {
   private store = inject(Store);
+  private sanitizer = inject(DomSanitizer);
 
   footerData$: Observable<FooterData | null>;
   currentYear = new Date().getFullYear();
@@ -225,6 +227,10 @@ export class FooterComponent implements OnInit {
 
   ngOnInit(): void {
     this.store.dispatch(FooterActions.loadFooterData());
+  }
+
+  sanitizeIcon(icon: string): SafeHtml {
+    return this.sanitizer.bypassSecurityTrustHtml(icon);
   }
 
   onNewsletterSubmit(event: Event): void {
