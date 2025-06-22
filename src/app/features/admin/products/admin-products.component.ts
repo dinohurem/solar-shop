@@ -6,26 +6,28 @@ import { Observable, from, map, catchError, of, BehaviorSubject } from 'rxjs';
 import { SupabaseService } from '../../../services/supabase.service';
 import { DataTableComponent, TableConfig, TableColumn, TableAction } from '../shared/data-table/data-table.component';
 import { SuccessModalComponent } from '../../../shared/components/modals/success-modal/success-modal.component';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../shared/services/translation.service';
 
 @Component({
     selector: 'app-admin-products',
     standalone: true,
-    imports: [CommonModule, DataTableComponent, SuccessModalComponent],
+    imports: [CommonModule, DataTableComponent, SuccessModalComponent, TranslatePipe],
     template: `
     <div class="w-full max-w-full overflow-hidden">
       <div class="space-y-4 sm:space-y-6 p-4 sm:p-6">
       <!-- Page Header -->
         <div class="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
           <div class="min-w-0 flex-1">
-            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 truncate">Products</h1>
-            <p class="mt-1 sm:mt-2 text-sm sm:text-base text-gray-600">Manage your product catalog</p>
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 truncate"> {{ 'admin.products' | translate }}</h1>
+            <p class="mt-1 sm:mt-2 text-sm sm:text-base text-gray-600"> {{ 'admin.manageYourProductCatalog' | translate }}</p>
         </div>
       </div>
 
         <!-- Data Table Container -->
         <div class="w-full overflow-hidden">
       <app-data-table
-        title="Products"
+        title="{{ 'admin.products' | translate }}"
         [data]="(products$ | async) || []"
         [config]="tableConfig"
         [loading]="(loading$ | async) || false"
@@ -55,9 +57,11 @@ export class AdminProductsComponent implements OnInit {
     private supabaseService = inject(SupabaseService);
     private router = inject(Router);
     private title = inject(Title);
+    private translationService = inject(TranslationService);
 
     private productsSubject = new BehaviorSubject<any[]>([]);
-    private loadingSubject = new BehaviorSubject<boolean>(true); products$ = this.productsSubject.asObservable();
+    private loadingSubject = new BehaviorSubject<boolean>(true);
+    products$ = this.productsSubject.asObservable();
     loading$ = this.loadingSubject.asObservable();
 
     // Modal properties
@@ -69,14 +73,14 @@ export class AdminProductsComponent implements OnInit {
         columns: [
             {
                 key: 'image_url',
-                label: 'Image',
+                label: this.translationService.translate('admin.productImage'),
                 type: 'image',
                 sortable: false,
                 searchable: false
             },
             {
                 key: 'name',
-                label: 'Name',
+                label: this.translationService.translate('admin.productName'),
                 type: 'text',
                 sortable: true,
                 searchable: true
@@ -90,21 +94,21 @@ export class AdminProductsComponent implements OnInit {
             },
             {
                 key: 'brand',
-                label: 'Brand',
+                label: this.translationService.translate('admin.productBrand'),
                 type: 'text',
                 sortable: true,
                 searchable: true
             },
             {
                 key: 'price',
-                label: 'Price',
+                label: this.translationService.translate('admin.productPricing'),
                 type: 'number',
                 sortable: true,
                 format: (value) => value ? `$${value.toFixed(2)}` : ''
             },
             {
                 key: 'stock_quantity',
-                label: 'Stock',
+                label: this.translationService.translate('admin.productStock'),
                 type: 'number',
                 sortable: true
             },
@@ -116,20 +120,20 @@ export class AdminProductsComponent implements OnInit {
             },
             {
                 key: 'created_at',
-                label: 'Created',
+                label: this.translationService.translate('admin.productCreated'),
                 type: 'date',
                 sortable: true
             }
         ],
         actions: [
             {
-                label: 'Edit',
+                label: this.translationService.translate('common.edit'),
                 icon: 'edit',
                 action: 'edit',
                 class: 'text-blue-600 hover:text-blue-900'
             },
             {
-                label: 'Delete',
+                label: this.translationService.translate('common.delete'),
                 icon: 'trash2',
                 action: 'delete',
                 class: 'text-red-600 hover:text-red-900'
@@ -206,11 +210,11 @@ export class AdminProductsComponent implements OnInit {
                 await this.supabaseService.createRecord('products', product);
             }
 
-            alert(`Successfully imported ${products.length} products`);
+            alert(`${this.translationService.translate('common.importSuccess')} ${products.length} ${this.translationService.translate('admin.products')}`);
             this.loadProducts();
         } catch (error) {
             console.error('Error importing products:', error);
-            alert('Error importing products. Please check the CSV format.');
+            alert(this.translationService.translate('admin.productImportError'));
         } finally {
             this.loadingSubject.next(false);
         }
@@ -267,14 +271,16 @@ export class AdminProductsComponent implements OnInit {
         } finally {
             this.loadingSubject.next(false);
         }
-    } private async deleteProduct(product: any): Promise<void> {
+    }
+
+    private async deleteProduct(product: any): Promise<void> {
         try {
             await this.supabaseService.deleteRecord('products', product.id);
-            this.showSuccess('Success', 'Product deleted successfully');
+            this.showSuccess(this.translationService.translate('common.success'), this.translationService.translate('admin.productDeletedSuccessfully'));
             this.loadProducts();
         } catch (error) {
             console.error('Error deleting product:', error);
-            this.showSuccess('Error', 'Error deleting product');
+            this.showSuccess(this.translationService.translate('common.error'), this.translationService.translate('admin.productDeletedError'));
         }
     }
 

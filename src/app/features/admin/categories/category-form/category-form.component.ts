@@ -5,6 +5,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { AdminFormComponent } from '../../shared/admin-form/admin-form.component';
 import { SupabaseService } from '../../../../services/supabase.service';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../shared/services/translation.service';
 
 interface Category {
   id?: string;
@@ -21,11 +23,11 @@ interface Category {
 @Component({
   selector: 'app-category-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, AdminFormComponent],
+  imports: [CommonModule, ReactiveFormsModule, AdminFormComponent, TranslatePipe],
   template: `
     <app-admin-form
-      [title]="isEditMode ? 'Edit Category' : 'Create Category'"
-      [subtitle]="isEditMode ? 'Update category information' : 'Add a new category to your store'"
+      [title]="isEditMode ? translationService.translate('admin.categoriesForm.updateCategory') : translationService.translate('admin.categoriesForm.createCategory')"
+      [subtitle]="isEditMode ? translationService.translate('admin.categoriesForm.updateCategoryInformation') : translationService.translate('admin.categoriesForm.addNewCategoryToStore')"
       [form]="categoryForm"
       [isEditMode]="isEditMode"
       [isSubmitting]="isSubmitting"
@@ -39,7 +41,7 @@ interface Category {
             <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
             </svg>
-            Basic Information
+            {{ 'admin.basicInformation' | translate }}
           </h3>
           
           <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -53,13 +55,13 @@ interface Category {
                 placeholder="Category Name"
               >
               <label for="name" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                Name *
+                {{ 'admin.common.name' | translate }} *
               </label>
               <div *ngIf="categoryForm.get('name')?.invalid && categoryForm.get('name')?.touched" class="mt-2 text-sm text-red-600 flex items-center">
                 <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                 </svg>
-              Name is required
+              {{ 'admin.common.nameRequired' | translate }}
             </div>
           </div>
 
@@ -72,13 +74,13 @@ interface Category {
                 placeholder="URL Slug"
               >
               <label for="slug" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                Slug *
+                {{ 'admin.common.slug' | translate }} *
               </label>
               <div *ngIf="categoryForm.get('slug')?.invalid && categoryForm.get('slug')?.touched" class="mt-2 text-sm text-red-600 flex items-center">
                 <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                 </svg>
-              Slug is required
+              {{ 'admin.common.slugRequired' | translate }}
             </div>
           </div>
         </div>
@@ -93,7 +95,7 @@ interface Category {
                 placeholder="Category Description"
           ></textarea>
               <label for="description" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                Description
+                {{ 'admin.common.description' | translate }}
               </label>
             </div>
           </div>
@@ -105,7 +107,7 @@ interface Category {
             <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
             </svg>
-            Media & Configuration
+            {{ 'admin.categoriesForm.mediaAndConfiguration' | translate }}
           </h3>
           
           <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -118,7 +120,7 @@ interface Category {
             placeholder="https://example.com/image.jpg"
           >
               <label for="image_url" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                Image URL
+                {{ 'admin.common.imageUrl' | translate }}
               </label>
         </div>
 
@@ -132,7 +134,7 @@ interface Category {
               placeholder="0"
             >
               <label for="sort_order" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                Sort Order
+                {{ 'admin.common.sortOrder' | translate }}
               </label>
             </div>
           </div>
@@ -144,7 +146,7 @@ interface Category {
             <svg class="w-5 h-5 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
-            Category Status
+            {{ 'admin.common.status' | translate }}
           </h3>
           
           <label class="relative flex items-center p-4 rounded-lg border-2 border-gray-200 cursor-pointer hover:border-blue-300 transition-colors duration-200">
@@ -163,8 +165,8 @@ interface Category {
                 </svg>
               </span>
               <div>
-                <span class="text-sm font-medium text-gray-700">Active</span>
-                <p class="text-sm text-gray-500">Enable this category in the store</p>
+                <span class="text-sm font-medium text-gray-700">{{ 'admin.common.active' | translate }}</span>
+                <p class="text-sm text-gray-500">{{ 'admin.categoriesForm.enableCategory' | translate }}</p>
             </div>
             </span>
           </label>
@@ -179,6 +181,7 @@ export class CategoryFormComponent implements OnInit {
   private router = inject(Router);
   private supabaseService = inject(SupabaseService);
   private title = inject(Title);
+  translationService = inject(TranslationService);
 
   categoryForm!: FormGroup;
   isEditMode = false;

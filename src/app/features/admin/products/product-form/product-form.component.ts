@@ -5,6 +5,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { AdminFormComponent } from '../../shared/admin-form/admin-form.component';
 import { SupabaseService } from '../../../../services/supabase.service';
+import { TranslationService } from '../../../../shared/services/translation.service';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 interface Product {
   id?: string;
@@ -30,11 +32,11 @@ interface Product {
 @Component({
   selector: 'app-product-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, AdminFormComponent],
+  imports: [CommonModule, ReactiveFormsModule, AdminFormComponent, TranslatePipe],
   template: `
     <app-admin-form
-      [title]="isEditMode ? 'Edit Product' : 'Create Product'"
-      [subtitle]="isEditMode ? 'Update product information' : 'Add a new product to your catalog'"
+      [title]="isEditMode ? translationService.translate('admin.editProduct') : translationService.translate('admin.createProduct')"
+      [subtitle]="isEditMode ? translationService.translate('admin.updateProductInformation') : translationService.translate('admin.addNewProductToCatalog')"
       [form]="productForm"
       [isEditMode]="isEditMode"
       [isSubmitting]="isSubmitting"
@@ -48,7 +50,7 @@ interface Product {
             <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
             </svg>
-            Basic Information
+            {{ 'admin.basicInformation' | translate }}
           </h3>
           
           <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -62,13 +64,13 @@ interface Product {
                 placeholder="Product Name"
               >
               <label for="name" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                Product Name *
+                {{ 'admin.productName' | translate }} *
               </label>
               <div *ngIf="productForm.get('name')?.invalid && productForm.get('name')?.touched" class="mt-2 text-sm text-red-600 flex items-center">
                 <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                 </svg>
-                Product name is required
+                {{ 'admin.productNameRequired' | translate }}
               </div>
             </div>
 
@@ -81,13 +83,13 @@ interface Product {
                 placeholder="URL Slug"
               >
               <label for="slug" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                URL Slug *
+                {{ 'admin.urlSlug' | translate }} *
               </label>
               <div *ngIf="productForm.get('slug')?.invalid && productForm.get('slug')?.touched" class="mt-2 text-sm text-red-600 flex items-center">
                 <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                 </svg>
-                URL slug is required
+                {{ 'admin.urlSlugRequired' | translate }}
               </div>
             </div>
           </div>
@@ -102,7 +104,7 @@ interface Product {
                 placeholder="Product Description"
               ></textarea>
               <label for="description" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                Description
+                {{ 'admin.productDescription' | translate }}
               </label>
             </div>
           </div>
@@ -114,7 +116,7 @@ interface Product {
             <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
             </svg>
-            Product Details
+            {{ 'admin.productDetails' | translate }}
           </h3>
           
           <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -127,13 +129,13 @@ interface Product {
                 placeholder="SKU"
               >
               <label for="sku" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                SKU *
+                {{ 'admin.productSKU' | translate }} *
               </label>
               <div *ngIf="productForm.get('sku')?.invalid && productForm.get('sku')?.touched" class="mt-2 text-sm text-red-600 flex items-center">
                 <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                 </svg>
-                SKU is required
+                {{ 'admin.productSKURequired' | translate }}
               </div>
             </div>
 
@@ -146,7 +148,7 @@ interface Product {
                 placeholder="Brand"
               >
               <label for="brand" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                Brand
+                {{ 'admin.productBrand' | translate }}
               </label>
             </div>
 
@@ -156,13 +158,13 @@ interface Product {
                 formControlName="category_id"
                 class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 bg-white"
               >
-                <option value="">Select a category</option>
+                <option value="">{{ 'admin.selectCategory' | translate }}</option>
                 <option *ngFor="let category of categories" [value]="category.id">
                   {{ category.name }}
                 </option>
               </select>
               <label class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700">
-                Category
+                {{ 'admin.productCategory' | translate }}
               </label>
             </div>
           </div>
@@ -174,7 +176,7 @@ interface Product {
             <svg class="w-5 h-5 mr-2 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
             </svg>
-            Pricing
+            {{ 'admin.productPricing' | translate }}
           </h3>
           
           <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -192,13 +194,13 @@ interface Product {
                 placeholder="0.00"
               >
               <label for="price" class="absolute left-10 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                Price *
+                {{ 'admin.productPrice' | translate }} *
               </label>
               <div *ngIf="productForm.get('price')?.invalid && productForm.get('price')?.touched" class="mt-2 text-sm text-red-600 flex items-center">
                 <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                 </svg>
-                Price is required and must be greater than 0
+                {{ 'admin.productPriceRequired' | translate }}
               </div>
             </div>
 
@@ -216,7 +218,7 @@ interface Product {
                 placeholder="0.00"
               >
               <label for="compare_at_price" class="absolute left-10 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                Compare at Price
+                {{ 'admin.productCompareAtPrice' | translate }}
               </label>
             </div>
           </div>
@@ -228,7 +230,7 @@ interface Product {
             <svg class="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
             </svg>
-            Inventory & Shipping
+            {{ 'admin.productInventoryAndShipping' | translate }}
           </h3>
           
           <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -242,13 +244,13 @@ interface Product {
                 placeholder="0"
               >
               <label for="stock_quantity" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                Stock Quantity *
+                {{ 'admin.productStockQuantity' | translate }} *
               </label>
               <div *ngIf="productForm.get('stock_quantity')?.invalid && productForm.get('stock_quantity')?.touched" class="mt-2 text-sm text-red-600 flex items-center">
                 <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                 </svg>
-                Stock quantity is required
+                {{ 'admin.productStockQuantityRequired' | translate }}
               </div>
             </div>
 
@@ -263,7 +265,7 @@ interface Product {
                 placeholder="0.0"
               >
               <label for="weight" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                Weight (kg)
+                {{ 'admin.productWeight' | translate }} (kg)
               </label>
             </div>
           </div>
@@ -275,7 +277,7 @@ interface Product {
             <svg class="w-5 h-5 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
-            Product Status
+            {{ 'admin.productStatus' | translate }}
           </h3>
           
           <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -294,7 +296,7 @@ interface Product {
                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                   </svg>
                 </span>
-                <span class="text-sm font-medium text-gray-700">Active</span>
+                <span class="text-sm font-medium text-gray-700">{{ 'admin.active' | translate }}</span>
               </span>
             </label>
 
@@ -313,7 +315,7 @@ interface Product {
                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                   </svg>
                 </span>
-                <span class="text-sm font-medium text-gray-700">Featured</span>
+                <span class="text-sm font-medium text-gray-700">{{ 'admin.featured' | translate }}</span>
               </span>
             </label>
 
@@ -332,7 +334,7 @@ interface Product {
                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                   </svg>
                 </span>
-                <span class="text-sm font-medium text-gray-700">On Sale</span>
+                <span class="text-sm font-medium text-gray-700">{{ 'admin.onSale' | translate }}</span>
               </span>
             </label>
           </div>
@@ -344,7 +346,7 @@ interface Product {
             <svg class="w-5 h-5 mr-2 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
             </svg>
-            Product Images
+            {{ 'admin.productImages' | translate }}
           </h3>
           
           <div class="relative">
@@ -356,13 +358,13 @@ interface Product {
               placeholder="Image URLs"
             ></textarea>
             <label for="images" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-              Product Images
+              {{ 'admin.productImages' | translate }}
             </label>
             <p class="mt-3 text-sm text-gray-500 flex items-center">
               <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
-              Enter one image URL per line
+              {{ 'admin.productEnterOneImageUrlPerLine' | translate }}
             </p>
           </div>
         </div>
@@ -376,6 +378,7 @@ export class ProductFormComponent implements OnInit {
   private router = inject(Router);
   private supabaseService = inject(SupabaseService);
   private title = inject(Title);
+  translationService = inject(TranslationService);
 
   productForm!: FormGroup;
   isEditMode = false;

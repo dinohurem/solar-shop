@@ -5,26 +5,28 @@ import { BehaviorSubject } from 'rxjs';
 import { SupabaseService } from '../../../services/supabase.service';
 import { DataTableComponent, TableConfig } from '../shared/data-table/data-table.component';
 import { SuccessModalComponent } from '../../../shared/components/modals/success-modal/success-modal.component';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../shared/services/translation.service';
 
 @Component({
     selector: 'app-admin-blog',
     standalone: true,
-    imports: [CommonModule, DataTableComponent, SuccessModalComponent],
+    imports: [CommonModule, DataTableComponent, SuccessModalComponent, TranslatePipe],
     template: `
     <div class="w-full">
       <div class="space-y-4 sm:space-y-6 p-4 sm:p-6">
       <!-- Page Header -->
         <div class="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
           <div class="min-w-0 flex-1">
-            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 truncate">Blog Posts</h1>
-            <p class="mt-1 sm:mt-2 text-sm sm:text-base text-gray-600">Manage blog content and articles</p>
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 truncate">{{ 'admin.blogForm.title' | translate }}</h1>
+            <p class="mt-1 sm:mt-2 text-sm sm:text-base text-gray-600">{{ 'admin.blogForm.subtitle' | translate }}</p>
         </div>
       </div>
 
         <!-- Data Table Container -->
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
       <app-data-table
-        title="Blog Posts"
+        [title]="translationService.translate('admin.blogForm.title')"
         [data]="(posts$ | async) || []"
         [config]="tableConfig"
         [loading]="(loading$ | async) || false"
@@ -53,6 +55,7 @@ import { SuccessModalComponent } from '../../../shared/components/modals/success
 export class AdminBlogComponent implements OnInit {
     private supabaseService = inject(SupabaseService);
     private router = inject(Router);
+    translationService = inject(TranslationService);
 
     private postsSubject = new BehaviorSubject<any[]>([]);
     private loadingSubject = new BehaviorSubject<boolean>(true); posts$ = this.postsSubject.asObservable();
@@ -67,40 +70,40 @@ export class AdminBlogComponent implements OnInit {
         columns: [
             {
                 key: 'featured_image_url',
-                label: 'Image',
+                label: this.translationService.translate('admin.common.image'),
                 type: 'image',
                 sortable: false,
                 searchable: false
             },
             {
                 key: 'title',
-                label: 'Title',
+                label: this.translationService.translate('admin.blogForm.postTitle'),
                 type: 'text',
                 sortable: true,
                 searchable: true
             },
             {
                 key: 'status',
-                label: 'Status',
+                label: this.translationService.translate('admin.common.status'),
                 type: 'status',
                 sortable: true
             },
             {
                 key: 'published_at',
-                label: 'Published',
+                label: this.translationService.translate('admin.blogForm.published'),
                 type: 'date',
                 sortable: true
             }
         ],
         actions: [
             {
-                label: 'Edit',
+                label: this.translationService.translate('admin.common.edit'),
                 icon: 'edit',
                 action: 'edit',
                 class: 'text-blue-600 hover:text-blue-900'
             },
             {
-                label: 'Delete',
+                label: this.translationService.translate('admin.common.delete'),
                 icon: 'trash2',
                 action: 'delete',
                 class: 'text-red-600 hover:text-red-900'

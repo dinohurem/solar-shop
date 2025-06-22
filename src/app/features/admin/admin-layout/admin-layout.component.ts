@@ -25,17 +25,17 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
           <!-- User Info & Actions -->
           <div class="flex items-center space-x-4">
             <div class="text-sm text-gray-700">
-              Welcome, <span class="font-semibold">{{ (currentUser$ | async)?.firstName }}</span>
+              {{ 'admin.welcome' | translate }}, <span class="font-semibold">{{ (currentUser$ | async)?.firstName }}</span>
             </div>
             <button 
               (click)="viewSite()"
               class="px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-              View Site
+              {{ 'admin.viewSite' | translate }}
             </button>
             <button 
               (click)="logout()"
               class="px-4 py-2 text-sm bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
-              Logout
+              {{ 'admin.logout' | translate }}
             </button>
           </div>
         </div>

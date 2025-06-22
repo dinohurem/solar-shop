@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { LucideAngularModule, Edit, Trash2, Upload, Download, Plus, Search, Eye, EyeOff, Check, X, Printer } from 'lucide-angular';
 import { DeleteConfirmationModalComponent } from '../../../../shared/components/modals/delete-confirmation-modal/delete-confirmation-modal.component';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../shared/services/translation.service';
 
 export interface TableColumn {
   key: string;
@@ -37,7 +39,7 @@ export interface TableConfig {
 @Component({
   selector: 'app-data-table',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, LucideAngularModule, DeleteConfirmationModalComponent],
+  imports: [CommonModule, FormsModule, RouterModule, LucideAngularModule, DeleteConfirmationModalComponent, TranslatePipe],
   template: `
     <div class="bg-white rounded-lg shadow-sm border border-gray-200">
       <!-- Table Header -->
@@ -45,7 +47,7 @@ export interface TableConfig {
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-4">
             <h2 class="text-lg font-semibold text-gray-900">{{ title }}</h2>
-            <span class="text-sm text-gray-500">({{ filteredData.length }} items)</span>
+            <span class="text-sm text-gray-500">({{ filteredData.length }} {{ 'admin.common.items' | translate }})</span>
           </div>
           
           <!-- Actions -->
@@ -56,7 +58,7 @@ export interface TableConfig {
                 type="text"
                 [(ngModel)]="searchTerm"
                 (input)="onSearch()"
-                placeholder="Search..."
+                placeholder="{{ 'common.searchPlaceholder' | translate }}"
                 class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
               <lucide-angular 
                 name="search" 
@@ -81,7 +83,7 @@ export interface TableConfig {
                   class="w-4 h-4 inline-block mr-2"
                   [img]="UploadIcon">
                 </lucide-angular>
-                Import CSV
+                {{ 'common.importCSV' | translate }}
               </button>
             </div>
             
@@ -95,7 +97,7 @@ export interface TableConfig {
                 class="w-4 h-4 inline-block mr-2"
                 [img]="DownloadIcon">
               </lucide-angular>
-              Export
+              {{ 'common.export' | translate }}
             </button>
             
             <!-- Add New -->
@@ -107,7 +109,7 @@ export interface TableConfig {
                 class="w-4 h-4 inline-block mr-2"
                 [img]="PlusIcon">
               </lucide-angular>
-              Add New
+              {{ 'common.addNew' | translate }}
             </button>
           </div>
         </div>
@@ -117,7 +119,7 @@ export interface TableConfig {
       <div *ngIf="importing" class="px-6 py-4 bg-blue-50 border-b border-blue-200">
         <div class="flex items-center space-x-3">
           <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-          <span class="text-sm text-blue-800">Importing CSV data...</span>
+          <span class="text-sm text-blue-800">{{ 'common.importing' | translate }}</span>
         </div>
       </div>
 
@@ -141,7 +143,7 @@ export interface TableConfig {
                 </div>
               </th>
               <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
+                {{ 'common.actions' | translate }}
               </th>
             </tr>
           </thead>
@@ -152,7 +154,7 @@ export interface TableConfig {
               <td [attr.colspan]="config.columns.length + 1" class="px-6 py-12">
                 <div class="flex items-center justify-center">
                   <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                  <span class="ml-3 text-gray-600">Loading...</span>
+                  <span class="ml-3 text-gray-600">{{ 'common.loading' | translate }}</span>
                 </div>
               </td>
             </tr>
@@ -244,14 +246,14 @@ export interface TableConfig {
       <div *ngIf="config.paginated && totalPages > 1" 
            class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
         <div class="text-sm text-gray-700">
-          Showing {{ (currentPage - 1) * pageSize + 1 }} to {{ Math.min(currentPage * pageSize, filteredData.length) }} 
-          of {{ filteredData.length }} results
+          {{ 'common.showing' | translate }} {{ (currentPage - 1) * pageSize + 1 }} {{ 'common.to' | translate }} {{ Math.min(currentPage * pageSize, filteredData.length) }} 
+          {{ 'common.of' | translate }} {{ filteredData.length }} {{ 'common.results' | translate }}
         </div>
         <div class="flex space-x-2">
           <button (click)="goToPage(currentPage - 1)"
                   [disabled]="currentPage === 1"
                   class="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50">
-            Previous
+            {{ 'common.previous' | translate }}
           </button>
           <button *ngFor="let page of getPageNumbers()"
                   (click)="goToPage(page)"
@@ -264,7 +266,7 @@ export interface TableConfig {
           <button (click)="goToPage(currentPage + 1)"
                   [disabled]="currentPage === totalPages"
                   class="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50">
-            Next
+            {{ 'common.next' | translate }}
           </button>
         </div>
       </div>      <!-- Empty State -->
@@ -282,7 +284,7 @@ export interface TableConfig {
               class="w-4 h-4 mr-2"
               [img]="PlusIcon">
             </lucide-angular>
-            Add {{ title.toLowerCase().slice(0, -1) }}
+            {{ 'common.addNew' | translate }} {{ title.toLowerCase().slice(0, -1) }}
           </button>
         </div>
       </div>
@@ -312,6 +314,7 @@ export class DataTableComponent implements OnInit, OnChanges {
   @Output() addClicked = new EventEmitter<void>();
   @Output() csvImported = new EventEmitter<any[]>();
   @Output() rowClicked = new EventEmitter<any>();
+  translationService = inject(TranslationService);
 
   // Delete modal properties
   showDeleteModal = false;

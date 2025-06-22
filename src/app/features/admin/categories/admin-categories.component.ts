@@ -5,26 +5,28 @@ import { Title } from '@angular/platform-browser';
 import { BehaviorSubject } from 'rxjs';
 import { SupabaseService } from '../../../services/supabase.service';
 import { DataTableComponent, TableConfig } from '../shared/data-table/data-table.component';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../shared/services/translation.service';
 
 @Component({
     selector: 'app-admin-categories',
     standalone: true,
-    imports: [CommonModule, DataTableComponent],
+    imports: [CommonModule, DataTableComponent, TranslatePipe],
     template: `
     <div class="w-full">
       <div class="space-y-4 sm:space-y-6 p-4 sm:p-6">
       <!-- Page Header -->
         <div class="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
           <div class="min-w-0 flex-1">
-            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 truncate">Categories</h1>
-            <p class="mt-1 sm:mt-2 text-sm sm:text-base text-gray-600">Manage product categories</p>
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 truncate"> {{ 'admin.categoriesForm.title' | translate }}</h1>
+            <p class="mt-1 sm:mt-2 text-sm sm:text-base text-gray-600"> {{ 'admin.categoriesForm.subtitle' | translate }}</p>
         </div>
       </div>
 
         <!-- Data Table Container -->
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
       <app-data-table
-        title="Categories"
+        title="{{ 'admin.categoriesForm.title' | translate }}"
         [data]="(categories$ | async) || []"
         [config]="tableConfig"
         [loading]="(loading$ | async) || false"
@@ -47,6 +49,7 @@ export class AdminCategoriesComponent implements OnInit {
     private supabaseService = inject(SupabaseService);
     private router = inject(Router);
     private title = inject(Title);
+    translationService = inject(TranslationService);
 
     private categoriesSubject = new BehaviorSubject<any[]>([]);
     private loadingSubject = new BehaviorSubject<boolean>(true);
@@ -58,41 +61,41 @@ export class AdminCategoriesComponent implements OnInit {
         columns: [
             {
                 key: 'image_url',
-                label: 'Image',
+                label: this.translationService.translate('admin.common.image'),
                 type: 'image',
                 sortable: false,
                 searchable: false
             },
             {
                 key: 'name',
-                label: 'Name',
+                label: this.translationService.translate('admin.common.name'),
                 type: 'text',
                 sortable: true,
                 searchable: true
             },
             {
                 key: 'description',
-                label: 'Description',
+                label: this.translationService.translate('admin.common.description'),
                 type: 'text',
                 sortable: false,
                 searchable: true
             },
             {
                 key: 'is_active',
-                label: 'Status',
+                label: this.translationService.translate('admin.common.status'),
                 type: 'boolean',
                 sortable: true
             }
         ],
         actions: [
             {
-                label: 'Edit',
+                label: this.translationService.translate('admin.common.edit'),
                 icon: 'edit',
                 action: 'edit',
                 class: 'text-blue-600 hover:text-blue-900'
             },
             {
-                label: 'Delete',
+                label: this.translationService.translate('admin.common.delete'),
                 icon: 'trash2',
                 action: 'delete',
                 class: 'text-red-600 hover:text-red-900'

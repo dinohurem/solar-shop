@@ -5,15 +5,17 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { AdminFormComponent } from '../../shared/admin-form/admin-form.component';
 import { SupabaseService } from '../../../../services/supabase.service';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-blog-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, AdminFormComponent],
+  imports: [CommonModule, ReactiveFormsModule, AdminFormComponent, TranslatePipe],
   template: `
     <app-admin-form
-      [title]="isEditMode ? 'Edit Blog Post' : 'Create Blog Post'"
-      [subtitle]="isEditMode ? 'Update blog post content' : 'Create a new blog post'"
+      [title]="isEditMode ? translationService.translate('admin.blogForm.editBlogPost') : translationService.translate('admin.blogForm.createBlogPost')"
+      [subtitle]="isEditMode ? translationService.translate('admin.blogForm.updateBlogPostContent') : translationService.translate('admin.blogForm.createNewBlogPost')"
       [form]="blogForm"
       [isEditMode]="isEditMode"
       [isSubmitting]="isSubmitting"
@@ -27,7 +29,7 @@ import { SupabaseService } from '../../../../services/supabase.service';
             <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
             </svg>
-            Basic Information
+            {{ 'admin.basicInformation' | translate }}
           </h3>
           
           <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -41,13 +43,13 @@ import { SupabaseService } from '../../../../services/supabase.service';
                 placeholder="Blog Post Title"
               >
               <label for="title" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                Title *
+                {{ 'admin.blogForm.postTitle' | translate }} *
               </label>
               <div *ngIf="blogForm.get('title')?.invalid && blogForm.get('title')?.touched" class="mt-2 text-sm text-red-600 flex items-center">
                 <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                 </svg>
-              Title is required
+              {{ 'admin.blogForm.postTitleRequired' | translate }}
             </div>
           </div>
 
@@ -60,13 +62,13 @@ import { SupabaseService } from '../../../../services/supabase.service';
                 placeholder="URL Slug"
               >
               <label for="slug" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                URL Slug *
+                {{ 'admin.common.slug' | translate }} *
               </label>
               <div *ngIf="blogForm.get('slug')?.invalid && blogForm.get('slug')?.touched" class="mt-2 text-sm text-red-600 flex items-center">
                 <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                 </svg>
-              URL slug is required
+              {{ 'admin.common.slugRequired' | translate }}
             </div>
           </div>
         </div>
@@ -81,13 +83,13 @@ import { SupabaseService } from '../../../../services/supabase.service';
                 placeholder="Brief excerpt of the blog post"
           ></textarea>
               <label for="excerpt" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                Excerpt *
+                {{ 'admin.blogForm.excerpt' | translate }} *
               </label>
               <div *ngIf="blogForm.get('excerpt')?.invalid && blogForm.get('excerpt')?.touched" class="mt-2 text-sm text-red-600 flex items-center">
                 <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                 </svg>
-            Excerpt is required
+            {{ 'admin.blogForm.excerptRequired' | translate }}
               </div>
             </div>
           </div>
@@ -99,7 +101,7 @@ import { SupabaseService } from '../../../../services/supabase.service';
             <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
             </svg>
-            Content
+            {{ 'admin.blogForm.content' | translate }}
           </h3>
           
           <div class="relative">
@@ -111,19 +113,19 @@ import { SupabaseService } from '../../../../services/supabase.service';
               placeholder="Full blog post content (supports Markdown)"
           ></textarea>
             <label for="content" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-              Content *
+              {{ 'admin.blogForm.content' | translate }} *
             </label>
             <div *ngIf="blogForm.get('content')?.invalid && blogForm.get('content')?.touched" class="mt-2 text-sm text-red-600 flex items-center">
               <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
               </svg>
-            Content is required
+            {{ 'admin.blogForm.contentRequired' | translate }}
             </div>
             <p class="mt-3 text-sm text-gray-500 flex items-center">
               <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
-              You can use Markdown formatting for rich text
+              {{ 'admin.blogForm.markdownFormatting' | translate }}
             </p>
           </div>
         </div>
@@ -134,7 +136,7 @@ import { SupabaseService } from '../../../../services/supabase.service';
             <svg class="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
             </svg>
-            Media & Organization
+            {{ 'admin.blogForm.mediaAndOrganization' | translate }}
           </h3>
           
           <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -147,7 +149,7 @@ import { SupabaseService } from '../../../../services/supabase.service';
               placeholder="https://example.com/image.jpg"
             >
               <label for="featured_image_url" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                Featured Image URL
+                {{ 'admin.blogForm.featuredImageUrl' | translate }}
               </label>
           </div>
 
@@ -157,13 +159,13 @@ import { SupabaseService } from '../../../../services/supabase.service';
               formControlName="category_id"
                 class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 bg-white"
             >
-              <option value="">Select a category</option>
+              <option value=""> {{ 'admin.selectCategory' | translate }}</option>
               <option *ngFor="let category of categories" [value]="category.id">
                 {{ category.name }}
               </option>
             </select>
               <label class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700">
-                Category
+                {{ 'admin.blogForm.category' | translate }}
               </label>
           </div>
         </div>
@@ -179,7 +181,7 @@ import { SupabaseService } from '../../../../services/supabase.service';
             placeholder="5"
           >
               <label for="reading_time" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                Reading Time (minutes)
+                {{ 'admin.blogForm.readingTime' | translate }}
               </label>
             </div>
           </div>
@@ -194,13 +196,13 @@ import { SupabaseService } from '../../../../services/supabase.service';
                 placeholder="solar, energy, sustainability, environment"
               >
               <label for="tags" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                Tags
+                {{ 'admin.blogForm.tags' | translate }}
               </label>
               <p class="mt-3 text-sm text-gray-500 flex items-center">
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                Separate tags with commas
+                {{ 'admin.blogForm.separateTagsWithCommas' | translate }}
               </p>
             </div>
           </div>
@@ -212,7 +214,7 @@ import { SupabaseService } from '../../../../services/supabase.service';
             <svg class="w-5 h-5 mr-2 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
             </svg>
-            SEO Optimization
+            {{ 'admin.blogForm.seoOptimization' | translate }}
           </h3>
           
           <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -225,7 +227,7 @@ import { SupabaseService } from '../../../../services/supabase.service';
               placeholder="SEO optimized title"
             >
               <label for="seo_title" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                SEO Title
+                {{ 'admin.blogForm.seoTitle' | translate }}
               </label>
           </div>
 
@@ -238,7 +240,7 @@ import { SupabaseService } from '../../../../services/supabase.service';
               placeholder="SEO description (160 characters max)"
             ></textarea>
               <label for="seo_description" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                SEO Description
+                {{ 'admin.blogForm.seoDescription' | translate }}
               </label>
             </div>
           </div>
@@ -250,7 +252,7 @@ import { SupabaseService } from '../../../../services/supabase.service';
             <svg class="w-5 h-5 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
-            Publishing Settings
+            {{ 'admin.blogForm.publishingSettings' | translate }}
           </h3>
           
           <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -260,12 +262,12 @@ import { SupabaseService } from '../../../../services/supabase.service';
                 formControlName="status"
                 class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 bg-white"
               >
-                <option value="draft">Draft</option>
-                <option value="published">Published</option>
-                <option value="archived">Archived</option>
+                <option value="draft">{{ 'admin.blogForm.draft' | translate }}</option>
+                <option value="published">{{ 'admin.blogForm.published' | translate }}</option>
+                <option value="archived">{{ 'admin.blogForm.archived' | translate }}</option>
               </select>
               <label class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700">
-                Status *
+                {{ 'admin.common.status' | translate }} *
               </label>
             </div>
 
@@ -277,7 +279,7 @@ import { SupabaseService } from '../../../../services/supabase.service';
                 class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200"
               >
               <label for="published_at" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700">
-                Publish Date
+                {{ 'admin.blogForm.publishDate' | translate }}
               </label>
             </div>
 
@@ -297,7 +299,7 @@ import { SupabaseService } from '../../../../services/supabase.service';
                       <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                     </svg>
                   </span>
-                  <span class="text-sm font-medium text-gray-700">Featured Post</span>
+                  <span class="text-sm font-medium text-gray-700">{{ 'admin.blogForm.featuredPost' | translate }}</span>
                 </span>
               </label>
             </div>
@@ -313,7 +315,7 @@ export class BlogFormComponent implements OnInit {
   private router = inject(Router);
   private supabaseService = inject(SupabaseService);
   private title = inject(Title);
-
+  translationService = inject(TranslationService);
   blogForm!: FormGroup;
   isEditMode = false;
   isSubmitting = false;

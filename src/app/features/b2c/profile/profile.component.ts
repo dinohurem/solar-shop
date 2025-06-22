@@ -420,7 +420,7 @@ const selectUserOrders = createSelector(
                               'bg-green-100 text-green-800': order.status === 'delivered',
                               'bg-red-100 text-red-800': order.status === 'cancelled'
                             }">
-                        {{ order.status | titlecase }}
+                        {{ 'admin.orderStatus.' + order.status | translate }}
                       </span>
                       <p class="text-lg font-semibold text-gray-900 mt-1 font-['DM_Sans']">
                         {{ order.totalAmount | currency:'EUR':'symbol':'1.2-2' }}
@@ -822,8 +822,6 @@ export class ProfileComponent implements OnInit {
   viewOrderDetails(orderId: string): void {
     this.router.navigate(['/order-details', orderId]);
   }
-
-
 
   private async loadUserReviews(): Promise<void> {
     this.reviewsLoadingSubject.next(true);

@@ -2,13 +2,14 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { SupabaseService } from '../../../services/supabase.service';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 import { Order } from '../../../shared/models/order.model';
 
 @Component({
   selector: 'app-order-details',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, TranslatePipe],
   template: `
     <div class="min-h-screen bg-gray-50 py-8">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -70,7 +71,7 @@ import { Order } from '../../../shared/models/order.model';
                         'bg-green-100 text-green-800': order.status === 'delivered',
                         'bg-red-100 text-red-800': order.status === 'cancelled'
                       }">
-                  {{ order.status | titlecase }}
+                  {{ 'admin.orderStatus.' + order.status | translate }}
                 </span>
               </div>
 
@@ -83,7 +84,7 @@ import { Order } from '../../../shared/models/order.model';
                         'bg-green-100 text-green-800': order.paymentStatus === 'paid',
                         'bg-red-100 text-red-800': order.paymentStatus === 'failed'
                       }">
-                  {{ order.paymentStatus | titlecase }}
+                  {{ 'admin.paymentStatus.' + order.paymentStatus | translate }}
                 </span>
               </div>
 

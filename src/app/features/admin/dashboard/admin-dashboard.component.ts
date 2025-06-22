@@ -4,29 +4,30 @@ import { RouterModule, Router } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { SupabaseService } from '../../../services/supabase.service';
 import { Observable, from } from 'rxjs';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 interface DashboardStats {
-    totalProducts: number;
-    totalCategories: number;
-    totalBlogPosts: number;
-    totalOffers: number;
-    totalUsers: number;
-    totalOrders: number;
-    recentOrders: any[];
+  totalProducts: number;
+  totalCategories: number;
+  totalBlogPosts: number;
+  totalOffers: number;
+  totalUsers: number;
+  totalOrders: number;
+  recentOrders: any[];
 }
 
 @Component({
-    selector: 'app-admin-dashboard',
-    standalone: true,
-    imports: [CommonModule, RouterModule],
-    template: `
+  selector: 'app-admin-dashboard',
+  standalone: true,
+  imports: [CommonModule, RouterModule, TranslatePipe],
+  template: `
     <div class="space-y-6">
       <div class="flex items-center justify-between">
-        <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>
+        <h1 class="text-3xl font-bold text-gray-900">{{ 'admin.dashboard' | translate }}</h1>
         <button 
           (click)="refreshStats()"
           class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-          Refresh Data
+          {{ 'admin.refreshData' | translate }}
         </button>
       </div>
 
@@ -34,7 +35,7 @@ interface DashboardStats {
         <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm font-medium text-gray-600">Total Products</p>
+              <p class="text-sm font-medium text-gray-600">{{ 'admin.totalProducts' | translate }}</p>
               <p class="text-3xl font-bold text-gray-900">{{ stats.totalProducts }}</p>
             </div>
             <div class="p-3 bg-blue-100 rounded-lg">
@@ -45,7 +46,7 @@ interface DashboardStats {
           </div>
           <div class="mt-4">
             <a routerLink="/admin/products" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
-              Manage Products →
+              {{ 'admin.manageProducts' | translate }} →
             </a>
           </div>
         </div>
@@ -53,7 +54,7 @@ interface DashboardStats {
         <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm font-medium text-gray-600">Categories</p>
+              <p class="text-sm font-medium text-gray-600">{{ 'admin.categories' | translate }}</p>
               <p class="text-3xl font-bold text-gray-900">{{ stats.totalCategories }}</p>
             </div>
             <div class="p-3 bg-green-100 rounded-lg">
@@ -64,7 +65,7 @@ interface DashboardStats {
           </div>
           <div class="mt-4">
             <a routerLink="/admin/categories" class="text-green-600 hover:text-green-800 text-sm font-medium">
-              Manage Categories →
+              {{ 'admin.manageCategories' | translate }} →
             </a>
           </div>
         </div>
@@ -72,7 +73,7 @@ interface DashboardStats {
         <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm font-medium text-gray-600">Blog Posts</p>
+              <p class="text-sm font-medium text-gray-600">{{ 'admin.blogPosts' | translate }}</p>
               <p class="text-3xl font-bold text-gray-900">{{ stats.totalBlogPosts }}</p>
             </div>
             <div class="p-3 bg-purple-100 rounded-lg">
@@ -83,7 +84,7 @@ interface DashboardStats {
           </div>
           <div class="mt-4">
             <a routerLink="/admin/blog" class="text-purple-600 hover:text-purple-800 text-sm font-medium">
-              Manage Blog →
+              {{ 'admin.manageBlogPosts' | translate }} →
             </a>
           </div>
         </div>
@@ -91,7 +92,7 @@ interface DashboardStats {
         <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm font-medium text-gray-600">Active Offers</p>
+              <p class="text-sm font-medium text-gray-600">{{ 'admin.activeOffers' | translate }}</p>
               <p class="text-3xl font-bold text-gray-900">{{ stats.totalOffers }}</p>
             </div>
             <div class="p-3 bg-yellow-100 rounded-lg">
@@ -102,7 +103,7 @@ interface DashboardStats {
           </div>
           <div class="mt-4">
             <a routerLink="/admin/offers" class="text-yellow-600 hover:text-yellow-800 text-sm font-medium">
-              Manage Offers →
+              {{ 'admin.manageOffers' | translate }} →
             </a>
           </div>
         </div>
@@ -110,7 +111,7 @@ interface DashboardStats {
         <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm font-medium text-gray-600">Total Users</p>
+              <p class="text-sm font-medium text-gray-600">{{ 'admin.totalUsers' | translate }}</p>
               <p class="text-3xl font-bold text-gray-900">{{ stats.totalUsers }}</p>
             </div>
             <div class="p-3 bg-indigo-100 rounded-lg">
@@ -121,7 +122,7 @@ interface DashboardStats {
           </div>
           <div class="mt-4">
             <a routerLink="/admin/users" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">
-              Manage Users →
+              {{ 'admin.manageUsers' | translate }} →
             </a>
           </div>
         </div>
@@ -129,7 +130,7 @@ interface DashboardStats {
         <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm font-medium text-gray-600">Total Orders</p>
+              <p class="text-sm font-medium text-gray-600">{{ 'admin.totalOrders' | translate }}</p>
               <p class="text-3xl font-bold text-gray-900">{{ stats.totalOrders }}</p>
             </div>
             <div class="p-3 bg-orange-100 rounded-lg">
@@ -140,7 +141,7 @@ interface DashboardStats {
           </div>
           <div class="mt-4">
             <a routerLink="/admin/orders" class="text-orange-600 hover:text-orange-800 text-sm font-medium">
-              Manage Orders →
+              {{ 'admin.manageOrders' | translate }} →
             </a>
           </div>
         </div>
@@ -149,9 +150,9 @@ interface DashboardStats {
       <div *ngIf="stats$ | async as stats">
         <div *ngIf="stats.recentOrders && stats.recentOrders.length > 0" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div class="flex justify-between items-center mb-6">
-            <h2 class="text-lg font-semibold text-gray-900">Recent Orders</h2>
+            <h2 class="text-lg font-semibold text-gray-900">{{ 'admin.recentOrders' | translate }}</h2>
             <a routerLink="/admin/orders" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
-              View All Orders →
+              {{ 'admin.viewAllOrders' | translate }} →
             </a>
           </div>
           
@@ -182,7 +183,7 @@ interface DashboardStats {
                         'bg-green-100 text-green-800': order.status === 'delivered',
                         'bg-red-100 text-red-800': order.status === 'cancelled'
                       }">
-                  {{ order.status | titlecase }}
+                  {{ 'admin.orderStatus.' + order.status | translate }}
                 </span>
                 <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -198,74 +199,74 @@ interface DashboardStats {
       </div>
     </div>
   `,
-    styles: [`
+  styles: [`
     :host {
       display: block;
     }
   `]
 })
 export class AdminDashboardComponent implements OnInit {
-    private supabaseService = inject(SupabaseService);
-    private titleService = inject(Title);
-    private router = inject(Router);
+  private supabaseService = inject(SupabaseService);
+  private titleService = inject(Title);
+  private router = inject(Router);
 
-    stats$: Observable<DashboardStats>;
+  stats$: Observable<DashboardStats>;
 
-    constructor() {
-        this.stats$ = this.loadStats();
-    }
+  constructor() {
+    this.stats$ = this.loadStats();
+  }
 
-    ngOnInit(): void {
-        this.titleService.setTitle('Dashboard - Solar Shop Admin');
-    }
+  ngOnInit(): void {
+    this.titleService.setTitle('Dashboard - Solar Shop Admin');
+  }
 
-    refreshStats(): void {
-        this.stats$ = this.loadStats();
-    }
+  refreshStats(): void {
+    this.stats$ = this.loadStats();
+  }
 
-    viewOrderDetails(orderId: string): void {
-        this.router.navigate(['/admin/orders/edit', orderId]);
-    }
+  viewOrderDetails(orderId: string): void {
+    this.router.navigate(['/admin/orders/edit', orderId]);
+  }
 
-    private loadStats(): Observable<DashboardStats> {
-        const loadStatsAsync = async () => {
-            try {
-                const [products, categories, blogPosts, offers, users] = await Promise.all([
-                    this.supabaseService.getTable('products'),
-                    this.supabaseService.getTable('categories'),
-                    this.supabaseService.getTable('blog_posts'),
-                    this.supabaseService.getTable('offers'),
-                    this.supabaseService.getTable('profiles')
-                ]);
+  private loadStats(): Observable<DashboardStats> {
+    const loadStatsAsync = async () => {
+      try {
+        const [products, categories, blogPosts, offers, users] = await Promise.all([
+          this.supabaseService.getTable('products'),
+          this.supabaseService.getTable('categories'),
+          this.supabaseService.getTable('blog_posts'),
+          this.supabaseService.getTable('offers'),
+          this.supabaseService.getTable('profiles')
+        ]);
 
-                const orders = await this.supabaseService.getTable('orders');
-                const recentOrders = (orders || [])
-                    .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-                    .slice(0, 5);
+        const orders = await this.supabaseService.getTable('orders');
+        const recentOrders = (orders || [])
+          .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+          .slice(0, 5);
 
-                return {
-                    totalProducts: products?.length || 0,
-                    totalCategories: categories?.length || 0,
-                    totalBlogPosts: blogPosts?.length || 0,
-                    totalOffers: offers?.length || 0,
-                    totalUsers: users?.length || 0,
-                    totalOrders: orders?.length || 0,
-                    recentOrders: recentOrders
-                };
-            } catch (error) {
-                console.error('Error loading dashboard stats:', error);
-                return {
-                    totalProducts: 0,
-                    totalCategories: 0,
-                    totalBlogPosts: 0,
-                    totalOffers: 0,
-                    totalUsers: 0,
-                    totalOrders: 0,
-                    recentOrders: []
-                };
-            }
+        return {
+          totalProducts: products?.length || 0,
+          totalCategories: categories?.length || 0,
+          totalBlogPosts: blogPosts?.length || 0,
+          totalOffers: offers?.length || 0,
+          totalUsers: users?.length || 0,
+          totalOrders: orders?.length || 0,
+          recentOrders: recentOrders
         };
+      } catch (error) {
+        console.error('Error loading dashboard stats:', error);
+        return {
+          totalProducts: 0,
+          totalCategories: 0,
+          totalBlogPosts: 0,
+          totalOffers: 0,
+          totalUsers: 0,
+          totalOrders: 0,
+          recentOrders: []
+        };
+      }
+    };
 
-        return from(loadStatsAsync());
-    }
+    return from(loadStatsAsync());
+  }
 } 

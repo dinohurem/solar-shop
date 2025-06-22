@@ -13,6 +13,7 @@ import { Order } from '../../../shared/models/order.model';
 import { Actions, ofType } from '@ngrx/effects';
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
+import { TranslationService } from '../../../shared/services/translation.service';
 
 @Component({
     selector: 'app-admin-orders',
@@ -83,6 +84,7 @@ export class AdminOrdersComponent implements OnInit {
     private title = inject(Title);
     private actions$ = inject(Actions);
     private destroy$ = new Subject<void>();
+    private translationService = inject(TranslationService);
 
     orders$: Observable<Order[]> = this.store.select(selectOrders);
     loading$: Observable<boolean> = this.store.select(selectOrdersLoading);
@@ -125,16 +127,7 @@ export class AdminOrdersComponent implements OnInit {
                 sortable: true,
                 searchable: true,
                 format: (value) => {
-                    const statusMap: { [key: string]: string } = {
-                        'pending': 'Pending',
-                        'confirmed': 'Confirmed',
-                        'processing': 'Processing',
-                        'shipped': 'Shipped',
-                        'delivered': 'Delivered',
-                        'cancelled': 'Cancelled',
-                        'refunded': 'Refunded'
-                    };
-                    return statusMap[value] || value;
+                    return this.translationService.translate(`admin.orderStatus.${value}`) || value;
                 }
             },
             {
@@ -143,13 +136,7 @@ export class AdminOrdersComponent implements OnInit {
                 type: 'status',
                 sortable: true,
                 format: (value) => {
-                    const statusMap: { [key: string]: string } = {
-                        'pending': 'Pending',
-                        'paid': 'Paid',
-                        'failed': 'Failed',
-                        'refunded': 'Refunded'
-                    };
-                    return statusMap[value] || value;
+                    return this.translationService.translate(`admin.paymentStatus.${value}`) || value;
                 }
             },
             {
