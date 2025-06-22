@@ -6,13 +6,13 @@ import { takeUntil, switchMap, map } from 'rxjs/operators';
 import { OffersService } from './services/offers.service';
 import { AddToCartButtonComponent } from '../cart/components/add-to-cart-button/add-to-cart-button.component';
 import { SupabaseService } from '../../../services/supabase.service';
-import { CartSidebarComponent } from "../cart/components/cart-sidebar/cart-sidebar.component";
 import { Offer } from '../../../shared/models/offer.model';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-offer-details',
   standalone: true,
-  imports: [CommonModule, AddToCartButtonComponent, CartSidebarComponent],
+  imports: [CommonModule, AddToCartButtonComponent, TranslatePipe],
   template: `
     <div class="min-h-screen bg-gray-50" *ngIf="offer$ | async as offer; else loadingTemplate">
       <!-- Hero Section -->
@@ -96,7 +96,7 @@ import { Offer } from '../../../shared/models/offer.model';
       <!-- Related Products Section -->
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <h2 class="text-3xl font-bold text-gray-900 mb-8 font-['Poppins']">
-          Products Included in This Offer
+          {{ 'offers.productsIncluded' | translate }}
         </h2>
 
         <!-- Product Cards -->
@@ -230,8 +230,6 @@ import { Offer } from '../../../shared/models/offer.model';
         </div>
       </div>
     </div>
-
-    <app-cart-sidebar></app-cart-sidebar>
 
     <!-- Loading Template -->
     <ng-template #loadingTemplate>

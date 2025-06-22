@@ -1,8 +1,10 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, from, map, catchError, of } from 'rxjs';
+import { inject, Injectable } from '@angular/core';
+import { BehaviorSubject, Observable, from, map, catchError, of, take } from 'rxjs';
 import { SupabaseService } from '../../../../services/supabase.service';
 import { CartItem, Cart } from '../../../../shared/models/cart.model';
 import { Coupon } from '../../../../shared/models/coupon.model';
+import { Store } from '@ngrx/store';
+import * as CartActions from '../store/cart.actions';
 
 export interface CartSummary {
     subtotal: number;
@@ -29,14 +31,22 @@ export class CartService {
     private isAuthenticated = false;
     private currentUserId: string | null = null;
 
+    private store = inject(Store);
+
     constructor(private supabaseService: SupabaseService) { }
 
     // Initialize cart based on authentication status
     async initializeCart(): Promise<void> {
         try {
+            console.log('CartService - initializeCart started');
             const user = await this.supabaseService.getCurrentUser().pipe(
-                map(user => user),
-                catchError(() => of(null))
+                map(user => {
+                    this.store.dispatch(CartActions.stopCartLoading());
+                    return user;
+                }),
+                catchError((error) => {
+                    return of(null);
+                })
             ).toPromise();
 
             this.isAuthenticated = !!user;
@@ -87,7 +97,12 @@ export class CartService {
     // Load cart - returns a Cart object for NgRx compatibility
     loadCart(): Observable<Cart> {
         return this.cartItems.pipe(
-            map(items => this.createCartFromItems(items))
+            map(items => {
+                return this.createCartFromItems(items);
+            }),
+            catchError(error => {
+                return of(this.createCartFromItems([]));
+            })
         );
     }
 

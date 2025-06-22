@@ -274,7 +274,8 @@ export class TranslationService {
                     noOffersText: 'Trenutno nema dostupnih partnerskih ponuda.',
                     bulkDiscount: 'Količinski popust',
                     limitedTime: 'Ograničeno vrijeme',
-                    contactForDetails: 'Kontaktirajte za detalje'
+                    contactForDetails: 'Kontaktirajte za detalje',
+                    productsIncluded: 'Proizvodi uključeni u ovu ponudu'
                 }
             },
             // Admin Company Management
@@ -608,7 +609,8 @@ export class TranslationService {
                 subscribeText: 'Pretplatite se na naš newsletter i budite prvi koji će saznati o novim ponudama.',
                 enterEmail: 'Unesite vaš email',
                 subscribe: 'Pretplati se',
-                viewAll: 'Pogledaj sve'
+                viewAll: 'Pogledaj sve',
+                productsIncluded: 'Proizvodi uključeni u ovu ponudu'
             },
             // Mission/Sustainability
             mission: {
@@ -938,6 +940,7 @@ export class TranslationService {
                 category: 'Kategorija',
                 manufacturer: 'Proizvođač',
                 sku: 'SKU',
+                certifications: 'Certifikati',
                 quantity: 'Količina',
                 addToCart: 'Dodaj u košaricu',
                 addToWishlist: 'Dodaj na listu želja',
@@ -951,7 +954,8 @@ export class TranslationService {
                 twoYearWarranty: '2 godine jamstva',
                 easyReturns: 'Jednostavan povrat',
                 // Product Photos
-                zoomImage: 'Povećaj sliku'
+                zoomImage: 'Povećaj sliku',
+                loginRequiredForWishlist: 'Molimo prijavite se za korištenje liste želja'
             },
             // Privacy Policy
             privacyPolicy: {
@@ -1494,7 +1498,8 @@ export class TranslationService {
                     noOffersText: 'No partner offers available at the moment.',
                     bulkDiscount: 'Bulk Discount',
                     limitedTime: 'Limited Time',
-                    contactForDetails: 'Contact us for details'
+                    contactForDetails: 'Contact us for details',
+                    productsIncluded: 'Products included in this offer'
                 }
             },
             // Admin Company Management
@@ -1828,7 +1833,8 @@ export class TranslationService {
                 subscribeText: 'Subscribe to our newsletter and be the first to know about new offers.',
                 enterEmail: 'Enter your email',
                 subscribe: 'Subscribe',
-                viewAll: 'View All'
+                viewAll: 'View All',
+                productsIncluded: 'Products included in this offer'
             },
             // Mission/Sustainability
             mission: {
@@ -2173,7 +2179,8 @@ export class TranslationService {
                 twoYearWarranty: '2-year warranty',
                 easyReturns: 'Easy returns',
                 // Product Photos
-                zoomImage: 'Zoom Image'
+                zoomImage: 'Zoom Image',
+                loginRequiredForWishlist: 'Please log in to use wishlist'
             },
             // Privacy Policy
             privacyPolicy: {

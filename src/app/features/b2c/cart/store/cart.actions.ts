@@ -7,6 +7,7 @@ import { Coupon } from '../../../../shared/models/coupon.model';
 export const openCart = createAction('[Cart] Open Cart');
 export const closeCart = createAction('[Cart] Close Cart');
 export const toggleCart = createAction('[Cart] Toggle Cart');
+export const stopCartLoading = createAction('[Cart] Stop Cart Loading');
 
 // Cart Data Actions
 export const loadCart = createAction('[Cart] Load Cart');

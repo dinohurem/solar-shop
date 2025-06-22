@@ -179,8 +179,8 @@ export class CheckoutComponent implements OnInit {
   }
 
   ngOnInit() {
-    // Load cart data
-    this.store.dispatch(CartActions.loadCart());
+    // Cart is already loaded by the cart sidebar in the page layout
+    // No need to dispatch loadCart here as it would be redundant
 
     // Check if cart is empty and redirect if needed
     this.store.select(CartSelectors.selectIsCartEmpty).subscribe(isEmpty => {

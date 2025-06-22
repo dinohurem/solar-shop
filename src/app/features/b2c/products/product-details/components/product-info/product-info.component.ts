@@ -15,6 +15,7 @@ import {
   selectRemovingFromWishlist
 } from '../../../../../b2c/wishlist/store/wishlist.selectors';
 import { selectCurrentUser } from '../../../../../../core/auth/store/auth.selectors';
+import * as CartActions from '../../../../../b2c/cart/store/cart.actions';
 
 @Component({
   selector: 'app-product-info',
@@ -353,7 +354,7 @@ export class ProductInfoComponent implements OnInit, OnDestroy {
   }
 
   addToCart(): void {
-    // TODO: Implement add to cart functionality
+    this.store.dispatch(CartActions.addToCart({ productId: this.product.id, quantity: this.quantity }));
   }
 
   toggleWishlist(): void {
@@ -363,7 +364,7 @@ export class ProductInfoComponent implements OnInit, OnDestroy {
       take(1)
     ).subscribe(user => {
       if (!user) {
-        this.toastService.showError('Please log in to use wishlist');
+        this.toastService.showError(this.translationService.translate('productDetails.loginRequiredForWishlist'));
         return;
       }
 

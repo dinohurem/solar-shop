@@ -367,7 +367,9 @@ export class CartSidebarComponent implements OnInit {
   }
 
   ngOnInit() {
-    // Load cart on component initialization
+    // Primary cart loading - this component should be included only once in the page layout
+    // to avoid duplicate loadCart dispatches. Other components should not dispatch loadCart
+    // as the cart sidebar handles this responsibility.
     this.store.dispatch(CartActions.loadCart());
   }
 

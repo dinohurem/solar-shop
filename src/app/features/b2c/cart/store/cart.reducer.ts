@@ -21,6 +21,11 @@ export const cartReducer = createReducer(
         isCartOpen: !state.isCartOpen
     })),
 
+    on(CartActions.stopCartLoading, (state) => ({
+        ...state,
+        isLoading: false
+    })),
+
     // Load Cart Actions
     on(CartActions.loadCart, (state) => ({
         ...state,

@@ -122,7 +122,8 @@ export class OrderReviewComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.store.dispatch(CartActions.loadCart());
+    // Cart is already loaded by the cart sidebar in the page layout
+    // No need to dispatch loadCart here as it would be redundant
   }
 
   trackByItemId(index: number, item: CartItem): string {

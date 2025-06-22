@@ -83,16 +83,6 @@ import { selectNewsletterState } from '../footer/store/footer.selectors';
 
               <!-- Action Buttons -->
               <div class="space-y-3">
-                <app-add-to-cart-button 
-                  [productId]="offer.id" 
-                  [quantity]="1" 
-                  [buttonText]="'offers.addToCart' | translate"
-                  [fullWidth]="true"
-                  size="md"
-                  variant="primary"
-                  (click)="$event.stopPropagation()">
-                </app-add-to-cart-button>
-                
                 <button 
                   (click)="navigateToOfferDetails(offer.id); $event.stopPropagation()"
                   class="w-full px-4 py-2 bg-white text-[#324053] border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-semibold font-['DM_Sans']"

@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { of } from 'rxjs';
-import { map, catchError, switchMap, tap, take } from 'rxjs/operators';
+import { map, catchError, switchMap, tap, take, delay } from 'rxjs/operators';
 import { CartService } from '../services/cart.service';
 import * as CartActions from './cart.actions';
 import * as AuthActions from '../../../../core/auth/store/auth.actions';
@@ -21,12 +21,20 @@ export class CartEffects {
             ofType(CartActions.loadCart),
             switchMap(() =>
                 from(this.cartService.initializeCart()).pipe(
-                    switchMap(() => this.cartService.loadCart()),
-                    map(cart => cart
-                        ? CartActions.loadCartSuccess({ cart })
-                        : CartActions.loadCartSuccess({ cart: null as any })
-                    ),
-                    catchError(error => of(CartActions.loadCartFailure({ error: error.message })))
+                    // Add a small delay to ensure BehaviorSubject is updated
+                    delay(10),
+                    switchMap(() => {
+                        return this.cartService.loadCart();
+                    }),
+                    map(cart => {
+                        return cart
+                            ? CartActions.loadCartSuccess({ cart })
+                            : CartActions.loadCartSuccess({ cart: null as any });
+                    }),
+                    catchError(error => {
+                        // For guest users or any error, ensure we set isLoading to false
+                        return of(CartActions.loadCartSuccess({ cart: null as any }));
+                    })
                 )
             )
         )
@@ -39,8 +47,12 @@ export class CartEffects {
             switchMap(({ user }) =>
                 from(this.cartService.handleUserLogin(user.id)).pipe(
                     switchMap(() => this.cartService.loadCart()),
-                    map(cart => CartActions.loadCartSuccess({ cart })),
-                    catchError(error => of(CartActions.loadCartFailure({ error: error.message })))
+                    map(cart => {
+                        return CartActions.loadCartSuccess({ cart });
+                    }),
+                    catchError(error => {
+                        return of(CartActions.loadCartFailure({ error: error.message }));
+                    })
                 )
             )
         )
