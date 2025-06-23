@@ -70,7 +70,14 @@ export const selectFilteredProducts = createSelector(
                 const query = searchQuery.toLowerCase();
                 const matchesName = product.name.toLowerCase().includes(query);
                 const matchesDescription = product.description.toLowerCase().includes(query);
-                if (!matchesName && !matchesDescription) {
+                const matchesCategory = product.category.toLowerCase().includes(query);
+                const matchesManufacturer = product.manufacturer.toLowerCase().includes(query);
+                const matchesCertificates = product.certificates.some(cert =>
+                    cert.toLowerCase().includes(query)
+                );
+
+                if (!matchesName && !matchesDescription && !matchesCategory &&
+                    !matchesManufacturer && !matchesCertificates) {
                     return false;
                 }
             }

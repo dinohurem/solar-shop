@@ -4,7 +4,7 @@ import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable, Subject } from 'rxjs';
-import { takeUntil, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { takeUntil, debounceTime, distinctUntilChanged, filter } from 'rxjs/operators';
 import { ProductListActions } from './store/product-list.actions';
 import {
   selectProducts,
@@ -20,6 +20,9 @@ import {
 import { AddToCartButtonComponent } from '../../cart/components/add-to-cart-button/add-to-cart-button.component';
 import * as CartActions from '../../cart/store/cart.actions';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { ProductCategory } from '../services/categories.service';
+import { selectProductCategories } from '../store/products.selectors';
+import { ProductsActions } from '../store/products.actions';
 
 export interface Product {
   id: string;
@@ -95,12 +98,12 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
                   <label *ngFor="let category of categories$ | async" class="flex items-center">
                     <input 
                       type="checkbox" 
-                      [value]="category"
-                      [checked]="(filters$ | async)?.categories?.includes(category) || false"
-                      (change)="onCategoryChange(category, $event)"
+                      [value]="category.name"
+                      [checked]="(filters$ | async)?.categories?.includes(category.name) || false"
+                      (change)="onCategoryChange(category.name, $event)"
                       class="rounded border-gray-300 text-solar-600 focus:ring-solar-500"
                     >
-                    <span class="ml-2 text-sm text-gray-700 font-['DM_Sans']">{{ category }}</span>
+                    <span class="ml-2 text-sm text-gray-700 font-['DM_Sans']">{{ category.name }}</span>
                   </label>
                 </div>
               </div>
@@ -312,7 +315,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
   isLoading$: Observable<boolean>;
   filters$: Observable<ProductFilters>;
   sortOption$: Observable<SortOption>;
-  categories$: Observable<string[]>;
+  categories$: Observable<ProductCategory[]>;
   manufacturers$: Observable<string[]>;
   certificates$: Observable<string[]>;
   searchQuery$: Observable<string>;
@@ -325,7 +328,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
     this.isLoading$ = this.store.select(selectIsLoading);
     this.filters$ = this.store.select(selectFilters);
     this.sortOption$ = this.store.select(selectSortOption);
-    this.categories$ = this.store.select(selectCategories);
+    this.categories$ = this.store.select(selectProductCategories);
     this.manufacturers$ = this.store.select(selectManufacturers);
     this.certificates$ = this.store.select(selectCertificates);
     this.searchQuery$ = this.store.select(selectSearchQuery);
@@ -333,11 +336,12 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.store.dispatch(ProductListActions.loadProducts());
+    this.store.dispatch(ProductsActions.loadProductCategories());
 
     // Check if we should clear filters based on navigation source
     this.checkAndClearFiltersIfNeeded();
 
-    // Handle query parameters first (for initial load and external navigation)
+    // Handle query parameters (for initial load and external navigation)
     this.route.queryParams.pipe(
       takeUntil(this.destroy$)
     ).subscribe(params => {
@@ -350,13 +354,33 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
       // Handle category filtering from query parameters
       if (params['category']) {
-        // Clear existing filters first
-        this.store.dispatch(ProductListActions.clearFilters());
-        // Apply category filter from query parameter
-        this.store.dispatch(ProductListActions.toggleCategoryFilter({
-          category: params['category'],
-          checked: true
-        }));
+        // Clear existing filters first (but not search if it was just set)
+        if (params['search'] === undefined) {
+          this.store.dispatch(ProductListActions.clearFilters());
+        }
+
+        // Wait for categories to be loaded, then find the matching category
+        this.categories$.pipe(
+          takeUntil(this.destroy$),
+          // Only process when categories are actually loaded
+          filter((categories): categories is ProductCategory[] =>
+            categories !== null && categories.length > 0
+          )
+        ).subscribe((categories) => {
+          const matchingCategory = categories.find((cat) =>
+            cat.slug === params['category'] ||
+            cat.id === params['category'] ||
+            cat.name.toLowerCase() === params['category'].toLowerCase()
+          );
+
+          if (matchingCategory) {
+            // Apply category filter using the category name (what products use)
+            this.store.dispatch(ProductListActions.toggleCategoryFilter({
+              category: matchingCategory.name,
+              checked: true
+            }));
+          }
+        });
       }
     });
 
@@ -380,6 +404,10 @@ export class ProductListComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    // Clear filters when leaving the product list page to ensure clean state
+    this.store.dispatch(ProductListActions.clearFilters());
+    this.store.dispatch(ProductListActions.searchProducts({ query: '' }));
+
     this.destroy$.next();
     this.destroy$.complete();
     this.searchSubject.complete();
@@ -391,12 +419,16 @@ export class ProductListComponent implements OnInit, OnDestroy {
     const state = navigation?.extras?.state;
 
     // Check if this navigation came from navbar search or hero explore buttons
+    // Don't clear filters if coming from products page (category navigation)
     if (state?.['clearFilters'] === true ||
-      state?.['fromNavbar'] === true ||
       state?.['fromHero'] === true) {
-      // Clear all existing filters when navigating from navbar or hero
+      // Clear all existing filters when navigating from hero explore
       this.store.dispatch(ProductListActions.clearFilters());
       this.store.dispatch(ProductListActions.searchProducts({ query: '' }));
+    } else if (state?.['fromNavbar'] === true) {
+      // Clear only non-search filters when coming from navbar search
+      this.store.dispatch(ProductListActions.clearFilters());
+      // Don't clear search query as it will be set from query params
     }
   }
 

@@ -6,7 +6,6 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { OffersActions } from './store/offers.actions';
 import { selectOffers, selectIsLoading } from './store/offers.selectors';
-import { AddToCartButtonComponent } from '../cart/components/add-to-cart-button/add-to-cart-button.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { Offer } from '../../../shared/models/offer.model';
 import { FooterActions } from '../footer/store/footer.actions';
@@ -15,7 +14,7 @@ import { selectNewsletterState } from '../footer/store/footer.selectors';
 @Component({
   selector: 'app-offers-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, AddToCartButtonComponent, TranslatePipe],
+  imports: [CommonModule, FormsModule, TranslatePipe],
   template: `
     <div class="min-h-screen bg-gray-50">
       <!-- Hero Section -->

@@ -29,7 +29,7 @@ import { FormsModule } from '@angular/forms';
     <div 
       *ngIf="showSearchOverlay"
       class="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-      (click)="closeSearchOverlay()"
+      (click)="cancelSearch()"
     >
       <div 
         class="bg-white/95 backdrop-blur-md rounded-xl shadow-2xl w-full max-w-2xl border border-white/20 search-overlay-content"
@@ -41,7 +41,7 @@ import { FormsModule } from '@angular/forms';
               {{ 'search.searchProducts' | translate }}
             </h3>
             <button 
-              (click)="closeSearchOverlay()"
+              (click)="cancelSearch()"
               class="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -50,7 +50,7 @@ import { FormsModule } from '@angular/forms';
             </button>
           </div>
           
-          <form (ngSubmit)="performSearch()" class="relative">
+          <form (ngSubmit)="performSearch(); $event.preventDefault()" class="relative">
             <div class="relative">
               <!-- Search Icon -->
               <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -68,7 +68,7 @@ import { FormsModule } from '@angular/forms';
                 class="w-full px-4 py-4 pl-12 pr-24 border border-gray-200 rounded-xl focus:ring-2 focus:ring-solar-500/50 focus:border-solar-500 text-lg font-['DM_Sans'] bg-white/80 backdrop-blur-sm placeholder-gray-400 search-input"
                 #searchInput
                 autofocus
-                (keydown.escape)="closeSearchOverlay()"
+                (keydown.escape)="cancelSearch()"
               >
               
               <!-- Action Buttons Container -->
@@ -648,7 +648,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   @HostListener('document:keydown.escape', ['$event'])
   onEscapeKey(event: KeyboardEvent) {
     if (this.showSearchOverlay) {
-      this.closeSearchOverlay();
+      this.cancelSearch();
     }
   }
 
@@ -693,19 +693,28 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   openSearchOverlay(): void {
     this.showSearchOverlay = true;
-    this.searchQuery = '';
+    // Don't reset searchQuery here to preserve any existing value
     // Focus the input after a short delay to ensure it's rendered
     setTimeout(() => {
       const searchInput = document.querySelector('input[name="searchQuery"]') as HTMLInputElement;
       if (searchInput) {
         searchInput.focus();
+        // Select all text if there's a value to allow easy replacement
+        if (this.searchQuery) {
+          searchInput.select();
+        }
       }
     }, 100);
   }
 
   closeSearchOverlay(): void {
     this.showSearchOverlay = false;
+    // Don't automatically clear search query when closing overlay
+  }
+
+  cancelSearch(): void {
     this.searchQuery = '';
+    this.closeSearchOverlay();
   }
 
   clearSearch(): void {
@@ -722,7 +731,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   performSearch(): void {
-    if (this.searchQuery.trim()) {
+    if (this.searchQuery && this.searchQuery.trim()) {
       this.closeSearchOverlay();
       this.router.navigate(['/products'], {
         queryParams: { search: this.searchQuery.trim() },

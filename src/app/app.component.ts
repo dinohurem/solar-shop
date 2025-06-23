@@ -3,7 +3,6 @@ import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule, } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { CartSidebarComponent } from './features/b2c/cart/components/cart-sidebar/cart-sidebar.component';
 import { ToastComponent } from './shared/components/toast/toast.component';
 import * as AuthActions from './core/auth/store/auth.actions';
 
@@ -11,7 +10,7 @@ import * as AuthActions from './core/auth/store/auth.actions';
   selector: 'app-root',
   standalone: true,
   templateUrl: './app.component.html',
-  imports: [CommonModule, RouterModule, FormsModule, ReactiveFormsModule, CartSidebarComponent, ToastComponent]
+  imports: [CommonModule, RouterModule, FormsModule, ReactiveFormsModule, ToastComponent]
 })
 export class AppComponent implements OnInit {
   title = 'solar-shop';

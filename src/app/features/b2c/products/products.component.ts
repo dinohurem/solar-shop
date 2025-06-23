@@ -158,8 +158,10 @@ export class ProductsComponent implements OnInit {
 
   navigateToProductList(category: ProductCategory): void {
     // Navigate to product list with category filter
+    // Use slug first, then fallback to name (URL-friendly)
+    const categoryParam = category.slug || category.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
     this.router.navigate(['/products'], {
-      queryParams: { category: category.slug || category.id }
+      queryParams: { category: categoryParam }
     });
   }
 
