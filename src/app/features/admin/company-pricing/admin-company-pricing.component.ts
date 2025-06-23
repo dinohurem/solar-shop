@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { SupabaseService } from '../../../services/supabase.service';
 import { DataTableComponent, TableConfig } from '../shared/data-table/data-table.component';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 interface CompanyPricingSummary {
   id: string;
@@ -17,17 +18,17 @@ interface CompanyPricingSummary {
 @Component({
   selector: 'app-admin-company-pricing',
   standalone: true,
-  imports: [CommonModule, DataTableComponent],
+  imports: [CommonModule, DataTableComponent, TranslatePipe],
   template: `
     <div class="space-y-6">
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-3xl font-bold text-gray-900">Company Pricing</h1>
-          <p class="mt-2 text-gray-600">Manage custom prices for partner companies</p>
+          <h1 class="text-3xl font-bold text-gray-900">{{ 'admin.companyPricingForm.title' | translate }}</h1>
+          <p class="mt-2 text-gray-600">{{ 'admin.companyPricingForm.subtitle' | translate }}</p>
         </div>
       </div>
       <app-data-table
-        title="Company Prices"
+        [title]="'admin.companyPricingForm.companyPrices' | translate"
         [data]="(companyPricing$ | async) || []"
         [config]="tableConfig"
         [loading]="(loading$ | async) || false"

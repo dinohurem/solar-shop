@@ -6,23 +6,25 @@ import { BehaviorSubject } from 'rxjs';
 import { SupabaseService } from '../../../services/supabase.service';
 import { DataTableComponent, TableConfig } from '../shared/data-table/data-table.component';
 import { SuccessModalComponent } from '../../../shared/components/modals/success-modal/success-modal.component';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
     selector: 'app-admin-users',
     standalone: true,
-    imports: [CommonModule, DataTableComponent, SuccessModalComponent], template: `
+    imports: [CommonModule, DataTableComponent, SuccessModalComponent, TranslatePipe],
+    template: `
     <div class="space-y-6">
       <!-- Page Header -->
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-3xl font-bold text-gray-900">Users</h1>
-          <p class="mt-2 text-gray-600">Manage user accounts and profiles</p>
+          <h1 class="text-3xl font-bold text-gray-900">{{ 'admin.usersForm.title' | translate }}</h1>
+          <p class="mt-2 text-gray-600">{{ 'admin.usersForm.subtitle' | translate }}</p>
         </div>
       </div>
 
       <!-- Data Table -->
       <app-data-table
-        title="Users"
+        [title]="'admin.usersForm.title' | translate"
         [data]="(users$ | async) || []"
         [config]="tableConfig"
         [loading]="(loading$ | async) || false"
@@ -53,7 +55,9 @@ export class AdminUsersComponent implements OnInit {
     private title = inject(Title);
 
     private usersSubject = new BehaviorSubject<any[]>([]);
-    private loadingSubject = new BehaviorSubject<boolean>(true); users$ = this.usersSubject.asObservable();
+    private loadingSubject = new BehaviorSubject<boolean>(true);
+
+    users$ = this.usersSubject.asObservable();
     loading$ = this.loadingSubject.asObservable();
 
     // Modal properties
@@ -141,7 +145,9 @@ export class AdminUsersComponent implements OnInit {
     }
 
     onTableAction(event: { action: string, item: any }): void {
-        const { action, item } = event; switch (action) {
+        const { action, item } = event;
+
+        switch (action) {
             case 'edit':
                 this.router.navigate(['/admin/users/edit', item.id]);
                 break;
@@ -158,7 +164,9 @@ export class AdminUsersComponent implements OnInit {
 
     onAddUser(): void {
         this.router.navigate(['/admin/users/create']);
-    } async onCsvImported(csvData: any[]): Promise<void> {
+    }
+
+    async onCsvImported(csvData: any[]): Promise<void> {
         // This should not be called since CSV import is disabled
         this.showSuccess('Error', 'CSV import is disabled for user management for security reasons');
     }
@@ -175,7 +183,9 @@ export class AdminUsersComponent implements OnInit {
         } finally {
             this.loadingSubject.next(false);
         }
-    } private async deleteUser(user: any): Promise<void> {
+    }
+
+    private async deleteUser(user: any): Promise<void> {
         try {
             await this.supabaseService.deleteRecord('profiles', user.id);
             this.showSuccess('Success', 'User deleted successfully');
