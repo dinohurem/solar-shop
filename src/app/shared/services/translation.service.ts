@@ -232,7 +232,7 @@ export class TranslationService {
                     messagePlaceholder: 'Unesite svoju poruku...',
                 },
                 products: {
-                    title: 'Partnerski proizvodi',
+                    title: 'Pogledajte naše proizvode',
                     subtitle: 'Ekskluzivni proizvodi i cijene za naše partnere',
                     productCategories: 'Kategorije proizvoda',
                     ourBrands: 'Naši brendovi',
@@ -264,7 +264,7 @@ export class TranslationService {
                     pendingPriceMessage: 'Kontaktirajte nas za specifičnu cijenu za vašu tvrtku'
                 },
                 offers: {
-                    title: 'Ponude za partnere',
+                    title: 'Pogledajte naše ponude',
                     subtitle: 'Ekskluzivne ponude i popusti za naše partnere',
                     currentHighlights: 'Istaknuto',
                     loginRequired: 'Potrebna je prijava da biste vidjeli ponude',

@@ -8,7 +8,7 @@ export const BlogActions = createActionGroup({
         'Load Blog Posts Success': props<{ posts: BlogPost[] }>(),
         'Load Blog Posts Failure': props<{ error: string }>(),
         'Select Post': props<{ postId: string }>(),
-        'Filter By Category': props<{ category: string }>(),
+        'Filter By Category': props<{ category: string | null }>(),
         'Search Posts': props<{ query: string }>(),
     },
 }); 

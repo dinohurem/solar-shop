@@ -165,6 +165,11 @@ export class BlogComponent implements OnInit, OnDestroy {
     this.isLoading$ = this.store.select(selectBlogIsLoading);
     this.error$ = this.store.select(selectBlogError);
     this.selectedCategory$ = this.store.select(selectFilteredCategory);
+
+    // Debug the selected category changes
+    this.selectedCategory$.subscribe(category => {
+      console.log('Selected category changed to:', category);
+    });
   }
 
   ngOnInit() {
@@ -181,7 +186,8 @@ export class BlogComponent implements OnInit, OnDestroy {
   }
 
   filterByCategory(categoryId: string | null) {
-    this.store.dispatch(BlogActions.filterByCategory({ category: categoryId || '' }));
+    console.log('filterByCategory called with:', categoryId);
+    this.store.dispatch(BlogActions.filterByCategory({ category: categoryId }));
   }
 
   searchPosts(query: string) {

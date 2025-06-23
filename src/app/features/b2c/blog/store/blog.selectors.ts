@@ -43,13 +43,18 @@ export const selectFilteredPosts = createSelector(
     selectFilteredCategory,
     selectSearchQuery,
     (posts, filteredCategory, searchQuery) => {
+        console.log('selectFilteredPosts called with:', { posts: posts.length, filteredCategory, searchQuery });
         let filteredPosts = posts;
 
         // Filter by category
-        if (filteredCategory && filteredCategory !== '') {
+        if (filteredCategory) {
+            console.log('Filtering by category:', filteredCategory);
             filteredPosts = filteredPosts.filter(post =>
                 post.category.id === filteredCategory
             );
+            console.log('Filtered posts count:', filteredPosts.length);
+        } else {
+            console.log('No category filter applied, showing all posts');
         }
 
         // Filter by search query
@@ -64,11 +69,14 @@ export const selectFilteredPosts = createSelector(
         }
 
         // Sort by updatedAt (most recently updated first), fallback to publishedAt
-        return [...filteredPosts].sort((a, b) => {
+        const sortedPosts = [...filteredPosts].sort((a, b) => {
             const aDate = new Date(a.updatedAt || a.publishedAt).getTime();
             const bDate = new Date(b.updatedAt || b.publishedAt).getTime();
             return bDate - aDate;
         });
+
+        console.log('Final filtered posts count:', sortedPosts.length);
+        return sortedPosts;
     }
 );
 
