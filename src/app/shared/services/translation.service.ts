@@ -257,7 +257,7 @@ export class TranslationService {
                 offers: {
                     title: 'Ponude za partnere',
                     subtitle: 'Ekskluzivne ponude i popusti za naše partnere',
-                    currentHighlights: 'Trenutni istaknuti sadržaj',
+                    currentHighlights: 'Istaknuto',
                     loginRequired: 'Potrebna je prijava da biste vidjeli ponude',
                     loginToViewOffers: 'Prijavite se za pregled ponuda',
                     loginToViewPrices: 'Prijavite se za pregled cijena',
@@ -1866,7 +1866,7 @@ export class TranslationService {
                 offers: {
                     title: 'Offers for Partners',
                     subtitle: 'Exclusive offers and discounts for our partners',
-                    currentHighlights: 'Current Highlights',
+                    currentHighlights: 'Highlights',
                     loginRequired: 'Login required to view offers',
                     loginToViewOffers: 'Login to view offers',
                     loginToViewPrices: 'Login to view prices',
