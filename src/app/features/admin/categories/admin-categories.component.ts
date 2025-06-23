@@ -178,40 +178,6 @@ export class AdminCategoriesComponent implements OnInit {
             this.categoriesSubject.next(categories || []);
         } catch (error) {
             console.warn('Categories table not found in database. Using mock data as placeholder.');
-            // Create some mock data for demonstration purposes
-            const mockCategories = [
-                {
-                    id: '1',
-                    name: 'Solar Panels',
-                    description: 'High-efficiency solar panels for residential and commercial use',
-                    slug: 'solar-panels',
-                    image_url: '',
-                    is_active: true,
-                    sort_order: 1,
-                    created_at: new Date().toISOString()
-                },
-                {
-                    id: '2',
-                    name: 'Inverters',
-                    description: 'Solar inverters and power conversion equipment',
-                    slug: 'inverters',
-                    image_url: '',
-                    is_active: true,
-                    sort_order: 2,
-                    created_at: new Date().toISOString()
-                },
-                {
-                    id: '3',
-                    name: 'Batteries',
-                    description: 'Energy storage solutions and battery systems',
-                    slug: 'batteries',
-                    image_url: '',
-                    is_active: true,
-                    sort_order: 3,
-                    created_at: new Date().toISOString()
-                }
-            ];
-            this.categoriesSubject.next(mockCategories);
         } finally {
             this.loadingSubject.next(false);
         }
