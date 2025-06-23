@@ -141,79 +141,11 @@ export class PartnersHighlightsComponent implements OnInit {
         }));
       } else {
         console.warn('No B2B offers found in database. Using fallback sample data.');
-        this.loadFallbackOffers();
       }
     } catch (error) {
       console.warn('Error loading B2B offers from database:', error);
       console.warn('Using fallback sample data. Please ensure the offers table exists and the migration 007_add_is_b2b_to_offers.sql has been run.');
-      this.loadFallbackOffers();
     }
-  }
-
-  private loadFallbackOffers() {
-    // Fallback sample B2B offers to ensure the component always shows content
-    this.highlights = [
-      {
-        id: 'b2b-1',
-        title: 'Bulk Solar Panel Package - 20% Off',
-        description: 'Complete solar panel installation package for commercial properties. Includes 100+ high-efficiency panels, professional installation, and 5-year maintenance.',
-        shortDescription: 'Bulk solar installation with professional service',
-        imageUrl: 'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=800&h=600&fit=crop',
-        originalPrice: 15000,
-        discountedPrice: 12000,
-        discountPercentage: 20,
-        type: 'bulk_discount',
-        status: 'active',
-        featured: true,
-        isB2B: true,
-        endDate: '2024-12-31'
-      },
-      {
-        id: 'b2b-2',
-        title: 'Partner Exclusive: Premium Inverter Bundle',
-        description: 'Exclusive bundle for certified partners including 3 premium inverters, monitoring system, and extended warranty coverage.',
-        shortDescription: 'Premium inverter bundle with monitoring',
-        imageUrl: 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=800&h=600&fit=crop',
-        originalPrice: 8500,
-        discountedPrice: 6800,
-        discountPercentage: 25,
-        type: 'partner_exclusive',
-        status: 'active',
-        featured: true,
-        isB2B: true,
-        endDate: '2024-06-30'
-      },
-      {
-        id: 'b2b-3',
-        title: 'Energy Storage Solution - Early Bird',
-        description: 'Complete energy storage solution with lithium batteries, smart management system, and installation support.',
-        shortDescription: 'Complete energy storage with smart management',
-        imageUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800&h=600&fit=crop',
-        originalPrice: 12000,
-        discountedPrice: 9600,
-        discountPercentage: 20,
-        type: 'early_bird',
-        status: 'active',
-        featured: false,
-        isB2B: true,
-        endDate: '2024-04-30'
-      },
-      {
-        id: 'b2b-4',
-        title: 'Commercial Mounting System Package',
-        description: 'Professional-grade mounting systems designed for large-scale commercial installations. Includes all hardware and installation guides.',
-        shortDescription: 'Professional mounting systems for commercial use',
-        imageUrl: 'https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?w=800&h=600&fit=crop',
-        originalPrice: 5000,
-        discountedPrice: 4000,
-        discountPercentage: 20,
-        type: 'volume_discount',
-        status: 'active',
-        featured: false,
-        isB2B: true,
-        endDate: '2024-08-31'
-      }
-    ];
   }
 
   navigateToOffer(offerId: string): void {
