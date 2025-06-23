@@ -5,6 +5,7 @@ import { Title } from '@angular/platform-browser';
 import { BehaviorSubject, from } from 'rxjs';
 import { SupabaseService } from '../../../services/supabase.service';
 import { DataTableComponent, TableConfig } from '../shared/data-table/data-table.component';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 interface UserWishlistSummary {
     id: string;
@@ -27,22 +28,22 @@ interface WishlistItemDetail {
 @Component({
     selector: 'app-admin-wishlist',
     standalone: true,
-    imports: [CommonModule, DataTableComponent],
+    imports: [CommonModule, DataTableComponent, TranslatePipe],
     template: `
     <div class="w-full max-w-full overflow-hidden">
       <div class="space-y-4 sm:space-y-6 p-4 sm:p-6">
         <!-- Page Header -->
         <div class="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
           <div class="min-w-0 flex-1">
-            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 truncate">Wishlist Management</h1>
-            <p class="mt-1 sm:mt-2 text-sm sm:text-base text-gray-600">View and manage user wishlists</p>
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 truncate">{{ 'admin.wishlistForm.title' | translate }}</h1>
+            <p class="mt-1 sm:mt-2 text-sm sm:text-base text-gray-600">{{ 'admin.wishlistForm.subtitle' | translate }}</p>
           </div>
         </div>
 
         <!-- Data Table Container -->
         <div class="w-full overflow-hidden">
           <app-data-table
-            title="User Wishlists"
+            [title]="'admin.wishlistForm.userWishlists' | translate"
             [data]="(userWishlists$ | async) || []"
             [config]="tableConfig"
             [loading]="(loading$ | async) || false"
@@ -61,7 +62,7 @@ interface WishlistItemDetail {
           <div class="flex justify-between items-center mb-6">
             <div>
               <h3 class="text-xl font-medium text-gray-900">
-                {{ selectedUserWishlist.userName }}'s Wishlist
+                {{ selectedUserWishlist.userName }}'s {{ 'admin.wishlistForm.title' | translate }}
               </h3>
               <p class="text-sm text-gray-600 mt-1">{{ selectedUserWishlist.userEmail }}</p>
             </div>
@@ -75,7 +76,7 @@ interface WishlistItemDetail {
           <!-- Wishlist Items -->
           <div *ngIf="(wishlistItems$ | async)?.length; else noItems">
             <h4 class="text-lg font-semibold text-gray-900 mb-4">
-              Wishlist Items ({{ (wishlistItems$ | async)?.length }})
+              {{ 'admin.wishlistForm.wishlistItems' | translate }} ({{ (wishlistItems$ | async)?.length }})
             </h4>
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -92,18 +93,18 @@ interface WishlistItemDetail {
                 <div class="space-y-2">
                   <h5 class="font-semibold text-gray-900 text-sm">{{ item.productName }}</h5>
                   <p class="text-lg font-bold text-green-600">€{{ item.productPrice.toFixed(2) }}</p>
-                  <p class="text-xs text-gray-500">Added: {{ formatDate(item.addedAt) }}</p>
+                  <p class="text-xs text-gray-500">{{ 'admin.wishlistForm.added' | translate }}: {{ formatDate(item.addedAt) }}</p>
                 </div>
                 
                 <!-- Actions -->
                 <div class="mt-3 flex space-x-2">
                   <button (click)="viewProduct(item.productId)" 
                           class="flex-1 px-3 py-2 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
-                    View Product
+                    {{ 'admin.wishlistForm.viewProduct' | translate }}
                   </button>
                   <button (click)="removeFromWishlist(item.id)" 
                           class="px-3 py-2 text-xs bg-red-600 text-white rounded hover:bg-red-700 transition-colors">
-                    Remove
+                    {{ 'admin.wishlistForm.remove' | translate }}
                   </button>
                 </div>
               </div>
@@ -116,8 +117,8 @@ interface WishlistItemDetail {
               <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
               </svg>
-              <h3 class="text-lg font-medium text-gray-900 mb-2">No wishlist items</h3>
-              <p class="text-gray-600">This user hasn't added any items to their wishlist yet.</p>
+              <h3 class="text-lg font-medium text-gray-900 mb-2">{{ 'admin.wishlistForm.noWishlistItems' | translate }}</h3>
+              <p class="text-gray-600">{{ 'admin.wishlistForm.noWishlistItemsDescription' | translate }}</p>
             </div>
           </ng-template>
 
@@ -125,7 +126,7 @@ interface WishlistItemDetail {
           <div class="mt-6 pt-4 border-t border-gray-200 flex justify-end">
             <button (click)="closeModal()" 
                     class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
-              Close
+              {{ 'admin.wishlistForm.close' | translate }}
             </button>
           </div>
         </div>
