@@ -322,7 +322,7 @@ export class TranslationService {
                     viewDetails: 'Pogledaj detalje',
                     reorder: 'Naruči ponovno',
                     noOrdersFound: 'Nema pronađenih narudžbi',
-                    noOrdersFoundMessage: 'Još niste napravili nijednu narudžbu. Počnite kupovati da biste vidjeli vaše narudžbe ovdje.',
+                    noOrdersFoundMessage: 'Počnite kupovati da biste vidjeli vaše narudžbe ovdje.',
                     startShopping: 'Počnite kupovati'
                 }
             },
@@ -2090,8 +2090,8 @@ export class TranslationService {
                     viewDetails: 'View Details',
                     reorder: 'Reorder',
                     noOrdersFound: 'No orders found',
-                    noOrdersFoundMessage: 'You haven\'t placed any orders yet. Start shopping to see your orders here.',
-                    startShopping: 'Start Shopping'
+                    noOrdersFoundMessage: 'Start shopping to see your orders here.',
+                    startShopping: 'Start Shopping',
                 }
             },
             // Admin Company Management
