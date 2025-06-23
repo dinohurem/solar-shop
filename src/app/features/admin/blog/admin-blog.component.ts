@@ -113,7 +113,7 @@ export class AdminBlogComponent implements OnInit {
         sortable: true,
         paginated: true,
         pageSize: 20,
-        allowCsvImport: true,
+        allowCsvImport: false,
         allowExport: true,
         rowClickable: true
     };

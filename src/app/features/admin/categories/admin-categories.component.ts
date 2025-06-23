@@ -157,6 +157,12 @@ export class AdminCategoriesComponent implements OnInit {
 
             // Import categories one by one
             for (const category of categories) {
+                // Check if category already exists based on the name
+                const existingCategory = await this.supabaseService.getTable('categories', { name: category.name });
+                if (existingCategory.length > 0) {
+                    alert(this.translationService.translate('admin.categoriesForm.categoryAlreadyExists', { name: category.name }));
+                    continue;
+                }
                 await this.supabaseService.createRecord('categories', category);
             }
 

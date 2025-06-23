@@ -5,6 +5,7 @@ import { BehaviorSubject } from 'rxjs';
 import { SupabaseService } from '../../../services/supabase.service';
 import { DataTableComponent, TableConfig } from '../shared/data-table/data-table.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../shared/services/translation.service';
 
 interface CompanyPricingSummary {
   id: string;
@@ -42,7 +43,7 @@ interface CompanyPricingSummary {
 export class AdminCompanyPricingComponent implements OnInit {
   private supabase = inject(SupabaseService);
   private router = inject(Router);
-
+  translationService = inject(TranslationService);
   private companyPricingSubject = new BehaviorSubject<CompanyPricingSummary[]>([]);
   private loadingSubject = new BehaviorSubject<boolean>(true);
 
@@ -51,20 +52,20 @@ export class AdminCompanyPricingComponent implements OnInit {
 
   tableConfig: TableConfig = {
     columns: [
-      { key: 'company_name', label: 'Company Name', type: 'text', sortable: true, searchable: true },
-      { key: 'company_id', label: 'Company ID', type: 'text', sortable: true, searchable: true },
-      { key: 'product_count', label: 'Products with Custom Pricing', type: 'number', sortable: true },
-      { key: 'created_at', label: 'First Created', type: 'date', sortable: true },
-      { key: 'updated_at', label: 'Last Updated', type: 'date', sortable: true }
+      { key: 'company_name', label: this.translationService.translate('admin.companyPricingForm.companyName'), type: 'text', sortable: true, searchable: true },
+      { key: 'company_id', label: this.translationService.translate('admin.companyPricingForm.companyId'), type: 'text', sortable: true, searchable: true },
+      { key: 'product_count', label: this.translationService.translate('admin.companyPricingForm.productsWithCustomPricing'), type: 'number', sortable: true },
+      { key: 'created_at', label: this.translationService.translate('admin.companyPricingForm.firstCreated'), type: 'date', sortable: true },
+      { key: 'updated_at', label: this.translationService.translate('admin.companyPricingForm.lastUpdated'), type: 'date', sortable: true }
     ],
     actions: [
-      { label: 'Delete All', icon: 'trash2', action: 'delete', class: 'text-red-600 hover:text-red-900' }
+      { label: this.translationService.translate('common.actions'), icon: 'trash2', action: 'delete', class: 'text-red-600 hover:text-red-900' }
     ],
     searchable: true,
     sortable: true,
     paginated: true,
     pageSize: 20,
-    allowCsvImport: false,
+    allowCsvImport: true,
     allowExport: true,
     rowClickable: true
   };

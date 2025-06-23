@@ -459,8 +459,8 @@ export class TranslationService {
                 basicInformation: 'Osnovne informacije',
                 productName: 'Naziv proizvoda',
                 productNameRequired: 'Naziv proizvoda je obavezan',
-                urlSlug: 'URL',
-                urlSlugRequired: 'URL je obavezan',
+                urlSlug: 'URL tag',
+                urlSlugRequired: 'URL tag je obavezan',
                 productDescription: 'Opis proizvoda',
                 productDetails: 'Detalji proizvoda',
                 productSKU: 'SKU',
@@ -479,6 +479,7 @@ export class TranslationService {
                 productWeightRequired: 'Težina je obavezna',
                 productStatus: 'Status proizvoda',
                 productImages: 'Slike',
+                productAlreadyExists: 'Proizvod {{name}} već postoji',
                 productEnterOneImageUrlPerLine: 'Unesite jednu URL adresu slike po retku',
                 productImage: 'Slika',
                 productStock: 'Zalihe',
@@ -512,6 +513,7 @@ export class TranslationService {
                     successImportingCategories: 'Kategorije uspješno unesene!',
                     categoryDeletedSuccessfully: 'Kategorija uspješno obrisana',
                     errorDeletingCategory: 'Greška prilikom brisanja kategorije',
+                    categoryAlreadyExists: 'Kategorija {{name}} već postoji',
                 },
                 blogForm: {
                     title: 'Blog postovi',
@@ -646,9 +648,10 @@ export class TranslationService {
                     pricingDeleted: 'Cijena uspješno obrisana',
                     pricingError: 'Greška prilikom spremanja cijene',
                     pricingLoadError: 'Greška prilikom učitavanja cijene',
+                    // table headers
                     companyName: 'Naziv tvrtke',
                     productsWithCustomPricing: 'Proizvodi s prilagođenim cijenama',
-                    firstCreated: 'Prvi put stvoreno',
+                    firstCreated: 'Prvi put dodano',
                     lastUpdated: 'Zadnje ažuriranje',
                     deleteAll: 'Obriši sve',
                     companyPrices: 'Cijene tvrtki',
@@ -657,7 +660,8 @@ export class TranslationService {
                     customPricesForCompany: 'prilagođene cijene za ovu tvrtku.',
                     successfullyDeleted: 'Uspješno obrisane sve prilagođene cijene za',
                     errorDeletingPricing: 'Greška prilikom brisanja cijena tvrtke. Molimo pokušajte ponovno.',
-                    errorLoadingPricing: 'Greška prilikom učitavanja cijena tvrtke'
+                    errorLoadingPricing: 'Greška prilikom učitavanja cijena tvrtke',
+                    pricesForCompany: 'cijene za tvrtku',
                 },
                 contactsForm: {
                     title: 'Kontakti',
@@ -690,6 +694,7 @@ export class TranslationService {
                     offerNameRequired: 'Naziv ponude je obavezan',
                     offerType: 'Tip ponude',
                     offerTypeRequired: 'Tip ponude je obavezan',
+                    description: 'Opis ponude',
                     selectOfferType: 'Odaberi tip ponude',
                     percentageDiscount: 'Postotni popust',
                     fixedAmount: 'Fiksni popust',
@@ -723,7 +728,8 @@ export class TranslationService {
                     offerUpdated: 'Ponuda uspješno ažurirana',
                     offerDeleted: 'Ponuda uspješno obrisana',
                     offerError: 'Greška prilikom spremanja ponude',
-                    offerLoadError: 'Greška prilikom učitavanja ponude'
+                    offerLoadError: 'Greška prilikom učitavanja ponude',
+                    offerAlreadyExists: 'Ponuda {{title}} već postoji'
                 },
                 reviewsForm: {
                     title: 'Recenzije',
@@ -994,7 +1000,10 @@ export class TranslationService {
                     no: 'Ne',
                     today: 'Danas',
                     thisWeek: 'Ovaj tjedan',
-                    thisMonth: 'Ovaj mjesec'
+                    thisMonth: 'Ovaj mjesec',
+                    noTemplateAvailable: 'Nema dostupnih podataka za preuzimanje CSV uzorka',
+                    getStartedByCreating: 'Započnite s kreiranjem sada...',
+                    noResults: 'Nema rezultata',
                 },
             },
             // Admin Users
@@ -2328,6 +2337,7 @@ export class TranslationService {
                 productWeightRequired: 'Weight is required',
                 productStatus: 'Status',
                 productImages: 'Images',
+                productAlreadyExists: 'Product {{name}} already exists',
                 productEnterOneImageUrlPerLine: 'Enter one image URL per line',
                 productImage: 'Image',
                 productStock: 'Stock',
@@ -2361,6 +2371,7 @@ export class TranslationService {
                     successImportingCategories: 'Categories successfully imported!',
                     categoryDeletedSuccessfully: 'Category deleted successfully',
                     errorDeletingCategory: 'Error deleting category',
+                    categoryAlreadyExists: 'Category {{name}} already exists',
                 },
                 blogForm: {
                     title: 'Blog Posts',
@@ -2506,7 +2517,8 @@ export class TranslationService {
                     customPricesForCompany: 'custom price(s) for this company.',
                     successfullyDeleted: 'Successfully deleted all custom pricing for',
                     errorDeletingPricing: 'Error deleting company pricing. Please try again.',
-                    errorLoadingPricing: 'Error loading company pricing'
+                    errorLoadingPricing: 'Error loading company pricing',
+                    pricesForCompany: 'compnay pricing',
                 },
                 contactsForm: {
                     title: 'Contacts',
@@ -2539,6 +2551,7 @@ export class TranslationService {
                     offerNameRequired: 'Offer name is required',
                     offerType: 'Offer type',
                     offerTypeRequired: 'Offer type is required',
+                    description: 'Description',
                     selectOfferType: 'Select offer type',
                     percentageDiscount: 'Percentage discount',
                     fixedAmount: 'Fixed amount',
@@ -2572,7 +2585,8 @@ export class TranslationService {
                     offerUpdated: 'Offer updated successfully',
                     offerDeleted: 'Offer deleted successfully',
                     offerError: 'Error creating offer',
-                    offerLoadError: 'Error loading offer'
+                    offerLoadError: 'Error loading offer',
+                    offerAlreadyExists: 'Offer {{title}} already exists'
                 },
                 reviewsForm: {
                     title: 'Reviews',
@@ -2823,7 +2837,10 @@ export class TranslationService {
                     no: 'No',
                     today: 'Today',
                     thisWeek: 'This Week',
-                    thisMonth: 'This Month'
+                    thisMonth: 'This Month',
+                    noTemplateAvailable: 'No template available for this entity',
+                    getStartedByCreating: 'Get started by creating now...',
+                    noResults: 'No results found',
                 },
             },
             // Admin Users

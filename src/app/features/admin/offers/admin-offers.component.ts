@@ -178,20 +178,26 @@ export class AdminOffersComponent implements OnInit {
         description: row.description || row.Description || '',
         short_description: row.short_description || row['Short Description'] || '',
         type: (row.type || row.Type || 'product') as any,
+        status: (row.status || row['Status'] || 'active') as any,
+        featured: (row.featured || row['Featured'] || 'false').toLowerCase() === 'true',
         discount_type: (row.discount_type || row['Discount Type'] || 'percentage') as any,
         discount_value: parseFloat(row.discount_value || row['Discount Value'] || '0'),
-        minimum_purchase: row.minimum_purchase ? parseFloat(row.minimum_purchase) : undefined,
-        maximum_discount: row.maximum_discount ? parseFloat(row.maximum_discount) : undefined,
+        min_order_amount: row.min_order_amount ? parseFloat(row.min_order_amount) : undefined,
+        max_order_amount: row.max_order_amount ? parseFloat(row.max_order_amount) : undefined,
         start_date: row.start_date || row['Start Date'] || undefined,
         end_date: row.end_date || row['End Date'] || undefined,
-        usage_limit: row.usage_limit ? parseInt(row.usage_limit) : undefined,
         image_url: row.image_url || row['Image URL'] || undefined,
-        terms_conditions: row.terms_conditions || row['Terms & Conditions'] || '',
         is_active: (row.is_active || row['Is Active'] || 'true').toLowerCase() === 'true'
       }));
 
       // Import offers one by one
       for (const offer of offers) {
+        // Check if offer already exists based on the title
+        const existingOffer = await this.supabaseService.getTable('offers', { title: offer.title });
+        if (existingOffer.length > 0) {
+          alert(this.translationService.translate('admin.offersForm.offerAlreadyExists', { title: offer.title }));
+          continue;
+        }
         await this.supabaseService.createRecord('offers', offer);
       }
 

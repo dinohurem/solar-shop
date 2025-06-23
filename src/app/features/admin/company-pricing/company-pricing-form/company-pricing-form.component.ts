@@ -139,17 +139,12 @@ interface Product {
         <!-- Pricing -->
         <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-6">
           <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
-            <svg class="w-5 h-5 mr-2 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
-            </svg>
+          <span class="text-yellow-600 mr-2"> € </span>
             Custom Pricing
           </h3>
           
           <div class="grid grid-cols-1 gap-6">
             <div class="relative">
-              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <span class="text-gray-500 text-lg">€</span>
-              </div>
               <input
                 type="number"
                 id="price"
@@ -160,7 +155,7 @@ interface Product {
                 placeholder="0.00"
                 [class.border-red-500]="pricingForm.get('price')?.invalid && pricingForm.get('price')?.touched">
               <label for="price" class="absolute left-10 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                Custom Price *
+                Custom Price (€) *
               </label>
               <div *ngIf="pricingForm.get('price')?.invalid && pricingForm.get('price')?.touched" 
                    class="mt-2 text-sm text-red-600 flex items-center">

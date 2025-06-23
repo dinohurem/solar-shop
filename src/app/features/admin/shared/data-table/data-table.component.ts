@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter, OnInit, inject, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { LucideAngularModule, Edit, Trash2, Upload, Download, Plus, Search, Eye, EyeOff, Check, X, Printer } from 'lucide-angular';
 import { DeleteConfirmationModalComponent } from '../../../../shared/components/modals/delete-confirmation-modal/delete-confirmation-modal.component';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
@@ -62,7 +62,7 @@ export interface TableConfig {
                 class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
               <lucide-angular 
                 name="search" 
-                class="absolute left-3 top-2.5 w-4 h-4 text-gray-400"
+                class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"
                 [img]="SearchIcon">
               </lucide-angular>
             </div>
@@ -84,6 +84,20 @@ export interface TableConfig {
                   [img]="UploadIcon">
                 </lucide-angular>
                 {{ 'common.importCSV' | translate }}
+              </button>
+            </div>
+            
+            <!-- CSV Template -->
+            <div *ngIf="config.allowCsvImport" class="relative">
+              <button
+                (click)="downloadCsvTemplate()"
+                class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+                <lucide-angular 
+                  name="download" 
+                  class="w-4 h-4 inline-block mr-2"
+                  [img]="DownloadIcon">
+                </lucide-angular>
+                CSV Template
               </button>
             </div>
             
@@ -274,8 +288,8 @@ export interface TableConfig {
         <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m8-8V3a1 1 0 00-1-1H9a1 1 0 00-1 1v2m4 0h0"/>
         </svg>
-        <h3 class="mt-2 text-sm font-medium text-gray-900">No {{ title.toLowerCase() }} found</h3>
-        <p class="mt-1 text-sm text-gray-500">Get started by creating a new {{ title.toLowerCase().slice(0, -1) }}.</p>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">{{ 'admin.common.noResults' | translate }}</h3>
+        <p class="mt-1 text-sm text-gray-500">{{ 'admin.common.getStartedByCreating' | translate }}</p>
         <div class="mt-6">
           <button (click)="onAdd()" 
                   class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
@@ -315,6 +329,7 @@ export class DataTableComponent implements OnInit, OnChanges {
   @Output() csvImported = new EventEmitter<any[]>();
   @Output() rowClicked = new EventEmitter<any>();
   translationService = inject(TranslationService);
+  private router = inject(Router);
 
   // Delete modal properties
   showDeleteModal = false;
@@ -585,5 +600,59 @@ export class DataTableComponent implements OnInit, OnChanges {
     this.pendingDeleteItem = null;
     this.deleteModalTitle = '';
     this.deleteModalMessage = '';
+  }
+
+  downloadCsvTemplate(): void {
+    // Get the entity type from the URL route instead of localized title
+    const currentUrl = this.router.url;
+    let entityType = '';
+
+    // Extract entity type from URL
+    if (currentUrl.includes('/admin/categories')) {
+      entityType = 'categories';
+    } else if (currentUrl.includes('/admin/products')) {
+      entityType = 'products';
+    } else if (currentUrl.includes('/admin/offers')) {
+      entityType = 'offers';
+    } else if (currentUrl.includes('/admin/company-pricing')) {
+      entityType = 'company-pricing';
+    } else {
+      // Fallback to title-based detection for other entities
+      entityType = 'unknown';
+    }
+
+    let headers: string[] = [];
+    let sampleData: string[] = [];
+
+    // Define templates for different entities
+    if (entityType.includes('categor')) {
+      headers = ['name', 'description', 'slug', 'image_url', 'sort_order', 'is_active'];
+      sampleData = ['Inverters', 'Inverters for solar panels', 'inverters', 'https://example.com/inverter.jpg', '1', 'true'];
+    } else if (entityType.includes('product')) {
+      headers = ['name', 'slug', 'description', 'short_description', 'price', 'original_price', 'sku', 'brand', 'model', 'category_name', 'stock_quantity', 'weight', 'is_active', 'is_featured', 'is_on_sale', 'images'];
+      sampleData = ['Solar Panel 100W', 'solar-panel-100w', 'High efficiency solar panel', 'High efficiency solar panel', '299.99', '399.99', 'SOLAR-100W', 'SolarTech', 'SolarTech Model', 'Solar Panels11', '100', '1', 'true', 'true', 'true', 'https://example.com/solar-panel-100w.jpg,https://example.com/solar-panel-100w-2.jpg'];
+    } else if (entityType.includes('offer')) {
+      headers = ['title', 'image_url', 'description', 'short_description', 'type', 'status', 'featured', 'discount_type', 'discount_value', 'start_date', 'end_date', 'min_order_amount', 'max_order_amount', 'is_active'];
+      sampleData = ['Solar Panel 100W', 'https://example.com/solar-panel-100w.jpg', 'High efficiency solar panel', 'High efficiency solar panel', 'bundle_deal', 'active', 'true', 'percentage', '10', '2025-01-01', '2025-05-01', '100', 'null', 'true'];
+    } else if (entityType.includes('company-pricing')) {
+      headers = ['company_id', 'price', 'is_active'];
+      sampleData = ['1', '299.99', 'true'];
+    } else {
+      // Generic template based on table columns
+      alert(this.translationService.translate('admin.common.noTemplateAvailable'));
+      return;
+    }
+
+    // Create CSV content
+    const csvContent = [headers.join(','), sampleData.join(',')].join('\n');
+
+    // Create and download the file
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${entityType.replace(/\s+/g, '-')}-template.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
   }
 }
