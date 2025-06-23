@@ -1,7 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { Observable, switchMap, from, catchError, of } from 'rxjs';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { SupabaseService } from '../../../../services/supabase.service';
+import { selectCurrentUser } from '../../../../core/auth/store/auth.selectors';
 
 @Component({
   selector: 'app-partners-hero',
@@ -18,19 +22,64 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
           {{ 'b2b.hero.subtitle' | translate }}
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <button (click)="navigateToRegister()" class="bg-white text-b2b-600 px-8 py-4 rounded-lg font-semibold hover:bg-b2b-50 transition-all">
-            {{ 'b2b.hero.getStarted' | translate }}
-          </button>
-          <button (click)="navigateToAbout()" class="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold hover:bg-white/10 transition-all">
-            {{ 'b2b.hero.learnMore' | translate }}
-          </button>
+          <!-- Buttons for authenticated company users -->
+          <ng-container *ngIf="isCompanyContact$ | async">
+            <button (click)="navigateToProducts()" class="bg-white text-b2b-600 px-8 py-4 rounded-lg font-semibold hover:bg-b2b-50 transition-all">
+              {{ 'b2b.products.title' | translate }}
+            </button>
+            <button (click)="navigateToOffers()" class="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold hover:bg-white/10 transition-all">
+              {{ 'b2b.offers.title' | translate }}
+            </button>
+          </ng-container>
+          
+          <!-- Default buttons for non-authenticated users -->
+          <ng-container *ngIf="!(isCompanyContact$ | async)">
+            <button (click)="navigateToRegister()" class="bg-white text-b2b-600 px-8 py-4 rounded-lg font-semibold hover:bg-b2b-50 transition-all">
+              {{ 'b2b.hero.getStarted' | translate }}
+            </button>
+            <button (click)="navigateToAbout()" class="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold hover:bg-white/10 transition-all">
+              {{ 'b2b.hero.learnMore' | translate }}
+            </button>
+          </ng-container>
         </div>
       </div>
     </section>
   `,
 })
-export class PartnersHeroComponent {
-  constructor(private router: Router) { }
+export class PartnersHeroComponent implements OnInit {
+  private router = inject(Router);
+  private store = inject(Store);
+  private supabaseService = inject(SupabaseService);
+
+  isCompanyContact$: Observable<boolean>;
+
+  constructor() {
+    // Initialize the observable to check if user is a company contact
+    this.isCompanyContact$ = this.store.select(selectCurrentUser).pipe(
+      switchMap(user => {
+        if (!user?.id) {
+          return of(false);
+        }
+
+        // Check if user is a company contact person
+        return from(
+          this.supabaseService.client
+            .from('companies')
+            .select('id, status')
+            .eq('contact_person_id', user.id)
+            .eq('status', 'approved')
+            .single()
+        ).pipe(
+          catchError(() => of({ data: null, error: true })),
+          switchMap(result => of(!!result.data))
+        );
+      })
+    );
+  }
+
+  ngOnInit(): void {
+    // Component initialization if needed
+  }
 
   navigateToRegister(): void {
     this.router.navigate(['/partners/register']);
@@ -38,5 +87,13 @@ export class PartnersHeroComponent {
 
   navigateToAbout(): void {
     this.router.navigate(['/partners/about']);
+  }
+
+  navigateToProducts(): void {
+    this.router.navigate(['/partners/products']);
+  }
+
+  navigateToOffers(): void {
+    this.router.navigate(['/partners/offers']);
   }
 }

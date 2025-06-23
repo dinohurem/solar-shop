@@ -21,6 +21,7 @@ export interface Order {
     notes?: string;
     adminNotes?: string;
     items: OrderItem[];
+    is_b2b?: boolean; // Flag to distinguish B2B orders from B2C orders
     createdAt: string;
     updatedAt: string;
 }

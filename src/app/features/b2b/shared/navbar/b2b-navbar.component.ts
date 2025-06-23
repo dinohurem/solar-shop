@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { TranslationService } from '../../../../shared/services/translation.service';
-import { Subject, takeUntil } from 'rxjs';
+import { SupabaseService } from '../../../../services/supabase.service';
+import { Subject, takeUntil, switchMap, from, catchError, of } from 'rxjs';
 
 @Component({
   selector: 'app-b2b-navbar',
@@ -53,7 +54,7 @@ import { Subject, takeUntil } from 'rxjs';
           <!-- User Menu -->
           <div class="flex items-center space-x-4">
             <!-- Authentication -->
-            <div *ngIf="!isAuthenticated" class="flex items-center space-x-2">
+            <div *ngIf="!isAuthenticated || !isCompanyContact" class="flex items-center space-x-2">
               <a routerLink="/login" 
                  class="text-gray-700 hover:text-solar-600 px-3 py-2 text-sm font-medium">
                 {{ 'b2bNav.signIn' | translate }}
@@ -72,8 +73,8 @@ import { Subject, takeUntil } from 'rxjs';
               </a>
             </div>
 
-            <!-- User Dropdown (when authenticated) -->
-            <div *ngIf="isAuthenticated" class="relative flex items-center space-x-4">
+            <!-- User Dropdown (when authenticated and is company contact) -->
+            <div *ngIf="isAuthenticated && isCompanyContact" class="relative flex items-center space-x-4">
               <div class="h-6 w-px bg-gray-300"></div>
               <a routerLink="/" 
                  class="text-gray-700 hover:text-solar-600 px-3 py-2 text-sm font-medium transition-colors flex items-center space-x-1">
@@ -158,7 +159,7 @@ import { Subject, takeUntil } from 'rxjs';
             
             <!-- Mobile Auth Section -->
             <div class="border-t border-gray-200 pt-4 mt-4">
-              <div *ngIf="!isAuthenticated" class="space-y-2">
+              <div *ngIf="!isAuthenticated || !isCompanyContact" class="space-y-2">
                 <a routerLink="/login" 
                    class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-solar-600 hover:bg-gray-50 rounded-md">
                   {{ 'b2bNav.signIn' | translate }}
@@ -176,7 +177,7 @@ import { Subject, takeUntil } from 'rxjs';
                 </a>
               </div>
               
-              <div *ngIf="isAuthenticated" class="space-y-2">
+              <div *ngIf="isAuthenticated && isCompanyContact" class="space-y-2">
                 <a routerLink="/partners/dashboard" 
                    class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-solar-600 hover:bg-gray-50 rounded-md">
                   {{ 'b2bNav.dashboard' | translate }}
@@ -209,22 +210,44 @@ import { Subject, takeUntil } from 'rxjs';
   `,
 })
 export class B2bNavbarComponent implements OnInit, OnDestroy {
+  private router = inject(Router);
   private translationService = inject(TranslationService);
+  private supabaseService = inject(SupabaseService);
   private destroy$ = new Subject<void>();
 
   showMobileMenu = false;
   showUserMenu = false;
-  isAuthenticated = false; // TODO: Replace with actual auth service
-  currentUser: any = null; // TODO: Replace with actual user data
-
-  constructor(private router: Router) { }
+  isAuthenticated = false;
+  currentUser: any = null;
+  isCompanyContact = false; // Flag to check if user is a company contact person
 
   ngOnInit(): void {
-    // TODO: Initialize authentication state and user data
-    // this.authService.currentUser$.subscribe(user => {
-    //   this.isAuthenticated = !!user;
-    //   this.currentUser = user;
-    // });
+    // Initialize authentication state and user data
+    this.supabaseService.getCurrentUser()
+      .pipe(
+        takeUntil(this.destroy$),
+        switchMap(user => {
+          this.isAuthenticated = !!user;
+          this.currentUser = user;
+
+          if (user?.id) {
+            // Check if user is a company contact person
+            return from(
+              this.supabaseService.client
+                .from('companies')
+                .select('id, status')
+                .eq('contact_person_id', user.id)
+                .single()
+            ).pipe(
+              catchError(() => of({ data: null, error: null }))
+            );
+          }
+          return of({ data: null, error: null });
+        })
+      )
+      .subscribe(({ data }) => {
+        this.isCompanyContact = !!data && data.status === 'approved';
+      });
   }
 
   ngOnDestroy(): void {
@@ -243,10 +266,13 @@ export class B2bNavbarComponent implements OnInit, OnDestroy {
   }
 
   signOut(): void {
-    // TODO: Implement sign out
-    // this.authService.signOut();
-    this.showUserMenu = false;
-    this.router.navigate(['/partners']);
+    this.supabaseService.signOut().then(() => {
+      this.showUserMenu = false;
+      this.isAuthenticated = false;
+      this.isCompanyContact = false;
+      this.currentUser = null;
+      this.router.navigate(['/partners']);
+    });
   }
 
   // Close dropdowns when clicking outside

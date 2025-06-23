@@ -25,6 +25,7 @@ import { PartnersProductsComponent } from './features/b2b/partners/products/part
 import { PartnersOffersComponent } from './features/b2b/partners/offers/partners-offers.component';
 import { PartnersOfferDetailsComponent } from './features/b2b/partners/offers/partners-offer-details.component';
 import { PartnersContactComponent } from './features/b2b/partners/contact/partners-contact.component';
+import { PartnerProfileComponent } from './features/b2b/partners/profile/partner-profile.component';
 import { B2bLayoutComponent } from './features/b2b/shared/layout/b2b-layout.component';
 import { CompanyApprovedGuard } from './guards/company-approved.guard';
 import { CheckoutComponent } from './features/b2c/checkout/checkout.component';
@@ -40,6 +41,7 @@ import { AdminCategoriesComponent } from './features/admin/categories/admin-cate
 import { AdminOffersComponent } from './features/admin/offers/admin-offers.component';
 import { AdminUsersComponent } from './features/admin/users/admin-users.component';
 import { AdminOrdersComponent } from './features/admin/orders/admin-orders.component';
+import { AdminOrdersPartnersComponent } from './features/admin/orders-partners/admin-orders-partners.component';
 import { AdminReviewsComponent } from './features/admin/reviews/admin-reviews.component';
 import { AdminCompanyPricingComponent } from './features/admin/company-pricing/admin-company-pricing.component';
 import { CompanyPricingFormComponent } from './features/admin/company-pricing/company-pricing-form/company-pricing-form.component';
@@ -113,6 +115,7 @@ export const routes: Routes = [
             { path: 'products', component: PartnersProductsComponent, canActivate: [CompanyApprovedGuard] },
             { path: 'offers', component: PartnersOffersComponent, canActivate: [CompanyApprovedGuard] },
             { path: 'offers/:id', component: PartnersOfferDetailsComponent, canActivate: [CompanyApprovedGuard] },
+            { path: 'profile', component: PartnerProfileComponent, canActivate: [AuthGuard] },
             { path: 'contact', component: PartnersContactComponent },
         ]
     },
@@ -156,6 +159,9 @@ export const routes: Routes = [
             { path: 'orders/create', component: OrderFormComponent },
             { path: 'orders/edit/:id', component: OrderFormComponent },
             { path: 'orders/details/:id', component: AdminOrderDetailsComponent },
+
+            // Partner Orders (B2B)
+            { path: 'orders-partners', component: AdminOrdersPartnersComponent },
 
             // Company Pricing
             { path: 'company-pricing', component: AdminCompanyPricingComponent },

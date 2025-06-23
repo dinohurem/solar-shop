@@ -1,8 +1,9 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { selectCurrentUser } from '../../../../../core/auth/store/auth.selectors';
 import { SupabaseService } from '../../../../../services/supabase.service';
@@ -118,8 +119,8 @@ import * as CartActions from '../../../cart/store/cart.actions';
             {{ 'checkout.creditCardDescription' | translate }}
           </p>
           
-          <!-- Guest Checkout Notice -->
-          <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <!-- Guest Checkout Notice (only show for non-authenticated users) -->
+          <div *ngIf="!(currentUser$ | async)" class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
             <div class="flex items-center space-x-2">
               <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -129,6 +130,49 @@ import * as CartActions from '../../../cart/store/cart.actions';
               </p>
             </div>
           </div>
+        </div>
+
+        <!-- B2B Order Option -->
+        <div class="mb-6 p-4 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-lg">
+          <label class="flex items-start space-x-3 cursor-pointer">
+            <input
+              type="checkbox"
+              formControlName="isB2BOrder"
+              class="mt-1 text-purple-600 focus:ring-purple-600 rounded"
+            >
+            <div class="flex-1">
+              <div class="flex items-center space-x-2">
+                <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                </svg>
+                <span class="font-medium text-purple-900 font-['DM_Sans']">{{ 'checkout.businessOrder' | translate }}</span>
+                <span class="px-2 py-1 text-xs font-semibold text-purple-700 bg-purple-100 rounded-full">B2B</span>
+              </div>
+              <p class="mt-1 text-sm text-purple-700 font-['DM_Sans']">
+                {{ 'checkout.businessOrderDescription' | translate }}
+              </p>
+              <div class="mt-2 flex items-center space-x-4 text-xs text-purple-600">
+                <div class="flex items-center space-x-1">
+                  <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                  </svg>
+                  <span>{{ 'checkout.bulkDiscounts' | translate }}</span>
+                </div>
+                <div class="flex items-center space-x-1">
+                  <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                  </svg>
+                  <span>{{ 'checkout.prioritySupport' | translate }}</span>
+                </div>
+                <div class="flex items-center space-x-1">
+                  <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                  </svg>
+                  <span>{{ 'checkout.customInvoicing' | translate }}</span>
+                </div>
+              </div>
+            </div>
+          </label>
         </div>
 
         <!-- Terms and Conditions -->
@@ -194,7 +238,7 @@ import * as CartActions from '../../../cart/store/cart.actions';
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap');
   `]
 })
-export class PaymentComponent {
+export class PaymentComponent implements OnInit {
   private fb = inject(FormBuilder);
   private router = inject(Router);
   private store = inject(Store);
@@ -204,13 +248,17 @@ export class PaymentComponent {
   isProcessing = false;
   showToast = false;
   orderNumber = '';
+  currentUser$: Observable<User | null>;
 
   constructor() {
+    this.currentUser$ = this.store.select(selectCurrentUser);
+
     this.paymentForm = this.fb.group({
       paymentMethod: ['cash_on_delivery', [Validators.required]],
       cardNumber: [''],
       expiryDate: [''],
       cvv: [''],
+      isB2BOrder: [false],
       acceptTerms: [false, [Validators.requiredTrue]]
     });
 
@@ -234,6 +282,10 @@ export class PaymentComponent {
       expiryDate?.updateValueAndValidity();
       cvv?.updateValueAndValidity();
     });
+  }
+
+  ngOnInit(): void {
+    // Component initialization if needed
   }
 
   async onSubmit() {
@@ -350,6 +402,9 @@ export class PaymentComponent {
       phone: shippingInfo.phone || currentUser.phone || ''
     };
 
+    // Get B2B flag from form
+    const isB2BOrder = this.paymentForm.get('isB2BOrder')?.value || false;
+
     // Create order object
     const orderData = {
       order_number: this.orderNumber,
@@ -370,6 +425,7 @@ export class PaymentComponent {
       payment_status: 'pending' as const,
       shipping_status: 'not_shipped' as const,
       payment_method: 'cash_on_delivery' as const,
+      is_b2b: isB2BOrder,
 
       // Addresses as JSON
       shipping_address: shippingAddress,

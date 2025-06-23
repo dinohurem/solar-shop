@@ -46,7 +46,7 @@ export const selectFilteredPosts = createSelector(
         let filteredPosts = posts;
 
         // Filter by category
-        if (filteredCategory) {
+        if (filteredCategory && filteredCategory !== '') {
             filteredPosts = filteredPosts.filter(post =>
                 post.category.id === filteredCategory
             );

@@ -475,9 +475,14 @@ export class DataTableComponent implements OnInit, OnChanges {
       'published': 'bg-green-100 text-green-800',
       'draft': 'bg-yellow-100 text-yellow-800',
       'archived': 'bg-gray-100 text-gray-800',
-      'pending': 'bg-blue-100 text-blue-800',
+      'pending': 'bg-yellow-100 text-yellow-800',
       'approved': 'bg-green-100 text-green-800',
-      'rejected': 'bg-red-100 text-red-800'
+      'rejected': 'bg-red-100 text-red-800',
+      // Payment status colors
+      'paid': 'bg-green-100 text-green-800',
+      'failed': 'bg-red-100 text-red-800',
+      'refunded': 'bg-gray-100 text-gray-800',
+      'partially_refunded': 'bg-orange-100 text-orange-800'
     };
     return statusClasses[status?.toLowerCase()] || 'bg-gray-100 text-gray-800';
   }
