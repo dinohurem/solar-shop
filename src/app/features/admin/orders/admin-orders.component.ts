@@ -14,19 +14,20 @@ import { Actions, ofType } from '@ngrx/effects';
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { TranslationService } from '../../../shared/services/translation.service';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
     selector: 'app-admin-orders',
     standalone: true,
-    imports: [CommonModule, DataTableComponent, SuccessModalComponent, DeleteConfirmationModalComponent],
+    imports: [CommonModule, DataTableComponent, SuccessModalComponent, DeleteConfirmationModalComponent, TranslatePipe],
     template: `
     <div class="w-full max-w-full overflow-hidden">
       <div class="space-y-4 sm:space-y-6 p-4 sm:p-6">
       <!-- Page Header -->
         <div class="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
           <div class="min-w-0 flex-1">
-            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 truncate">Orders</h1>
-            <p class="mt-1 sm:mt-2 text-sm sm:text-base text-gray-600">Manage customer orders and order details</p>
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 truncate">{{ 'admin.ordersForm.title' | translate }}</h1>
+            <p class="mt-1 sm:mt-2 text-sm sm:text-base text-gray-600">{{ 'admin.ordersForm.subtitle' | translate }}</p>
         </div>
       </div>
 
@@ -43,7 +44,7 @@ import { TranslationService } from '../../../shared/services/translation.service
         <!-- Data Table Container -->
         <div class="w-full overflow-hidden">
       <app-data-table
-            title="Customer Orders"
+        [title]="'admin.ordersForm.customerOrders' | translate"
         [data]="(orders$ | async) || []"
         [config]="tableConfig"
         [loading]="(loading$ | async) || false"
@@ -66,8 +67,8 @@ import { TranslationService } from '../../../shared/services/translation.service
     <!-- Delete Confirmation Modal -->
     <app-delete-confirmation-modal
       [isOpen]="showDeleteModal"
-      [title]="'Confirm Order Deletion'"
-      [message]="'Are you sure you want to delete this order? This action cannot be undone.'"
+      [title]="'admin.ordersForm.confirmOrderDeletion' | translate"
+      [message]="'admin.ordersForm.confirmOrderDeletionMessage' | translate"
       (confirmed)="onDeleteConfirmed()"
       (cancelled)="onDeleteCancelled()"
     ></app-delete-confirmation-modal>
@@ -101,28 +102,28 @@ export class AdminOrdersComponent implements OnInit {
         columns: [
             {
                 key: 'orderNumber',
-                label: 'Order #',
+                label: this.translationService.translate('admin.ordersForm.orderNumber'),
                 type: 'text',
                 sortable: true,
                 searchable: true
             },
             {
                 key: 'customerEmail',
-                label: 'Customer',
+                label: this.translationService.translate('admin.ordersForm.customer'),
                 type: 'text',
                 sortable: true,
                 searchable: true
             },
             {
                 key: 'totalAmount',
-                label: 'Total',
+                label: this.translationService.translate('admin.ordersForm.total'),
                 type: 'number',
                 sortable: true,
                 format: (value) => value ? `€${value.toFixed(2)}` : '€0.00'
             },
             {
                 key: 'status',
-                label: 'Status',
+                label: this.translationService.translate('admin.ordersForm.status'),
                 type: 'status',
                 sortable: true,
                 searchable: true,
@@ -132,7 +133,7 @@ export class AdminOrdersComponent implements OnInit {
             },
             {
                 key: 'paymentStatus',
-                label: 'Payment',
+                label: this.translationService.translate('admin.ordersForm.payment'),
                 type: 'status',
                 sortable: true,
                 format: (value) => {
@@ -141,27 +142,27 @@ export class AdminOrdersComponent implements OnInit {
             },
             {
                 key: 'items',
-                label: 'Items',
+                label: this.translationService.translate('admin.ordersForm.items'),
                 type: 'number',
                 sortable: true,
                 format: (value) => Array.isArray(value) ? value.length.toString() : '0'
             },
             {
                 key: 'createdAt',
-                label: 'Order Date',
+                label: this.translationService.translate('admin.ordersForm.orderDate'),
                 type: 'date',
                 sortable: true
             }
         ],
         actions: [
             {
-                label: 'Edit',
+                label: this.translationService.translate('admin.ordersForm.edit'),
                 icon: 'edit',
                 action: 'edit',
                 class: 'text-blue-600 hover:text-blue-900'
             },
             {
-                label: 'Delete',
+                label: this.translationService.translate('admin.ordersForm.delete'),
                 icon: 'trash2',
                 action: 'delete',
                 class: 'text-red-600 hover:text-red-900'
@@ -177,7 +178,7 @@ export class AdminOrdersComponent implements OnInit {
     };
 
     ngOnInit(): void {
-        this.title.setTitle('Orders - Solar Shop Admin');
+        this.title.setTitle(this.translationService.translate('admin.ordersForm.longTitle'));
 
         // Load orders
         this.store.dispatch(OrdersActions.loadOrders());
@@ -187,7 +188,7 @@ export class AdminOrdersComponent implements OnInit {
             ofType(OrdersActions.deleteOrderSuccess),
             takeUntil(this.destroy$)
         ).subscribe(() => {
-            this.showSuccess('Success', 'Order deleted successfully');
+            this.showSuccess(this.translationService.translate('admin.ordersForm.success'), this.translationService.translate('admin.ordersForm.orderDeletedSuccessfully'));
         });
 
         // Listen for failed delete operations
@@ -195,7 +196,7 @@ export class AdminOrdersComponent implements OnInit {
             ofType(OrdersActions.deleteOrderFailure),
             takeUntil(this.destroy$)
         ).subscribe(({ error }) => {
-            this.showSuccess('Error', `Failed to delete order: ${error}`);
+            this.showSuccess(this.translationService.translate('admin.ordersForm.error'), this.translationService.translate('admin.ordersForm.failedToDeleteOrder', { error }));
         });
     }
 
@@ -237,7 +238,6 @@ export class AdminOrdersComponent implements OnInit {
     async onCsvImported(csvData: any[]): Promise<void> {
         // Orders typically aren't imported via CSV in most systems
         // But if needed, this would handle it
-        this.showSuccess('Info', 'Order import functionality would be implemented here');
     }
 
     private showSuccess(title: string, message: string): void {

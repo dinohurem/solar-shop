@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { SupabaseService } from '../../../services/supabase.service';
+import { TranslationService } from '../../../shared/services/translation.service';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { DataTableComponent, TableConfig } from '../shared/data-table/data-table.component';
 import { Review } from '../../../shared/models/review.model';
 import { SuccessModalComponent } from '../../../shared/components/modals/success-modal/success-modal.component';
@@ -10,22 +12,22 @@ import { SuccessModalComponent } from '../../../shared/components/modals/success
 @Component({
     selector: 'app-admin-reviews',
     standalone: true,
-    imports: [CommonModule, DataTableComponent, SuccessModalComponent],
+    imports: [CommonModule, DataTableComponent, SuccessModalComponent, TranslatePipe],
     template: `
     <div class="w-full max-w-full overflow-hidden">
       <div class="space-y-4 sm:space-y-6 p-4 sm:p-6">
       <!-- Page Header -->
         <div class="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
           <div class="min-w-0 flex-1">
-            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 truncate">Reviews</h1>
-            <p class="mt-1 sm:mt-2 text-sm sm:text-base text-gray-600">Manage product reviews and ratings</p>
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 truncate">{{ 'admin.reviewsForm.title' | translate }}</h1>
+            <p class="mt-1 sm:mt-2 text-sm sm:text-base text-gray-600">{{ 'admin.reviewsForm.subtitle' | translate }}</p>
         </div>
       </div>
 
         <!-- Data Table Container -->
         <div class="w-full overflow-hidden">
       <app-data-table
-        title="Reviews"
+        [title]="'admin.reviewsForm.title' | translate"
         [data]="(reviews$ | async) || []"
         [config]="tableConfig"
         [loading]="(loading$ | async) || false"
@@ -54,9 +56,11 @@ import { SuccessModalComponent } from '../../../shared/components/modals/success
 export class AdminReviewsComponent implements OnInit {
     private supabaseService = inject(SupabaseService);
     private router = inject(Router);
+    private translationService = inject(TranslationService);
 
     private reviewsSubject = new BehaviorSubject<Review[]>([]);
-    private loadingSubject = new BehaviorSubject<boolean>(true); reviews$ = this.reviewsSubject.asObservable();
+    private loadingSubject = new BehaviorSubject<boolean>(true);
+    reviews$ = this.reviewsSubject.asObservable();
     loading$ = this.loadingSubject.asObservable();
 
     // Success modal properties
@@ -68,14 +72,14 @@ export class AdminReviewsComponent implements OnInit {
         columns: [
             {
                 key: 'product.name',
-                label: 'Product',
+                label: this.translationService.translate('admin.reviewsForm.reviewProduct'),
                 type: 'text',
                 sortable: true,
                 searchable: true
             },
             {
                 key: 'user.firstName',
-                label: 'Customer',
+                label: this.translationService.translate('admin.reviewsForm.reviewAuthor'),
                 type: 'text',
                 sortable: true,
                 searchable: true,
@@ -83,7 +87,7 @@ export class AdminReviewsComponent implements OnInit {
             },
             {
                 key: 'rating',
-                label: 'Rating',
+                label: this.translationService.translate('admin.reviewsForm.reviewRating'),
                 type: 'text',
                 sortable: true,
                 format: (value: any) => {
@@ -93,75 +97,75 @@ export class AdminReviewsComponent implements OnInit {
             },
             {
                 key: 'title',
-                label: 'Title',
+                label: this.translationService.translate('admin.reviewsForm.reviewTitle'),
                 type: 'text',
                 sortable: true,
                 searchable: true
             },
             {
                 key: 'comment',
-                label: 'Comment',
+                label: this.translationService.translate('admin.reviewsForm.reviewContent'),
                 type: 'text',
                 searchable: true,
                 format: (value) => value ? (value.length > 100 ? value.substring(0, 100) + '...' : value) : ''
             },
             {
                 key: 'status',
-                label: 'Status',
+                label: this.translationService.translate('admin.reviewsForm.reviewStatus'),
                 type: 'status',
                 sortable: true,
                 searchable: true
             },
             {
                 key: 'isVerifiedPurchase',
-                label: 'Verified',
+                label: this.translationService.translate('reviews.verifiedPurchase'),
                 type: 'boolean',
                 sortable: true,
-                format: (value) => value ? 'Yes' : 'No'
+                format: (value) => value ? this.translationService.translate('common.yes') : this.translationService.translate('common.no')
             },
             {
                 key: 'helpfulCount',
-                label: 'Helpful',
+                label: this.translationService.translate('reviews.helpful'),
                 type: 'number',
                 sortable: true
             },
             {
                 key: 'createdAt',
-                label: 'Created',
+                label: this.translationService.translate('admin.reviewsForm.reviewDate'),
                 type: 'date',
                 sortable: true
             }
         ],
         actions: [
             {
-                label: 'View',
+                label: this.translationService.translate('common.view'),
                 icon: 'eye',
                 action: 'view',
                 class: 'text-blue-600 hover:text-blue-900'
             },
             {
-                label: 'Approve',
+                label: this.translationService.translate('admin.reviewsForm.approved'),
                 icon: 'check',
                 action: 'approve',
                 class: 'text-green-600 hover:text-green-900',
                 condition: (item: any) => item.status === 'pending'
             },
             {
-                label: 'Reject',
+                label: this.translationService.translate('admin.reviewsForm.rejected'),
                 icon: 'x',
                 action: 'reject',
                 class: 'text-red-600 hover:text-red-900',
                 condition: (item: any) => item.status === 'pending'
             },
             {
-                label: 'Hide',
+                label: this.translationService.translate('common.hide'),
                 icon: 'eye-off',
                 action: 'hide',
                 class: 'text-gray-600 hover:text-gray-900',
                 condition: (item: any) => item.status === 'approved'
             },
             {
-                label: 'Delete',
+                label: this.translationService.translate('common.delete'),
                 icon: 'trash2',
                 action: 'delete',
                 class: 'text-red-600 hover:text-red-900'
@@ -211,13 +215,12 @@ export class AdminReviewsComponent implements OnInit {
     }
 
     async onCsvImported(csvData: any[]): Promise<void> {
-        // CSV import disabled for reviews
-        alert('CSV import is disabled for reviews');
+        // CSV import not supported for reviews
+        alert(this.translationService.translate('common.importError'));
     }
 
     private async loadReviews(): Promise<void> {
         this.loadingSubject.next(true);
-
         try {
             const reviews = await this.supabaseService.getTable('reviews');
             // Map database fields to model fields
@@ -236,34 +239,46 @@ export class AdminReviewsComponent implements OnInit {
                 reportedCount: review.reported_count,
                 status: review.status,
                 createdAt: review.created_at,
-                updatedAt: review.updated_at
+                updatedAt: review.updated_at,
+                user: review.user,
+                product: review.product
             }));
             this.reviewsSubject.next(mappedReviews);
         } catch (error) {
-            console.warn('Reviews table not found in database. Using empty array as placeholder.');
+            console.error('Error loading reviews:', error);
             this.reviewsSubject.next([]);
         } finally {
             this.loadingSubject.next(false);
         }
-    } private async updateReviewStatus(reviewId: string, status: 'approved' | 'rejected' | 'hidden'): Promise<void> {
+    }
+
+    private async updateReviewStatus(reviewId: string, status: 'approved' | 'rejected' | 'hidden'): Promise<void> {
         try {
             await this.supabaseService.updateRecord('reviews', reviewId, { status });
-            await this.loadReviews(); // Reload data
-            this.showSuccess('Success', `Review ${status} successfully`);
+            this.showSuccess(
+                this.translationService.translate('admin.reviewsForm.reviewUpdated'),
+                this.translationService.translate('admin.reviewsForm.reviewUpdated')
+            );
+            this.loadReviews();
         } catch (error) {
             console.error('Error updating review status:', error);
-            this.showSuccess('Error', 'Error updating review status');
+            alert(this.translationService.translate('admin.reviewsForm.reviewError'));
         }
     }
 
     private async deleteReview(reviewId: string): Promise<void> {
+        if (!confirm(this.translationService.translate('admin.reviewsForm.reviewDeleted'))) return;
+
         try {
             await this.supabaseService.deleteRecord('reviews', reviewId);
-            await this.loadReviews(); // Reload data
-            this.showSuccess('Success', 'Review deleted successfully');
+            this.showSuccess(
+                this.translationService.translate('admin.reviewsForm.reviewDeleted'),
+                this.translationService.translate('admin.reviewsForm.reviewDeleted')
+            );
+            this.loadReviews();
         } catch (error) {
             console.error('Error deleting review:', error);
-            this.showSuccess('Error', 'Error deleting review');
+            alert(this.translationService.translate('admin.reviewsForm.reviewError'));
         }
     }
 

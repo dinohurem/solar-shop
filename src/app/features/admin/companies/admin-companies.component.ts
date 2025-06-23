@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -21,21 +21,22 @@ import {
   selectCompaniesRejecting,
   selectCompaniesDeleting
 } from './store/companies.selectors';
+import { TranslationService } from '../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-admin-companies',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, DeleteConfirmationModalComponent],
+  imports: [CommonModule, RouterModule, FormsModule, DeleteConfirmationModalComponent, TranslatePipe],
   template: `
     <div class="p-6">
       <!-- Header -->
       <div class="flex justify-between items-center mb-6">
         <div>
           <h1 class="text-2xl font-bold text-gray-900 font-['Poppins']">
-            Company Management
+            {{ 'admin.companiesForm.title' | translate }}
           </h1>
           <p class="text-gray-600 mt-1 font-['DM_Sans']">
-            Manage partner company applications and approvals
+            {{ 'admin.companiesForm.subtitle' | translate }}
           </p>
         </div>
       </div>
@@ -56,54 +57,54 @@ import {
           <!-- Status Filter -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              Status
+              {{ 'admin.companiesForm.status' | translate }}
             </label>
             <select [(ngModel)]="selectedStatus" (ngModelChange)="onFilterChange()" 
                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-solar-500">
-              <option value="">All Statuses</option>
-              <option value="pending">Pending</option>
-              <option value="approved">Approved</option>
-              <option value="rejected">Rejected</option>
+              <option value="">{{ 'admin.companiesForm.allStatuses' | translate }}</option>
+              <option value="pending">{{ 'admin.companiesForm.pending' | translate }}</option>
+              <option value="approved">{{ 'admin.companiesForm.approved' | translate }}</option>
+              <option value="rejected">{{ 'admin.companiesForm.rejected' | translate }}</option>
             </select>
           </div>
 
           <!-- Business Type Filter -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              Business Type
+              {{ 'admin.companiesForm.businessType' | translate }}
             </label>
             <select [(ngModel)]="selectedBusinessType" (ngModelChange)="onFilterChange()" 
                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-solar-500">
-              <option value="">All Types</option>
-              <option value="retailer">Retailer</option>
-              <option value="wholesaler">Wholesaler</option>
-              <option value="installer">Installer</option>
-              <option value="distributor">Distributor</option>
-              <option value="other">Other</option>
+              <option value="">{{ 'admin.companiesForm.allTypes' | translate }}</option>
+              <option value="retailer">{{ 'admin.companiesForm.retailer' | translate }}</option>
+              <option value="wholesaler">{{ 'admin.companiesForm.wholesaler' | translate }}</option>
+              <option value="installer">{{ 'admin.companiesForm.installer' | translate }}</option>
+              <option value="distributor">{{ 'admin.companiesForm.distributor' | translate }}</option>
+              <option value="other">{{ 'admin.companiesForm.other' | translate }}</option>
             </select>
           </div>
 
           <!-- Search -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              Search
+              {{ 'admin.companiesForm.search' | translate }}
             </label>
             <input [(ngModel)]="searchTerm" (ngModelChange)="onFilterChange()" 
-                   type="text" placeholder="Search companies..."
+                   type="text" placeholder="{{ 'admin.companiesForm.searchPlaceholder' | translate }}"
                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-solar-500">
           </div>
 
           <!-- Date Range -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              Date Range
+              {{ 'admin.companiesForm.dateRange' | translate }}
             </label>
             <select [(ngModel)]="selectedDateRange" (ngModelChange)="onFilterChange()" 
                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-solar-500">
-              <option value="">All Dates</option>
-              <option value="today">Today</option>
-              <option value="week">This Week</option>
-              <option value="month">This Month</option>
+              <option value="">{{ 'admin.companiesForm.allDates' | translate }}</option>
+              <option value="today">{{ 'admin.companiesForm.today' | translate }}</option>
+              <option value="week">{{ 'admin.companiesForm.thisWeek' | translate }}</option>
+              <option value="month">{{ 'admin.companiesForm.thisMonth' | translate }}</option>
             </select>
           </div>
         </div>
@@ -121,7 +122,7 @@ import {
               </div>
             </div>
             <div class="ml-4">
-              <p class="text-sm font-medium text-gray-500">Total Companies</p>
+              <p class="text-sm font-medium text-gray-500">{{ 'admin.companiesForm.totalCompanies' | translate }}</p>
               <p class="text-2xl font-bold text-gray-900">{{ totalCompanies$ | async }}</p>
             </div>
           </div>
@@ -137,7 +138,7 @@ import {
               </div>
             </div>
             <div class="ml-4">
-              <p class="text-sm font-medium text-gray-500">Pending Approval</p>
+              <p class="text-sm font-medium text-gray-500">{{ 'admin.companiesForm.pendingApproval' | translate }}</p>
               <p class="text-2xl font-bold text-gray-900">{{ pendingCompanies$ | async }}</p>
             </div>
           </div>
@@ -153,7 +154,7 @@ import {
               </div>
             </div>
             <div class="ml-4">
-              <p class="text-sm font-medium text-gray-500">Approved Companies</p>
+              <p class="text-sm font-medium text-gray-500">{{ 'admin.companiesForm.approvedCompanies' | translate }}</p>
               <p class="text-2xl font-bold text-gray-900">{{ approvedCompanies$ | async }}</p>
             </div>
           </div>
@@ -169,7 +170,7 @@ import {
               </div>
             </div>
             <div class="ml-4">
-              <p class="text-sm font-medium text-gray-500">Rejected Companies</p>
+              <p class="text-sm font-medium text-gray-500">{{ 'admin.companiesForm.rejectedCompanies' | translate }}</p>
               <p class="text-2xl font-bold text-gray-900">{{ rejectedCompanies$ | async }}</p>
             </div>
           </div>
@@ -180,7 +181,7 @@ import {
       <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-200">
           <h3 class="text-lg font-medium text-gray-900 font-['Poppins']">
-            Company Applications
+            {{ 'admin.companiesForm.companyApplications' | translate }}
           </h3>
         </div>
 
@@ -189,22 +190,22 @@ import {
             <thead class="bg-gray-50">
               <tr>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Company
+                  {{ 'admin.companiesForm.company' | translate }}
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Contact Person
+                  {{ 'admin.companiesForm.contactPerson' | translate }}
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Business Type
+                  {{ 'admin.companiesForm.businessType' | translate }}
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
+                  {{ 'admin.companiesForm.status' | translate }}
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Applied Date
+                  {{ 'admin.companiesForm.appliedDate' | translate }}
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
+                  {{ 'admin.companiesForm.actions' | translate }}
                 </th>
               </tr>
             </thead>
@@ -241,28 +242,28 @@ import {
                   <div class="flex space-x-2">
                     <button (click)="viewCompany(company)" 
                             class="text-solar-600 hover:text-solar-900">
-                      View
+                      {{ 'admin.companiesForm.view' | translate }}
                     </button>
                     <button *ngIf="company.status === 'pending'" 
                             (click)="approveCompany(company)" 
                             [disabled]="approving$ | async"
                             class="text-green-600 hover:text-green-900 disabled:opacity-50">
-                      Approve
+                      {{ 'admin.companiesForm.approve' | translate }}
                     </button>
                     <button *ngIf="company.status === 'pending'" 
                             (click)="rejectCompany(company)" 
                             [disabled]="rejecting$ | async"
                             class="text-red-600 hover:text-red-900 disabled:opacity-50">
-                      Reject
+                      {{ 'admin.companiesForm.reject' | translate }}
                     </button>
                     <button (click)="editCompany(company)" 
                             class="text-blue-600 hover:text-blue-900">
-                      Edit
+                      {{ 'admin.companiesForm.edit' | translate }}
                     </button>
                     <button (click)="deleteCompany(company)" 
                             [disabled]="deleting$ | async"
                             class="text-red-600 hover:text-red-900 disabled:opacity-50">
-                      Delete
+                      {{ 'admin.companiesForm.delete' | translate }}
                     </button>
                   </div>
                 </td>
@@ -276,8 +277,8 @@ import {
           <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
           </svg>
-          <h3 class="text-lg font-medium text-gray-900 mb-2">No companies found</h3>
-          <p class="text-gray-600">No company applications match your current filters.</p>
+          <h3 class="text-lg font-medium text-gray-900 mb-2">{{ 'admin.companiesForm.noCompaniesFound' | translate }}</h3>
+          <p class="text-gray-600">{{ 'admin.companiesForm.noCompaniesFoundDescription' | translate }}</p>
         </div>
       </div>
     </div>
@@ -289,7 +290,7 @@ import {
           <!-- Modal Header -->
           <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg font-medium text-gray-900 font-['Poppins']">
-              Company Details
+              {{ 'admin.companiesForm.companyDetails' | translate }}
             </h3>
             <button (click)="closeModal()" class="text-gray-400 hover:text-gray-600">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -302,22 +303,22 @@ import {
           <div class="space-y-6">
             <!-- Basic Info -->
             <div>
-              <h4 class="text-md font-semibold text-gray-900 mb-3">Basic Information</h4>
+              <h4 class="text-md font-semibold text-gray-900 mb-3">{{ 'admin.companiesForm.basicInformation' | translate }}</h4>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700">Company Name</label>
+                  <label class="block text-sm font-medium text-gray-700">{{ 'admin.companiesForm.companyName' | translate }}</label>
                   <p class="mt-1 text-sm text-gray-900">{{ selectedCompany.companyName }}</p>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700">Tax Number</label>
+                  <label class="block text-sm font-medium text-gray-700">{{ 'admin.companiesForm.taxNumber' | translate }}</label>
                   <p class="mt-1 text-sm text-gray-900">{{ selectedCompany.taxNumber }}</p>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700">Business Type</label>
+                  <label class="block text-sm font-medium text-gray-700">{{ 'admin.companiesForm.businessType' | translate }}</label>
                   <p class="mt-1 text-sm text-gray-900">{{ getBusinessTypeLabel(selectedCompany.businessType) }}</p>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700">Years in Business</label>
+                  <label class="block text-sm font-medium text-gray-700">{{ 'admin.companiesForm.yearsInBusiness' | translate }}</label>
                   <p class="mt-1 text-sm text-gray-900">{{ selectedCompany.yearsInBusiness }} years</p>
                 </div>
               </div>
@@ -325,22 +326,22 @@ import {
 
             <!-- Contact Information -->
             <div>
-              <h4 class="text-md font-semibold text-gray-900 mb-3">Contact Information</h4>
+              <h4 class="text-md font-semibold text-gray-900 mb-3">{{ 'admin.companiesForm.contactInformation' | translate }}</h4>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700">Contact Person</label>
+                  <label class="block text-sm font-medium text-gray-700">{{ 'admin.companiesForm.contactPerson' | translate }}</label>
                   <p class="mt-1 text-sm text-gray-900">{{ selectedCompany.contactPersonName }}</p>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700">Email</label>
+                  <label class="block text-sm font-medium text-gray-700">{{ 'admin.companiesForm.email' | translate }}</label>
                   <p class="mt-1 text-sm text-gray-900">{{ selectedCompany.companyEmail }}</p>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700">Phone</label>
+                  <label class="block text-sm font-medium text-gray-700">{{ 'admin.companiesForm.phone' | translate }}</label>
                   <p class="mt-1 text-sm text-gray-900">{{ selectedCompany.companyPhone }}</p>
                 </div>
                 <div *ngIf="selectedCompany.website">
-                  <label class="block text-sm font-medium text-gray-700">Website</label>
+                  <label class="block text-sm font-medium text-gray-700">{{ 'admin.companiesForm.website' | translate }}</label>
                   <p class="mt-1 text-sm text-gray-900">
                     <a [href]="selectedCompany.website" target="_blank" class="text-solar-600 hover:text-solar-700">
                       {{ selectedCompany.website }}
@@ -352,25 +353,25 @@ import {
 
             <!-- Address -->
             <div>
-              <h4 class="text-md font-semibold text-gray-900 mb-3">Address</h4>
+              <h4 class="text-md font-semibold text-gray-900 mb-3">{{ 'admin.companiesForm.address' | translate }}</h4>
               <p class="text-sm text-gray-900">{{ selectedCompany.companyAddress }}</p>
             </div>
 
             <!-- Business Details -->
             <div *ngIf="selectedCompany.annualRevenue || selectedCompany.numberOfEmployees || selectedCompany.description">
-              <h4 class="text-md font-semibold text-gray-900 mb-3">Business Details</h4>
+              <h4 class="text-md font-semibold text-gray-900 mb-3">{{ 'admin.companiesForm.businessDetails' | translate }}</h4>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div *ngIf="selectedCompany.annualRevenue">
-                  <label class="block text-sm font-medium text-gray-700">Annual Revenue</label>
+                  <label class="block text-sm font-medium text-gray-700">{{ 'admin.companiesForm.annualRevenue' | translate }}</label>
                   <p class="mt-1 text-sm text-gray-900">€{{ selectedCompany.annualRevenue | number }}</p>
                 </div>
                 <div *ngIf="selectedCompany.numberOfEmployees">
-                  <label class="block text-sm font-medium text-gray-700">Number of Employees</label>
+                  <label class="block text-sm font-medium text-gray-700">{{ 'admin.companiesForm.numberOfEmployees' | translate }}</label>
                   <p class="mt-1 text-sm text-gray-900">{{ selectedCompany.numberOfEmployees }}</p>
                 </div>
               </div>
               <div *ngIf="selectedCompany.description" class="mt-4">
-                <label class="block text-sm font-medium text-gray-700">Description</label>
+                <label class="block text-sm font-medium text-gray-700">{{ 'admin.companiesForm.description' | translate }}</label>
                 <p class="mt-1 text-sm text-gray-900">{{ selectedCompany.description }}</p>
               </div>
             </div>
@@ -379,7 +380,7 @@ import {
             <div class="border-t pt-4">
               <div class="flex justify-between items-center">
                 <div>
-                  <span class="text-sm font-medium text-gray-700">Current Status: </span>
+                  <span class="text-sm font-medium text-gray-700">{{ 'admin.companiesForm.currentStatus' | translate }}: </span>
                   <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
                         [class]="getStatusClass(selectedCompany.status)">
                     {{ getStatusLabel(selectedCompany.status) }}
@@ -390,13 +391,13 @@ import {
                           (click)="approveCompany(selectedCompany)" 
                           [disabled]="approving$ | async"
                           class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 disabled:opacity-50">
-                    Approve
+                    {{ 'admin.companiesForm.approve' | translate }}
                   </button>
                   <button *ngIf="selectedCompany.status === 'pending'" 
                           (click)="rejectCompany(selectedCompany)" 
                           [disabled]="rejecting$ | async"
                           class="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700 disabled:opacity-50">
-                    Reject
+                    {{ 'admin.companiesForm.reject' | translate }}
                   </button>
                 </div>
               </div>
@@ -417,6 +418,7 @@ import {
 })
 export class AdminCompaniesComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
+  private translationService = inject(TranslationService);
 
   // Observables
   filteredCompanies$: Observable<Company[]>;
@@ -565,8 +567,8 @@ export class AdminCompaniesComponent implements OnInit, OnDestroy {
   }
 
   rejectCompany(company: Company): void {
-    const reason = prompt('Please provide a reason for rejection:');
-    if (reason && confirm(`Are you sure you want to reject ${company.companyName}?`)) {
+    const reason = prompt(this.translationService.translate('admin.companiesForm.reasonForRejection'));
+    if (reason && confirm(this.translationService.translate('admin.companiesForm.confirmRejectionMessage', { companyName: company.companyName }))) {
       this.store.dispatch(CompaniesActions.rejectCompany({ companyId: company.id, reason }));
 
       // Close modal if it's open
@@ -581,8 +583,8 @@ export class AdminCompaniesComponent implements OnInit, OnDestroy {
   }
   deleteCompany(company: Company): void {
     this.pendingDeleteCompany = company;
-    this.deleteModalTitle = 'Confirm Deletion';
-    this.deleteModalMessage = `Are you sure you want to delete ${company.companyName}? This action cannot be undone.`;
+    this.deleteModalTitle = this.translationService.translate('admin.companiesForm.confirmDeletion');
+    this.deleteModalMessage = this.translationService.translate('admin.companiesForm.confirmDeletionMessage', { companyName: company.companyName });
     this.showDeleteModal = true;
   }
 

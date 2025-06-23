@@ -111,7 +111,7 @@ export class AdminCategoriesComponent implements OnInit {
     };
 
     ngOnInit(): void {
-        this.title.setTitle('Categories - Solar Shop Admin');
+        this.title.setTitle(this.translationService.translate('admin.categoriesForm.longTitle'));
         this.loadCategories();
     }
 
@@ -138,7 +138,7 @@ export class AdminCategoriesComponent implements OnInit {
 
     async onCsvImported(csvData: any[]): Promise<void> {
         if (!csvData || csvData.length === 0) {
-            alert('No data found in CSV file');
+            alert(this.translationService.translate('admin.categoriesForm.noDataFoundInCsvFile'));
             return;
         }
 
@@ -160,11 +160,11 @@ export class AdminCategoriesComponent implements OnInit {
                 await this.supabaseService.createRecord('categories', category);
             }
 
-            alert(`Successfully imported ${categories.length} categories`);
+            alert(this.translationService.translate('admin.categoriesForm.successImportingCategories', { count: categories.length }));
             this.loadCategories();
         } catch (error) {
             console.error('Error importing categories:', error);
-            alert('Error importing categories. Please check the CSV format.');
+            alert(this.translationService.translate('admin.categoriesForm.errorImportingCategories'));
         } finally {
             this.loadingSubject.next(false);
         }
@@ -224,11 +224,11 @@ export class AdminCategoriesComponent implements OnInit {
 
         try {
             await this.supabaseService.deleteRecord('categories', category.id);
-            alert('Category deleted successfully');
+            alert(this.translationService.translate('admin.categoriesForm.categoryDeletedSuccessfully'));
             this.loadCategories();
         } catch (error) {
             console.error('Error deleting category:', error);
-            alert('Error deleting category');
+            alert(this.translationService.translate('admin.categoriesForm.errorDeletingCategory'));
         }
     }
 } 
