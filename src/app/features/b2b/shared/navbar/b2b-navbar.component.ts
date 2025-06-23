@@ -74,7 +74,39 @@ import { Subject, takeUntil, switchMap, from, catchError, of } from 'rxjs';
             </div>
 
             <!-- User Dropdown (when authenticated and is company contact) -->
-            <div *ngIf="isAuthenticated && isCompanyContact" class="relative flex items-center space-x-4">
+            <div *ngIf="isAuthenticated && isCompanyContact" class="flex items-center space-x-4">
+              <div class="relative">
+                <button (click)="toggleUserMenu()" 
+                        class="flex items-center space-x-2 text-gray-700 hover:text-solar-600 px-3 py-2 text-sm font-medium">
+                  <div class="w-8 h-8 bg-solar-100 rounded-full flex items-center justify-center">
+                    <svg class="w-5 h-5 text-solar-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                  </div>
+                  <span>{{ currentUser?.name || ('b2bNav.partner' | translate) }}</span>
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                  </svg>
+                </button>
+                
+                <!-- User Dropdown Menu -->
+                <div *ngIf="showUserMenu" 
+                     class="absolute right-0 top-full mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50">
+                  <div class="py-1">
+                    <a routerLink="/partners/profile" 
+                       (click)="closeUserMenu()"
+                       class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                      {{ 'b2bNav.profile' | translate }}
+                    </a>
+                    <div class="border-t border-gray-100"></div>
+                    <button (click)="signOut()" 
+                            class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                      {{ 'b2bNav.signOut' | translate }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
               <div class="h-6 w-px bg-gray-300"></div>
               <a routerLink="/" 
                  class="text-gray-700 hover:text-solar-600 px-3 py-2 text-sm font-medium transition-colors flex items-center space-x-1">
@@ -83,42 +115,6 @@ import { Subject, takeUntil, switchMap, from, catchError, of } from 'rxjs';
                 </svg>
                 <span>{{ 'b2bFooter.backToB2C' | translate }}</span>
               </a>
-              <button (click)="toggleUserMenu()" 
-                      class="flex items-center space-x-2 text-gray-700 hover:text-solar-600 px-3 py-2 text-sm font-medium">
-                <div class="w-8 h-8 bg-solar-100 rounded-full flex items-center justify-center">
-                  <svg class="w-5 h-5 text-solar-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                  </svg>
-                </div>
-                <span>{{ currentUser?.name || ('b2bNav.partner' | translate) }}</span>
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                </svg>
-              </button>
-              
-              <!-- User Dropdown Menu -->
-              <div *ngIf="showUserMenu" 
-                   class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50">
-                <div class="py-1">
-                  <a routerLink="/partners/dashboard" 
-                     class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                    {{ 'b2bNav.dashboard' | translate }}
-                  </a>
-                  <a routerLink="/partners/profile" 
-                     class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                    {{ 'b2bNav.profile' | translate }}
-                  </a>
-                  <a routerLink="/partners/orders" 
-                     class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                    {{ 'b2bNav.orders' | translate }}
-                  </a>
-                  <div class="border-t border-gray-100"></div>
-                  <button (click)="signOut()" 
-                          class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                    {{ 'b2bNav.signOut' | translate }}
-                  </button>
-                </div>
-              </div>
             </div>
 
             <!-- Mobile Menu Button -->
@@ -178,19 +174,13 @@ import { Subject, takeUntil, switchMap, from, catchError, of } from 'rxjs';
               </div>
               
               <div *ngIf="isAuthenticated && isCompanyContact" class="space-y-2">
-                <a routerLink="/partners/dashboard" 
-                   class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-solar-600 hover:bg-gray-50 rounded-md">
-                  {{ 'b2bNav.dashboard' | translate }}
-                </a>
                 <a routerLink="/partners/profile" 
+                   (click)="closeMobileMenu()"
                    class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-solar-600 hover:bg-gray-50 rounded-md">
                   {{ 'b2bNav.profile' | translate }}
                 </a>
-                <a routerLink="/partners/orders" 
-                   class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-solar-600 hover:bg-gray-50 rounded-md">
-                  {{ 'b2bNav.orders' | translate }}
-                </a>
                 <a routerLink="/" 
+                   (click)="closeMobileMenu()"
                    class="flex items-center space-x-2 px-3 py-2 text-base font-medium text-gray-700 hover:text-solar-600 hover:bg-gray-50 rounded-md">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
@@ -281,5 +271,13 @@ export class B2bNavbarComponent implements OnInit, OnDestroy {
     if (!target.closest('.relative')) {
       this.showUserMenu = false;
     }
+  }
+
+  closeUserMenu(): void {
+    this.showUserMenu = false;
+  }
+
+  closeMobileMenu(): void {
+    this.showMobileMenu = false;
   }
 } 

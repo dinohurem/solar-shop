@@ -93,7 +93,15 @@ export class AdminOrdersComponent implements OnInit {
 
     // Filtered orders (B2C only - no B2B orders)
     filteredOrders$: Observable<Order[]> = this.orders$.pipe(
-        map(orders => orders.filter(order => !order.is_b2b))
+        map(orders => orders
+            .filter(order => !order.is_b2b)
+            .sort((a, b) => {
+                // Sort by createdAt ascending (oldest first)
+                const dateA = new Date(a.createdAt || '').getTime();
+                const dateB = new Date(b.createdAt || '').getTime();
+                return dateA - dateB;
+            })
+        )
     );
 
     // Modal properties

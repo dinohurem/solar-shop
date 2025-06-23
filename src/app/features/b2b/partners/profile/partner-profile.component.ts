@@ -13,10 +13,10 @@ import { Company } from '../../../../shared/models/company.model';
 import { SupabaseService } from '../../../../services/supabase.service';
 
 @Component({
-    selector: 'app-partner-profile',
-    standalone: true,
-    imports: [CommonModule, RouterModule, FormsModule, TranslatePipe],
-    template: `
+  selector: 'app-partner-profile',
+  standalone: true,
+  imports: [CommonModule, RouterModule, FormsModule, TranslatePipe],
+  template: `
     <div class="min-h-screen bg-gray-50">
       <!-- Header -->
       <div class="bg-white shadow-sm border-b border-gray-200">
@@ -262,246 +262,269 @@ import { SupabaseService } from '../../../../services/supabase.service';
   `,
 })
 export class PartnerProfileComponent implements OnInit, OnDestroy {
-    private destroy$ = new Subject<void>();
-    private store = inject(Store);
-    private router = inject(Router);
-    private supabaseService = inject(SupabaseService);
+  private destroy$ = new Subject<void>();
+  private store = inject(Store);
+  private router = inject(Router);
+  private supabaseService = inject(SupabaseService);
 
-    currentUser$: Observable<User | null>;
+  currentUser$: Observable<User | null>;
 
-    loading = true;
-    isCompanyContact = false;
-    company: Company | null = null;
-    companyOrders: Order[] = [];
-    filteredOrders: Order[] = [];
-    orderStatusFilter = '';
+  loading = true;
+  isCompanyContact = false;
+  company: Company | null = null;
+  companyOrders: Order[] = [];
+  filteredOrders: Order[] = [];
+  orderStatusFilter = '';
 
-    constructor() {
-        this.currentUser$ = this.store.select(selectCurrentUser);
-    }
+  constructor() {
+    this.currentUser$ = this.store.select(selectCurrentUser);
+  }
 
-    ngOnInit(): void {
-        this.loadPartnerProfile();
-    }
+  ngOnInit(): void {
+    this.loadPartnerProfile();
+  }
 
-    ngOnDestroy(): void {
-        this.destroy$.next();
-        this.destroy$.complete();
-    }
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
-    private async loadPartnerProfile(): Promise<void> {
+  private async loadPartnerProfile(): Promise<void> {
+    try {
+      this.loading = true;
+
+      // Get the current user from the observable
+      this.currentUser$.pipe(
+        filter(user => user !== null),
+        takeUntil(this.destroy$)
+      ).subscribe(async (user) => {
+        if (!user) {
+          this.router.navigate(['/login']);
+          return;
+        }
+
         try {
-            this.loading = true;
+          // Check if user is a company contact person
+          const { data: companies, error: companyError } = await this.supabaseService.client
+            .from('companies')
+            .select('*')
+            .eq('contact_person_id', user.id)
+            .eq('status', 'approved')
+            .single();
 
-            // First check if user is authenticated
-            const user = await this.currentUser$.pipe(
-                filter(user => user !== null),
-                takeUntil(this.destroy$)
-            ).toPromise();
+          if (companyError || !companies) {
+            this.isCompanyContact = false;
+            this.loading = false;
+            return;
+          }
 
-            if (!user) {
-                this.router.navigate(['/login']);
-                return;
-            }
+          this.company = companies;
+          this.isCompanyContact = true;
 
-            // Check if user is a company contact person
-            const { data: companies, error: companyError } = await this.supabaseService.client
-                .from('companies')
-                .select('*')
-                .eq('contact_person_id', user.id)
-                .eq('status', 'approved')
-                .single();
-
-            if (companyError || !companies) {
-                this.isCompanyContact = false;
-                this.loading = false;
-                return;
-            }
-
-            this.company = companies;
-            this.isCompanyContact = true;
-
-            // Load company orders
-            await this.loadCompanyOrders();
+          // Load company orders
+          await this.loadCompanyOrders();
 
         } catch (error) {
-            console.error('Error loading partner profile:', error);
-            this.isCompanyContact = false;
+          console.error('Error loading company data:', error);
+          this.isCompanyContact = false;
         } finally {
-            this.loading = false;
+          this.loading = false;
         }
+      });
+
+    } catch (error) {
+      console.error('Error loading partner profile:', error);
+      this.isCompanyContact = false;
+      this.loading = false;
     }
+  }
 
-    private async loadCompanyOrders(): Promise<void> {
-        if (!this.company) return;
+  private async loadCompanyOrders(): Promise<void> {
+    if (!this.company) return;
 
-        try {
-            const { data: orders, error } = await this.supabaseService.client
-                .from('orders')
-                .select(`
+    try {
+      const { data: orders, error } = await this.supabaseService.client
+        .from('orders')
+        .select(`
           *,
           order_items (
             id,
             product_id,
             product_name,
             quantity,
-            price,
-            discount_percent
-          ),
-          profiles (
-            first_name,
-            last_name,
-            email
+            unit_price,
+            discount_percentage
           )
         `)
-                .eq('is_b2b', true)
-                .eq('user_id', this.company.contactPersonId)
-                .order('created_at', { ascending: false });
+        .eq('is_b2b', true)
+        .eq('company_id', this.company.id)
+        .order('created_at', { ascending: false });
 
-            if (error) {
-                console.error('Error loading company orders:', error);
-                return;
-            }
+      if (error) {
+        console.error('Error loading company orders:', error);
+        this.companyOrders = [];
+        this.filteredOrders = [];
+        return;
+      }
 
-            this.companyOrders = orders || [];
-            this.filteredOrders = [...this.companyOrders];
-        } catch (error) {
-            console.error('Error loading company orders:', error);
-        }
+      // Transform the order data to match our expected structure
+      this.companyOrders = (orders || []).map((order: any) => ({
+        ...order,
+        items: (order.order_items || []).map((item: any) => ({
+          ...item,
+          productName: item.product_name,
+          unitPrice: item.unit_price,
+          discountPercentage: item.discount_percentage
+        })),
+        orderNumber: order.order_number || order.id,
+        totalAmount: order.total_amount || 0,
+        createdAt: order.created_at,
+        paymentStatus: order.payment_status,
+        // Ensure all required fields are present
+        status: order.status || 'pending'
+      }));
+
+      this.filteredOrders = [...this.companyOrders];
+
+    } catch (error) {
+      console.error('Error loading company orders:', error);
+      this.companyOrders = [];
+      this.filteredOrders = [];
     }
+  }
 
-    filterOrders(): void {
-        if (!this.orderStatusFilter) {
-            this.filteredOrders = [...this.companyOrders];
-        } else {
-            this.filteredOrders = this.companyOrders.filter(order => order.status === this.orderStatusFilter);
-        }
+  filterOrders(): void {
+    if (!this.orderStatusFilter) {
+      this.filteredOrders = [...this.companyOrders];
+    } else {
+      this.filteredOrders = this.companyOrders.filter(order => order.status === this.orderStatusFilter);
     }
+  }
 
-    getStatusClass(status: string): string {
-        switch (status) {
-            case 'pending':
-                return 'bg-yellow-100 text-yellow-800';
-            case 'approved':
-                return 'bg-green-100 text-green-800';
-            case 'rejected':
-                return 'bg-red-100 text-red-800';
-            default:
-                return 'bg-gray-100 text-gray-800';
-        }
+  getStatusClass(status: string): string {
+    switch (status) {
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'approved':
+        return 'bg-green-100 text-green-800';
+      case 'rejected':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
+  }
 
-    getStatusLabel(status: string): string {
-        switch (status) {
-            case 'pending':
-                return 'Pending Approval';
-            case 'approved':
-                return 'Approved';
-            case 'rejected':
-                return 'Rejected';
-            default:
-                return status;
-        }
+  getStatusLabel(status: string): string {
+    switch (status) {
+      case 'pending':
+        return 'Pending Approval';
+      case 'approved':
+        return 'Approved';
+      case 'rejected':
+        return 'Rejected';
+      default:
+        return status;
     }
+  }
 
-    getBusinessTypeLabel(type: string): string {
-        switch (type) {
-            case 'retailer':
-                return 'Retailer';
-            case 'wholesaler':
-                return 'Wholesaler';
-            case 'installer':
-                return 'Installer';
-            case 'distributor':
-                return 'Distributor';
-            case 'other':
-                return 'Other';
-            default:
-                return type;
-        }
+  getBusinessTypeLabel(type: string): string {
+    switch (type) {
+      case 'retailer':
+        return 'Retailer';
+      case 'wholesaler':
+        return 'Wholesaler';
+      case 'installer':
+        return 'Installer';
+      case 'distributor':
+        return 'Distributor';
+      case 'other':
+        return 'Other';
+      default:
+        return type;
     }
+  }
 
-    getOrderStatusClass(status: string): string {
-        switch (status) {
-            case 'pending':
-                return 'bg-yellow-100 text-yellow-800';
-            case 'processing':
-                return 'bg-blue-100 text-blue-800';
-            case 'shipped':
-                return 'bg-purple-100 text-purple-800';
-            case 'delivered':
-                return 'bg-green-100 text-green-800';
-            case 'cancelled':
-                return 'bg-red-100 text-red-800';
-            default:
-                return 'bg-gray-100 text-gray-800';
-        }
+  getOrderStatusClass(status: string): string {
+    switch (status) {
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'processing':
+        return 'bg-blue-100 text-blue-800';
+      case 'shipped':
+        return 'bg-purple-100 text-purple-800';
+      case 'delivered':
+        return 'bg-green-100 text-green-800';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
+  }
 
-    getOrderStatusLabel(status: string): string {
-        switch (status) {
-            case 'pending':
-                return 'Pending';
-            case 'processing':
-                return 'Processing';
-            case 'shipped':
-                return 'Shipped';
-            case 'delivered':
-                return 'Delivered';
-            case 'cancelled':
-                return 'Cancelled';
-            default:
-                return status;
-        }
+  getOrderStatusLabel(status: string): string {
+    switch (status) {
+      case 'pending':
+        return 'Pending';
+      case 'processing':
+        return 'Processing';
+      case 'shipped':
+        return 'Shipped';
+      case 'delivered':
+        return 'Delivered';
+      case 'cancelled':
+        return 'Cancelled';
+      default:
+        return status;
     }
+  }
 
-    getPaymentStatusLabel(status: string): string {
-        switch (status) {
-            case 'paid':
-                return 'Paid';
-            case 'pending':
-                return 'Pending';
-            case 'failed':
-                return 'Failed';
-            default:
-                return status;
-        }
+  getPaymentStatusLabel(status: string): string {
+    switch (status) {
+      case 'paid':
+        return 'Paid';
+      case 'pending':
+        return 'Pending';
+      case 'failed':
+        return 'Failed';
+      default:
+        return status;
     }
+  }
 
-    getTotalSpent(): number {
-        return this.companyOrders.reduce((total, order) => total + order.totalAmount, 0);
-    }
+  getTotalSpent(): number {
+    return this.companyOrders.reduce((total, order) => total + order.totalAmount, 0);
+  }
 
-    formatDate(date: Date | string): string {
-        return new Date(date).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-        });
-    }
+  formatDate(date: Date | string): string {
+    return new Date(date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  }
 
-    viewOrderDetails(order: Order): void {
-        this.router.navigate(['/order-details', order.id]);
-    }
+  viewOrderDetails(order: Order): void {
+    this.router.navigate(['/order-details', order.id]);
+  }
 
-    reorderItems(order: Order): void {
-        // TODO: Implement reorder functionality
-        console.log('Reordering items from order:', order.id);
-    }
+  reorderItems(order: Order): void {
+    // TODO: Implement reorder functionality
+    console.log('Reordering items from order:', order.id);
+  }
 
-    contactSupport(): void {
-        this.router.navigate(['/contact']);
-    }
+  contactSupport(): void {
+    this.router.navigate(['/contact']);
+  }
 
-    navigateToProducts(): void {
-        this.router.navigate(['/partners/products']);
-    }
+  navigateToProducts(): void {
+    this.router.navigate(['/partners/products']);
+  }
 
-    navigateToOffers(): void {
-        this.router.navigate(['/partners/offers']);
-    }
+  navigateToOffers(): void {
+    this.router.navigate(['/partners/offers']);
+  }
 
-    navigateToHome(): void {
-        this.router.navigate(['/']);
-    }
+  navigateToHome(): void {
+    this.router.navigate(['/']);
+  }
 } 

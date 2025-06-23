@@ -6,6 +6,7 @@ import { Title } from '@angular/platform-browser';
 import { SupabaseService } from '../../../../services/supabase.service';
 import { AdminFormComponent } from '../../shared/admin-form/admin-form.component';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-order-form',
@@ -14,8 +15,8 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
   template: `
     <app-admin-form
       *ngIf="orderForm"
-      [title]="isEditMode ? ('admin.editOrder' | translate) : ('admin.createOrder' | translate)"
-      [subtitle]="isEditMode ? ('admin.updateOrderInformation' | translate) : ('admin.addNewOrder' | translate)"
+      [title]="isEditMode ? ('admin.ordersForm.editOrder' | translate) : ('admin.ordersForm.createOrder' | translate)"
+      [subtitle]="isEditMode ? ('admin.ordersForm.updateOrderInformation' | translate) : ('admin.ordersForm.addNewOrder' | translate)"
       [form]="orderForm"
       [isEditMode]="isEditMode"
       [isSubmitting]="loading"
@@ -29,7 +30,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
             <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
             </svg>
-            {{ 'admin.orderInformation' | translate }}
+            {{ 'admin.ordersForm.orderInformation' | translate }}
           </h3>
           
           <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -42,13 +43,13 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
                 placeholder="Order Number"
               >
               <label for="order_number" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                {{ 'admin.orderNumber' | translate }} *
+                {{ 'admin.ordersForm.orderNumber' | translate }} *
               </label>
               <div *ngIf="orderForm.get('order_number')?.invalid && orderForm.get('order_number')?.touched" class="mt-2 text-sm text-red-600 flex items-center">
                 <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                 </svg>
-                {{ 'admin.orderNumberRequired' | translate }}
+                {{ 'admin.ordersForm.orderNumberRequired' | translate }}
               </div>
             </div>
 
@@ -61,13 +62,13 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
                 placeholder="Order Date"
               >
               <label for="order_date" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                {{ 'admin.orderDate' | translate }} *
+                {{ 'admin.ordersForm.orderDate' | translate }} *
               </label>
               <div *ngIf="orderForm.get('order_date')?.invalid && orderForm.get('order_date')?.touched" class="mt-2 text-sm text-red-600 flex items-center">
                 <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                 </svg>
-                {{ 'admin.orderDateRequired' | translate }}
+                {{ 'admin.ordersForm.orderDateRequired' | translate }}
               </div>
             </div>
           </div>
@@ -79,7 +80,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
             <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
             </svg>
-            {{ 'admin.customerInformation' | translate }}
+            {{ 'admin.ordersForm.customerInformation' | translate }}
           </h3>
           
           <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -92,14 +93,14 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
                 placeholder="Customer Email"
               >
               <label for="customer_email" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                {{ 'admin.customerEmail' | translate }} *
+                {{ 'admin.ordersForm.customerEmail' | translate }} *
               </label>
               <div *ngIf="orderForm.get('customer_email')?.invalid && orderForm.get('customer_email')?.touched" class="mt-2 text-sm text-red-600 flex items-center">
                 <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                 </svg>
-                <span *ngIf="orderForm.get('customer_email')?.errors?.['required']">{{ 'admin.customerEmailRequired' | translate }}</span>
-                <span *ngIf="orderForm.get('customer_email')?.errors?.['email']">{{ 'admin.validEmailRequired' | translate }}</span>
+                <span *ngIf="orderForm.get('customer_email')?.errors?.['required']">{{ 'admin.ordersForm.customerEmailRequired' | translate }}</span>
+                <span *ngIf="orderForm.get('customer_email')?.errors?.['email']">{{ 'admin.ordersForm.validEmailRequired' | translate }}</span>
               </div>
             </div>
 
@@ -112,7 +113,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
                 placeholder="Customer Name"
               >
               <label for="customer_name" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                {{ 'admin.customerName' | translate }}
+                {{ 'admin.ordersForm.customerName' | translate }}
               </label>
             </div>
 
@@ -125,7 +126,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
                 placeholder="Customer Phone"
               >
               <label for="customer_phone" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                {{ 'admin.customerPhone' | translate }}
+                {{ 'admin.ordersForm.customerPhone' | translate }}
               </label>
             </div>
           </div>
@@ -140,7 +141,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
                 placeholder="Shipping Address"
               ></textarea>
               <label for="shipping_address" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                {{ 'admin.shippingAddress' | translate }}
+                {{ 'admin.ordersForm.shippingAddress' | translate }}
               </label>
             </div>
 
@@ -153,7 +154,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
                 placeholder="Billing Address"
               ></textarea>
               <label for="billing_address" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                {{ 'admin.billingAddress' | translate }}
+                {{ 'admin.ordersForm.billingAddress' | translate }}
               </label>
             </div>
           </div>
@@ -166,7 +167,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
               <svg class="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
               </svg>
-              {{ 'admin.orderItems' | translate }}
+              {{ 'admin.ordersForm.orderItems' | translate }}
             </h3>
             <button
               type="button"
@@ -175,7 +176,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
               </svg>
-              <span>{{ 'admin.addItem' | translate }}</span>
+              <span>{{ 'admin.ordersForm.addItem' | translate }}</span>
             </button>
           </div>
 
@@ -191,7 +192,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
                     placeholder="Product Name"
                   >
                   <label class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                    {{ 'admin.productName' | translate }} *
+                    {{ 'admin.ordersForm.productName' | translate }} *
                   </label>
                 </div>
 
@@ -208,7 +209,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
                     placeholder="0.00"
                   >
                   <label class="absolute left-10 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                    {{ 'admin.unitPrice' | translate }} *
+                    {{ 'admin.ordersForm.unitPrice' | translate }} *
                   </label>
                 </div>
 
@@ -221,7 +222,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
                     placeholder="1"
                   >
                   <label class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                    {{ 'admin.quantity' | translate }} *
+                    {{ 'admin.ordersForm.quantity' | translate }} *
                   </label>
                 </div>
 
@@ -236,12 +237,12 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
                     placeholder="0"
                   >
                   <label class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                    {{ 'admin.discountPercent' | translate }}
+                    {{ 'admin.ordersForm.discountPercent' | translate }}
                   </label>
                 </div>
 
                 <div class="text-center">
-                  <p class="text-sm font-medium text-gray-700 mb-2">{{ 'admin.subtotal' | translate }}</p>
+                  <p class="text-sm font-medium text-gray-700 mb-2">{{ 'admin.ordersForm.subtotal' | translate }}</p>
                   <p class="text-lg font-semibold text-blue-600">
                     {{ getItemSubtotal(i) | currency:'EUR':'symbol':'1.2-2' }}
                   </p>
@@ -265,12 +266,12 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
             <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
             </svg>
-            <p class="mb-4">{{ 'admin.noOrderItems' | translate }}</p>
+            <p class="mb-4">{{ 'admin.ordersForm.noOrderItems' | translate }}</p>
             <button
               type="button"
               (click)="addOrderItem()"
               class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
-              {{ 'admin.addFirstItem' | translate }}
+              {{ 'admin.ordersForm.addFirstItem' | translate }}
             </button>
           </div>
         </div>
@@ -281,7 +282,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
             <svg class="w-5 h-5 mr-2 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
             </svg>
-            {{ 'admin.pricingDiscounts' | translate }}
+            {{ 'admin.ordersForm.pricingDiscounts' | translate }}
           </h3>
           
           <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -297,27 +298,27 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
                 placeholder="0"
               >
               <label for="order_discount_percentage" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                {{ 'admin.orderDiscountPercent' | translate }}
+                {{ 'admin.ordersForm.orderDiscountPercent' | translate }}
               </label>
             </div>
 
             <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-100">
-              <h4 class="text-sm font-medium text-gray-700 mb-3">{{ 'admin.orderSummary' | translate }}</h4>
+              <h4 class="text-sm font-medium text-gray-700 mb-3">{{ 'admin.ordersForm.orderSummary' | translate }}</h4>
               <div class="space-y-2 text-sm">
                 <div class="flex justify-between">
-                  <span class="text-gray-600">{{ 'admin.subtotal' | translate }}:</span>
+                  <span class="text-gray-600">{{ 'admin.ordersForm.subtotal' | translate }}:</span>
                   <span class="font-medium">{{ getOrderSubtotal() | currency:'EUR':'symbol':'1.2-2' }}</span>
                 </div>
                 <div class="flex justify-between">
-                  <span class="text-gray-600">{{ 'admin.itemDiscounts' | translate }}:</span>
+                  <span class="text-gray-600">{{ 'admin.ordersForm.itemDiscounts' | translate }}:</span>
                   <span class="font-medium text-red-600">-{{ getItemDiscountsTotal() | currency:'EUR':'symbol':'1.2-2' }}</span>
                 </div>
                 <div class="flex justify-between">
-                  <span class="text-gray-600">{{ 'admin.orderDiscount' | translate }}:</span>
+                  <span class="text-gray-600">{{ 'admin.ordersForm.orderDiscount' | translate }}:</span>
                   <span class="font-medium text-red-600">-{{ getOrderDiscountAmount() | currency:'EUR':'symbol':'1.2-2' }}</span>
                 </div>
                 <div class="border-t border-blue-200 pt-2 flex justify-between">
-                  <span class="font-semibold text-gray-900">{{ 'admin.total' | translate }}:</span>
+                  <span class="font-semibold text-gray-900">{{ 'admin.ordersForm.total' | translate }}:</span>
                   <span class="font-bold text-blue-600">{{ getOrderTotal() | currency:'EUR':'symbol':'1.2-2' }}</span>
                 </div>
               </div>
@@ -331,7 +332,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
             <svg class="w-5 h-5 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
-            {{ 'admin.statusInformation' | translate }}
+            {{ 'admin.ordersForm.statusInformation' | translate }}
           </h3>
           
           <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -341,17 +342,17 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
                 formControlName="status"
                 class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 bg-white appearance-none"
               >
-                <option value="">{{ 'admin.selectStatus' | translate }}</option>
-                <option value="pending">{{ 'admin.pending' | translate }}</option>
-                <option value="confirmed">{{ 'admin.confirmed' | translate }}</option>
-                <option value="processing">{{ 'admin.processing' | translate }}</option>
-                <option value="shipped">{{ 'admin.shipped' | translate }}</option>
-                <option value="delivered">{{ 'admin.delivered' | translate }}</option>
-                <option value="cancelled">{{ 'admin.cancelled' | translate }}</option>
-                <option value="refunded">{{ 'admin.refunded' | translate }}</option>
+                <option value="">{{ 'admin.ordersForm.selectStatus' | translate }}</option>
+                <option value="pending">{{ 'admin.ordersForm.pending' | translate }}</option>
+                <option value="confirmed">{{ 'admin.ordersForm.confirmed' | translate }}</option>
+                <option value="processing">{{ 'admin.ordersForm.processing' | translate }}</option>
+                <option value="shipped">{{ 'admin.ordersForm.shipped' | translate }}</option>
+                <option value="delivered">{{ 'admin.ordersForm.delivered' | translate }}</option>
+                <option value="cancelled">{{ 'admin.ordersForm.cancelled' | translate }}</option>
+                <option value="refunded">{{ 'admin.ordersForm.refunded' | translate }}</option>
               </select>
               <label class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700">
-                {{ 'admin.orderStatus' | translate }} *
+                {{ 'admin.ordersForm.orderStatus' | translate }} *
               </label>
               <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                 <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -362,7 +363,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
                 <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                 </svg>
-                {{ 'admin.orderStatusRequired' | translate }}
+                {{ 'admin.ordersForm.orderStatusRequired' | translate }}
               </div>
             </div>
 
@@ -372,15 +373,15 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
                 formControlName="payment_status"
                 class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 bg-white appearance-none"
               >
-                <option value="">{{ 'admin.selectPaymentStatus' | translate }}</option>
-                <option value="pending">{{ 'admin.pending' | translate }}</option>
-                <option value="paid">{{ 'admin.paid' | translate }}</option>
-                <option value="failed">{{ 'admin.failed' | translate }}</option>
-                <option value="refunded">{{ 'admin.refunded' | translate }}</option>
-                <option value="partially_refunded">{{ 'admin.partiallyRefunded' | translate }}</option>
+                <option value="">{{ 'admin.ordersForm.selectPaymentStatus' | translate }}</option>
+                <option value="pending">{{ 'admin.ordersForm.pending' | translate }}</option>
+                <option value="paid">{{ 'admin.ordersForm.paid' | translate }}</option>
+                <option value="failed">{{ 'admin.ordersForm.failed' | translate }}</option>
+                <option value="refunded">{{ 'admin.ordersForm.refunded' | translate }}</option>
+                <option value="partially_refunded">{{ 'admin.ordersForm.partiallyRefunded' | translate }}</option>
               </select>
               <label class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700">
-                {{ 'admin.paymentStatus' | translate }} *
+                {{ 'admin.ordersForm.paymentStatus' | translate }} *
               </label>
               <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                 <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -391,7 +392,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
                 <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                 </svg>
-                {{ 'admin.paymentStatusRequired' | translate }}
+                {{ 'admin.ordersForm.paymentStatusRequired' | translate }}
               </div>
             </div>
 
@@ -401,15 +402,15 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
                 formControlName="payment_method"
                 class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 bg-white appearance-none"
               >
-                <option value="">{{ 'admin.selectPaymentMethod' | translate }}</option>
-                <option value="credit_card">{{ 'admin.creditCard' | translate }}</option>
-                <option value="debit_card">{{ 'admin.debitCard' | translate }}</option>
+                <option value="">{{ 'admin.ordersForm.selectPaymentMethod' | translate }}</option>
+                <option value="credit_card">{{ 'admin.ordersForm.creditCard' | translate }}</option>
+                <option value="debit_card">{{ 'admin.ordersForm.debitCard' | translate }}</option>
                 <option value="paypal">PayPal</option>
-                <option value="bank_transfer">{{ 'admin.bankTransfer' | translate }}</option>
-                <option value="cash_on_delivery">{{ 'admin.cashOnDelivery' | translate }}</option>
+                <option value="bank_transfer">{{ 'admin.ordersForm.bankTransfer' | translate }}</option>
+                <option value="cash_on_delivery">{{ 'admin.ordersForm.cashOnDelivery' | translate }}</option>
               </select>
               <label class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700">
-                {{ 'admin.paymentMethod' | translate }}
+                {{ 'admin.ordersForm.paymentMethod' | translate }}
               </label>
               <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                 <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -426,7 +427,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
             <svg class="w-5 h-5 mr-2 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
             </svg>
-            {{ 'admin.additionalNotes' | translate }}
+            {{ 'admin.ordersForm.additionalNotes' | translate }}
           </h3>
           
           <div class="relative">
@@ -438,7 +439,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
               placeholder="Additional notes"
             ></textarea>
             <label for="notes" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-              {{ 'admin.notesAboutOrder' | translate }}
+              {{ 'admin.ordersForm.notesAboutOrder' | translate }}
             </label>
           </div>
         </div>
@@ -452,6 +453,7 @@ export class OrderFormComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private supabaseService = inject(SupabaseService);
   private title = inject(Title);
+  private translationService = inject(TranslationService);
 
   orderForm: FormGroup | null = null;
   loading = false;
@@ -500,7 +502,7 @@ export class OrderFormComponent implements OnInit {
     }
 
     // Set page title
-    this.title.setTitle(this.isEditMode ? 'Edit Order - Solar Shop Admin' : 'Create Order - Solar Shop Admin');
+    this.title.setTitle(this.translationService.translate('admin.ordersForm.title'));
   }
 
   createOrderItem(): FormGroup {
