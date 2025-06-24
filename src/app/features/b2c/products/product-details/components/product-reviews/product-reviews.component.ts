@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../../../shared/services/translation.service';
 import { ReviewModalComponent } from '../../../../../../shared/components/modals/review-modal/review-modal.component';
 import { SuccessModalComponent } from '../../../../../../shared/components/modals/success-modal/success-modal.component';
 import { SupabaseService } from '../../../../../../services/supabase.service';
@@ -233,6 +234,7 @@ export class ProductReviewsComponent implements OnInit {
 
   private store = inject(Store);
   private supabaseService = inject(SupabaseService);
+  private translationService = inject(TranslationService);
 
   reviews: Review[] = [];
   averageRating: number = 0;
@@ -350,7 +352,10 @@ export class ProductReviewsComponent implements OnInit {
       this.showReviewModal = true;
     } else {
       // Show message that user needs to purchase and have delivered order
-      this.showSuccess('Cannot Write Review', 'You can only write reviews for products you have purchased and received.');
+      this.showSuccess(
+        this.translationService.translate('reviewsSection.cannotWriteReview'),
+        this.translationService.translate('reviewsSection.mustPurchaseFirst')
+      );
     }
   }
 
@@ -366,7 +371,10 @@ export class ProductReviewsComponent implements OnInit {
     try {
       const user = await this.currentUser$.pipe().toPromise();
       if (!user) {
-        this.showSuccess('Error', 'You must be logged in to write a review.');
+        this.showSuccess(
+          this.translationService.translate('reviewsSection.reviewError'),
+          this.translationService.translate('reviewsSection.mustBeLoggedIn')
+        );
         return;
       } const reviewRecord = {
         user_id: user.id,
@@ -385,13 +393,19 @@ export class ProductReviewsComponent implements OnInit {
 
       await this.supabaseService.createRecord('reviews', reviewRecord);
       this.showReviewModal = false;
-      this.showSuccess('Review Submitted!', 'Thank you for your review. It will be published after admin approval.');
+      this.showSuccess(
+        this.translationService.translate('reviewsSection.reviewSubmitted'),
+        this.translationService.translate('reviewsSection.reviewSubmittedMessage')
+      );
 
       // Reload reviews to include the new one (if approved)
       this.loadReviews();
     } catch (error) {
       console.error('Error submitting review:', error);
-      this.showSuccess('Error', 'Failed to submit review. Please try again.');
+      this.showSuccess(
+        this.translationService.translate('reviewsSection.reviewError'),
+        this.translationService.translate('reviewsSection.reviewErrorMessage')
+      );
     }
   }
 

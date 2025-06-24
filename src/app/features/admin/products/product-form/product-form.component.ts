@@ -541,7 +541,6 @@ export class ProductFormComponent implements OnInit {
       this.router.navigate(['/admin/products']);
     } catch (error) {
       console.error('Error saving product:', error);
-      alert('Error saving product. Please try again.');
     } finally {
       this.isSubmitting = false;
     }

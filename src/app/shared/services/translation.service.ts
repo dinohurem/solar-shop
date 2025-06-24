@@ -399,8 +399,8 @@ export class TranslationService {
                 users: 'Korisnici',
                 orders: 'Narudžbe',
                 reviews: 'Recenzije',
-                companyPricing: 'Cijene za tvrtke',
-                companies: 'Tvrtke',
+                companyPricing: 'Cjenovnik',
+                companies: 'Partneri',
                 contacts: 'Poruke',
                 wishlist: 'Lista želja',
                 totalProducts: 'Ukupno proizvoda',
@@ -547,13 +547,13 @@ export class TranslationService {
                     archived: 'Arhivirano',
                 },
                 companiesForm: {
-                    title: 'Tvrtke',
-                    longTitle: 'Companies - Solar Shop Admin',
+                    title: 'Partneri',
+                    longTitle: 'Partneri - Solar Shop Admin',
                     subtitle: 'Upravljajte zahtjevima za partnerstvo',
-                    editCompany: 'Uredi tvrtku',
-                    createCompany: 'Dodaj tvrtku',
-                    updateCompanyInformation: 'Ažuriraj informacije o tvrtki',
-                    createNewCompany: 'Dodaj novu tvrtku',
+                    editCompany: 'Uredi partnera',
+                    createCompany: 'Dodaj partnera',
+                    updateCompanyInformation: 'Ažuriraj informacije o partneru',
+                    createNewCompany: 'Dodaj novog partnera',
                     company: 'Tvrtka',
                     companyName: 'Naziv tvrtke',
                     companyNameRequired: 'Naziv tvrtke je obavezan',
@@ -629,7 +629,7 @@ export class TranslationService {
                     errorImportingCompanies: 'Greška prilikom učitavanja tvrtki. Molimo provjerite format CSV datoteke.',
                 },
                 companyPricingForm: {
-                    title: 'Cijene za tvrtke',
+                    title: 'Cjenovnik',
                     subtitle: 'Upravljajte prilagođenim cijenama za partnerske tvrtke',
                     editPricing: 'Uredi cijenu',
                     createPricing: 'Dodaj cijenu',
@@ -1069,7 +1069,15 @@ export class TranslationService {
                 loadMoreReviews: 'Učitaj više recenzija',
                 noReviewsYet: 'Još nema recenzija',
                 beFirstToReview: 'Budite prvi koji će recenzirati ovaj proizvod',
-                writeFirstReview: 'Napiši prvu recenziju'
+                writeFirstReview: 'Napiši prvu recenziju',
+                // Error and success messages
+                cannotWriteReview: 'Ne možete pisati recenziju',
+                mustPurchaseFirst: 'Možete pisati recenzije samo za proizvode koje ste kupili i primili.',
+                mustBeLoggedIn: 'Morate biti prijavljeni da biste napisali recenziju.',
+                reviewSubmitted: 'Recenzija je poslana!',
+                reviewSubmittedMessage: 'Hvala vam na recenziji. Bit će objavljena nakon odobrenja administratora.',
+                reviewError: 'Greška',
+                reviewErrorMessage: 'Neuspješno slanje recenzije. Molimo pokušajte ponovno.'
             },
             // Profile
             profile: {
@@ -1212,7 +1220,7 @@ export class TranslationService {
             },
             // Products
             products: {
-                title: 'Proizvodi',
+                title: 'Kategorije',
                 subtitle: 'Otkrijte naš široki asortiman proizvoda za održivu i energetski učinkovitu gradnju',
                 exploreProducts: 'Istražite proizvode',
                 productsCount: '{{count}} proizvoda',
@@ -2906,7 +2914,15 @@ export class TranslationService {
                 loadMoreReviews: 'Load More Reviews',
                 noReviewsYet: 'No reviews yet',
                 beFirstToReview: 'Be the first to review this product',
-                writeFirstReview: 'Write First Review'
+                writeFirstReview: 'Write First Review',
+                // Error and success messages
+                cannotWriteReview: 'Cannot Write Review',
+                mustPurchaseFirst: 'You can only write reviews for products you have purchased and received.',
+                mustBeLoggedIn: 'You must be logged in to write a review.',
+                reviewSubmitted: 'Review Submitted!',
+                reviewSubmittedMessage: 'Thank you for your review. It will be published after admin approval.',
+                reviewError: 'Error',
+                reviewErrorMessage: 'Failed to submit review. Please try again.'
             },
             // Profile
             profile: {
@@ -3049,7 +3065,7 @@ export class TranslationService {
             },
             // Products
             products: {
-                title: 'Products',
+                title: 'Categories',
                 subtitle: 'Discover our wide range of products for sustainable and energy-efficient construction',
                 exploreProducts: 'Explore Products',
                 productsCount: '{{count}} Products',

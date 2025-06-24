@@ -39,11 +39,6 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
                   {{ 'b2bNav.offers' | translate }}
                 </a>
               </li>
-              <li>
-                <a routerLink="/partners/dashboard" class="text-gray-300 hover:text-white transition-colors font-['DM_Sans']">
-                  {{ 'b2bFooter.dashboard' | translate }}
-                </a>
-              </li>
             </ul>
           </div>
 
@@ -59,7 +54,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
                 </a>
               </li>
               <li>
-                <a routerLink="/partners/about" class="text-gray-300 hover:text-white transition-colors font-['DM_Sans']">
+                <a routerLink="/company" class="text-gray-300 hover:text-white transition-colors font-['DM_Sans']">
                   {{ 'b2bNav.about' | translate }}
                 </a>
               </li>

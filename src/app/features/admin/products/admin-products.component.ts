@@ -72,13 +72,6 @@ export class AdminProductsComponent implements OnInit {
     tableConfig: TableConfig = {
         columns: [
             {
-                key: 'image_url',
-                label: this.translationService.translate('admin.productImage'),
-                type: 'image',
-                sortable: false,
-                searchable: false
-            },
-            {
                 key: 'name',
                 label: this.translationService.translate('admin.productName'),
                 type: 'text',
@@ -102,6 +95,13 @@ export class AdminProductsComponent implements OnInit {
             {
                 key: 'price',
                 label: this.translationService.translate('admin.productPricing'),
+                type: 'number',
+                sortable: true,
+                format: (value) => value ? `$${value.toFixed(2)}` : ''
+            },
+            {
+                key: 'original_price',
+                label: this.translationService.translate('admin.productCompareAtPrice'),
                 type: 'number',
                 sortable: true,
                 format: (value) => value ? `$${value.toFixed(2)}` : ''
@@ -265,46 +265,6 @@ export class AdminProductsComponent implements OnInit {
             this.productsSubject.next(products || []);
         } catch (error) {
             console.warn('Products table not found in database. Using mock data as placeholder.');
-            // Create some mock data for demonstration purposes
-            const mockProducts = [
-                {
-                    id: '1',
-                    name: 'SunPower Maxeon 3 400W Solar Panel',
-                    sku: 'SP-MAX3-400',
-                    brand: 'SunPower',
-                    price: 299.99,
-                    stock_quantity: 25,
-                    is_active: true,
-                    image_url: '',
-                    description: 'High-efficiency solar panel with 22.6% efficiency rating',
-                    created_at: new Date().toISOString()
-                },
-                {
-                    id: '2',
-                    name: 'Tesla Powerwall 2 Battery',
-                    sku: 'TESLA-PW2',
-                    brand: 'Tesla',
-                    price: 7999.99,
-                    stock_quantity: 5,
-                    is_active: true,
-                    image_url: '',
-                    description: '13.5 kWh home battery backup system',
-                    created_at: new Date().toISOString()
-                },
-                {
-                    id: '3',
-                    name: 'SolarEdge SE7600H Inverter',
-                    sku: 'SE-7600H',
-                    brand: 'SolarEdge',
-                    price: 1299.99,
-                    stock_quantity: 12,
-                    is_active: true,
-                    image_url: '',
-                    description: '7.6kW single-phase inverter with HD-Wave technology',
-                    created_at: new Date().toISOString()
-                }
-            ];
-            this.productsSubject.next(mockProducts);
         } finally {
             this.loadingSubject.next(false);
         }
