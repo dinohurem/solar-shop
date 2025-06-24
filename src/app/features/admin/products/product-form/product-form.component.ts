@@ -401,7 +401,7 @@ export class ProductFormComponent implements OnInit {
       slug: ['', [Validators.required]],
       description: [''],
       price: [0, [Validators.required, Validators.min(0.01)]],
-      compare_at_price: [null],
+      compare_at_price: [''],
       sku: ['', [Validators.required]],
       brand: [''],
       category_id: [''],
@@ -446,7 +446,7 @@ export class ProductFormComponent implements OnInit {
           slug: (data as any).slug || this.generateSlug(productName),
           description: data.description || '',
           price: Number(data.price) || 0,
-          compare_at_price: Number((data as any).compare_at_price || data.original_price) || null,
+          compare_at_price: (data as any).compare_at_price || data.original_price || '',
           sku: data.sku || '',
           brand: data.brand || '',
           category_id: data.category_id || '',
@@ -505,13 +505,12 @@ export class ProductFormComponent implements OnInit {
       }));
 
       // Map form fields to database fields
-      const productData = {
+      const productData: any = {
         name: formValue.name,
         slug: formValue.slug,
         description: formValue.description,
         short_description: formValue.description, // Use description as short_description if not provided
         price: Number(formValue.price),
-        original_price: formValue.compare_at_price ? Number(formValue.compare_at_price) : undefined,
         currency: 'EUR', // Default currency
         sku: formValue.sku,
         brand: formValue.brand,
@@ -530,6 +529,13 @@ export class ProductFormComponent implements OnInit {
         stock_status: Number(formValue.stock_quantity) > 0 ? 'in_stock' as const : 'out_of_stock' as const,
         updated_at: new Date().toISOString()
       };
+
+      // Explicitly handle original_price to ensure it's always included in the payload
+      if (formValue.compare_at_price && formValue.compare_at_price !== '' && formValue.compare_at_price !== null) {
+        productData.original_price = Number(formValue.compare_at_price);
+      } else {
+        productData.original_price = null; // Explicitly set to null to clear the field
+      }
 
       if (this.isEditMode && this.productId) {
         await this.supabaseService.updateRecord('products', this.productId, productData);
