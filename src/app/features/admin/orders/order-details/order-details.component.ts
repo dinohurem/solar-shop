@@ -49,16 +49,6 @@ import * as OrdersActions from '../store/orders.actions';
               </svg>
               <span>{{ 'admin.saveChanges' | translate }}</span>
             </button>
-            
-            <!-- Print Invoice Button -->
-            <button 
-              (click)="printInvoice()"
-              class="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors duration-200 flex items-center space-x-2">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
-              </svg>
-              <span>{{ 'admin.printInvoice' | translate }}</span>
-            </button>
 
             <!-- Order Status Dropdown -->
             <div class="relative">
@@ -347,7 +337,7 @@ import * as OrdersActions from '../store/orders.actions';
           </div>
           
           <div class="flex justify-between items-center">
-            <span class="text-gray-700">{{ 'admin.tax' | translate }}:</span>
+            <span class="text-gray-700">{{ 'admin.tax' | translate }} ({{ order.tax_percentage || 0 }}%):</span>
             <span class="font-semibold text-gray-900">{{ order.tax_amount || 0 | currency:'EUR':'symbol':'1.2-2' }}</span>
           </div>
           
@@ -438,8 +428,18 @@ export class OrderDetailsComponent implements OnInit {
 
   private async loadOrderDetails(orderId: string): Promise<void> {
     try {
+      console.log(`Loading order details for ID: ${orderId}`);
       this.order = await this.supabaseService.getTableById('orders', orderId);
       if (this.order) {
+        console.log('Loaded order data:', this.order);
+        console.log('Order fields:', {
+          discount_percentage: this.order.discount_percentage,
+          discount_amount: this.order.discount_amount,
+          tax_percentage: this.order.tax_percentage,
+          tax_amount: this.order.tax_amount,
+          shipping_cost: this.order.shipping_cost,
+          total_amount: this.order.total_amount
+        });
         this.title.setTitle(`Order ${this.order.order_number} - Order Details - Solar Shop Admin`);
         await this.loadOrderItems(orderId);
         this.loadOrderDiscount();
@@ -454,42 +454,31 @@ export class OrderDetailsComponent implements OnInit {
 
   private async loadOrderItems(orderId: string): Promise<void> {
     try {
-      // Simulate order items (in a real implementation, you'd load from order_items table)
-      const simulatedItems = [
-        {
-          id: '1',
-          product_id: 'prod_1',
-          product_name: 'Solar Panel 400W',
-          product_sku: 'SP-400W-001',
-          unit_price: 299.99,
-          quantity: 2,
-          discount_percentage: 5,
-          product: {
-            name: 'Solar Panel 400W',
-            sku: 'SP-400W-001',
-            category: 'Solar Panels',
-            image_url: '/assets/images/solar-panel-placeholder.jpg'
-          }
-        },
-        {
-          id: '2',
-          product_id: 'prod_2',
-          product_name: 'Inverter 5kW',
-          product_sku: 'INV-5KW-001',
-          unit_price: 1299.99,
-          quantity: 1,
-          discount_percentage: 0,
-          product: {
-            name: 'Inverter 5kW',
-            sku: 'INV-5KW-001',
-            category: 'Inverters',
-            image_url: '/assets/images/inverter-placeholder.jpg'
-          }
-        }
-      ];
+      console.log(`Loading order items for order ID: ${orderId}`);
 
-      this.orderItems = simulatedItems;
-      this.originalOrderItems = JSON.parse(JSON.stringify(simulatedItems));
+      // Load order items from database
+      const orderItemsData = await this.supabaseService.getTable('order_items', {
+        order_id: orderId
+      });
+
+      console.log(`Loaded ${orderItemsData?.length || 0} order items:`, orderItemsData);
+
+      // Convert database order items to internal format
+      this.orderItems = (orderItemsData || []).map((itemData: any) => ({
+        id: itemData.id,
+        product_name: itemData.product_name || 'Unknown Product',
+        product_sku: itemData.product_sku || '',
+        unit_price: itemData.unit_price || 0,
+        quantity: itemData.quantity || 1,
+        discount_percentage: itemData.discount_percentage || 0,
+        discount_amount: itemData.discount_amount || 0,
+        total_price: itemData.total_price || 0
+      }));
+
+      // Store original items for change detection
+      this.originalOrderItems = JSON.parse(JSON.stringify(this.orderItems));
+
+      console.log('Processed order items:', this.orderItems);
 
       // Populate form array
       const itemsArray = this.orderItemsArray;
@@ -497,6 +486,8 @@ export class OrderDetailsComponent implements OnInit {
       this.orderItems.forEach(item => {
         itemsArray.push(this.createItemFormGroup(item));
       });
+
+      console.log('Form array populated with', itemsArray.length, 'items');
 
     } catch (error) {
       console.error('Error loading order items:', error);
@@ -506,9 +497,10 @@ export class OrderDetailsComponent implements OnInit {
   }
 
   private loadOrderDiscount(): void {
-    const discountPercentage = this.order.order_discount_percentage || 0;
+    const discountPercentage = this.order.discount_percentage || 0;
     this.originalOrderDiscount = discountPercentage;
     this.orderDiscountForm.patchValue({ discount_percentage: discountPercentage });
+    console.log('Loaded order discount percentage:', discountPercentage);
   }
 
   private createItemFormGroup(item?: any): FormGroup {
@@ -585,6 +577,18 @@ export class OrderDetailsComponent implements OnInit {
     const shipping = this.order?.shipping_cost || 0;
     const tax = this.order?.tax_amount || 0;
     return Math.max(0, subtotal - itemDiscounts - orderDiscount + shipping + tax);
+  }
+
+  getTaxPercentage(): number {
+    return this.order?.tax_percentage || 0;
+  }
+
+  getShippingCost(): number {
+    return this.order?.shipping_cost || 0;
+  }
+
+  getDiscountPercentage(): number {
+    return this.order?.discount_percentage || 0;
   }
 
   async markAsPurchased(): Promise<void> {
@@ -678,9 +682,9 @@ export class OrderDetailsComponent implements OnInit {
       if (currentDiscount !== this.originalOrderDiscount) {
         // Update order discount in database via Supabase
         await this.supabaseService.updateRecord('orders', this.order.id, {
-          order_discount_percentage: currentDiscount
+          discount_percentage: currentDiscount
         } as any);
-        this.order.order_discount_percentage = currentDiscount;
+        this.order.discount_percentage = currentDiscount;
       }
 
       // Update order items if changed

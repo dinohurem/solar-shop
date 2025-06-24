@@ -828,31 +828,120 @@ export class OrderFormComponent implements OnInit {
     try {
       const formData = { ...this.orderForm.value };
 
+      // Remove order_items from the order data (it should be saved separately)
+      const orderItems = formData.order_items;
+      delete formData.order_items;
+
       // Convert datetime-local back to ISO string
       if (formData.order_date) {
         formData.order_date = new Date(formData.order_date).toISOString();
       }
 
       // Calculate and set amounts from percentages
+      formData.subtotal = this.getOrderSubtotal();
       formData.discount_amount = this.getOrderDiscountAmount();
       formData.tax_amount = this.getTaxAmount();
       formData.total_amount = this.getOrderTotal();
 
+      // Handle empty payment method - ensure valid values only
+      if (!formData.payment_method || formData.payment_method === '') {
+        delete formData.payment_method; // Remove the field entirely if empty
+      } else {
+        // Ensure the payment method is one of the allowed values
+        const validPaymentMethods = ['credit_card', 'debit_card', 'paypal', 'bank_transfer', 'cash_on_delivery'];
+        if (!validPaymentMethods.includes(formData.payment_method)) {
+          console.error('Invalid payment method:', formData.payment_method);
+          delete formData.payment_method;
+        }
+      }
+
+      // Debug: Log the data being saved
+      console.log('Order data being saved:', formData);
+      console.log('Payment method value:', formData.payment_method);
+
+      let savedOrder: any;
+
       if (this.isEditMode && this.orderId) {
-        await this.supabaseService.updateRecord('orders', this.orderId, formData);
+        // Update existing order
+        savedOrder = await this.supabaseService.updateRecord('orders', this.orderId, formData);
+
+        // Delete existing order items and create new ones
+        await this.deleteExistingOrderItems();
+        await this.saveOrderItems(this.orderId, orderItems);
+
         alert('Order updated successfully');
       } else {
-        await this.supabaseService.createRecord('orders', formData);
+        // Create new order
+        savedOrder = await this.supabaseService.createRecord('orders', formData);
+
+        if (savedOrder && savedOrder.id) {
+          // Save order items
+          await this.saveOrderItems(savedOrder.id, orderItems);
+        }
+
         alert('Order created successfully');
       }
 
       this.router.navigate(['/admin/orders']);
     } catch (error) {
-      console.warn('Orders table not found in database:', error);
-      alert('Orders functionality is not yet available. The orders table needs to be created in the database.');
-      this.router.navigate(['/admin/orders']);
+      console.error('Error saving order:', error);
+      alert('Error saving order: ' + (error as any).message);
     } finally {
       this.loading = false;
+    }
+  }
+
+  private async deleteExistingOrderItems(): Promise<void> {
+    if (!this.orderId) return;
+
+    try {
+      // Get existing order items
+      const existingItems = await this.supabaseService.getTable('order_items', { order_id: this.orderId });
+
+      // Delete each item
+      if (existingItems && existingItems.length > 0) {
+        for (const item of existingItems) {
+          await this.supabaseService.deleteRecord('order_items', item.id);
+        }
+      }
+    } catch (error) {
+      console.error('Error deleting existing order items:', error);
+    }
+  }
+
+  private async saveOrderItems(orderId: string, orderItems: any[]): Promise<void> {
+    if (!orderItems || orderItems.length === 0) return;
+
+    try {
+      for (const item of orderItems) {
+        if (item.product_name && item.unit_price && item.quantity) {
+          const unitPrice = parseFloat(item.unit_price) || 0;
+          const quantity = parseInt(item.quantity) || 1;
+          const discountPercentage = parseFloat(item.discount_percentage) || 0;
+
+          // Calculate amounts
+          const itemSubtotal = unitPrice * quantity;
+          const discountAmount = itemSubtotal * (discountPercentage / 100);
+          const totalPrice = itemSubtotal - discountAmount;
+
+          const orderItemData = {
+            order_id: orderId,
+            product_id: item.product_id || null,
+            product_name: item.product_name,
+            product_sku: item.product_sku || null,
+            unit_price: unitPrice,
+            quantity: quantity,
+            total_price: totalPrice,
+            discount_percentage: discountPercentage,
+            discount_amount: discountAmount
+          };
+
+          await this.supabaseService.createRecord('order_items', orderItemData);
+        }
+      }
+    } catch (error) {
+      console.error('Error saving order items:', error);
+      throw error;
     }
   }
 } 

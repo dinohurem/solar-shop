@@ -35,6 +35,8 @@ export interface OrderItem {
     quantity: number;
     unitPrice: number;
     totalPrice: number;
+    discountAmount?: number;
+    discountPercentage?: number;
     productImageUrl?: string;
     productSpecifications?: any;
     createdAt: string;

@@ -130,6 +130,12 @@ import { Order } from '../../../shared/models/order.model';
                   <div class="mt-2 flex items-center space-x-4 text-sm text-gray-600 font-['DM_Sans']">
                     <span>{{ 'orderDetails.qty' | translate }}: {{ item.quantity }}</span>
                     <span>{{ 'orderDetails.unitPrice' | translate }}: {{ item.unitPrice | currency:'EUR':'symbol':'1.2-2' }}</span>
+                    <span *ngIf="item.discountAmount && item.discountAmount > 0" class="text-red-600">
+                      {{ 'orderDetails.itemDiscount' | translate }}: -{{ item.discountAmount | currency:'EUR':'symbol':'1.2-2' }}
+                      <span *ngIf="item.discountPercentage && item.discountPercentage > 0" class="text-xs">
+                        ({{ item.discountPercentage }}%)
+                      </span>
+                    </span>
                   </div>
                   <div class="mt-2">
                     <a 
@@ -270,58 +276,74 @@ export class OrderDetailsComponent implements OnInit {
       this.loading = true;
       this.error = false;
 
+      console.log(`Loading order details for ID: ${orderId}`);
+
       // Load order from database
       const orderData = await this.supabaseService.getTableById('orders', orderId);
 
       if (!orderData) {
+        console.error(`Order not found with ID: ${orderId}`);
         this.error = true;
         return;
       }
+
+      console.log('Order data loaded:', orderData);
 
       // Load order items
       const orderItemsData = await this.supabaseService.getTable('order_items', {
         order_id: orderId
       });
 
+      console.log(`Loaded ${orderItemsData?.length || 0} order items:`, orderItemsData);
+
       // Convert database order to Order model
       this.order = {
         id: orderData.id,
         orderNumber: orderData.order_number,
-        userId: orderData.user_id,
+        userId: orderData.user_id || undefined,
         customerEmail: orderData.customer_email,
-        customerName: orderData.customer_name,
-        customerPhone: orderData.customer_phone,
-        totalAmount: orderData.total_amount,
-        subtotal: orderData.subtotal,
+        customerName: orderData.customer_name || undefined,
+        customerPhone: orderData.customer_phone || undefined,
+        totalAmount: orderData.total_amount || 0,
+        subtotal: orderData.subtotal || 0,
         taxAmount: orderData.tax_amount || 0,
         shippingCost: orderData.shipping_cost || 0,
         discountAmount: orderData.discount_amount || 0,
         status: orderData.status,
         paymentStatus: orderData.payment_status,
-        shippingStatus: orderData.shipping_status,
-        paymentMethod: orderData.payment_method,
+        shippingStatus: orderData.shipping_status || undefined,
+        paymentMethod: orderData.payment_method || undefined,
         orderDate: orderData.order_date,
-        shippingAddress: orderData.shipping_address,
-        billingAddress: orderData.billing_address,
-        trackingNumber: orderData.tracking_number,
-        notes: orderData.notes,
-        adminNotes: orderData.admin_notes,
-        items: (orderItemsData || []).map((itemData: any) => ({
-          id: itemData.id,
-          orderId: itemData.order_id,
-          productId: itemData.product_id,
-          productName: itemData.product_name,
-          productSku: itemData.product_sku,
-          quantity: itemData.quantity,
-          unitPrice: itemData.unit_price,
-          totalPrice: itemData.total_price,
-          productImageUrl: itemData.product_image_url,
-          productSpecifications: itemData.product_specifications,
-          createdAt: itemData.created_at
-        })),
+        shippingAddress: orderData.shipping_address || undefined,
+        billingAddress: orderData.billing_address || undefined,
+        trackingNumber: orderData.tracking_number || undefined,
+        notes: orderData.notes || undefined,
+        adminNotes: orderData.admin_notes || undefined,
+        items: (orderItemsData || []).map((itemData: any) => {
+          const orderItem = {
+            id: itemData.id,
+            orderId: itemData.order_id,
+            productId: itemData.product_id || undefined,
+            productName: itemData.product_name || 'Unknown Product',
+            productSku: itemData.product_sku || undefined,
+            quantity: itemData.quantity || 0,
+            unitPrice: itemData.unit_price || 0,
+            totalPrice: itemData.total_price || 0,
+            discountAmount: itemData.discount_amount || 0,
+            discountPercentage: itemData.discount_percentage || 0,
+            productImageUrl: itemData.product_image_url || undefined,
+            productSpecifications: itemData.product_specifications || undefined,
+            createdAt: itemData.created_at
+          };
+
+          console.log('Mapped order item:', orderItem);
+          return orderItem;
+        }),
         createdAt: orderData.created_at,
         updatedAt: orderData.updated_at
       };
+
+      console.log('Successfully loaded complete order:', this.order);
 
     } catch (error) {
       console.error('Error loading order:', error);
