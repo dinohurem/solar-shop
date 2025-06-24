@@ -6,7 +6,6 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { DataTableComponent, TableConfig } from '../shared/data-table/data-table.component';
 import { SuccessModalComponent } from '../../../shared/components/modals/success-modal/success-modal.component';
-import { DeleteConfirmationModalComponent } from '../../../shared/components/modals/delete-confirmation-modal/delete-confirmation-modal.component';
 import * as OrdersActions from './store/orders.actions';
 import { selectOrders, selectOrdersLoading, selectOrdersError } from './store/orders.selectors';
 import { Order } from '../../../shared/models/order.model';
@@ -19,7 +18,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 @Component({
     selector: 'app-admin-orders',
     standalone: true,
-    imports: [CommonModule, DataTableComponent, SuccessModalComponent, DeleteConfirmationModalComponent, TranslatePipe],
+    imports: [CommonModule, DataTableComponent, SuccessModalComponent, TranslatePipe],
     template: `
     <div class="w-full max-w-full overflow-hidden">
       <div class="space-y-4 sm:space-y-6 p-4 sm:p-6">
@@ -64,14 +63,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
       (closed)="onSuccessModalClosed()"
     ></app-success-modal>
 
-    <!-- Delete Confirmation Modal -->
-    <app-delete-confirmation-modal
-      [isOpen]="showDeleteModal"
-      [title]="'admin.ordersForm.confirmOrderDeletion' | translate"
-      [message]="'admin.ordersForm.confirmOrderDeletionMessage' | translate"
-      (confirmed)="onDeleteConfirmed()"
-      (cancelled)="onDeleteCancelled()"
-    ></app-delete-confirmation-modal>
+
   `,
     styles: [`
     :host {
@@ -108,8 +100,6 @@ export class AdminOrdersComponent implements OnInit {
     showSuccessModal = false;
     successModalTitle = '';
     successModalMessage = '';
-    showDeleteModal = false;
-    pendingDeleteOrder: any = null;
 
     tableConfig: TableConfig = {
         columns: [
@@ -226,8 +216,8 @@ export class AdminOrdersComponent implements OnInit {
                 this.router.navigate(['/admin/orders/edit', item.id]);
                 break;
             case 'delete':
-                this.pendingDeleteOrder = item;
-                this.showDeleteModal = true;
+                // The delete confirmation is handled by the data-table component
+                this.store.dispatch(OrdersActions.deleteOrder({ orderId: item.id }));
                 break;
         }
     }
@@ -236,17 +226,7 @@ export class AdminOrdersComponent implements OnInit {
         this.router.navigate(['/admin/orders/details', item.id]);
     }
 
-    onDeleteConfirmed(): void {
-        if (this.pendingDeleteOrder) {
-            this.store.dispatch(OrdersActions.deleteOrder({ orderId: this.pendingDeleteOrder.id }));
-        }
-        this.onDeleteCancelled();
-    }
 
-    onDeleteCancelled(): void {
-        this.showDeleteModal = false;
-        this.pendingDeleteOrder = null;
-    }
 
     async onCsvImported(csvData: any[]): Promise<void> {
         // Orders typically aren't imported via CSV in most systems

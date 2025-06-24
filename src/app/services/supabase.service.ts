@@ -281,6 +281,46 @@ export class SupabaseService {
         if (error) throw error;
     }
 
+    // Admin-specific delete method that provides more detailed error logging
+    async adminDeleteRecord<T extends keyof Database['public']['Tables']>(
+        tableName: T,
+        id: string
+    ): Promise<void> {
+        console.log(`Admin attempting to delete ${tableName} record with id: ${id}`);
+
+        // First check if the record exists
+        const { data: existingRecord, error: fetchError } = await this.supabase
+            .from(tableName)
+            .select('id')
+            .eq('id', id)
+            .single();
+
+        if (fetchError) {
+            console.error(`Error fetching ${tableName} record for deletion:`, fetchError);
+            throw new Error(`Failed to find ${tableName} record: ${fetchError.message}`);
+        }
+
+        if (!existingRecord) {
+            console.error(`Record not found: ${tableName} with id ${id}`);
+            throw new Error(`Record not found: ${tableName} with id ${id}`);
+        }
+
+        console.log(`Record found, proceeding with deletion...`);
+
+        // Attempt the deletion
+        const { error } = await this.supabase
+            .from(tableName)
+            .delete()
+            .eq('id', id);
+
+        if (error) {
+            console.error(`Error deleting ${tableName} record:`, error);
+            throw new Error(`Failed to delete ${tableName}: ${error.message} (Code: ${error.code})`);
+        }
+
+        console.log(`Successfully deleted ${tableName} record with id: ${id}`);
+    }
+
     // Specific business logic methods
     async getProducts(filters?: {
         categoryId?: string;

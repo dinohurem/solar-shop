@@ -7,7 +7,6 @@ import { Observable, Subject } from 'rxjs';
 import { takeUntil, map } from 'rxjs/operators';
 import { DataTableComponent, TableConfig } from '../shared/data-table/data-table.component';
 import { SuccessModalComponent } from '../../../shared/components/modals/success-modal/success-modal.component';
-import { DeleteConfirmationModalComponent } from '../../../shared/components/modals/delete-confirmation-modal/delete-confirmation-modal.component';
 import * as OrdersActions from '../orders/store/orders.actions';
 import { selectOrders, selectOrdersLoading, selectOrdersError } from '../orders/store/orders.selectors';
 import { Order } from '../../../shared/models/order.model';
@@ -18,7 +17,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 @Component({
     selector: 'app-admin-orders-partners',
     standalone: true,
-    imports: [CommonModule, DataTableComponent, SuccessModalComponent, DeleteConfirmationModalComponent, TranslatePipe],
+    imports: [CommonModule, DataTableComponent, SuccessModalComponent, TranslatePipe],
     template: `
     <div class="space-y-6">
       <div class="flex items-center justify-between">
@@ -46,14 +45,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
       (closed)="onSuccessModalClosed()"
     ></app-success-modal>
 
-    <!-- Delete Confirmation Modal -->
-    <app-delete-confirmation-modal
-      [isOpen]="showDeleteModal"
-      [title]="'admin.partnerOrdersForm.confirmOrderDeletion' | translate"
-      [message]="'admin.partnerOrdersForm.confirmOrderDeletionMessage' | translate"
-      (confirmed)="onDeleteConfirmed()"
-      (cancelled)="onDeleteCancelled()"
-    ></app-delete-confirmation-modal>
+
   `,
     styles: [`
     :host {
@@ -90,8 +82,6 @@ export class AdminOrdersPartnersComponent implements OnInit {
     showSuccessModal = false;
     successModalTitle = '';
     successModalMessage = '';
-    showDeleteModal = false;
-    pendingDeleteOrder: any = null;
 
     tableConfig: TableConfig = {
         columns: [
@@ -208,26 +198,14 @@ export class AdminOrdersPartnersComponent implements OnInit {
                 this.router.navigate(['/admin/orders/edit', item.id]);
                 break;
             case 'delete':
-                this.pendingDeleteOrder = item;
-                this.showDeleteModal = true;
+                // The delete confirmation is handled by the data-table component
+                this.store.dispatch(OrdersActions.deleteOrder({ orderId: item.id }));
                 break;
         }
     }
 
     onRowClick(item: any): void {
         this.router.navigate(['/admin/orders/details', item.id]);
-    }
-
-    onDeleteConfirmed(): void {
-        if (this.pendingDeleteOrder) {
-            this.store.dispatch(OrdersActions.deleteOrder({ orderId: this.pendingDeleteOrder.id }));
-        }
-        this.onDeleteCancelled();
-    }
-
-    onDeleteCancelled(): void {
-        this.showDeleteModal = false;
-        this.pendingDeleteOrder = null;
     }
 
     async onCsvImported(csvData: any[]): Promise<void> {

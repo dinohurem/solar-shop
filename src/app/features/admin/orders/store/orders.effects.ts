@@ -216,11 +216,22 @@ export class OrdersEffects {
         this.actions$.pipe(
             ofType(OrdersActions.deleteOrder),
             switchMap(({ orderId }) =>
-                this.supabaseService.deleteRecord('orders', orderId).then(() =>
-                    OrdersActions.deleteOrderSuccess({ orderId })
-                ).catch(error =>
-                    OrdersActions.deleteOrderFailure({ error: error.message })
-                )
+                // First delete order items, then delete the order
+                this.supabaseService.getTable('order_items', { order_id: orderId }).then(async (orderItems) => {
+                    // Delete all order items first
+                    if (orderItems && orderItems.length > 0) {
+                        for (const item of orderItems) {
+                            await this.supabaseService.adminDeleteRecord('order_items', item.id);
+                        }
+                    }
+
+                    // Then delete the order
+                    await this.supabaseService.adminDeleteRecord('orders', orderId);
+
+                    return OrdersActions.deleteOrderSuccess({ orderId });
+                }).catch(error => {
+                    return OrdersActions.deleteOrderFailure({ error: error.message });
+                })
             )
         )
     );
