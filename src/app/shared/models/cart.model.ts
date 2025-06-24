@@ -35,7 +35,7 @@ export interface CartItem {
     minQuantity: number;
     maxQuantity: number;
     weight?: number;
-    dimensions?: ProductDimensions;
+    dimensions?: string;
     image: string;
     category: string;
     brand: string;
@@ -47,13 +47,6 @@ export interface CartItem {
     taxInfo: ItemTaxInfo;
 }
 
-export interface ProductDimensions {
-    length: number;
-    width: number;
-    height: number;
-    unit: 'cm' | 'mm' | 'm' | 'in' | 'ft';
-}
-
 export interface ProductCustomization {
     type: string;
     name: string;
@@ -63,16 +56,14 @@ export interface ProductCustomization {
 }
 
 export interface ItemAvailability {
-    inStock: boolean;
     quantity: number;
     stockStatus: 'in_stock' | 'low_stock' | 'out_of_stock' | 'pre_order';
     estimatedDelivery?: string;
-    backorderAllowed: boolean;
 }
 
 export interface ItemShippingInfo {
     weight: number;
-    dimensions: ProductDimensions;
+    dimensions: string;
     shippingClass: string;
     freeShipping: boolean;
     restrictions?: string[];

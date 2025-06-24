@@ -12,12 +12,17 @@ export interface Product {
     imageUrl: string;
     category: string;
     manufacturer: string;
+    model?: string;
+    weight?: number;
+    dimensions?: string;
     certificates: string[];
     rating: number;
     reviewCount: number;
     availability: 'available' | 'limited' | 'out-of-stock';
     featured: boolean;
     createdAt: Date;
+    specifications: { [key: string]: string };
+    features: string[];
 }
 
 export interface ProductFilters {
@@ -103,13 +108,12 @@ export class ProductListService {
             }
 
             if (filters?.availability) {
-                switch (filters.availability) {
-                    case 'available':
-                        supabaseFilters.in_stock = true;
-                        break;
-                    case 'out-of-stock':
-                        supabaseFilters.in_stock = false;
-                        break;
+                if (filters.availability === 'available') {
+                    supabaseFilters.stock_status = 'in_stock';
+                } else if (filters.availability === 'limited') {
+                    supabaseFilters.stock_status = 'low_stock';
+                } else if (filters.availability === 'out-of-stock') {
+                    supabaseFilters.stock_status = 'out_of_stock';
                 }
             }
 
@@ -207,9 +211,9 @@ export class ProductListService {
                 ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
                 : undefined;
 
-            // Determine availability
+            // Determine availability based on stock status
             let availability: 'available' | 'limited' | 'out-of-stock' = 'available';
-            if (!product.in_stock || product.stock_quantity === 0) {
+            if (product.stock_status === 'out_of_stock' || product.stock_quantity === 0) {
                 availability = 'out-of-stock';
             } else if (product.stock_status === 'low_stock' || product.stock_quantity < 10) {
                 availability = 'limited';
@@ -225,12 +229,17 @@ export class ProductListService {
                 imageUrl,
                 category: categoryName,
                 manufacturer: product.brand,
+                model: product.model,
+                weight: product.weight,
+                dimensions: product.dimensions,
                 certificates: product.certifications || [],
                 rating: product.rating_average || 0,
                 reviewCount: product.rating_count || 0,
                 availability,
                 featured: product.is_featured || false,
-                createdAt: new Date(product.created_at)
+                createdAt: new Date(product.created_at),
+                specifications: product.specifications || {},
+                features: product.features || []
             };
         } catch (error) {
             console.error('Error converting product:', error);

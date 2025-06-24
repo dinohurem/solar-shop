@@ -193,7 +193,7 @@ export class WishlistEffects {
                                 isActive: product.is_active,
                                 isFeatured: product.is_featured,
                                 stockQuantity: product.stock_quantity,
-                                availability: this.determineAvailability(product.stock_status, product.in_stock),
+                                availability: this.determineAvailability(product.stock_status),
                                 rating: product.rating_average || 0,
                                 reviewCount: product.rating_count || 0
                             }
@@ -300,7 +300,7 @@ export class WishlistEffects {
                     isActive: productDetails.is_active,
                     isFeatured: productDetails.is_featured,
                     stockQuantity: productDetails.stock_quantity,
-                    availability: this.determineAvailability(productDetails.stock_status, productDetails.in_stock),
+                    availability: this.determineAvailability(productDetails.stock_status),
                     rating: productDetails.rating_average || 0,
                     reviewCount: productDetails.rating_count || 0
                 };
@@ -340,8 +340,8 @@ export class WishlistEffects {
         }
     }
 
-    private determineAvailability(stockStatus: string, inStock: boolean): 'available' | 'limited' | 'out-of-stock' {
-        if (!inStock || stockStatus === 'out_of_stock') {
+    private determineAvailability(stockStatus: string): 'available' | 'limited' | 'out-of-stock' {
+        if (stockStatus === 'out_of_stock') {
             return 'out-of-stock';
         } else if (stockStatus === 'low_stock') {
             return 'limited';

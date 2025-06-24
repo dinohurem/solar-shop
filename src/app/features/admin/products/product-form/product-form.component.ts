@@ -16,15 +16,18 @@ interface Product {
   price: number;
   compare_at_price?: number;
   sku: string;
+  brand: string;
+  model: string;
   category_id?: string;
   images?: string[];
-  specifications?: any;
+  specifications?: { [key: string]: string };
+  features?: string[];
   is_active: boolean;
   is_featured: boolean;
   is_on_sale: boolean;
   stock_quantity: number;
   weight?: number;
-  dimensions?: any;
+  dimensions?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -153,6 +156,19 @@ interface Product {
             </div>
 
             <div class="relative">
+              <input
+                type="text"
+                id="model"
+                formControlName="model"
+                class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
+                placeholder="Model"
+              >
+              <label for="model" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+                {{ 'admin.productModel' | translate }}
+              </label>
+            </div>
+
+            <div class="relative">
               <select
                 id="category_id"
                 formControlName="category_id"
@@ -167,6 +183,50 @@ interface Product {
                 {{ 'admin.productCategory' | translate }}
               </label>
             </div>
+          </div>
+
+          <!-- Specifications -->
+          <div class="mt-6">
+            <div class="relative">
+              <textarea
+                id="specifications"
+                formControlName="specifications"
+                rows="6"
+                class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent resize-none font-mono text-sm"
+                placeholder='{"frequency": "50Hz", "ac_voltage": "230V", "efficiency": "97.6%"}'
+              ></textarea>
+              <label for="specifications" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+                {{ 'admin.productSpecifications' | translate }} (JSON)
+              </label>
+            </div>
+            <p class="mt-3 text-sm text-gray-500 flex items-center">
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              {{ 'admin.productSpecificationsHelp' | translate }}
+            </p>
+          </div>
+
+          <!-- Features -->
+          <div class="mt-6">
+            <div class="relative">
+              <textarea
+                id="features"
+                formControlName="features"
+                rows="6"
+                class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent resize-none"
+                placeholder="Dual MPPT trackers&#10;WiFi monitoring&#10;Fanless design&#10;Compact size&#10;Easy installation"
+              ></textarea>
+              <label for="features" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+                {{ 'admin.productFeatures' | translate }}
+              </label>
+            </div>
+            <p class="mt-3 text-sm text-gray-500 flex items-center">
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              {{ 'admin.productFeaturesHelp' | translate }}
+            </p>
           </div>
         </div>
 
@@ -268,6 +328,25 @@ interface Product {
                 {{ 'admin.productWeight' | translate }} (kg)
               </label>
             </div>
+
+            <div class="relative">
+              <input
+                type="text"
+                id="dimensions"
+                formControlName="dimensions"
+                class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
+                placeholder="100x50x20cm"
+              >
+              <label for="dimensions" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+                {{ 'admin.productDimensions' | translate }}
+              </label>
+            </div>
+            <p class="mt-3 text-sm text-gray-500 flex items-center">
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              {{ 'admin.productDimensionsHelp' | translate }}
+            </p>
           </div>
         </div>
 
@@ -404,13 +483,17 @@ export class ProductFormComponent implements OnInit {
       compare_at_price: [''],
       sku: ['', [Validators.required]],
       brand: [''],
+      model: [''],
       category_id: [''],
       images: [''],
       stock_quantity: [0, [Validators.required, Validators.min(0)]],
       weight: [null],
+      dimensions: [''],
       is_active: [true],
       is_featured: [false],
-      is_on_sale: [false]
+      is_on_sale: [false],
+      specifications: [''],
+      features: ['']
     });
   }
 
@@ -449,13 +532,17 @@ export class ProductFormComponent implements OnInit {
           compare_at_price: (data as any).compare_at_price || data.original_price || '',
           sku: data.sku || '',
           brand: data.brand || '',
+          model: data.model || '',
           category_id: data.category_id || '',
           stock_quantity: Number(data.stock_quantity) || 0,
           weight: data.weight ? Number(data.weight) : null,
+          dimensions: data.dimensions || '',
           is_active: data.is_active !== undefined ? Boolean(data.is_active) : true,
           is_featured: data.is_featured !== undefined ? Boolean(data.is_featured) : false,
           is_on_sale: data.is_on_sale !== undefined ? Boolean(data.is_on_sale) : false,
-          images: this.formatImages(data)
+          images: this.formatImages(data),
+          specifications: this.formatSpecifications(data.specifications),
+          features: this.formatFeatures(data.features)
         };
 
         this.productForm.patchValue(formData);
@@ -473,6 +560,52 @@ export class ProductFormComponent implements OnInit {
       return data.images;
     }
     return '';
+  }
+
+  private formatSpecifications(specifications: any): string {
+    if (!specifications) {
+      return '';
+    }
+
+    try {
+      // If it's already a string, return it
+      if (typeof specifications === 'string') {
+        return specifications;
+      }
+
+      // If it's an object, convert to JSON string
+      if (typeof specifications === 'object') {
+        return JSON.stringify(specifications, null, 2);
+      }
+
+      return '';
+    } catch (error) {
+      console.error('Error formatting specifications:', error);
+      return '';
+    }
+  }
+
+  private formatFeatures(features: any): string {
+    if (!features) {
+      return '';
+    }
+
+    try {
+      // If it's already a string, return it
+      if (typeof features === 'string') {
+        return features;
+      }
+
+      // If it's an array, join with newlines
+      if (Array.isArray(features)) {
+        return features.join('\n');
+      }
+
+      return '';
+    } catch (error) {
+      console.error('Error formatting features:', error);
+      return '';
+    }
   }
 
   onNameChange(event: any): void {
@@ -504,6 +637,25 @@ export class ProductFormComponent implements OnInit {
         type: index === 0 ? 'main' : 'gallery'
       }));
 
+      // Parse specifications JSON string to object
+      let specificationsObj = {};
+      if (formValue.specifications && formValue.specifications.trim()) {
+        try {
+          specificationsObj = JSON.parse(formValue.specifications.trim());
+        } catch (error) {
+          console.error('Error parsing specifications JSON:', error);
+          // Continue with empty specifications if parsing fails
+        }
+      }
+
+      // Parse features string to array
+      let featuresArray: string[] = [];
+      if (formValue.features && formValue.features.trim()) {
+        featuresArray = formValue.features.split('\n')
+          .map((feature: string) => feature.trim())
+          .filter((feature: string) => feature.length > 0);
+      }
+
       // Map form fields to database fields
       const productData: any = {
         name: formValue.name,
@@ -514,18 +666,19 @@ export class ProductFormComponent implements OnInit {
         currency: 'EUR', // Default currency
         sku: formValue.sku,
         brand: formValue.brand,
+        model: formValue.model,
         category_id: formValue.category_id || undefined,
         stock_quantity: Number(formValue.stock_quantity),
         weight: formValue.weight ? Number(formValue.weight) : undefined,
+        dimensions: formValue.dimensions || '',
         is_active: Boolean(formValue.is_active),
         is_featured: Boolean(formValue.is_featured),
         is_on_sale: Boolean(formValue.is_on_sale),
         images: imagesArray, // Use JSONB array format
-        specifications: [], // Default empty specifications array
-        features: [], // Default empty features
+        specifications: specificationsObj,
+        features: featuresArray,
         certifications: [], // Default empty certifications
         tags: [], // Default empty tags
-        in_stock: Number(formValue.stock_quantity) > 0, // Derive from stock quantity
         stock_status: Number(formValue.stock_quantity) > 0 ? 'in_stock' as const : 'out_of_stock' as const,
         updated_at: new Date().toISOString()
       };

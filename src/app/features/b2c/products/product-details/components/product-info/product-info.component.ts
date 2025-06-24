@@ -149,10 +149,64 @@ import * as CartActions from '../../../../../b2c/cart/store/cart.actions';
             <dd class="text-sm text-gray-900 font-['DM_Sans']">{{ product.manufacturer }}</dd>
           </div>
           <div class="flex justify-between">
+            <dt class="text-sm font-medium text-gray-500 font-['DM_Sans']">{{ 'productDetails.model' | translate }}:</dt>
+            <dd class="text-sm text-gray-900 font-['DM_Sans']">{{ product.model || '-' }}</dd>
+          </div>
+          <div class="flex justify-between">
             <dt class="text-sm font-medium text-gray-500 font-['DM_Sans']">{{ 'productDetails.sku' | translate }}:</dt>
             <dd class="text-sm text-gray-900 font-['DM_Sans']">{{ product.id.toUpperCase() }}</dd>
           </div>
+          <div class="flex justify-between" *ngIf="product.weight">
+            <dt class="text-sm font-medium text-gray-500 font-['DM_Sans']">{{ 'productDetails.weight' | translate }}:</dt>
+            <dd class="text-sm text-gray-900 font-['DM_Sans']">{{ product.weight }} kg</dd>
+          </div>
+          <div class="flex justify-between" *ngIf="product.dimensions">
+            <dt class="text-sm font-medium text-gray-500 font-['DM_Sans']">{{ 'productDetails.dimensions' | translate }}:</dt>
+            <dd class="text-sm text-gray-900 font-['DM_Sans']">{{ product.dimensions }}</dd>
+          </div>
         </dl>
+
+        <!-- Specifications Subsection -->
+        <ng-container *ngIf="hasSpecifications()">
+          <div class="mt-6 pt-6 border-t border-gray-100">
+            <button type="button" (click)="toggleSpecifications()" class="flex items-center w-full justify-between group focus:outline-none" [attr.aria-expanded]="specificationsOpen" [attr.aria-controls]="'specifications-content'">
+              <h4 class="text-base font-semibold text-gray-900 mb-3 font-['Poppins']">{{ 'productDetails.specifications' | translate }}</h4>
+              <svg [ngClass]="{'rotate-180': specificationsOpen, 'rotate-0': !specificationsOpen}" class="w-5 h-5 text-gray-500 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            <div id="specifications-content" *ngIf="specificationsOpen" class="mt-2">
+              <dl class="grid grid-cols-1 gap-3">
+                <div *ngFor="let spec of getSpecificationsArray()" class="flex justify-between py-2 px-3 bg-gray-50 rounded-lg">
+                  <dt class="text-sm font-medium text-gray-600 font-['DM_Sans']">{{ formatSpecificationKey(spec.key) }}:</dt>
+                  <dd class="text-sm text-gray-900 font-semibold font-['DM_Sans']">{{ spec.value }}</dd>
+                </div>
+              </dl>
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- Features Subsection -->
+        <ng-container *ngIf="hasFeatures()">
+          <div class="mt-6 pt-6 border-t border-gray-100">
+            <button type="button" (click)="toggleFeatures()" class="flex items-center w-full justify-between group focus:outline-none" [attr.aria-expanded]="featuresOpen" [attr.aria-controls]="'features-content'">
+              <h4 class="text-base font-semibold text-gray-900 mb-3 font-['Poppins']">{{ 'productDetails.features' | translate }}</h4>
+              <svg [ngClass]="{'rotate-180': featuresOpen, 'rotate-0': !featuresOpen}" class="w-5 h-5 text-gray-500 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            <div id="features-content" *ngIf="featuresOpen" class="mt-2">
+              <div class="grid grid-cols-1 gap-2">
+                <div *ngFor="let feature of product.features" class="flex items-center py-2 px-3 bg-blue-50 rounded-lg">
+                  <svg class="w-4 h-4 text-blue-600 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                  <span class="text-sm text-blue-900 font-medium font-['DM_Sans']">{{ feature }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-container>
       </div>
 
       <!-- Certificates -->
@@ -281,6 +335,8 @@ import * as CartActions from '../../../../../b2c/cart/store/cart.actions';
     :host {
       display: block;
     }
+    .rotate-180 { transform: rotate(180deg); }
+    .rotate-0 { transform: rotate(0deg); }
   `]
 })
 export class ProductInfoComponent implements OnInit, OnDestroy {
@@ -304,6 +360,9 @@ export class ProductInfoComponent implements OnInit, OnDestroy {
     addingToWishlist: boolean;
     removingFromWishlist: string | null;
   }>;
+
+  specificationsOpen = false;
+  featuresOpen = false;
 
   ngOnInit(): void {
     // Create combined observable for template
@@ -387,5 +446,35 @@ export class ProductInfoComponent implements OnInit, OnDestroy {
 
   getCompanySavings(): number {
     return this.product.price - this.getCompanyPrice();
+  }
+
+  getSpecificationsArray(): { key: string; value: string }[] {
+    if (!this.product.specifications) {
+      return [];
+    }
+    return Object.entries(this.product.specifications).map(([key, value]) => ({
+      key,
+      value: String(value)
+    }));
+  }
+
+  formatSpecificationKey(key: string): string {
+    return key.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim();
+  }
+
+  hasSpecifications(): boolean {
+    return !!(this.product.specifications && Object.keys(this.product.specifications).length > 0);
+  }
+
+  hasFeatures(): boolean {
+    return !!(this.product.features && this.product.features.length > 0);
+  }
+
+  toggleSpecifications() {
+    this.specificationsOpen = !this.specificationsOpen;
+  }
+
+  toggleFeatures() {
+    this.featuresOpen = !this.featuresOpen;
   }
 } 

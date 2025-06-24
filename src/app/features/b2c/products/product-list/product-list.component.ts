@@ -34,7 +34,12 @@ export interface Product {
   imageUrl: string;
   category: string;
   manufacturer: string;
+  model?: string;
+  weight?: number;
+  dimensions?: string;
   certificates: string[];
+  specifications?: { [key: string]: string };
+  features?: string[];
   rating: number;
   reviewCount: number;
   availability: 'available' | 'limited' | 'out-of-stock';

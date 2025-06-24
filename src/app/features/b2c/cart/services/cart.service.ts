@@ -219,14 +219,12 @@ export class CartService {
                     addedAt: now,
                     updatedAt: now,
                     availability: {
-                        inStock: product.in_stock,
                         quantity: product.stock_quantity,
                         stockStatus: product.stock_status,
-                        backorderAllowed: false
                     },
                     shippingInfo: {
                         weight: product.weight || 0,
-                        dimensions: product.dimensions || { length: 0, width: 0, height: 0, unit: 'cm' },
+                        dimensions: product.dimensions || '',
                         shippingClass: 'standard',
                         freeShipping: product.free_shipping
                     },
@@ -359,14 +357,12 @@ export class CartService {
                         addedAt: item.created_at,
                         updatedAt: item.updated_at,
                         availability: {
-                            inStock: product.in_stock,
                             quantity: product.stock_quantity,
                             stockStatus: product.stock_status,
-                            backorderAllowed: false
                         },
                         shippingInfo: {
                             weight: product.weight || 0,
-                            dimensions: product.dimensions || { length: 0, width: 0, height: 0, unit: 'cm' },
+                            dimensions: product.dimensions || '',
                             shippingClass: 'standard',
                             freeShipping: product.free_shipping
                         },

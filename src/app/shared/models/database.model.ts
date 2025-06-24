@@ -133,16 +133,15 @@ export interface Database {
                     currency: string;
                     sku: string;
                     brand: string;
+                    model?: string;
                     category_id: string;
-                    subcategory?: string;
                     images: ProductImage[];
-                    specifications: ProductSpecification[];
+                    specifications: { [key: string]: string };
                     features: string[];
-                    in_stock: boolean;
                     stock_quantity: number;
                     stock_status: 'in_stock' | 'low_stock' | 'out_of_stock' | 'pre_order';
                     weight?: number;
-                    dimensions?: ProductDimensions;
+                    dimensions?: string;
                     warranty_duration?: number;
                     warranty_unit?: 'months' | 'years';
                     warranty_description?: string;
@@ -177,16 +176,15 @@ export interface Database {
                     currency?: string;
                     sku: string;
                     brand: string;
+                    model?: string;
                     category_id: string;
-                    subcategory?: string;
                     images?: ProductImage[];
-                    specifications?: ProductSpecification[];
+                    specifications?: { [key: string]: string };
                     features?: string[];
-                    in_stock?: boolean;
                     stock_quantity?: number;
                     stock_status?: 'in_stock' | 'low_stock' | 'out_of_stock' | 'pre_order';
                     weight?: number;
-                    dimensions?: ProductDimensions;
+                    dimensions?: string;
                     warranty_duration?: number;
                     warranty_unit?: 'months' | 'years';
                     warranty_description?: string;
@@ -221,16 +219,15 @@ export interface Database {
                     currency?: string;
                     sku?: string;
                     brand?: string;
+                    model?: string;
                     category_id?: string;
-                    subcategory?: string;
                     images?: ProductImage[];
-                    specifications?: ProductSpecification[];
+                    specifications?: { [key: string]: string };
                     features?: string[];
-                    in_stock?: boolean;
                     stock_quantity?: number;
                     stock_status?: 'in_stock' | 'low_stock' | 'out_of_stock' | 'pre_order';
                     weight?: number;
-                    dimensions?: ProductDimensions;
+                    dimensions?: string;
                     warranty_duration?: number;
                     warranty_unit?: 'months' | 'years';
                     warranty_description?: string;
@@ -667,21 +664,6 @@ export interface ProductImage {
     is_primary: boolean;
     order: number;
     type: 'main' | 'gallery' | 'thumbnail' | 'technical';
-}
-
-export interface ProductSpecification {
-    name: string;
-    value: string;
-    unit?: string;
-    category: string;
-    order: number;
-}
-
-export interface ProductDimensions {
-    length: number;
-    width: number;
-    height: number;
-    unit: 'cm' | 'mm' | 'm' | 'in' | 'ft';
 }
 
 export type OfferType =

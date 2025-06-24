@@ -9,16 +9,16 @@ export interface Product {
     currency: string;
     sku: string;
     brand: string;
+    model?: string;
     category: ProductCategory;
-    subcategory?: string;
     images: ProductImage[];
-    specifications: ProductSpecification[];
+    specifications: { [key: string]: string };
     features: string[];
     availability: ProductAvailability;
     rating: ProductRating;
     tags: string[];
     weight?: number;
-    dimensions?: ProductDimensions;
+    dimensions?: string;
     warranty: ProductWarranty;
     energyEfficiency?: EnergyEfficiency;
     certifications: string[];
@@ -52,20 +52,10 @@ export interface ProductImage {
     type: 'main' | 'gallery' | 'thumbnail' | 'technical';
 }
 
-export interface ProductSpecification {
-    name: string;
-    value: string;
-    unit?: string;
-    category: string;
-    order: number;
-}
-
 export interface ProductAvailability {
-    inStock: boolean;
     quantity: number;
     stockStatus: 'in_stock' | 'low_stock' | 'out_of_stock' | 'pre_order';
     estimatedDelivery?: string;
-    backorderAllowed: boolean;
 }
 
 export interface ProductRating {
@@ -78,13 +68,6 @@ export interface ProductRating {
         4: number;
         5: number;
     };
-}
-
-export interface ProductDimensions {
-    length: number;
-    width: number;
-    height: number;
-    unit: 'cm' | 'mm' | 'm' | 'in' | 'ft';
 }
 
 export interface ProductWarranty {
