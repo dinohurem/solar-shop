@@ -196,20 +196,20 @@ export class AdminOrdersComponent implements OnInit {
         // Load orders
         this.store.dispatch(OrdersActions.loadOrders());
 
-        // Listen for successful delete operations
+        // Listen for successful delete operations (silent - no popup)
         this.actions$.pipe(
             ofType(OrdersActions.deleteOrderSuccess),
             takeUntil(this.destroy$)
         ).subscribe(() => {
-            this.showSuccess(this.translationService.translate('admin.ordersForm.success'), this.translationService.translate('admin.ordersForm.orderDeletedSuccessfully'));
+            // Order deleted successfully - no popup needed
         });
 
-        // Listen for failed delete operations
+        // Listen for failed delete operations (silent - just log error)
         this.actions$.pipe(
             ofType(OrdersActions.deleteOrderFailure),
             takeUntil(this.destroy$)
         ).subscribe(({ error }) => {
-            this.showSuccess(this.translationService.translate('admin.ordersForm.error'), this.translationService.translate('admin.ordersForm.failedToDeleteOrder', { error }));
+            console.error('Failed to delete order:', error);
         });
     }
 

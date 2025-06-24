@@ -5,13 +5,14 @@ import { Title } from '@angular/platform-browser';
 import { BehaviorSubject } from 'rxjs';
 import { SupabaseService } from '../../../services/supabase.service';
 import { DataTableComponent, TableConfig } from '../shared/data-table/data-table.component';
+import { SuccessModalComponent } from '../../../shared/components/modals/success-modal/success-modal.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { TranslationService } from '../../../shared/services/translation.service';
 
 @Component({
     selector: 'app-admin-categories',
     standalone: true,
-    imports: [CommonModule, DataTableComponent, TranslatePipe],
+    imports: [CommonModule, DataTableComponent, SuccessModalComponent, TranslatePipe],
     template: `
     <div class="w-full">
       <div class="space-y-4 sm:space-y-6 p-4 sm:p-6">
@@ -35,9 +36,17 @@ import { TranslationService } from '../../../shared/services/translation.service
         (rowClicked)="onRowClick($event)"
         (csvImported)="onCsvImported($event)">
       </app-data-table>
-        </div>
+                </div>
       </div>
     </div>
+
+    <!-- Success/Error Modal -->
+    <app-success-modal
+      [isOpen]="showModal"
+      [title]="modalTitle"
+      [message]="modalMessage"
+      (closed)="onModalClosed()"
+    ></app-success-modal>
   `,
     styles: [`
     :host {
@@ -56,6 +65,14 @@ export class AdminCategoriesComponent implements OnInit {
 
     categories$ = this.categoriesSubject.asObservable();
     loading$ = this.loadingSubject.asObservable();
+
+    // Modal properties
+    showModal = false;
+    modalTitle = '';
+    modalMessage = '';
+    modalIsSuccess = true;
+
+
 
     tableConfig: TableConfig = {
         columns: [
@@ -190,17 +207,40 @@ export class AdminCategoriesComponent implements OnInit {
     }
 
     private async deleteCategory(category: any): Promise<void> {
-        if (!confirm(`Are you sure you want to delete "${category.name}"?`)) {
-            return;
-        }
-
         try {
             await this.supabaseService.deleteRecord('categories', category.id);
-            alert(this.translationService.translate('admin.categoriesForm.categoryDeletedSuccessfully'));
+            this.showSuccess(
+                this.translationService.translate('admin.categoriesForm.success'),
+                this.translationService.translate('admin.categoriesForm.categoryDeletedSuccessfully')
+            );
             this.loadCategories();
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error deleting category:', error);
-            alert(this.translationService.translate('admin.categoriesForm.errorDeletingCategory'));
+
+            // Check if it's a foreign key constraint error
+            if (error?.code === '23502' || error?.code === '23503' || error?.message?.includes('violates not-null constraint') || error?.message?.includes('violates foreign key constraint')) {
+                this.showSuccess(
+                    this.translationService.translate('admin.categoriesForm.error'),
+                    this.translationService.translate('admin.categoriesForm.categoryHasRelatedProducts')
+                );
+            } else {
+                this.showSuccess(
+                    this.translationService.translate('admin.categoriesForm.error'),
+                    this.translationService.translate('admin.categoriesForm.errorDeletingCategory')
+                );
+            }
         }
+    }
+
+    onModalClosed(): void {
+        this.showModal = false;
+        this.modalTitle = '';
+        this.modalMessage = '';
+    }
+
+    private showSuccess(title: string, message: string): void {
+        this.modalTitle = title;
+        this.modalMessage = message;
+        this.showModal = true;
     }
 } 

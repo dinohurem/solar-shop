@@ -220,7 +220,7 @@ import { Offer } from '../../../shared/models/offer.model';
             <button 
               (click)="onExploreProducts()"
               [disabled]="isLoading$ | async"
-              class="bg-solar-400 text-white font-semibold text-base px-8 py-3 rounded-xl hover:bg-solar-300 transition-all duration-300 font-['DM_Sans'] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+              class="bg-solar-400 text-white font-semibold text-base px-8 py-3 rounded-xl hover:bg-solar-700 transition-all duration-300 font-['DM_Sans'] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:-translate-y-1"
             >
               <span *ngIf="!(isLoading$ | async)">{{ 'hero.exploreProducts' | translate }}</span>
               <span *ngIf="isLoading$ | async" class="flex items-center justify-center">

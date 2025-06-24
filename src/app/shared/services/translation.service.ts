@@ -387,6 +387,7 @@ export class TranslationService {
             },
             // Admin Panel
             admin: {
+
                 welcome: 'Dobrodošli',
                 viewSite: 'Pogledaj stranicu',
                 logout: 'Odjavi se',
@@ -514,6 +515,11 @@ export class TranslationService {
                     categoryDeletedSuccessfully: 'Kategorija uspješno obrisana',
                     errorDeletingCategory: 'Greška prilikom brisanja kategorije',
                     categoryAlreadyExists: 'Kategorija {{name}} već postoji',
+                    confirmCategoryDeletion: 'Jeste li sigurni da želite obrisati kategoriju "{{name}}"?',
+                    categoryHasRelatedProducts: 'Kategorija se ne može obrisati jer sadrži povezane proizvode. Prvo uklonite sve proizvode iz ove kategorije.',
+                    success: 'Uspjeh',
+                    error: 'Greška',
+                    longTitle: 'Kategorije - Solar Shop Admin'
                 },
                 blogForm: {
                     title: 'Blog postovi',
@@ -1004,6 +1010,9 @@ export class TranslationService {
                     noTemplateAvailable: 'Nema dostupnih podataka za preuzimanje CSV uzorka',
                     getStartedByCreating: 'Započnite s kreiranjem sada...',
                     noResults: 'Nema rezultata',
+                    confirmDeletion: 'Potvrdi brisanje',
+                    confirmDeleteMessage: 'Jeste li sigurni da želite obrisati "{{itemName}}"? Ova radnja se ne može poništiti.',
+                    thisItem: 'ovu stavku',
                 },
             },
             // Admin Users
@@ -2380,6 +2389,11 @@ export class TranslationService {
                     categoryDeletedSuccessfully: 'Category deleted successfully',
                     errorDeletingCategory: 'Error deleting category',
                     categoryAlreadyExists: 'Category {{name}} already exists',
+                    confirmCategoryDeletion: 'Are you sure you want to delete the category "{{name}}"?',
+                    categoryHasRelatedProducts: 'Category cannot be deleted because it contains related products. Please remove all products from this category first.',
+                    success: 'Success',
+                    error: 'Error',
+                    longTitle: 'Categories - Solar Shop Admin'
                 },
                 blogForm: {
                     title: 'Blog Posts',
@@ -2849,6 +2863,9 @@ export class TranslationService {
                     noTemplateAvailable: 'No template available for this entity',
                     getStartedByCreating: 'Get started by creating now...',
                     noResults: 'No results found',
+                    confirmDeletion: 'Confirm Deletion',
+                    confirmDeleteMessage: 'Are you sure you want to delete "{{itemName}}"? This action cannot be undone.',
+                    thisItem: 'this item',
                 },
             },
             // Admin Users

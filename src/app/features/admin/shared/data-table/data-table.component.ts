@@ -579,11 +579,11 @@ export class DataTableComponent implements OnInit, OnChanges {
 
   showDeleteConfirmation(item: any): void {
     this.pendingDeleteItem = item;
-    this.deleteModalTitle = 'Confirm Deletion';
+    this.deleteModalTitle = this.translationService.translate('admin.common.confirmDeletion');
 
     // Try to get a meaningful name for the item
-    const itemName = item.name || item.title || item.first_name || item.order_number || 'this item';
-    this.deleteModalMessage = `Are you sure you want to delete "${itemName}"? This action cannot be undone.`;
+    const itemName = item.name || item.title || item.first_name || item.order_number || this.translationService.translate('admin.common.thisItem');
+    this.deleteModalMessage = this.translationService.translate('admin.common.confirmDeleteMessage', { itemName });
 
     this.showDeleteModal = true;
   }

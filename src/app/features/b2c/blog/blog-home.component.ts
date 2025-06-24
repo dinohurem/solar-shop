@@ -131,7 +131,7 @@ import {
         <div class="text-center mt-12" *ngIf="!(isLoading$ | async) && !(error$ | async) && (displayPosts$ | async)?.length">
           <button 
             (click)="navigateToBlog()"
-            class="bg-solar-600 text-white px-8 py-3 rounded-lg hover:bg-solar-700 transition-colors font-medium font-['DM_Sans'] inline-flex items-center space-x-2"
+            class="inline-flex items-center gap-2 bg-solar-600 text-white font-medium px-8 py-3 rounded-lg hover:bg-solar-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 font-['DM_Sans'] whitespace-nowrap"
           >
             <span>{{ 'blog.viewAllPosts' | translate }}</span>
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -197,8 +197,8 @@ export class BlogHomeComponent implements OnInit, OnDestroy {
             return bDate - aDate;
           });
 
-        // Return up to 6 posts for the home page
-        return sortedPosts.slice(0, 6);
+        // Return up to 3 posts for the home page
+        return sortedPosts.slice(0, 3);
       })
     );
   }

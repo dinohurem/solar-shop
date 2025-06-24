@@ -101,15 +101,19 @@ export interface SustainabilityFeature {
               </div>
             </div>
 
-            <!-- CTA Button -->
-            <div class="mt-8 text-center sm:text-left">
-              <button 
-                (click)="navigateToSustainability()" 
-                class="bg-solar-500 text-white font-semibold text-lg px-8 py-4 rounded-xl hover:bg-solar-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 font-['DM_Sans']">
-                {{ 'sustainability.towardsSustainability' | translate }}
-              </button>
-            </div>
           </div>
+        </div>
+        
+        <!-- CTA Button - Centered on full screen width -->
+        <div class="mt-12 text-center">
+          <button 
+            (click)="navigateToSustainability()" 
+            class="inline-flex items-center gap-2 bg-solar-600 text-white font-medium px-8 py-3 rounded-lg hover:bg-solar-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 font-['DM_Sans'] whitespace-nowrap">
+            {{ 'sustainability.towardsSustainability' | translate }}
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+            </svg>
+          </button>
         </div>
       </div>
     </section>
@@ -144,6 +148,6 @@ export class SustainabilityComponent implements OnInit {
   }
 
   navigateToSustainability() {
-    this.router.navigate(['/mission']);
+    this.router.navigate(['/company']);
   }
 } 
