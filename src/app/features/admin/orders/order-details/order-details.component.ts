@@ -55,15 +55,15 @@ import * as OrdersActions from '../store/orders.actions';
               <select 
                 [value]="order.status"
                 (change)="updateOrderStatus($event)"
-                class="px-6 py-3 rounded-lg text-white font-medium border-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 appearance-none cursor-pointer"
+                class="h-12 px-6 py-3 rounded-lg text-white font-medium border-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 appearance-none cursor-pointer"
                 [class]="getStatusDropdownClass(order.status)">
-                <option value="pending">Pending</option>
-                <option value="confirmed">Confirmed</option>
-                <option value="processing">Processing</option>
-                <option value="shipped">Shipped</option>
-                <option value="delivered">Delivered</option>
-                <option value="cancelled">Cancelled</option>
-                <option value="refunded">Refunded</option>
+                <option value="pending">{{ 'admin.orderStatus.pending' | translate }}</option>
+                <option value="confirmed">{{ 'admin.orderStatus.confirmed' | translate }}</option>
+                <option value="processing">{{ 'admin.orderStatus.processing' | translate }}</option>
+                <option value="shipped">{{ 'admin.orderStatus.shipped' | translate }}</option>
+                <option value="delivered">{{ 'admin.orderStatus.delivered' | translate }}</option>
+                <option value="cancelled">{{ 'admin.orderStatus.cancelled' | translate }}</option>
+                <option value="refunded">{{ 'admin.orderStatus.refunded' | translate }}</option>
               </select>
               <svg class="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -83,7 +83,7 @@ import * as OrdersActions from '../store/orders.actions';
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              <span>{{ isUpdatingPayment ? 'Updating...' : 'Mark Purchased' }}</span>
+              <span>{{ isUpdatingPayment ? ('common.updating' | translate) : ('admin.markPurchased' | translate) }}</span>
             </button>
             
             <!-- Edit Order Button -->
@@ -131,7 +131,7 @@ import * as OrdersActions from '../store/orders.actions';
           
           <div class="bg-gradient-to-br from-orange-50 to-red-50 rounded-lg p-4 border border-orange-100">
             <h3 class="text-sm font-medium text-gray-700 mb-2">{{ 'admin.paymentMethod' | translate }}</h3>
-            <p class="text-lg font-semibold text-orange-600 capitalize">{{ order.payment_method || ('admin.creditCard' | translate) }}</p>
+            <p class="text-lg font-semibold text-orange-600">{{ getPaymentMethodTranslation(order.payment_method) | translate }}</p>
           </div>
         </div>
       </div>
@@ -801,5 +801,31 @@ export class OrderDetailsComponent implements OnInit {
       'refunded': 'Refunded'
     };
     return statusMap[status] || status;
+  }
+
+  getPaymentMethodTranslation(paymentMethod: string): string {
+    const translationKey = this.getPaymentMethodKey(paymentMethod);
+    return translationKey;
+  }
+
+  private getPaymentMethodKey(paymentMethod: string): string {
+    if (!paymentMethod) {
+      return 'admin.ordersForm.creditCard'; // Default fallback
+    }
+
+    switch (paymentMethod) {
+      case 'credit_card':
+        return 'admin.ordersForm.creditCard';
+      case 'debit_card':
+        return 'admin.ordersForm.debitCard';
+      case 'bank_transfer':
+        return 'admin.ordersForm.bankTransfer';
+      case 'cash_on_delivery':
+        return 'admin.ordersForm.cashOnDelivery';
+      case 'paypal':
+        return 'checkout.paypal';
+      default:
+        return paymentMethod;
+    }
   }
 } 

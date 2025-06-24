@@ -4,9 +4,11 @@ import * as OrdersActions from './orders.actions';
 
 export const initialState: OrdersState = {
     orders: [],
+    userOrders: [],
     currentOrder: null,
     loading: false,
     loadingOrder: false,
+    loadingUserOrders: false,
     error: null,
     updatingStatus: false,
     confirmingPurchase: false
@@ -32,6 +34,26 @@ export const ordersReducer = createReducer(
     on(OrdersActions.loadOrdersFailure, (state, { error }) => ({
         ...state,
         loading: false,
+        error
+    })),
+
+    // Load user orders
+    on(OrdersActions.loadUserOrders, (state) => ({
+        ...state,
+        loadingUserOrders: true,
+        error: null
+    })),
+
+    on(OrdersActions.loadUserOrdersSuccess, (state, { orders }) => ({
+        ...state,
+        userOrders: orders,
+        loadingUserOrders: false,
+        error: null
+    })),
+
+    on(OrdersActions.loadUserOrdersFailure, (state, { error }) => ({
+        ...state,
+        loadingUserOrders: false,
         error
     })),
 
@@ -67,6 +89,9 @@ export const ordersReducer = createReducer(
         orders: state.orders.map(order =>
             order.id === orderId ? { ...order, status: status as any } : order
         ),
+        userOrders: state.userOrders.map(order =>
+            order.id === orderId ? { ...order, status: status as any } : order
+        ),
         currentOrder: state.currentOrder?.id === orderId
             ? { ...state.currentOrder, status: status as any }
             : state.currentOrder,
@@ -92,6 +117,9 @@ export const ordersReducer = createReducer(
         orders: state.orders.map(order =>
             order.id === orderId ? { ...order, paymentStatus: paymentStatus as any } : order
         ),
+        userOrders: state.userOrders.map(order =>
+            order.id === orderId ? { ...order, paymentStatus: paymentStatus as any } : order
+        ),
         currentOrder: state.currentOrder?.id === orderId
             ? { ...state.currentOrder, paymentStatus: paymentStatus as any }
             : state.currentOrder,
@@ -115,6 +143,9 @@ export const ordersReducer = createReducer(
     on(OrdersActions.confirmPurchaseSuccess, (state, { orderId }) => ({
         ...state,
         orders: state.orders.map(order =>
+            order.id === orderId ? { ...order, paymentStatus: 'paid' as any } : order
+        ),
+        userOrders: state.userOrders.map(order =>
             order.id === orderId ? { ...order, paymentStatus: 'paid' as any } : order
         ),
         currentOrder: state.currentOrder?.id === orderId

@@ -454,6 +454,9 @@ export class TranslationService {
                 total: 'Ukupno',
                 printInvoice: 'Ispiši račun',
                 saveChanges: 'Spremi promjene',
+                markPurchased: 'Označi kao plaćeno',
+                orderCreatedSuccessfully: 'Narudžba je uspješno kreirana',
+                orderUpdatedSuccessfully: 'Narudžba je uspješno ažurirana',
                 orderNotFound: 'Narudžba nije pronađena',
                 goBack: 'Idi natrag',
                 // Product management
@@ -874,6 +877,9 @@ export class TranslationService {
                     customerEmail: 'Email kupca',
                     customerEmailRequired: 'Email kupca je obavezan',
                     validEmailRequired: 'Potreban je valjani email',
+                    lookingUpUser: 'Pretraživanje korisnika...',
+                    userFound: 'Korisnik pronađen',
+                    newCustomer: 'Novi kupac - račun se neće povezati',
                     customerName: 'Ime kupca',
                     customerPhone: 'Telefon kupca',
                     shippingAddress: 'Adresa dostave',
@@ -1175,7 +1181,8 @@ export class TranslationService {
                 editReview: 'Uredi recenziju',
                 deleteReview: 'Obriši recenziju',
                 noReviewsFound: 'Nema pronađenih recenzija',
-                writeFirstReview: 'Napišite svoju prvu recenziju nakon kupovine proizvoda'
+                writeFirstReview: 'Napišite svoju prvu recenziju nakon kupovine proizvoda',
+                qty: 'Kol.'
             },
             // Admin Wishlist
             adminWishlist: {
@@ -1494,7 +1501,7 @@ export class TranslationService {
             orderDetails: {
                 title: 'Detalji narudžbe',
                 orderPlacedOn: 'Narudžba stvorena',
-                backToOrders: 'Natrag na narudžbe',
+                backToOrders: 'Natrag na profil',
                 orderNotFound: 'Narudžba nije pronađena',
                 orderNotFoundMessage: 'Narudžba koju tražite nije mogla biti pronađena.',
                 orderNumber: 'Broj narudžbe',
@@ -2394,6 +2401,9 @@ export class TranslationService {
                 total: 'Total',
                 printInvoice: 'Print Invoice',
                 saveChanges: 'Save Changes',
+                markPurchased: 'Mark Purchased',
+                orderCreatedSuccessfully: 'Order created successfully',
+                orderUpdatedSuccessfully: 'Order updated successfully',
                 orderNotFound: 'Order Not Found',
                 goBack: 'Go Back',
                 // Product management
@@ -2793,6 +2803,9 @@ export class TranslationService {
                     customerEmail: 'Customer Email',
                     customerEmailRequired: 'Customer email is required',
                     validEmailRequired: 'Valid email is required',
+                    lookingUpUser: 'Looking up user...',
+                    userFound: 'User found',
+                    newCustomer: 'New customer - account will not be linked',
                     customerName: 'Customer Name',
                     customerPhone: 'Customer Phone',
                     shippingAddress: 'Shipping Address',
@@ -3094,7 +3107,8 @@ export class TranslationService {
                 editReview: 'Edit Review',
                 deleteReview: 'Delete Review',
                 noReviewsFound: 'No reviews found',
-                writeFirstReview: 'Write your first review after purchasing a product'
+                writeFirstReview: 'Write your first review after purchasing a product',
+                qty: 'Qty'
             },
             // Admin Wishlist
             adminWishlist: {
@@ -3413,7 +3427,7 @@ export class TranslationService {
             orderDetails: {
                 title: 'Order Details',
                 orderPlacedOn: 'Order placed on',
-                backToOrders: 'Back to Orders',
+                backToOrders: 'Back to profile',
                 orderNotFound: 'Order Not Found',
                 orderNotFoundMessage: 'The order you\'re looking for could not be found.',
                 orderNumber: 'Order Number',

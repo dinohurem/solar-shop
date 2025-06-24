@@ -42,3 +42,13 @@ export const selectOrderById = (orderId: string) => createSelector(
     selectOrders,
     (orders) => orders.find(order => order.id === orderId)
 );
+
+export const selectUserOrders = createSelector(
+    selectOrdersState,
+    (state: OrdersState) => state.userOrders
+);
+
+export const selectUserOrdersLoading = createSelector(
+    selectOrdersState,
+    (state: OrdersState) => state.loadingUserOrders
+);

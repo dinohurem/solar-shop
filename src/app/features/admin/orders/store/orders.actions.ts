@@ -14,6 +14,22 @@ export const loadOrdersFailure = createAction(
     props<{ error: string }>()
 );
 
+// Load user orders by email actions
+export const loadUserOrders = createAction(
+    '[User Orders] Load User Orders',
+    props<{ userEmail: string }>()
+);
+
+export const loadUserOrdersSuccess = createAction(
+    '[User Orders] Load User Orders Success',
+    props<{ orders: Order[] }>()
+);
+
+export const loadUserOrdersFailure = createAction(
+    '[User Orders] Load User Orders Failure',
+    props<{ error: string }>()
+);
+
 // Load single order actions
 export const loadOrder = createAction(
     '[Admin Orders] Load Order',

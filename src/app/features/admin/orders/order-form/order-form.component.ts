@@ -6,14 +6,15 @@ import { Title } from '@angular/platform-browser';
 import { SupabaseService } from '../../../../services/supabase.service';
 import { AdminFormComponent } from '../../shared/admin-form/admin-form.component';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { SuccessModalComponent } from '../../../../shared/components/modals/success-modal/success-modal.component';
 import { TranslationService } from '../../../../shared/services/translation.service';
 import { debounceTime, distinctUntilChanged, switchMap, catchError } from 'rxjs/operators';
-import { of, fromEvent, merge, EMPTY } from 'rxjs';
+import { of, fromEvent, merge, EMPTY, from } from 'rxjs';
 
 @Component({
   selector: 'app-order-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, AdminFormComponent, TranslatePipe],
+  imports: [CommonModule, ReactiveFormsModule, AdminFormComponent, TranslatePipe, SuccessModalComponent],
   template: `
     <app-admin-form
       *ngIf="orderForm"
@@ -97,12 +98,33 @@ import { of, fromEvent, merge, EMPTY } from 'rxjs';
               <label for="customer_email" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
                 {{ 'admin.ordersForm.customerEmail' | translate }} *
               </label>
+              <!-- Error Messages -->
               <div *ngIf="orderForm.get('customer_email')?.invalid && orderForm.get('customer_email')?.touched" class="mt-2 text-sm text-red-600 flex items-center">
                 <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                 </svg>
                 <span *ngIf="orderForm.get('customer_email')?.errors?.['required']">{{ 'admin.ordersForm.customerEmailRequired' | translate }}</span>
                 <span *ngIf="orderForm.get('customer_email')?.errors?.['email']">{{ 'admin.ordersForm.validEmailRequired' | translate }}</span>
+              </div>
+              
+              <!-- User Lookup Feedback -->
+              <div *ngIf="isLookingUpUser" class="mt-2 text-sm text-blue-600 flex items-center">
+                <div class="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600 mr-2"></div>
+                {{ 'admin.ordersForm.lookingUpUser' | translate }}
+              </div>
+              
+              <div *ngIf="foundUser && !isLookingUpUser" class="mt-2 text-sm text-green-600 flex items-center">
+                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                </svg>
+                {{ 'admin.ordersForm.userFound' | translate }}: {{ foundUser.first_name }} {{ foundUser.last_name }}
+              </div>
+              
+              <div *ngIf="!foundUser && !isLookingUpUser && orderForm.get('customer_email')?.value?.includes('@')" class="mt-2 text-sm text-gray-500 flex items-center">
+                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                </svg>
+                {{ 'admin.ordersForm.newCustomer' | translate }}
               </div>
             </div>
 
@@ -554,6 +576,15 @@ import { of, fromEvent, merge, EMPTY } from 'rxjs';
         </div>
       </div>
     </app-admin-form>
+    
+    <!-- Success Modal -->
+    <app-success-modal
+      [isOpen]="showSuccessModal"
+      [title]="successModalTitle"
+      [message]="successModalMessage"
+      [closeText]="'common.close' | translate"
+      (closed)="onSuccessModalClose()">
+    </app-success-modal>
   `
 })
 export class OrderFormComponent implements OnInit {
@@ -573,6 +604,15 @@ export class OrderFormComponent implements OnInit {
   searchResults: any[] = [];
   isSearching = false;
   activeSearchIndex = -1;
+
+  // User lookup properties
+  foundUser: any = null;
+  isLookingUpUser = false;
+
+  // Success modal properties
+  showSuccessModal = false;
+  successModalTitle = '';
+  successModalMessage = '';
 
   constructor() {
     this.orderForm = this.fb.group({
@@ -619,6 +659,9 @@ export class OrderFormComponent implements OnInit {
       const localDateTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
       this.orderForm?.patchValue({ order_date: localDateTime });
     }
+
+    // Set up email field listener for user lookup
+    this.setupEmailListener();
 
     // Set page title
     this.title.setTitle(this.translationService.translate('admin.ordersForm.title'));
@@ -706,6 +749,81 @@ export class OrderFormComponent implements OnInit {
     return Math.max(0, subtotal - itemDiscounts - orderDiscount + shipping + tax);
   }
 
+  // User lookup method
+  private async findUserByEmail(email: string): Promise<string | null> {
+    if (!email || !email.includes('@')) {
+      return null;
+    }
+
+    try {
+      console.log(`Looking up user by email: ${email}`);
+      const matchingUser = await this.supabaseService.findAuthUserByEmail(email);
+
+      if (matchingUser) {
+        console.log(`Found matching user for email ${email}:`, matchingUser.id);
+        return matchingUser.id;
+      } else {
+        console.log(`No matching user found for email: ${email}`);
+        return null;
+      }
+    } catch (error) {
+      console.error('Error finding user by email:', error);
+      return null;
+    }
+  }
+
+  private setupEmailListener(): void {
+    if (!this.orderForm) return;
+
+    const emailControl = this.orderForm.get('customer_email');
+    if (emailControl) {
+      emailControl.valueChanges.pipe(
+        debounceTime(500),
+        distinctUntilChanged(),
+        switchMap(email => {
+          if (!email || !email.includes('@')) {
+            this.foundUser = null;
+            this.isLookingUpUser = false;
+            return EMPTY;
+          }
+
+          this.isLookingUpUser = true;
+          return from(this.lookupUserForDisplay(email));
+        }),
+        catchError(error => {
+          console.error('Error in email lookup:', error);
+          this.isLookingUpUser = false;
+          return EMPTY;
+        })
+      ).subscribe();
+    }
+  }
+
+  private async lookupUserForDisplay(email: string): Promise<void> {
+    try {
+      // Use the database function to find user by email
+      const authUser = await this.supabaseService.findAuthUserByEmail(email);
+
+      if (authUser && authUser.profile) {
+        this.foundUser = {
+          user_id: authUser.id,
+          email: authUser.email,
+          first_name: authUser.profile.first_name,
+          last_name: authUser.profile.last_name,
+          full_name: authUser.profile.full_name,
+          role: authUser.profile.role
+        };
+      } else {
+        this.foundUser = null;
+      }
+    } catch (error) {
+      console.error('Error looking up user for display:', error);
+      this.foundUser = null;
+    } finally {
+      this.isLookingUpUser = false;
+    }
+  }
+
   // Product search methods
   async searchProducts(query: string, itemIndex: number): Promise<void> {
     if (!query || query.length < 2) {
@@ -763,8 +881,10 @@ export class OrderFormComponent implements OnInit {
 
     this.loading = true;
     try {
+      console.log('Loading order with ID:', this.orderId);
       const data = await this.supabaseService.getTableById('orders', this.orderId);
       if (data) {
+        console.log('Order loaded successfully:', data);
         // Format dates for datetime-local inputs
         const formData = {
           ...data,
@@ -774,9 +894,15 @@ export class OrderFormComponent implements OnInit {
 
         // Load order items
         await this.loadOrderItems();
+      } else {
+        console.error('Order not found with ID:', this.orderId);
+        alert('Order not found. You will be redirected to the orders list.');
+        this.router.navigate(['/admin/orders']);
       }
     } catch (error) {
       console.error('Error loading order:', error);
+      alert('Error loading order: ' + (error as any).message);
+      this.router.navigate(['/admin/orders']);
     } finally {
       this.loading = false;
     }
@@ -843,46 +969,82 @@ export class OrderFormComponent implements OnInit {
       formData.tax_amount = this.getTaxAmount();
       formData.total_amount = this.getOrderTotal();
 
+      // Find matching user by email and set user_id
+      formData.user_id = await this.findUserByEmail(formData.customer_email);
+
+      // Clean up form data - ensure all numeric fields are properly typed
+      const cleanedFormData = {
+        ...formData,
+        subtotal: Number(formData.subtotal) || 0,
+        discount_amount: Number(formData.discount_amount) || 0,
+        tax_amount: Number(formData.tax_amount) || 0,
+        total_amount: Number(formData.total_amount) || 0,
+        shipping_cost: Number(formData.shipping_cost) || 0,
+        discount_percentage: Number(formData.discount_percentage) || 0,
+        tax_percentage: Number(formData.tax_percentage) || 0,
+        is_b2b: Boolean(formData.is_b2b)
+      };
+
+      console.log('Cleaned form data for order save:', cleanedFormData);
+
       // Handle empty payment method - ensure valid values only
-      if (!formData.payment_method || formData.payment_method === '') {
-        delete formData.payment_method; // Remove the field entirely if empty
+      if (!cleanedFormData.payment_method || cleanedFormData.payment_method === '') {
+        delete cleanedFormData.payment_method; // Remove the field entirely if empty
       } else {
         // Ensure the payment method is one of the allowed values
         const validPaymentMethods = ['credit_card', 'debit_card', 'paypal', 'bank_transfer', 'cash_on_delivery'];
-        if (!validPaymentMethods.includes(formData.payment_method)) {
-          console.error('Invalid payment method:', formData.payment_method);
-          delete formData.payment_method;
+        if (!validPaymentMethods.includes(cleanedFormData.payment_method)) {
+          console.error('Invalid payment method:', cleanedFormData.payment_method);
+          delete cleanedFormData.payment_method;
         }
       }
 
       // Debug: Log the data being saved
-      console.log('Order data being saved:', formData);
-      console.log('Payment method value:', formData.payment_method);
+      console.log('Order data being saved:', cleanedFormData);
+      console.log('Payment method value:', cleanedFormData.payment_method);
 
       let savedOrder: any;
 
       if (this.isEditMode && this.orderId) {
         // Update existing order
-        savedOrder = await this.supabaseService.updateRecord('orders', this.orderId, formData);
+        console.log('Updating order with ID:', this.orderId);
+        console.log('Update data:', formData);
 
-        // Delete existing order items and create new ones
-        await this.deleteExistingOrderItems();
-        await this.saveOrderItems(this.orderId, orderItems);
+        try {
+          // First verify the order exists
+          const existingOrder = await this.supabaseService.getTableById('orders', this.orderId);
+          if (!existingOrder) {
+            throw new Error(`Order with ID ${this.orderId} not found`);
+          }
+          console.log('Existing order found:', existingOrder);
 
-        alert('Order updated successfully');
+          savedOrder = await this.supabaseService.updateRecord('orders', this.orderId, cleanedFormData);
+          console.log('Order updated successfully:', savedOrder);
+
+          // Delete existing order items and create new ones
+          await this.deleteExistingOrderItems();
+          await this.saveOrderItems(this.orderId, orderItems);
+
+          this.successModalTitle = this.translationService.translate('common.success');
+          this.successModalMessage = this.translationService.translate('admin.orderUpdatedSuccessfully');
+          this.showSuccessModal = true;
+        } catch (updateError: any) {
+          console.error('Error updating order:', updateError);
+          throw new Error(`Failed to update order: ${updateError.message}`);
+        }
       } else {
         // Create new order
-        savedOrder = await this.supabaseService.createRecord('orders', formData);
+        savedOrder = await this.supabaseService.createRecord('orders', cleanedFormData);
 
         if (savedOrder && savedOrder.id) {
           // Save order items
           await this.saveOrderItems(savedOrder.id, orderItems);
         }
 
-        alert('Order created successfully');
+        this.successModalTitle = this.translationService.translate('common.success');
+        this.successModalMessage = this.translationService.translate('admin.orderCreatedSuccessfully');
+        this.showSuccessModal = true;
       }
-
-      this.router.navigate(['/admin/orders']);
     } catch (error) {
       console.error('Error saving order:', error);
       alert('Error saving order: ' + (error as any).message);
@@ -943,5 +1105,10 @@ export class OrderFormComponent implements OnInit {
       console.error('Error saving order items:', error);
       throw error;
     }
+  }
+
+  onSuccessModalClose(): void {
+    this.showSuccessModal = false;
+    this.router.navigate(['/admin/orders']);
   }
 } 

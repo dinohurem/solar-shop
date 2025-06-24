@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { of } from 'rxjs';
+import { of, from } from 'rxjs';
 import { catchError, map, mergeMap, switchMap, tap } from 'rxjs/operators';
 import * as AuthActions from './auth.actions';
 import { AuthService } from '../services/auth.service';
@@ -8,6 +8,7 @@ import { AuthPersistenceService } from '../services/auth-persistence.service';
 import { Router } from '@angular/router';
 import { User } from '../../../shared/models/user.model';
 import { AuthResponse, AuthUser } from '../../../shared/models/auth.model';
+import { SupabaseService } from '../../../services/supabase.service';
 
 @Injectable()
 export class AuthEffects {
@@ -15,7 +16,8 @@ export class AuthEffects {
         private actions$: Actions,
         private authService: AuthService,
         private authPersistence: AuthPersistenceService,
-        private router: Router
+        private router: Router,
+        private supabaseService: SupabaseService
     ) { }
 
     login$ = createEffect(() =>
@@ -23,20 +25,20 @@ export class AuthEffects {
             ofType(AuthActions.login),
             mergeMap(({ loginRequest }) =>
                 this.authService.login(loginRequest).pipe(
-                    map((response: AuthResponse) => {
+                    switchMap((response: AuthResponse) => {
                         if (response.error) {
                             throw new Error(response.error);
                         }
 
                         const accessToken = response.session?.access_token || '';
 
-                        // Create a proper User object from the response
-                        const user: User = this.createUserFromAuthResponse(response.user, loginRequest.email);
-
-                        return AuthActions.loginSuccess({
-                            token: accessToken,
-                            user: user
-                        });
+                        // Fetch user profile data including role from database
+                        return this.createUserWithProfile(response.user, loginRequest.email).pipe(
+                            map((user: User) => AuthActions.loginSuccess({
+                                token: accessToken,
+                                user: user
+                            }))
+                        );
                     }),
                     catchError(error => of(AuthActions.loginFailure({ error })))
                 )
@@ -49,20 +51,20 @@ export class AuthEffects {
             ofType(AuthActions.register),
             mergeMap(({ registerRequest }) =>
                 this.authService.register(registerRequest).pipe(
-                    map((response: AuthResponse) => {
+                    switchMap((response: AuthResponse) => {
                         if (response.error) {
                             throw new Error(response.error);
                         }
 
                         const accessToken = response.session?.access_token || '';
 
-                        // Create a proper User object from the response
-                        const user: User = this.createUserFromRegisterResponse(response.user, registerRequest);
-
-                        return AuthActions.registerSuccess({
-                            token: accessToken,
-                            user: user
-                        });
+                        // Fetch user profile data including role from database
+                        return this.createUserWithProfile(response.user, registerRequest.email, registerRequest).pipe(
+                            map((user: User) => AuthActions.registerSuccess({
+                                token: accessToken,
+                                user: user
+                            }))
+                        );
                     }),
                     catchError(error => of(AuthActions.registerFailure({ error })))
                 )
@@ -267,6 +269,56 @@ export class AuthEffects {
         ),
         { dispatch: false }
     );
+
+    private createUserWithProfile(authUser: AuthUser | null, email: string, registerRequest?: any) {
+        if (!authUser) {
+            return of(this.createDefaultUser());
+        }
+
+        // Fetch user profile from database to get the role
+        return from(this.supabaseService.getUserProfile(authUser.id)).pipe(
+            map((profile: any) => {
+                const role = profile?.role || 'customer';
+
+                return {
+                    id: authUser.id,
+                    email: email,
+                    firstName: profile?.first_name || registerRequest?.firstName || authUser.user_metadata?.firstName || '',
+                    lastName: profile?.last_name || registerRequest?.lastName || authUser.user_metadata?.lastName || '',
+                    fullName: profile?.full_name || `${profile?.first_name || registerRequest?.firstName || ''} ${profile?.last_name || registerRequest?.lastName || ''}`.trim(),
+                    avatar: authUser.user_metadata?.avatar_url || profile?.avatar_url,
+                    phone: registerRequest?.phone || authUser.user_metadata?.phone || profile?.phone,
+                    role: {
+                        id: role,
+                        name: role,
+                        permissions: [],
+                        isDefault: role === 'customer',
+                        isActive: true
+                    },
+                    status: {
+                        isActive: true,
+                        isBlocked: false,
+                        isSuspended: false
+                    },
+                    preferences: this.createDefaultPreferences(),
+                    addresses: [],
+                    paymentMethods: [],
+                    socialLogins: [],
+                    emailVerified: !!authUser.email_confirmed_at,
+                    phoneVerified: !!authUser.phone_confirmed_at,
+                    twoFactorEnabled: false,
+                    lastLoginAt: authUser.last_sign_in_at,
+                    createdAt: authUser.created_at,
+                    updatedAt: authUser.updated_at || authUser.created_at
+                } as User;
+            }),
+            catchError(error => {
+                console.error('Error fetching user profile, using fallback:', error);
+                // Fallback to auth user data if profile fetch fails
+                return of(this.createUserFromAuthResponse(authUser, email));
+            })
+        );
+    }
 
     private createUserFromAuthResponse(authUser: AuthUser | null, email: string): User {
         if (!authUser) {

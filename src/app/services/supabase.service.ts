@@ -258,6 +258,8 @@ export class SupabaseService {
         id: string,
         record: Database['public']['Tables'][T]['Update']
     ): Promise<Database['public']['Tables'][T]['Row'] | null> {
+        console.log(`Updating ${tableName} record with id: ${id}`, record);
+
         const { data, error } = await this.supabase
             .from(tableName)
             .update(record)
@@ -265,7 +267,18 @@ export class SupabaseService {
             .select()
             .single();
 
-        if (error) throw error;
+        if (error) {
+            console.error(`Error updating ${tableName} record:`, error);
+            console.error(`Update attempted on ID: ${id} with data:`, record);
+            throw new Error(`Failed to update ${tableName}: ${error.message} (Code: ${error.code})`);
+        }
+
+        if (!data) {
+            console.error(`No data returned after updating ${tableName} with ID: ${id}`);
+            throw new Error(`Update operation completed but no data was returned for ${tableName} with ID: ${id}`);
+        }
+
+        console.log(`Successfully updated ${tableName} record:`, data);
         return data as Database['public']['Tables'][T]['Row'];
     }
 
@@ -762,5 +775,37 @@ export class SupabaseService {
     // Getter for direct client access (for special operations)
     get client(): SupabaseClient<Database> {
         return this.supabase;
+    }
+
+    // Method to find user by email using database function
+    async findAuthUserByEmail(email: string): Promise<{ id: string; email: string; profile?: any } | null> {
+        try {
+            const { data, error } = await this.supabase
+                .rpc('find_user_by_email', { user_email: email });
+
+            if (error) {
+                console.error('Error calling find_user_by_email function:', error);
+                return null;
+            }
+
+            if (data && data.length > 0) {
+                const user = data[0];
+                return {
+                    id: user.user_id,
+                    email: user.email,
+                    profile: {
+                        first_name: user.first_name,
+                        last_name: user.last_name,
+                        full_name: user.full_name,
+                        role: user.role
+                    }
+                };
+            }
+
+            return null;
+        } catch (error) {
+            console.error('Error finding auth user by email:', error);
+            return null;
+        }
     }
 } 

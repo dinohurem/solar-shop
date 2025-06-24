@@ -15,19 +15,8 @@ import { Review } from '../../../shared/models/review.model';
 import { SupabaseService } from '../../../services/supabase.service';
 import * as WishlistActions from '../wishlist/store/wishlist.actions';
 import { selectWishlistItems, selectWishlistLoading, selectWishlistError } from '../wishlist/store/wishlist.selectors';
-import { selectOrders, selectOrdersLoading } from '../../admin/orders/store/orders.selectors';
+import { selectUserOrders, selectUserOrdersLoading } from '../../admin/orders/store/orders.selectors';
 import * as OrdersActions from '../../admin/orders/store/orders.actions';
-import { createSelector } from '@ngrx/store';
-
-// Create a selector for user-specific orders
-const selectUserOrders = createSelector(
-  selectOrders,
-  selectCurrentUser,
-  (orders, user) => {
-    if (!user || !orders) return [];
-    return orders.filter(order => order.userId === user.id);
-  }
-);
 
 @Component({
   selector: 'app-profile',
@@ -433,13 +422,14 @@ const selectUserOrders = createSelector(
                     <div 
                       *ngFor="let item of order.items.slice(0, 2)" 
                       class="flex items-center space-x-3">
-                      <img 
-                        [src]="item.productImageUrl || '/assets/images/placeholder.jpg'" 
-                        [alt]="item.productName"
-                        class="w-12 h-12 object-cover rounded-lg bg-gray-100">
+                      <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                        </svg>
+                      </div>
                       <div class="flex-1 min-w-0">
                         <h4 class="text-sm font-medium text-gray-900 truncate font-['DM_Sans']">{{ item.productName }}</h4>
-                        <p class="text-sm text-gray-500 font-['DM_Sans']">Qty: {{ item.quantity }}</p>
+                        <p class="text-sm text-gray-500 font-['DM_Sans']">{{ 'profile.qty' | translate }}: {{ item.quantity }}</p>
                       </div>
                       <span class="text-sm font-medium text-gray-900 font-['DM_Sans']">
                         {{ item.totalPrice | currency:'EUR':'symbol':'1.2-2' }}
@@ -719,7 +709,7 @@ export class ProfileComponent implements OnInit {
 
   // Orders - using NgRx
   orders$: Observable<Order[]> = this.store.select(selectUserOrders);
-  ordersLoading$: Observable<boolean> = this.store.select(selectOrdersLoading);
+  ordersLoading$: Observable<boolean> = this.store.select(selectUserOrdersLoading);
 
   // Reviews - keeping BehaviorSubject for now (to be migrated to NgRx later)
   private reviewsSubject = new BehaviorSubject<Review[]>([]);
@@ -752,8 +742,27 @@ export class ProfileComponent implements OnInit {
     this.store.dispatch(AuthActions.loadUserProfile());
 
     // Load initial data
-    this.store.dispatch(OrdersActions.loadOrders());
     this.store.dispatch(WishlistActions.loadWishlist());
+
+    // Load user orders when user data is available
+    this.currentUser$.pipe(
+      filter(user => !!user?.email),
+      take(1)
+    ).subscribe(user => {
+      if (user?.email) {
+        console.log('Profile Component: Loading orders for user:', user.email);
+        this.store.dispatch(OrdersActions.loadUserOrders({ userEmail: user.email }));
+      }
+    });
+
+    // Debug: Subscribe to orders to see when they load
+    this.orders$.subscribe(orders => {
+      console.log('Profile Component: User orders updated:', orders?.length || 0, orders);
+    });
+
+    this.ordersLoading$.subscribe(loading => {
+      console.log('Profile Component: Orders loading state:', loading);
+    });
 
     // Subscribe to user data and populate form
     this.currentUser$.subscribe(user => {
@@ -787,8 +796,15 @@ export class ProfileComponent implements OnInit {
 
     // Load data when switching to specific tabs
     if (tab === 'my-orders') {
-      // Load orders using NgRx
-      this.store.dispatch(OrdersActions.loadOrders());
+      // Load user orders using NgRx
+      this.currentUser$.pipe(
+        filter(user => !!user?.email),
+        take(1)
+      ).subscribe(user => {
+        if (user?.email) {
+          this.store.dispatch(OrdersActions.loadUserOrders({ userEmail: user.email }));
+        }
+      });
     } else if (tab === 'my-reviews') {
       this.loadUserReviews();
     } else if (tab === 'my-wishlist') {

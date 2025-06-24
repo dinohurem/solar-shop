@@ -118,10 +118,20 @@ import { Order } from '../../../shared/models/order.model';
               <div *ngFor="let item of order.items" 
                    class="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg">
                 <!-- Product Image -->
-                <img 
-                  [src]="item.productImageUrl || '/assets/images/placeholder.jpg'" 
-                  [alt]="item.productName"
-                  class="w-20 h-20 object-cover rounded-lg bg-gray-100">
+                <div class="w-20 h-20 rounded-lg bg-gray-100 overflow-hidden flex items-center justify-center">
+                  <img 
+                    *ngIf="item.productImageUrl && !hasImageError(item.id); else productIcon"
+                    [src]="item.productImageUrl" 
+                    [alt]="item.productName"
+                    class="w-full h-full object-cover"
+                    (error)="onImageError(item.id)"
+                    (load)="onImageLoad(item.id)">
+                  <ng-template #productIcon>
+                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                    </svg>
+                  </ng-template>
+                </div>
                 
                 <!-- Product Details -->
                 <div class="flex-1 min-w-0">
@@ -236,7 +246,7 @@ import { Order } from '../../../shared/models/order.model';
               <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
               </svg>
-              <span class="text-gray-900 font-medium font-['DM_Sans']">{{ order.paymentMethod | titlecase }}</span>
+              <span class="text-gray-900 font-medium font-['DM_Sans']">{{ getPaymentMethodTranslation(order.paymentMethod) | translate }}</span>
             </div>
           </div>
 
@@ -260,6 +270,7 @@ export class OrderDetailsComponent implements OnInit {
   order: Order | null = null;
   loading = true;
   error = false;
+  imageErrors = new Set<string>();
 
   ngOnInit(): void {
     const orderId = this.route.snapshot.paramMap.get('id');
@@ -319,7 +330,21 @@ export class OrderDetailsComponent implements OnInit {
         trackingNumber: orderData.tracking_number || undefined,
         notes: orderData.notes || undefined,
         adminNotes: orderData.admin_notes || undefined,
-        items: (orderItemsData || []).map((itemData: any) => {
+        items: await Promise.all((orderItemsData || []).map(async (itemData: any) => {
+          let productImageUrl = itemData.product_image_url;
+
+          // If no image URL in order item and we have a product ID, try to get it from products table
+          if (!productImageUrl && itemData.product_id) {
+            try {
+              const productData = await this.supabaseService.getTableById('products', itemData.product_id);
+              if (productData?.images && productData.images.length > 0) {
+                productImageUrl = productData.images[0].url || productData.images[0];
+              }
+            } catch (error) {
+              console.warn('Could not load product image for product ID:', itemData.product_id, error);
+            }
+          }
+
           const orderItem = {
             id: itemData.id,
             orderId: itemData.order_id,
@@ -331,14 +356,14 @@ export class OrderDetailsComponent implements OnInit {
             totalPrice: itemData.total_price || 0,
             discountAmount: itemData.discount_amount || 0,
             discountPercentage: itemData.discount_percentage || 0,
-            productImageUrl: itemData.product_image_url || undefined,
+            productImageUrl: productImageUrl || undefined,
             productSpecifications: itemData.product_specifications || undefined,
             createdAt: itemData.created_at
           };
 
           console.log('Mapped order item:', orderItem);
           return orderItem;
-        }),
+        })),
         createdAt: orderData.created_at,
         updatedAt: orderData.updated_at
       };
@@ -350,6 +375,40 @@ export class OrderDetailsComponent implements OnInit {
       this.error = true;
     } finally {
       this.loading = false;
+    }
+  }
+
+  hasImageError(itemId: string): boolean {
+    return this.imageErrors.has(itemId);
+  }
+
+  onImageError(itemId: string): void {
+    this.imageErrors.add(itemId);
+  }
+
+  onImageLoad(itemId: string): void {
+    this.imageErrors.delete(itemId);
+  }
+
+  getPaymentMethodTranslation(paymentMethod: string): string {
+    const translationKey = this.getPaymentMethodKey(paymentMethod);
+    return translationKey;
+  }
+
+  private getPaymentMethodKey(paymentMethod: string): string {
+    switch (paymentMethod) {
+      case 'credit_card':
+        return 'admin.ordersForm.creditCard';
+      case 'debit_card':
+        return 'admin.ordersForm.debitCard';
+      case 'bank_transfer':
+        return 'admin.ordersForm.bankTransfer';
+      case 'cash_on_delivery':
+        return 'admin.ordersForm.cashOnDelivery';
+      case 'paypal':
+        return 'checkout.paypal';
+      default:
+        return paymentMethod;
     }
   }
 
