@@ -4,6 +4,7 @@ import { of } from 'rxjs';
 import { catchError, map, mergeMap, switchMap, tap } from 'rxjs/operators';
 import * as AuthActions from './auth.actions';
 import { AuthService } from '../services/auth.service';
+import { AuthPersistenceService } from '../services/auth-persistence.service';
 import { Router } from '@angular/router';
 import { User } from '../../../shared/models/user.model';
 import { AuthResponse, AuthUser } from '../../../shared/models/auth.model';
@@ -13,6 +14,7 @@ export class AuthEffects {
     constructor(
         private actions$: Actions,
         private authService: AuthService,
+        private authPersistence: AuthPersistenceService,
         private router: Router
     ) { }
 
@@ -71,7 +73,9 @@ export class AuthEffects {
     loginSuccess$ = createEffect(() =>
         this.actions$.pipe(
             ofType(AuthActions.loginSuccess),
-            tap(() => {
+            tap(({ token, user }) => {
+                // Save auth state to localStorage
+                this.authPersistence.saveAuthState(token, user);
                 // Navigate to home on successful login
                 this.router.navigate(['/']);
             })
@@ -82,7 +86,9 @@ export class AuthEffects {
     registerSuccess$ = createEffect(() =>
         this.actions$.pipe(
             ofType(AuthActions.registerSuccess),
-            tap(({ user }) => {
+            tap(({ token, user }) => {
+                // Save auth state to localStorage
+                this.authPersistence.saveAuthState(token, user);
                 // If user is not email verified, navigate to confirmation page
                 if (user && !user.emailVerified) {
                     this.router.navigate(['/confirmation'], {
@@ -101,10 +107,15 @@ export class AuthEffects {
             ofType(AuthActions.logout),
             mergeMap(() =>
                 this.authService.logout().pipe(
-                    tap(() => this.router.navigate(['/login'])),
+                    tap(() => {
+                        // Clear persisted auth state
+                        this.authPersistence.clearAuthState();
+                        this.router.navigate(['/login']);
+                    }),
                     map(() => AuthActions.logoutSuccess()),
                     catchError(() => {
                         // Even if logout fails, clear the state and redirect
+                        this.authPersistence.clearAuthState();
                         this.router.navigate(['/login']);
                         return of(AuthActions.logoutSuccess());
                     })
@@ -140,18 +151,61 @@ export class AuthEffects {
     checkAuthToken$ = createEffect(() =>
         this.actions$.pipe(
             ofType(AuthActions.checkAuthToken),
-            mergeMap(() =>
-                this.authService.getCurrentUser().pipe(
-                    map(user => {
-                        if (user) {
-                            return AuthActions.loadUserProfileSuccess({ user });
+            mergeMap(() => {
+                // First try to get session from Supabase
+                return this.authService.refreshToken().pipe(
+                    switchMap(session => {
+                        if (session && session.access_token) {
+                            // We have a valid session, now get the user
+                            return this.authService.getCurrentUser().pipe(
+                                map(user => {
+                                    if (user) {
+                                        return AuthActions.initializeAuthState({
+                                            token: session.access_token!,
+                                            user
+                                        });
+                                    } else {
+                                        return AuthActions.clearAuthToken();
+                                    }
+                                })
+                            );
                         } else {
-                            return AuthActions.clearAuthToken();
+                            // No valid Supabase session, try localStorage as fallback
+                            const persistedAuth = this.authPersistence.loadAuthState();
+                            if (persistedAuth) {
+                                // Validate the persisted token with Supabase
+                                return this.authService.validateToken(persistedAuth.token).pipe(
+                                    switchMap(isValid => {
+                                        if (isValid) {
+                                            return of(AuthActions.initializeAuthState({
+                                                token: persistedAuth.token,
+                                                user: persistedAuth.user
+                                            }));
+                                        } else {
+                                            // Invalid token, clear it
+                                            this.authPersistence.clearAuthState();
+                                            return of(AuthActions.clearAuthToken());
+                                        }
+                                    })
+                                );
+                            } else {
+                                return of(AuthActions.clearAuthToken());
+                            }
                         }
                     }),
-                    catchError(() => of(AuthActions.clearAuthToken()))
-                )
-            )
+                    catchError(() => {
+                        // On error, try localStorage as fallback
+                        const persistedAuth = this.authPersistence.loadAuthState();
+                        if (persistedAuth) {
+                            return of(AuthActions.initializeAuthState({
+                                token: persistedAuth.token,
+                                user: persistedAuth.user
+                            }));
+                        }
+                        return of(AuthActions.clearAuthToken());
+                    })
+                );
+            })
         )
     );
 
@@ -187,6 +241,28 @@ export class AuthEffects {
             ofType(AuthActions.resetPasswordSuccess),
             tap(() => {
                 this.router.navigate(['/login']);
+            })
+        ),
+        { dispatch: false }
+    );
+
+    initializeAuthState$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(AuthActions.initializeAuthState),
+            tap(({ token, user }) => {
+                // Save auth state to localStorage when initialized
+                this.authPersistence.saveAuthState(token, user);
+            })
+        ),
+        { dispatch: false }
+    );
+
+    clearAuthToken$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(AuthActions.clearAuthToken),
+            tap(() => {
+                // Clear persisted auth state when token is cleared
+                this.authPersistence.clearAuthState();
             })
         ),
         { dispatch: false }

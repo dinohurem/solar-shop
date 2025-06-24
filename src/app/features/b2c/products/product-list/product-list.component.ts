@@ -213,7 +213,7 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
                       'bg-red-100 text-red-800': product.availability === 'out-of-stock'
                     }"
                   >
-                    {{ getAvailabilityText(product.availability) }}
+                    {{ getAvailabilityText(product.availability) | translate }}
                   </div>
                 </div>
 
@@ -485,9 +485,9 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
   getAvailabilityText(availability: string): string {
     switch (availability) {
-      case 'available': return 'Available';
-      case 'limited': return 'Limited';
-      case 'out-of-stock': return 'Out of Stock';
+      case 'available': return 'productDetails.inStock';
+      case 'limited': return 'productDetails.limitedStock';
+      case 'out-of-stock': return 'productDetails.outOfStock';
       default: return '';
     }
   }

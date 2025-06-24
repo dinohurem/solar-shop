@@ -143,6 +143,15 @@ export const authReducer = createReducer(
     })),
 
     // Token Management Actions
+    on(AuthActions.initializeAuthState, (state, { token, user }) => ({
+        ...state,
+        token,
+        user,
+        loggedIn: true,
+        loading: false,
+        error: null
+    })),
+
     on(AuthActions.setAuthToken, (state, { token }) => ({
         ...state,
         token,

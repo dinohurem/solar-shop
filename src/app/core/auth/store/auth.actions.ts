@@ -54,6 +54,7 @@ export const updateUserProfileFailure = createAction('[Auth] Update User Profile
 
 // Token Management
 export const checkAuthToken = createAction('[Auth] Check Auth Token');
+export const initializeAuthState = createAction('[Auth] Initialize Auth State', props<{ token: string; user: User }>());
 export const setAuthToken = createAction('[Auth] Set Auth Token', props<{ token: string }>());
 export const clearAuthToken = createAction('[Auth] Clear Auth Token');
 
