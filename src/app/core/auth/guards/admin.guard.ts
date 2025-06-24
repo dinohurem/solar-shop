@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, Router } from '@angular/router';
-import { Observable, of } from 'rxjs';
-import { map, catchError, take, switchMap } from 'rxjs/operators';
+import { Observable, of, combineLatest } from 'rxjs';
+import { map, catchError, take, filter, switchMap } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
-import { selectHasAdminPrivileges, selectIsAuthenticated } from '../store/auth.selectors';
+import { selectHasAdminPrivileges, selectIsAuthenticated, selectAuthLoading } from '../store/auth.selectors';
 
 @Injectable({
     providedIn: 'root'
@@ -16,28 +16,34 @@ export class AdminGuard implements CanActivate {
     ) { }
 
     canActivate(): Observable<boolean> {
-        return this.store.select(selectIsAuthenticated).pipe(
+        // Wait for auth state to be initialized (not loading)
+        return this.store.select(selectAuthLoading).pipe(
+            filter(loading => !loading), // Wait until not loading
             take(1),
-            switchMap(isAuthenticated => {
-                if (!isAuthenticated) {
-                    // Redirect to login if not authenticated
-                    this.router.navigate(['/login']);
-                    return of(false);
-                }
-
-                // Check if user has admin privileges
-                return this.store.select(selectHasAdminPrivileges).pipe(
+            switchMap(() => {
+                // Now check authentication and admin privileges
+                return combineLatest([
+                    this.store.select(selectIsAuthenticated),
+                    this.store.select(selectHasAdminPrivileges)
+                ]).pipe(
                     take(1),
-                    map(hasAdminPrivileges => {
+                    map(([isAuthenticated, hasAdminPrivileges]) => {
+                        if (!isAuthenticated) {
+                            // Redirect to login if not authenticated
+                            this.router.navigate(['/login']);
+                            return false;
+                        }
+
                         if (!hasAdminPrivileges) {
                             // Redirect to home if not admin
                             this.router.navigate(['/']);
                             return false;
                         }
+
                         return true;
                     }),
                     catchError(() => {
-                        this.router.navigate(['/']);
+                        this.router.navigate(['/login']);
                         return of(false);
                     })
                 );

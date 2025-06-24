@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, Router, UrlTree } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, map, take } from 'rxjs';
-import { selectIsAuthenticated } from '../core/auth/store/auth.selectors';
+import { Observable, map, take, filter, switchMap } from 'rxjs';
+import { selectIsAuthenticated, selectAuthLoading } from '../core/auth/store/auth.selectors';
 
 @Injectable({
     providedIn: 'root'
@@ -14,13 +14,20 @@ export class AuthGuard implements CanActivate {
     ) { }
 
     canActivate(): Observable<boolean | UrlTree> {
-        return this.store.select(selectIsAuthenticated).pipe(
+        // Wait for auth state to be initialized (not loading)
+        return this.store.select(selectAuthLoading).pipe(
+            filter(loading => !loading), // Wait until not loading
             take(1),
-            map(isAuthenticated => {
-                if (isAuthenticated) {
-                    return true;
-                }
-                return this.router.createUrlTree(['/login']);
+            switchMap(() => {
+                return this.store.select(selectIsAuthenticated).pipe(
+                    take(1),
+                    map(isAuthenticated => {
+                        if (isAuthenticated) {
+                            return true;
+                        }
+                        return this.router.createUrlTree(['/login']);
+                    })
+                );
             })
         );
     }

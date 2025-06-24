@@ -197,10 +197,21 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
                     [alt]="product.name"
                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   >
+                  <!-- Featured Badge -->
+                  <div 
+                    *ngIf="product.featured" 
+                    class="absolute top-3 left-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg"
+                  >
+                    {{ 'productList.featured' | translate }}
+                  </div>
                   <!-- Discount Badge -->
                   <div 
                     *ngIf="product.discount" 
-                    class="absolute top-3 left-3 bg-solar-500 text-white px-2 py-1 rounded-full text-xs font-semibold"
+                    class="absolute px-2 py-1 rounded-full text-xs font-semibold bg-solar-500 text-white"
+                    [ngClass]="{
+                      'top-3 left-3': !product.featured,
+                      'top-12 left-3': product.featured
+                    }"
                   >
                     -{{ product.discount }}%
                   </div>
