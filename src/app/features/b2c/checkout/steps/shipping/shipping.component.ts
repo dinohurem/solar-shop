@@ -221,6 +221,14 @@ export class ShippingComponent {
   }
 
   onSubmit() {
+    // Ensure cart items are still available for checkout
+    const checkoutItems = localStorage.getItem('checkoutItems');
+    if (!checkoutItems) {
+      console.error('No checkout items found. Redirecting to cart.');
+      this.router.navigate(['/checkout/order-review']);
+      return;
+    }
+
     // Save shipping information to localStorage for payment step
     const shippingData = this.shippingForm.value;
     localStorage.setItem('shippingInfo', JSON.stringify(shippingData));

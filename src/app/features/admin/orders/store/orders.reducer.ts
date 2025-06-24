@@ -186,5 +186,42 @@ export const ordersReducer = createReducer(
     on(OrdersActions.clearCurrentOrder, (state) => ({
         ...state,
         currentOrder: null
+    })),
+
+    // B2C Order creation
+    on(OrdersActions.createB2COrder, (state) => {
+        console.log('Reducer: createB2COrder - setting loading to true');
+        return {
+            ...state,
+            loading: true,
+            error: null
+        };
+    }),
+
+    on(OrdersActions.createB2COrderSuccess, (state, { order, orderNumber }) => {
+        console.log('Reducer: createB2COrderSuccess - order created:', order);
+        return {
+            ...state,
+            currentOrder: order,
+            loading: false,
+            error: null
+        };
+    }),
+
+    on(OrdersActions.createB2COrderFailure, (state, { error }) => {
+        console.log('Reducer: createB2COrderFailure - error:', error);
+        return {
+            ...state,
+            loading: false,
+            error
+        };
+    }),
+
+    // Clear B2C order state
+    on(OrdersActions.clearB2COrderState, (state) => ({
+        ...state,
+        currentOrder: null,
+        loading: false,
+        error: null
     }))
 );

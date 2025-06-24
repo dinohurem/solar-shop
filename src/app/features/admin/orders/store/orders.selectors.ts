@@ -52,3 +52,19 @@ export const selectUserOrdersLoading = createSelector(
     selectOrdersState,
     (state: OrdersState) => state.loadingUserOrders
 );
+
+// B2C Order creation selectors
+export const selectB2COrderCreating = createSelector(
+    selectOrdersState,
+    (state: OrdersState) => state.loading
+);
+
+export const selectB2COrderCreated = createSelector(
+    selectOrdersState,
+    (state: OrdersState) => state.currentOrder
+);
+
+export const selectB2COrderError = createSelector(
+    selectOrdersState,
+    (state: OrdersState) => state.error
+);

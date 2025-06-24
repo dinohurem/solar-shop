@@ -808,4 +808,145 @@ export class SupabaseService {
             return null;
         }
     }
+
+    // Stock Management Methods
+    async decrementProductStock(productId: string, quantity: number): Promise<boolean> {
+        try {
+            console.log(`Decrementing stock for product ${productId} by ${quantity}`);
+
+            // First check current stock
+            const product = await this.getTableById('products', productId);
+            if (!product) {
+                console.error(`Product ${productId} not found`);
+                return false;
+            }
+
+            const currentStock = product.stock_quantity;
+            if (currentStock < quantity) {
+                console.error(`Insufficient stock for product ${productId}. Available: ${currentStock}, Requested: ${quantity}`);
+                return false;
+            }
+
+            const newStock = currentStock - quantity;
+
+            // Update stock quantity
+            const { data, error } = await this.supabase
+                .from('products')
+                .update({
+                    stock_quantity: newStock,
+                    stock_status: this.calculateStockStatus(newStock, (product as any).stock_threshold || 5),
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', productId)
+                .select()
+                .single();
+
+            if (error) {
+                console.error('Error updating product stock:', error);
+                return false;
+            }
+
+            console.log(`Stock updated successfully for product ${productId}: ${currentStock} -> ${newStock}`);
+            return true;
+        } catch (error) {
+            console.error('Error in decrementProductStock:', error);
+            return false;
+        }
+    }
+
+    async incrementProductStock(productId: string, quantity: number): Promise<boolean> {
+        try {
+            console.log(`Incrementing stock for product ${productId} by ${quantity}`);
+
+            // Get current product
+            const product = await this.getTableById('products', productId);
+            if (!product) {
+                console.error(`Product ${productId} not found`);
+                return false;
+            }
+
+            const currentStock = product.stock_quantity;
+            const newStock = currentStock + quantity;
+
+            // Update stock quantity
+            const { data, error } = await this.supabase
+                .from('products')
+                .update({
+                    stock_quantity: newStock,
+                    stock_status: this.calculateStockStatus(newStock, (product as any).stock_threshold || 5),
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', productId)
+                .select()
+                .single();
+
+            if (error) {
+                console.error('Error updating product stock:', error);
+                return false;
+            }
+
+            console.log(`Stock updated successfully for product ${productId}: ${currentStock} -> ${newStock}`);
+            return true;
+        } catch (error) {
+            console.error('Error in incrementProductStock:', error);
+            return false;
+        }
+    }
+
+    async processOrderStockAdjustment(orderItems: any[], decrement: boolean = true): Promise<boolean> {
+        try {
+            console.log(`Processing stock adjustment for ${orderItems.length} items (decrement: ${decrement})`);
+
+            const stockAdjustments: { productId: string; quantity: number; success: boolean }[] = [];
+
+            for (const item of orderItems) {
+                if (!item.product_id && !item.productId) {
+                    console.log(`Skipping stock adjustment for item without product_id: ${item.product_name || item.name}`);
+                    continue;
+                }
+
+                const productId = item.product_id || item.productId;
+                const quantity = item.quantity;
+
+                const success = decrement
+                    ? await this.decrementProductStock(productId, quantity)
+                    : await this.incrementProductStock(productId, quantity);
+
+                stockAdjustments.push({
+                    productId: productId,
+                    quantity: quantity,
+                    success
+                });
+
+                if (!success && decrement) {
+                    // If any stock decrement fails, we need to rollback
+                    console.error(`Stock adjustment failed for product ${productId}`);
+
+                    // Rollback previous adjustments
+                    for (const adjustment of stockAdjustments) {
+                        if (adjustment.success && adjustment.productId !== productId) {
+                            await this.incrementProductStock(adjustment.productId, adjustment.quantity);
+                        }
+                    }
+                    return false;
+                }
+            }
+
+            console.log('Stock adjustments completed successfully');
+            return true;
+        } catch (error) {
+            console.error('Error in processOrderStockAdjustment:', error);
+            return false;
+        }
+    }
+
+    private calculateStockStatus(quantity: number, threshold: number): 'in_stock' | 'low_stock' | 'out_of_stock' {
+        if (quantity === 0) {
+            return 'out_of_stock';
+        } else if (quantity <= threshold) {
+            return 'low_stock';
+        } else {
+            return 'in_stock';
+        }
+    }
 } 

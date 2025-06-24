@@ -1,15 +1,17 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
-import { take, map } from 'rxjs/operators';
+import { Observable, BehaviorSubject, Subscription } from 'rxjs';
+import { take, map, filter, distinctUntilChanged } from 'rxjs/operators';
 import { selectCurrentUser } from '../../../../../core/auth/store/auth.selectors';
 import { SupabaseService } from '../../../../../services/supabase.service';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { User } from '../../../../../shared/models/user.model';
 import * as CartActions from '../../../cart/store/cart.actions';
+import * as OrdersActions from '../../../../admin/orders/store/orders.actions';
+import { selectB2COrderCreating, selectB2COrderCreated, selectB2COrderError } from '../../../../admin/orders/store/orders.selectors';
 
 @Component({
   selector: 'app-payment',
@@ -193,6 +195,16 @@ import * as CartActions from '../../../cart/store/cart.actions';
           </div>
         </div>
 
+        <!-- Error Message -->
+        <div *ngIf="(orderCreationError$ | async) as error" class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <div class="flex items-center space-x-2">
+            <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+            </svg>
+            <p class="text-sm text-red-800 font-['DM_Sans']">{{ error }}</p>
+          </div>
+        </div>
+
         <!-- Navigation Buttons -->
         <div class="flex space-x-4 pt-6 border-t border-gray-200">
           <button 
@@ -220,25 +232,14 @@ import * as CartActions from '../../../cart/store/cart.actions';
       </form>
     </div>
 
-    <!-- Toast Notification -->
-    <div *ngIf="showToast" class="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg transform transition-all duration-300 ease-in-out">
-      <div class="flex items-center space-x-3">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-        </svg>
-        <div>
-          <p class="font-semibold">{{ 'checkout.orderCompletedSuccessfully' | translate }}</p>
-          <p class="text-sm">{{ 'checkout.orderCreated' | translate: {number: orderNumber} }}</p>
-        </div>
-      </div>
-    </div>
+
   `,
   styles: [`
     /* Custom font loading */
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap');
   `]
 })
-export class PaymentComponent implements OnInit {
+export class PaymentComponent implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private router = inject(Router);
   private store = inject(Store);
@@ -246,10 +247,11 @@ export class PaymentComponent implements OnInit {
 
   paymentForm: FormGroup;
   isProcessing = false;
-  showToast = false;
   orderNumber = '';
   currentUser$: Observable<User | null>;
   isCompanyUser$: Observable<boolean>;
+  orderCreationError$ = new BehaviorSubject<string | null>(null);
+  private subscriptions = new Subscription();
 
   constructor() {
     this.currentUser$ = this.store.select(selectCurrentUser);
@@ -289,7 +291,44 @@ export class PaymentComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Component initialization if needed
+    // Subscribe to order creation success
+    this.subscriptions.add(
+      this.store.select(selectB2COrderCreated)
+        .pipe(
+          distinctUntilChanged()
+        )
+        .subscribe(order => {
+          console.log('Order state changed in payment component:', order, 'isProcessing:', this.isProcessing);
+          if (order && this.isProcessing) {
+            console.log('Order created successfully:', order);
+            this.isProcessing = false;
+            this.orderNumber = order.orderNumber;
+            this.handleOrderSuccess();
+          }
+        })
+    );
+
+    // Subscribe to order creation errors
+    this.subscriptions.add(
+      this.store.select(selectB2COrderError)
+        .pipe(
+          distinctUntilChanged()
+        )
+        .subscribe(error => {
+          console.log('Error state changed in payment component:', error, 'isProcessing:', this.isProcessing);
+          if (error && this.isProcessing) {
+            console.error('Order creation failed:', error);
+            this.isProcessing = false;
+
+            // Check for specific error types
+            if (error.includes('Insufficient stock')) {
+              this.orderCreationError$.next('One or more items in your cart are no longer available in the requested quantity. Please review your cart and try again.');
+            } else {
+              this.orderCreationError$.next('Error creating order. Please try again.');
+            }
+          }
+        })
+    );
   }
 
   async onSubmit() {
@@ -301,21 +340,12 @@ export class PaymentComponent implements OnInit {
     }
 
     this.isProcessing = true;
+    this.orderCreationError$.next(null); // Clear any previous errors
 
-    try {
-      await this.createOrder();
-      this.showSuccessToast();
+    // Clear any previous order state
+    this.store.dispatch(OrdersActions.clearB2COrderState());
 
-      // Navigate to home after a brief delay to show toast
-      setTimeout(() => {
-        this.router.navigate(['/']);
-      }, 1500);
-    } catch (error) {
-      console.error('Error creating order:', error);
-      alert('Error creating order. Please try again.');
-    } finally {
-      this.isProcessing = false;
-    }
+    await this.createOrder();
   }
 
   private async createOrder() {
@@ -374,14 +404,21 @@ export class PaymentComponent implements OnInit {
 
   private async createOrderWithUser(currentUser: any) {
 
-    // Get cart items from localStorage (or from cart service)
-    const cartItems = JSON.parse(localStorage.getItem('cart') || '[]');
+    // Get cart items from localStorage that was saved during checkout flow
+    const cartItems = JSON.parse(localStorage.getItem('checkoutItems') || '[]');
+
+    console.log('Cart items for order processing:', cartItems);
+
+    if (!cartItems.length) {
+      throw new Error('No items in cart for checkout');
+    }
+
     return this.processCartItems(currentUser, cartItems);
   }
 
   private async processCartItems(currentUser: any, cartItems: any[]) {
 
-    // Calculate totals
+    // Calculate totals from CartItem objects
     const subtotal = cartItems.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0);
     const tax = subtotal * 0.25; // 25% VAT
     const shipping = subtotal > 500 ? 0 : 50; // Free shipping over €500
@@ -441,46 +478,36 @@ export class PaymentComponent implements OnInit {
       updated_at: new Date().toISOString()
     };
 
-    // Create order in database
-    const order = await this.supabaseService.createRecord('orders', orderData);
+    // Dispatch NgRx action to create order with stock management
+    console.log('Dispatching createB2COrder action with data:', { orderData, cartItems });
+    this.store.dispatch(OrdersActions.createB2COrder({
+      orderData,
+      cartItems
+    }));
+  }
 
-    if (!order) {
-      throw new Error('Failed to create order');
-    }
-
-    // Create order items
-    for (const item of cartItems) {
-      const orderItemData = {
-        order_id: order.id,
-        product_id: item.id === '00000000-0000-0000-0000-000000000001' ? null : item.id, // Set to null for test products
-        product_name: item.name,
-        product_sku: item.sku || `SKU-${item.id}`,
-        product_image_url: item.image,
-        quantity: item.quantity,
-        unit_price: item.price,
-        total_price: item.price * item.quantity,
-        created_at: new Date().toISOString()
-      };
-
-      await this.supabaseService.createRecord('order_items', orderItemData);
-    }
+  private handleOrderSuccess() {
+    console.log('Handling order success, orderNumber:', this.orderNumber);
 
     // Clear cart - localStorage and NgRx store
-    localStorage.removeItem('cart');
+    localStorage.removeItem('checkoutItems');
     localStorage.removeItem('shippingInfo');
 
     // Dispatch order completion action which will automatically clear cart
     this.store.dispatch(CartActions.orderCompleted({
-      orderId: order.id,
+      orderId: '', // Will be filled by the effect
       orderNumber: this.orderNumber
     }));
+
+    // Clear the order state after success
+    this.store.dispatch(OrdersActions.clearB2COrderState());
+
   }
 
-  private showSuccessToast() {
-    this.showToast = true;
-    setTimeout(() => {
-      this.showToast = false;
-    }, 2000);
+
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
   }
 
   goBack() {

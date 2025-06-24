@@ -1037,6 +1037,16 @@ export class OrderFormComponent implements OnInit {
         savedOrder = await this.supabaseService.createRecord('orders', cleanedFormData);
 
         if (savedOrder && savedOrder.id) {
+          // First, check and decrement stock for all items
+          console.log('Processing stock adjustment for new order items...');
+          const stockAdjustmentSuccess = await this.supabaseService.processOrderStockAdjustment(orderItems, true);
+
+          if (!stockAdjustmentSuccess) {
+            // Delete the order if stock adjustment fails
+            await this.supabaseService.deleteRecord('orders', savedOrder.id);
+            throw new Error('Insufficient stock for one or more items. Order not created.');
+          }
+
           // Save order items
           await this.saveOrderItems(savedOrder.id, orderItems);
         }

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
+import { take } from 'rxjs/operators';
 import * as CartSelectors from '../../../cart/store/cart.selectors';
 import * as CartActions from '../../../cart/store/cart.actions';
 import { CartItem } from '../../../../../shared/models/cart.model';
@@ -143,6 +144,12 @@ export class OrderReviewComponent implements OnInit {
   }
 
   continueToShipping() {
+    // Save current cart items to localStorage for order processing
+    this.cartItems$.pipe(take(1)).subscribe(cartItems => {
+      console.log('Saving cart items for checkout:', cartItems);
+      localStorage.setItem('checkoutItems', JSON.stringify(cartItems));
+    });
+
     this.router.navigate(['/checkout/shipping']);
   }
 } 

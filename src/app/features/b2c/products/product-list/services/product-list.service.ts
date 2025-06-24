@@ -209,7 +209,7 @@ export class ProductListService {
 
             // Determine availability
             let availability: 'available' | 'limited' | 'out-of-stock' = 'available';
-            if (!product.in_stock || product.stock_quantity === 0) {
+            if (product.stock_status === 'out_of_stock' || product.stock_quantity === 0) {
                 availability = 'out-of-stock';
             } else if (product.stock_status === 'low_stock' || product.stock_quantity < 10) {
                 availability = 'limited';
