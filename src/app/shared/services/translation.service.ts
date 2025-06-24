@@ -862,7 +862,7 @@ export class TranslationService {
                     error: 'Greška',
                     info: 'Info',
                     // Order form specific keys
-                    createOrder: 'Stvori narudžbu',
+                    createOrder: 'Kreiraj narudžbu',
                     editOrder: 'Uredi narudžbu',
                     updateOrderInformation: 'Ažuriraj informacije o narudžbi',
                     addNewOrder: 'Dodaj novu narudžbu',
@@ -883,7 +883,7 @@ export class TranslationService {
                     unitPrice: 'Jedinična cijena',
                     quantity: 'Količina',
                     discountPercent: 'Popust %',
-                    subtotal: 'Podzbroj',
+                    subtotal: 'Ukupno',
                     noOrderItems: 'Nema stavki narudžbe',
                     addFirstItem: 'Dodaj prvu stavku',
                     pricingDiscounts: 'Cijene i popusti',
@@ -915,6 +915,14 @@ export class TranslationService {
                     partiallyRefunded: 'Djelomično vraćeno',
                     additionalNotes: 'Dodatne napomene',
                     notesAboutOrder: 'Napomene o narudžbi',
+                    noProductsFound: 'Nema pronađenih proizvoda',
+                    isB2BOrder: 'B2B narudžba',
+                    isB2BOrderDescription: 'Označava da je ovo poslovni (B2B) naloga',
+                    discountAmount: 'Iznos popusta',
+                    discountPercentage: 'Postotak popusta',
+                    shippingCost: 'Troškovi dostave',
+                    taxAmount: 'Iznos poreza',
+                    taxPercentage: 'Postotak poreza',
                 },
                 partnerOrdersForm: {
                     title: 'Narudžbe partnera',
@@ -1017,6 +1025,8 @@ export class TranslationService {
             },
             // Admin Users
             adminUsers: {
+                title: 'Korisnici',
+                subtitle: 'Upravljajte korisničkim računima i profilima',
                 createUser: 'Stvori korisnika',
                 editUser: 'Uredi korisnika',
                 manageUserAccounts: 'Upravljaj korisničkim računima i profilima',
@@ -1165,6 +1175,25 @@ export class TranslationService {
                 deleteReview: 'Obriši recenziju',
                 noReviewsFound: 'Nema pronađenih recenzija',
                 writeFirstReview: 'Napišite svoju prvu recenziju nakon kupovine proizvoda'
+            },
+            // Admin Wishlist
+            adminWishlist: {
+                title: 'Liste želja',
+                subtitle: 'Upravljajte korisničkim listama želja',
+                userWishlists: 'Korisničke liste želja',
+                wishlistItems: 'Stavke liste želja',
+                userName: 'Ime korisnika',
+                userEmail: 'Email korisnika',
+                itemCount: 'Broj stavki',
+                lastUpdated: 'Zadnje ažuriranje',
+                viewDetails: 'Pogledaj detalje',
+                deleteAll: 'Obriši sve',
+                noWishlistItems: 'Nema stavki u listi želja',
+                noWishlistItemsDescription: 'Ovaj korisnik još nema stavki u svojoj listi želja.',
+                added: 'Dodano',
+                viewProduct: 'Pogledaj proizvod',
+                remove: 'Ukloni',
+                close: 'Zatvori'
             },
             // Common
             common: {
@@ -2804,6 +2833,14 @@ export class TranslationService {
                     partiallyRefunded: 'Partially Refunded',
                     additionalNotes: 'Additional Notes',
                     notesAboutOrder: 'Notes about the order',
+                    noProductsFound: 'No products found',
+                    isB2BOrder: 'B2B Order',
+                    isB2BOrderDescription: 'Indicates this is a business (B2B) order',
+                    discountAmount: 'Discount Amount',
+                    discountPercentage: 'Discount Percentage',
+                    shippingCost: 'Shipping Cost',
+                    taxAmount: 'Tax Amount',
+                    taxPercentage: 'Tax Percentage',
                 },
                 partnerOrdersForm: {
                     title: 'Partner Orders',
@@ -2906,6 +2943,8 @@ export class TranslationService {
             },
             // Admin Users
             adminUsers: {
+                title: 'Users',
+                subtitle: 'Manage user accounts and profiles',
                 createUser: 'Create User',
                 editUser: 'Edit User',
                 manageUserAccounts: 'Manage user accounts and profiles',
@@ -3054,6 +3093,25 @@ export class TranslationService {
                 deleteReview: 'Delete Review',
                 noReviewsFound: 'No reviews found',
                 writeFirstReview: 'Write your first review after purchasing a product'
+            },
+            // Admin Wishlist
+            adminWishlist: {
+                title: 'Wishlists',
+                subtitle: 'Manage user wishlists',
+                userWishlists: 'User Wishlists',
+                wishlistItems: 'Wishlist Items',
+                userName: 'User Name',
+                userEmail: 'User Email',
+                itemCount: 'Item Count',
+                lastUpdated: 'Last Updated',
+                viewDetails: 'View Details',
+                deleteAll: 'Delete All',
+                noWishlistItems: 'No wishlist items',
+                noWishlistItemsDescription: 'This user has no items in their wishlist yet.',
+                added: 'Added',
+                viewProduct: 'View Product',
+                remove: 'Remove',
+                close: 'Close'
             },
             // Common
             common: {

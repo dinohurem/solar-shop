@@ -7,6 +7,7 @@ import { SupabaseService } from '../../../services/supabase.service';
 import { DataTableComponent, TableConfig } from '../shared/data-table/data-table.component';
 import { SuccessModalComponent } from '../../../shared/components/modals/success-modal/success-modal.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../shared/services/translation.service';
 
 @Component({
     selector: 'app-admin-users',
@@ -17,14 +18,14 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
       <!-- Page Header -->
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-3xl font-bold text-gray-900">{{ 'admin.usersForm.title' | translate }}</h1>
-          <p class="mt-2 text-gray-600">{{ 'admin.usersForm.subtitle' | translate }}</p>
+          <h1 class="text-3xl font-bold text-gray-900">{{ 'adminUsers.title' | translate }}</h1>
+          <p class="mt-2 text-gray-600">{{ 'adminUsers.subtitle' | translate }}</p>
         </div>
       </div>
 
       <!-- Data Table -->
       <app-data-table
-        [title]="'admin.usersForm.title' | translate"
+        [title]="'adminUsers.title' | translate"
         [data]="(users$ | async) || []"
         [config]="tableConfig"
         [loading]="(loading$ | async) || false"
@@ -53,6 +54,7 @@ export class AdminUsersComponent implements OnInit {
     private supabaseService = inject(SupabaseService);
     private router = inject(Router);
     private title = inject(Title);
+    private translationService = inject(TranslationService);
 
     private usersSubject = new BehaviorSubject<any[]>([]);
     private loadingSubject = new BehaviorSubject<boolean>(true);
@@ -65,83 +67,88 @@ export class AdminUsersComponent implements OnInit {
     successModalTitle = '';
     successModalMessage = '';
 
-    tableConfig: TableConfig = {
-        columns: [
-            {
-                key: 'avatar_url',
-                label: 'Avatar',
-                type: 'image',
-                sortable: false,
-                searchable: false
-            },
-            {
-                key: 'first_name',
-                label: 'First Name',
-                type: 'text',
-                sortable: true,
-                searchable: true
-            },
-            {
-                key: 'last_name',
-                label: 'Last Name',
-                type: 'text',
-                sortable: true,
-                searchable: true
-            },
-            {
-                key: 'email',
-                label: 'Email',
-                type: 'text',
-                sortable: true,
-                searchable: true
-            },
-            {
-                key: 'phone',
-                label: 'Phone',
-                type: 'text',
-                sortable: false,
-                searchable: true
-            },
-            {
-                key: 'role',
-                label: 'Role',
-                type: 'status',
-                sortable: true,
-                searchable: true
-            },
-            {
-                key: 'created_at',
-                label: 'Created',
-                type: 'date',
-                sortable: true
-            }
-        ],
-        actions: [
-            {
-                label: 'Edit',
-                icon: 'edit',
-                action: 'edit',
-                class: 'text-blue-600 hover:text-blue-900'
-            },
-            {
-                label: 'Delete',
-                icon: 'trash2',
-                action: 'delete',
-                class: 'text-red-600 hover:text-red-900'
-            }
-        ],
-        searchable: true,
-        sortable: true,
-        paginated: true,
-        pageSize: 20,
-        allowCsvImport: false, // Disable CSV import for users for security
-        allowExport: true,
-        rowClickable: true
-    };
+    tableConfig!: TableConfig;
 
     ngOnInit(): void {
-        this.title.setTitle('Users - Solar Shop Admin');
+        this.initializeTableConfig();
+        this.title.setTitle(this.translationService.translate('adminUsers.title') + ' - Solar Shop Admin');
         this.loadUsers();
+    }
+
+    private initializeTableConfig(): void {
+        this.tableConfig = {
+            columns: [
+                {
+                    key: 'avatar_url',
+                    label: 'Avatar',
+                    type: 'image',
+                    sortable: false,
+                    searchable: false
+                },
+                {
+                    key: 'first_name',
+                    label: this.translationService.translate('adminUsers.firstName'),
+                    type: 'text',
+                    sortable: true,
+                    searchable: true
+                },
+                {
+                    key: 'last_name',
+                    label: this.translationService.translate('adminUsers.lastName'),
+                    type: 'text',
+                    sortable: true,
+                    searchable: true
+                },
+                {
+                    key: 'email',
+                    label: this.translationService.translate('adminUsers.email'),
+                    type: 'text',
+                    sortable: true,
+                    searchable: true
+                },
+                {
+                    key: 'phone',
+                    label: this.translationService.translate('adminUsers.phone'),
+                    type: 'text',
+                    sortable: false,
+                    searchable: true
+                },
+                {
+                    key: 'role',
+                    label: this.translationService.translate('adminUsers.role'),
+                    type: 'status',
+                    sortable: true,
+                    searchable: true
+                },
+                {
+                    key: 'created_at',
+                    label: 'Created',
+                    type: 'date',
+                    sortable: true
+                }
+            ],
+            actions: [
+                {
+                    label: 'Edit',
+                    icon: 'edit',
+                    action: 'edit',
+                    class: 'text-blue-600 hover:text-blue-900'
+                },
+                {
+                    label: 'Delete',
+                    icon: 'trash2',
+                    action: 'delete',
+                    class: 'text-red-600 hover:text-red-900'
+                }
+            ],
+            searchable: true,
+            sortable: true,
+            paginated: true,
+            pageSize: 20,
+            allowCsvImport: false, // Disable CSV import for users for security
+            allowExport: true,
+            rowClickable: true
+        };
     }
 
     onTableAction(event: { action: string, item: any }): void {

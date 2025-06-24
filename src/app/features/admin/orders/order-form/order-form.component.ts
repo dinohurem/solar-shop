@@ -7,6 +7,8 @@ import { SupabaseService } from '../../../../services/supabase.service';
 import { AdminFormComponent } from '../../shared/admin-form/admin-form.component';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { TranslationService } from '../../../../shared/services/translation.service';
+import { debounceTime, distinctUntilChanged, switchMap, catchError } from 'rxjs/operators';
+import { of, fromEvent, merge, EMPTY } from 'rxjs';
 
 @Component({
   selector: 'app-order-form',
@@ -184,16 +186,57 @@ import { TranslationService } from '../../../../shared/services/translation.serv
             <div *ngFor="let item of orderItems.controls; let i = index" [formGroupName]="i" 
                  class="bg-gray-50 rounded-lg p-4 border border-gray-200">
               <div class="grid grid-cols-1 lg:grid-cols-6 gap-4 items-end">
+                <!-- Product Search Combobox -->
                 <div class="relative">
                   <input
                     type="text"
                     formControlName="product_name"
+                    (input)="onProductInputChange($any($event.target).value, i)"
+                    (focus)="onProductInputFocus(i)"
+                    (blur)="onProductInputBlur(i)"
                     class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
-                    placeholder="Product Name"
+                    placeholder="Search product..."
+                    autocomplete="off"
                   >
                   <label class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
                     {{ 'admin.ordersForm.productName' | translate }} *
                   </label>
+                  
+                  <!-- Loading indicator -->
+                  <div *ngIf="isSearching && activeSearchIndex === i" class="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                  </div>
+                  
+                  <!-- Search Results Dropdown -->
+                  <div *ngIf="searchResults.length > 0 && activeSearchIndex === i" 
+                       class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                    <div *ngFor="let product of searchResults; let productIndex = index"
+                         (mousedown)="selectProduct(product, i)"
+                         class="px-4 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0">
+                      <div class="flex items-center justify-between">
+                        <div class="flex-1">
+                          <p class="font-medium text-gray-900">{{ product.name }}</p>
+                          <p class="text-sm text-gray-500">SKU: {{ product.sku || 'N/A' }}</p>
+                          <p class="text-sm text-blue-600 font-semibold">€{{ product.price | number:'1.2-2' }}</p>
+                        </div>
+                        <div class="ml-3">
+                          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" 
+                                [class.bg-green-100]="product.is_active"
+                                [class.text-green-800]="product.is_active"
+                                [class.bg-red-100]="!product.is_active"
+                                [class.text-red-800]="!product.is_active">
+                            {{ product.is_active ? 'Active' : 'Inactive' }}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- No results message -->
+                  <div *ngIf="searchResults.length === 0 && !isSearching && activeSearchIndex === i && item.get('product_name')?.value?.length > 2"
+                       class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-4 text-center text-gray-500">
+                    {{ 'admin.ordersForm.noProductsFound' | translate }}
+                  </div>
                 </div>
 
                 <div class="relative">
@@ -286,19 +329,62 @@ import { TranslationService } from '../../../../shared/services/translation.serv
           </h3>
           
           <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <!-- Order Discount Percentage -->
             <div class="relative">
               <input
                 type="number"
-                id="order_discount_percentage"
-                formControlName="order_discount_percentage"
+                id="discount_percentage"
+                formControlName="discount_percentage"
                 step="0.1"
                 min="0"
                 max="100"
-                class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
+                class="peer w-full pl-4 pr-10 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
                 placeholder="0"
               >
-              <label for="order_discount_percentage" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                {{ 'admin.ordersForm.orderDiscountPercent' | translate }}
+              <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                <span class="text-gray-500 text-lg">%</span>
+              </div>
+              <label for="discount_percentage" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+                {{ 'admin.ordersForm.discountPercentage' | translate }}
+              </label>
+            </div>
+
+            <!-- Shipping Cost -->
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <span class="text-gray-500 text-lg">€</span>
+              </div>
+              <input
+                type="number"
+                id="shipping_cost"
+                formControlName="shipping_cost"
+                step="0.01"
+                min="0"
+                class="peer w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
+                placeholder="0.00"
+              >
+              <label for="shipping_cost" class="absolute left-10 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+                {{ 'admin.ordersForm.shippingCost' | translate }}
+              </label>
+            </div>
+
+            <!-- Tax Percentage -->
+            <div class="relative">
+              <input
+                type="number"
+                id="tax_percentage"
+                formControlName="tax_percentage"
+                step="0.1"
+                min="0"
+                max="100"
+                class="peer w-full pl-4 pr-10 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
+                placeholder="0"
+              >
+              <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                <span class="text-gray-500 text-lg">%</span>
+              </div>
+              <label for="tax_percentage" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+                {{ 'admin.ordersForm.taxPercentage' | translate }}
               </label>
             </div>
 
@@ -317,6 +403,14 @@ import { TranslationService } from '../../../../shared/services/translation.serv
                   <span class="text-gray-600">{{ 'admin.ordersForm.orderDiscount' | translate }}:</span>
                   <span class="font-medium text-red-600">-{{ getOrderDiscountAmount() | currency:'EUR':'symbol':'1.2-2' }}</span>
                 </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-600">{{ 'admin.ordersForm.shippingCost' | translate }}:</span>
+                  <span class="font-medium text-green-600">+{{ getShippingCost() | currency:'EUR':'symbol':'1.2-2' }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-600">{{ 'admin.ordersForm.taxAmount' | translate }} ({{ orderForm.get('tax_percentage')?.value || 0 }}%):</span>
+                  <span class="font-medium text-green-600">+{{ getTaxAmount() | currency:'EUR':'symbol':'1.2-2' }}</span>
+                </div>
                 <div class="border-t border-blue-200 pt-2 flex justify-between">
                   <span class="font-semibold text-gray-900">{{ 'admin.ordersForm.total' | translate }}:</span>
                   <span class="font-bold text-blue-600">{{ getOrderTotal() | currency:'EUR':'symbol':'1.2-2' }}</span>
@@ -334,6 +428,21 @@ import { TranslationService } from '../../../../shared/services/translation.serv
             </svg>
             {{ 'admin.ordersForm.statusInformation' | translate }}
           </h3>
+
+          <!-- B2B Checkbox -->
+          <div class="mb-6">
+            <label class="flex items-center space-x-3 cursor-pointer">
+              <input
+                type="checkbox"
+                formControlName="is_b2b"
+                class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+              >
+              <span class="text-sm font-medium text-gray-700">
+                {{ 'admin.ordersForm.isB2BOrder' | translate }}
+              </span>
+            </label>
+            <p class="mt-1 text-sm text-gray-500">{{ 'admin.ordersForm.isB2BOrderDescription' | translate }}</p>
+          </div>
           
           <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
             <div class="relative">
@@ -460,6 +569,11 @@ export class OrderFormComponent implements OnInit {
   isEditMode = false;
   orderId: string | null = null;
 
+  // Product search properties
+  searchResults: any[] = [];
+  isSearching = false;
+  activeSearchIndex = -1;
+
   constructor() {
     this.orderForm = this.fb.group({
       order_number: ['', Validators.required],
@@ -472,7 +586,12 @@ export class OrderFormComponent implements OnInit {
       payment_method: [''],
       shipping_address: [''],
       billing_address: [''],
-      order_discount_percentage: [0, [Validators.min(0), Validators.max(100)]],
+      discount_percentage: [0, [Validators.min(0), Validators.max(100)]],
+      discount_amount: [0, [Validators.min(0)]],
+      shipping_cost: [0, [Validators.min(0)]],
+      tax_percentage: [0, [Validators.min(0), Validators.max(100)]],
+      tax_amount: [0, [Validators.min(0)]],
+      is_b2b: [false],
       notes: [''],
       order_items: this.fb.array([])
     });
@@ -507,10 +626,13 @@ export class OrderFormComponent implements OnInit {
 
   createOrderItem(): FormGroup {
     return this.fb.group({
+      product_id: [''],
       product_name: ['', Validators.required],
+      product_sku: [''],
       unit_price: [0, [Validators.required, Validators.min(0)]],
       quantity: [1, [Validators.required, Validators.min(1)]],
-      discount_percentage: [0, [Validators.min(0), Validators.max(100)]]
+      discount_percentage: [0, [Validators.min(0), Validators.max(100)]],
+      discount_amount: [0, [Validators.min(0)]]
     });
   }
 
@@ -561,15 +683,79 @@ export class OrderFormComponent implements OnInit {
 
   getOrderDiscountAmount(): number {
     const subtotalAfterItemDiscounts = this.getOrderSubtotal() - this.getItemDiscountsTotal();
-    const orderDiscountPercentage = this.orderForm?.get('order_discount_percentage')?.value || 0;
-    return subtotalAfterItemDiscounts * (orderDiscountPercentage / 100);
+    const discountPercentage = this.orderForm?.get('discount_percentage')?.value || 0;
+    return subtotalAfterItemDiscounts * (discountPercentage / 100);
+  }
+
+  getShippingCost(): number {
+    return this.orderForm?.get('shipping_cost')?.value || 0;
+  }
+
+  getTaxAmount(): number {
+    const subtotalAfterDiscounts = this.getOrderSubtotal() - this.getItemDiscountsTotal() - this.getOrderDiscountAmount() + this.getShippingCost();
+    const taxPercentage = this.orderForm?.get('tax_percentage')?.value || 0;
+    return subtotalAfterDiscounts * (taxPercentage / 100);
   }
 
   getOrderTotal(): number {
     const subtotal = this.getOrderSubtotal();
     const itemDiscounts = this.getItemDiscountsTotal();
     const orderDiscount = this.getOrderDiscountAmount();
-    return Math.max(0, subtotal - itemDiscounts - orderDiscount);
+    const shipping = this.getShippingCost();
+    const tax = this.getTaxAmount();
+    return Math.max(0, subtotal - itemDiscounts - orderDiscount + shipping + tax);
+  }
+
+  // Product search methods
+  async searchProducts(query: string, itemIndex: number): Promise<void> {
+    if (!query || query.length < 2) {
+      this.searchResults = [];
+      return;
+    }
+
+    this.isSearching = true;
+    try {
+      const products = await this.supabaseService.getProducts({ search: query, limit: 10 });
+      this.searchResults = products || [];
+      this.activeSearchIndex = itemIndex;
+    } catch (error) {
+      console.error('Error searching products:', error);
+      this.searchResults = [];
+    } finally {
+      this.isSearching = false;
+    }
+  }
+
+  selectProduct(product: any, itemIndex: number): void {
+    const item = this.orderItems.at(itemIndex);
+    if (item) {
+      item.patchValue({
+        product_id: product.id,
+        product_name: product.name,
+        product_sku: product.sku || '',
+        unit_price: product.price || 0
+      });
+    }
+    this.searchResults = [];
+    this.activeSearchIndex = -1;
+  }
+
+  onProductInputFocus(itemIndex: number): void {
+    this.activeSearchIndex = itemIndex;
+  }
+
+  onProductInputBlur(itemIndex: number): void {
+    // Add a small delay to allow click on search results
+    setTimeout(() => {
+      if (this.activeSearchIndex === itemIndex) {
+        this.searchResults = [];
+        this.activeSearchIndex = -1;
+      }
+    }, 200);
+  }
+
+  onProductInputChange(query: string, itemIndex: number): void {
+    this.searchProducts(query, itemIndex);
   }
 
   private async loadOrder(): Promise<void> {
@@ -586,14 +772,49 @@ export class OrderFormComponent implements OnInit {
         };
         this.orderForm.patchValue(formData);
 
-        // Load order items if they exist
-        // For now, add a sample item
-        this.addOrderItem();
+        // Load order items
+        await this.loadOrderItems();
       }
     } catch (error) {
       console.error('Error loading order:', error);
     } finally {
       this.loading = false;
+    }
+  }
+
+  private async loadOrderItems(): Promise<void> {
+    if (!this.orderId) return;
+
+    try {
+      const orderItems = await this.supabaseService.getTable('order_items', { order_id: this.orderId });
+
+      // Clear existing items
+      while (this.orderItems.length !== 0) {
+        this.orderItems.removeAt(0);
+      }
+
+      if (orderItems && orderItems.length > 0) {
+        for (const item of orderItems) {
+          const orderItemForm = this.createOrderItem();
+          orderItemForm.patchValue({
+            product_id: item.product_id || '',
+            product_name: item.product_name || '',
+            product_sku: item.product_sku || '',
+            unit_price: item.unit_price || 0,
+            quantity: item.quantity || 1,
+            discount_percentage: (item as any).discount_percentage || 0,
+            discount_amount: (item as any).discount_amount || 0
+          });
+          this.orderItems.push(orderItemForm);
+        }
+      } else {
+        // Add one empty item for editing
+        this.addOrderItem();
+      }
+    } catch (error) {
+      console.error('Error loading order items:', error);
+      // Add one empty item if loading fails
+      this.addOrderItem();
     }
   }
 
@@ -612,7 +833,9 @@ export class OrderFormComponent implements OnInit {
         formData.order_date = new Date(formData.order_date).toISOString();
       }
 
-      // Calculate total amount from order items and discounts
+      // Calculate and set amounts from percentages
+      formData.discount_amount = this.getOrderDiscountAmount();
+      formData.tax_amount = this.getTaxAmount();
       formData.total_amount = this.getOrderTotal();
 
       if (this.isEditMode && this.orderId) {

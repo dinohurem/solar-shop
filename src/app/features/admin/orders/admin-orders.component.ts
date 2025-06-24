@@ -47,10 +47,12 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
         [data]="(filteredOrders$ | async) || []"
         [config]="tableConfig"
         [loading]="(loading$ | async) || false"
+        (addClicked)="onAddOrder()"
         (actionClicked)="onTableAction($event)"
         (rowClicked)="onRowClick($event)"
         (csvImported)="onCsvImported($event)">
       </app-data-table>
+      
         </div>
       </div>
     </div>
@@ -226,7 +228,9 @@ export class AdminOrdersComponent implements OnInit {
         this.router.navigate(['/admin/orders/details', item.id]);
     }
 
-
+    onAddOrder(): void {
+        this.router.navigate(['/admin/orders/create']);
+    }
 
     async onCsvImported(csvData: any[]): Promise<void> {
         // Orders typically aren't imported via CSV in most systems

@@ -6,6 +6,7 @@ import { BehaviorSubject, from } from 'rxjs';
 import { SupabaseService } from '../../../services/supabase.service';
 import { DataTableComponent, TableConfig } from '../shared/data-table/data-table.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../shared/services/translation.service';
 
 interface UserWishlistSummary {
     id: string;
@@ -35,15 +36,15 @@ interface WishlistItemDetail {
         <!-- Page Header -->
         <div class="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
           <div class="min-w-0 flex-1">
-            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 truncate">{{ 'admin.wishlistForm.title' | translate }}</h1>
-            <p class="mt-1 sm:mt-2 text-sm sm:text-base text-gray-600">{{ 'admin.wishlistForm.subtitle' | translate }}</p>
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 truncate">{{ 'adminWishlist.title' | translate }}</h1>
+            <p class="mt-1 sm:mt-2 text-sm sm:text-base text-gray-600">{{ 'adminWishlist.subtitle' | translate }}</p>
           </div>
         </div>
 
         <!-- Data Table Container -->
         <div class="w-full overflow-hidden">
           <app-data-table
-            [title]="'admin.wishlistForm.userWishlists' | translate"
+            [title]="'adminWishlist.userWishlists' | translate"
             [data]="(userWishlists$ | async) || []"
             [config]="tableConfig"
             [loading]="(loading$ | async) || false"
@@ -62,7 +63,7 @@ interface WishlistItemDetail {
           <div class="flex justify-between items-center mb-6">
             <div>
               <h3 class="text-xl font-medium text-gray-900">
-                {{ selectedUserWishlist.userName }}'s {{ 'admin.wishlistForm.title' | translate }}
+                {{ selectedUserWishlist.userName }}'s {{ 'adminWishlist.title' | translate }}
               </h3>
               <p class="text-sm text-gray-600 mt-1">{{ selectedUserWishlist.userEmail }}</p>
             </div>
@@ -76,7 +77,7 @@ interface WishlistItemDetail {
           <!-- Wishlist Items -->
           <div *ngIf="(wishlistItems$ | async)?.length; else noItems">
             <h4 class="text-lg font-semibold text-gray-900 mb-4">
-              {{ 'admin.wishlistForm.wishlistItems' | translate }} ({{ (wishlistItems$ | async)?.length }})
+              {{ 'adminWishlist.wishlistItems' | translate }} ({{ (wishlistItems$ | async)?.length }})
             </h4>
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -93,18 +94,18 @@ interface WishlistItemDetail {
                 <div class="space-y-2">
                   <h5 class="font-semibold text-gray-900 text-sm">{{ item.productName }}</h5>
                   <p class="text-lg font-bold text-green-600">€{{ item.productPrice.toFixed(2) }}</p>
-                  <p class="text-xs text-gray-500">{{ 'admin.wishlistForm.added' | translate }}: {{ formatDate(item.addedAt) }}</p>
+                  <p class="text-xs text-gray-500">{{ 'adminWishlist.added' | translate }}: {{ formatDate(item.addedAt) }}</p>
                 </div>
                 
                 <!-- Actions -->
                 <div class="mt-3 flex space-x-2">
                   <button (click)="viewProduct(item.productId)" 
                           class="flex-1 px-3 py-2 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
-                    {{ 'admin.wishlistForm.viewProduct' | translate }}
+                    {{ 'adminWishlist.viewProduct' | translate }}
                   </button>
                   <button (click)="removeFromWishlist(item.id)" 
                           class="px-3 py-2 text-xs bg-red-600 text-white rounded hover:bg-red-700 transition-colors">
-                    {{ 'admin.wishlistForm.remove' | translate }}
+                    {{ 'adminWishlist.remove' | translate }}
                   </button>
                 </div>
               </div>
@@ -117,8 +118,8 @@ interface WishlistItemDetail {
               <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
               </svg>
-              <h3 class="text-lg font-medium text-gray-900 mb-2">{{ 'admin.wishlistForm.noWishlistItems' | translate }}</h3>
-              <p class="text-gray-600">{{ 'admin.wishlistForm.noWishlistItemsDescription' | translate }}</p>
+              <h3 class="text-lg font-medium text-gray-900 mb-2">{{ 'adminWishlist.noWishlistItems' | translate }}</h3>
+              <p class="text-gray-600">{{ 'adminWishlist.noWishlistItemsDescription' | translate }}</p>
             </div>
           </ng-template>
 
@@ -126,7 +127,7 @@ interface WishlistItemDetail {
           <div class="mt-6 pt-4 border-t border-gray-200 flex justify-end">
             <button (click)="closeModal()" 
                     class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
-              {{ 'admin.wishlistForm.close' | translate }}
+              {{ 'adminWishlist.close' | translate }}
             </button>
           </div>
         </div>
@@ -143,6 +144,7 @@ export class AdminWishlistComponent implements OnInit {
     private supabaseService = inject(SupabaseService);
     private router = inject(Router);
     private title = inject(Title);
+    private translationService = inject(TranslationService);
 
     private userWishlistsSubject = new BehaviorSubject<UserWishlistSummary[]>([]);
     private wishlistItemsSubject = new BehaviorSubject<WishlistItemDetail[]>([]);
@@ -154,61 +156,66 @@ export class AdminWishlistComponent implements OnInit {
 
     selectedUserWishlist: UserWishlistSummary | null = null;
 
-    tableConfig: TableConfig = {
-        columns: [
-            {
-                key: 'userName',
-                label: 'User Name',
-                type: 'text',
-                sortable: true,
-                searchable: true
-            },
-            {
-                key: 'userEmail',
-                label: 'Email',
-                type: 'text',
-                sortable: true,
-                searchable: true
-            },
-            {
-                key: 'itemCount',
-                label: 'Items',
-                type: 'number',
-                sortable: true
-            },
-            {
-                key: 'lastUpdated',
-                label: 'Last Updated',
-                type: 'date',
-                sortable: true
-            }
-        ],
-        actions: [
-            {
-                label: 'View Details',
-                icon: 'eye',
-                action: 'details',
-                class: 'text-blue-600 hover:text-blue-900'
-            },
-            {
-                label: 'Delete All',
-                icon: 'trash2',
-                action: 'deleteAll',
-                class: 'text-red-600 hover:text-red-900'
-            }
-        ],
-        searchable: true,
-        sortable: true,
-        paginated: true,
-        pageSize: 20,
-        allowCsvImport: false,
-        allowExport: true,
-        rowClickable: true
-    };
+    tableConfig!: TableConfig;
 
     ngOnInit(): void {
-        this.title.setTitle('Wishlist Management - Solar Shop Admin');
+        this.initializeTableConfig();
+        this.title.setTitle(this.translationService.translate('adminWishlist.title') + ' Management - Solar Shop Admin');
         this.loadUserWishlists();
+    }
+
+    private initializeTableConfig(): void {
+        this.tableConfig = {
+            columns: [
+                {
+                    key: 'userName',
+                    label: this.translationService.translate('adminWishlist.userName'),
+                    type: 'text',
+                    sortable: true,
+                    searchable: true
+                },
+                {
+                    key: 'userEmail',
+                    label: this.translationService.translate('adminWishlist.userEmail'),
+                    type: 'text',
+                    sortable: true,
+                    searchable: true
+                },
+                {
+                    key: 'itemCount',
+                    label: this.translationService.translate('adminWishlist.itemCount'),
+                    type: 'number',
+                    sortable: true
+                },
+                {
+                    key: 'lastUpdated',
+                    label: this.translationService.translate('adminWishlist.lastUpdated'),
+                    type: 'date',
+                    sortable: true
+                }
+            ],
+            actions: [
+                {
+                    label: this.translationService.translate('adminWishlist.viewDetails'),
+                    icon: 'eye',
+                    action: 'details',
+                    class: 'text-blue-600 hover:text-blue-900'
+                },
+                {
+                    label: this.translationService.translate('adminWishlist.deleteAll'),
+                    icon: 'trash2',
+                    action: 'deleteAll',
+                    class: 'text-red-600 hover:text-red-900'
+                }
+            ],
+            searchable: true,
+            sortable: true,
+            paginated: true,
+            pageSize: 20,
+            allowCsvImport: false,
+            allowExport: true,
+            rowClickable: true
+        };
     }
 
     onTableAction(event: { action: string, item: UserWishlistSummary }): void {
