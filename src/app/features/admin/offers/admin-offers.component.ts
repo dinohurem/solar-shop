@@ -225,8 +225,6 @@ export class AdminOffersComponent implements OnInit {
   }
 
   private async deleteOffer(offer: any): Promise<void> {
-    if (!confirm(this.translationService.translate('admin.offersForm.offerDeleted'))) return;
-
     try {
       await this.supabaseService.deleteRecord('offers', offer.id);
       this.loadOffers();

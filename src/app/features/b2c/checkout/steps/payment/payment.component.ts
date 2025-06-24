@@ -4,7 +4,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { take, map } from 'rxjs/operators';
 import { selectCurrentUser } from '../../../../../core/auth/store/auth.selectors';
 import { SupabaseService } from '../../../../../services/supabase.service';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
@@ -132,8 +132,8 @@ import * as CartActions from '../../../cart/store/cart.actions';
           </div>
         </div>
 
-        <!-- B2B Order Option -->
-        <div class="mb-6 p-4 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-lg">
+        <!-- B2B Order Option (only show for company users) -->
+        <div *ngIf="isCompanyUser$ | async" class="mb-6 p-4 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-lg">
           <label class="flex items-start space-x-3 cursor-pointer">
             <input
               type="checkbox"
@@ -249,9 +249,13 @@ export class PaymentComponent implements OnInit {
   showToast = false;
   orderNumber = '';
   currentUser$: Observable<User | null>;
+  isCompanyUser$: Observable<boolean>;
 
   constructor() {
     this.currentUser$ = this.store.select(selectCurrentUser);
+    this.isCompanyUser$ = this.currentUser$.pipe(
+      map((user: User | null) => user?.companyId != null)
+    );
 
     this.paymentForm = this.fb.group({
       paymentMethod: ['cash_on_delivery', [Validators.required]],
@@ -302,10 +306,10 @@ export class PaymentComponent implements OnInit {
       await this.createOrder();
       this.showSuccessToast();
 
-      // Navigate to home after 3 seconds
+      // Navigate to home after a brief delay to show toast
       setTimeout(() => {
         this.router.navigate(['/']);
-      }, 3000);
+      }, 1500);
     } catch (error) {
       console.error('Error creating order:', error);
       alert('Error creating order. Please try again.');
@@ -476,7 +480,7 @@ export class PaymentComponent implements OnInit {
     this.showToast = true;
     setTimeout(() => {
       this.showToast = false;
-    }, 4000);
+    }, 2000);
   }
 
   goBack() {

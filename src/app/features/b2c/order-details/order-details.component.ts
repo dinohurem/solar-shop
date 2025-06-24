@@ -17,9 +17,9 @@ import { Order } from '../../../shared/models/order.model';
         <div class="mb-8">
           <div class="flex items-center justify-between">
             <div>
-              <h1 class="text-3xl font-bold text-gray-900 font-['Poppins']">Order Details</h1>
+              <h1 class="text-3xl font-bold text-gray-900 font-['Poppins']">{{ 'orderDetails.title' | translate }}</h1>
               <p class="mt-2 text-gray-600 font-['DM_Sans']" *ngIf="order">
-                Order placed on {{ order.orderDate | date:'fullDate' }}
+                {{ 'orderDetails.orderPlacedOn' | translate }} {{ order.orderDate | date:'fullDate' }}
               </p>
             </div>
             <button 
@@ -29,7 +29,7 @@ import { Order } from '../../../shared/models/order.model';
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
               </svg>
-              <span>Back to Orders</span>
+              <span>{{ 'orderDetails.backToOrders' | translate }}</span>
             </button>
           </div>
         </div>
@@ -44,8 +44,8 @@ import { Order } from '../../../shared/models/order.model';
           <svg class="w-12 h-12 text-red-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z"/>
           </svg>
-          <h3 class="text-lg font-medium text-red-800 mb-2">Order Not Found</h3>
-          <p class="text-red-600">The order you're looking for could not be found.</p>
+          <h3 class="text-lg font-medium text-red-800 mb-2">{{ 'orderDetails.orderNotFound' | translate }}</h3>
+          <p class="text-red-600">{{ 'orderDetails.orderNotFoundMessage' | translate }}</p>
         </div>
 
         <!-- Order Content -->
@@ -55,13 +55,13 @@ import { Order } from '../../../shared/models/order.model';
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <!-- Order Number -->
               <div>
-                <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide font-['DM_Sans']">Order Number</h3>
+                <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide font-['DM_Sans']">{{ 'orderDetails.orderNumber' | translate }}</h3>
                 <p class="mt-1 text-lg font-semibold text-gray-900 font-['Poppins']">{{ order.orderNumber }}</p>
               </div>
 
               <!-- Order Status -->
               <div>
-                <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide font-['DM_Sans']">Status</h3>
+                <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide font-['DM_Sans']">{{ 'orderDetails.status' | translate }}</h3>
                 <span class="mt-1 inline-flex px-3 py-1 text-sm font-medium rounded-full font-['DM_Sans']"
                       [ngClass]="{
                         'bg-yellow-100 text-yellow-800': order.status === 'pending',
@@ -77,7 +77,7 @@ import { Order } from '../../../shared/models/order.model';
 
               <!-- Payment Status -->
               <div>
-                <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide font-['DM_Sans']">Payment</h3>
+                <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide font-['DM_Sans']">{{ 'orderDetails.payment' | translate }}</h3>
                 <span class="mt-1 inline-flex px-3 py-1 text-sm font-medium rounded-full font-['DM_Sans']"
                       [ngClass]="{
                         'bg-yellow-100 text-yellow-800': order.paymentStatus === 'pending',
@@ -90,7 +90,7 @@ import { Order } from '../../../shared/models/order.model';
 
               <!-- Total Amount -->
               <div>
-                <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide font-['DM_Sans']">Total</h3>
+                <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide font-['DM_Sans']">{{ 'orderDetails.total' | translate }}</h3>
                 <p class="mt-1 text-lg font-semibold text-gray-900 font-['Poppins']">
                   {{ order.totalAmount | currency:'EUR':'symbol':'1.2-2' }}
                 </p>
@@ -101,11 +101,11 @@ import { Order } from '../../../shared/models/order.model';
             <div *ngIf="order.trackingNumber" class="mt-6 pt-6 border-t border-gray-200">
               <div class="flex items-center justify-between">
                 <div>
-                  <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide font-['DM_Sans']">Tracking Number</h3>
+                  <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide font-['DM_Sans']">{{ 'orderDetails.trackingNumber' | translate }}</h3>
                   <p class="mt-1 text-lg font-medium text-gray-900 font-['DM_Sans']">{{ order.trackingNumber }}</p>
                 </div>
                 <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-['DM_Sans']">
-                  Track Package
+                  {{ 'orderDetails.trackPackage' | translate }}
                 </button>
               </div>
             </div>
@@ -113,8 +113,8 @@ import { Order } from '../../../shared/models/order.model';
 
           <!-- Order Items -->
           <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 class="text-xl font-semibold text-gray-900 mb-6 font-['Poppins']">Order Items</h2>
-            <div class="space-y-4">
+            <h2 class="text-xl font-semibold text-gray-900 mb-6 font-['Poppins']">{{ 'orderDetails.orderItems' | translate }}</h2>
+            <div class="space-y-4" *ngIf="order.items && order.items.length > 0; else noItems">
               <div *ngFor="let item of order.items" 
                    class="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg">
                 <!-- Product Image -->
@@ -128,8 +128,8 @@ import { Order } from '../../../shared/models/order.model';
                   <h3 class="text-lg font-medium text-gray-900 font-['Poppins']">{{ item.productName }}</h3>
                   <p class="text-sm text-gray-500 font-['DM_Sans']" *ngIf="item.productSku">SKU: {{ item.productSku }}</p>
                   <div class="mt-2 flex items-center space-x-4 text-sm text-gray-600 font-['DM_Sans']">
-                    <span>Qty: {{ item.quantity }}</span>
-                    <span>Unit Price: {{ item.unitPrice | currency:'EUR':'symbol':'1.2-2' }}</span>
+                    <span>{{ 'orderDetails.qty' | translate }}: {{ item.quantity }}</span>
+                    <span>{{ 'orderDetails.unitPrice' | translate }}: {{ item.unitPrice | currency:'EUR':'symbol':'1.2-2' }}</span>
                   </div>
                   <div class="mt-2">
                     <a 
@@ -137,11 +137,11 @@ import { Order } from '../../../shared/models/order.model';
                       [routerLink]="item.productId ? ['/products', item.productId] : ['/products']"
                       [queryParams]="!item.productId && item.productName ? { search: item.productName } : null"
                       class="inline-flex items-center text-xs text-blue-600 hover:text-blue-800 font-medium cursor-pointer transition-colors">
-                      {{ item.productId ? 'View Details' : 'Search for Product' }}
+                      {{ item.productId ? ('orderDetails.viewDetails' | translate) : ('orderDetails.searchForProduct' | translate) }}
                     </a>
                     <ng-template #disabledLink>
                       <span class="inline-flex items-center text-xs text-gray-400 font-medium">
-                        Product details not available
+                        {{ 'orderDetails.productDetailsNotAvailable' | translate }}
                       </span>
                     </ng-template>
                   </div>
@@ -155,31 +155,36 @@ import { Order } from '../../../shared/models/order.model';
                 </div>
               </div>
             </div>
+            <ng-template #noItems>
+              <div class="text-center py-8">
+                <p class="text-gray-500 font-['DM_Sans']">{{ 'orderDetails.noItemsFound' | translate }}</p>
+              </div>
+            </ng-template>
           </div>
 
           <!-- Order Summary -->
           <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 class="text-xl font-semibold text-gray-900 mb-6 font-['Poppins']">Order Summary</h2>
+            <h2 class="text-xl font-semibold text-gray-900 mb-6 font-['Poppins']">{{ 'orderDetails.orderSummary' | translate }}</h2>
             <div class="space-y-3">
               <div class="flex justify-between font-['DM_Sans']">
-                <span class="text-gray-600">Subtotal</span>
+                <span class="text-gray-600">{{ 'orderDetails.subtotal' | translate }}</span>
                 <span class="text-gray-900">{{ order.subtotal | currency:'EUR':'symbol':'1.2-2' }}</span>
               </div>
               <div class="flex justify-between font-['DM_Sans']" *ngIf="order.taxAmount > 0">
-                <span class="text-gray-600">Tax</span>
+                <span class="text-gray-600">{{ 'orderDetails.tax' | translate }}</span>
                 <span class="text-gray-900">{{ order.taxAmount | currency:'EUR':'symbol':'1.2-2' }}</span>
               </div>
               <div class="flex justify-between font-['DM_Sans']" *ngIf="order.shippingCost > 0">
-                <span class="text-gray-600">Shipping</span>
+                <span class="text-gray-600">{{ 'orderDetails.shipping' | translate }}</span>
                 <span class="text-gray-900">{{ order.shippingCost | currency:'EUR':'symbol':'1.2-2' }}</span>
               </div>
               <div class="flex justify-between font-['DM_Sans']" *ngIf="order.discountAmount > 0">
-                <span class="text-gray-600">Discount</span>
+                <span class="text-gray-600">{{ 'orderDetails.discount' | translate }}</span>
                 <span class="text-red-600">-{{ order.discountAmount | currency:'EUR':'symbol':'1.2-2' }}</span>
               </div>
               <div class="border-t border-gray-200 pt-3">
                 <div class="flex justify-between text-lg font-semibold text-gray-900 font-['Poppins']">
-                  <span>Total</span>
+                  <span>{{ 'orderDetails.total' | translate }}</span>
                   <span>{{ order.totalAmount | currency:'EUR':'symbol':'1.2-2' }}</span>
                 </div>
               </div>
@@ -188,11 +193,11 @@ import { Order } from '../../../shared/models/order.model';
 
           <!-- Shipping Information -->
           <div *ngIf="order.shippingAddress" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 class="text-xl font-semibold text-gray-900 mb-6 font-['Poppins']">Shipping Information</h2>
+            <h2 class="text-xl font-semibold text-gray-900 mb-6 font-['Poppins']">{{ 'orderDetails.shippingInformation' | translate }}</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <!-- Shipping Address -->
               <div>
-                <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide mb-3 font-['DM_Sans']">Shipping Address</h3>
+                <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide mb-3 font-['DM_Sans']">{{ 'orderDetails.shippingAddress' | translate }}</h3>
                 <div class="space-y-1 text-gray-900 font-['DM_Sans']">
                   <p class="font-medium">{{ order.shippingAddress.firstName }} {{ order.shippingAddress.lastName }}</p>
                   <p>{{ order.shippingAddress.addressLine1 }}</p>
@@ -205,7 +210,7 @@ import { Order } from '../../../shared/models/order.model';
 
               <!-- Billing Address -->
               <div *ngIf="order.billingAddress">
-                <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide mb-3 font-['DM_Sans']">Billing Address</h3>
+                <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide mb-3 font-['DM_Sans']">{{ 'orderDetails.billingAddress' | translate }}</h3>
                 <div class="space-y-1 text-gray-900 font-['DM_Sans']">
                   <p class="font-medium">{{ order.billingAddress.firstName }} {{ order.billingAddress.lastName }}</p>
                   <p>{{ order.billingAddress.addressLine1 }}</p>
@@ -220,7 +225,7 @@ import { Order } from '../../../shared/models/order.model';
 
           <!-- Payment Method -->
           <div *ngIf="order.paymentMethod" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 class="text-xl font-semibold text-gray-900 mb-4 font-['Poppins']">Payment Method</h2>
+            <h2 class="text-xl font-semibold text-gray-900 mb-4 font-['Poppins']">{{ 'orderDetails.paymentMethod' | translate }}</h2>
             <div class="flex items-center space-x-3">
               <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
@@ -231,7 +236,7 @@ import { Order } from '../../../shared/models/order.model';
 
           <!-- Order Notes -->
           <div *ngIf="order.notes" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 class="text-xl font-semibold text-gray-900 mb-4 font-['Poppins']">Order Notes</h2>
+            <h2 class="text-xl font-semibold text-gray-900 mb-4 font-['Poppins']">{{ 'orderDetails.orderNotes' | translate }}</h2>
             <p class="text-gray-700 font-['DM_Sans']">{{ order.notes }}</p>
           </div>
         </div>
