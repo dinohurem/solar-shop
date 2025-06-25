@@ -7,6 +7,7 @@ import { ToastService } from '../../../../shared/services/toast.service';
 import { TranslationService } from '../../../../shared/services/translation.service';
 import * as OrdersActions from './orders.actions';
 import { Order } from '../../../../shared/models/order.model';
+import { Review } from '../../../../shared/models/review.model';
 
 @Injectable()
 export class OrdersEffects {
@@ -463,5 +464,80 @@ export class OrdersEffects {
             })
         ),
         { dispatch: false }
+    );
+
+    loadUserReviews$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(OrdersActions.loadUserReviews),
+            switchMap(({ userId }) =>
+                this.supabaseService.getTable('reviews', { user_id: userId }).then(async (reviewsData) => {
+                    console.log('Loading reviews for user ID:', userId, 'Found reviews:', reviewsData?.length || 0);
+
+                    const reviewsWithProducts: Review[] = [];
+
+                    for (const reviewData of reviewsData || []) {
+                        try {
+                            // Load product data for each review
+                            const productData = await this.supabaseService.getTable('products', {
+                                id: reviewData.product_id
+                            });
+
+                            const review: Review = {
+                                id: reviewData.id,
+                                userId: reviewData.user_id,
+                                productId: reviewData.product_id,
+                                orderId: reviewData.order_id,
+                                orderItemId: reviewData.order_item_id,
+                                rating: reviewData.rating,
+                                title: reviewData.title,
+                                comment: reviewData.comment,
+                                isVerifiedPurchase: reviewData.is_verified_purchase,
+                                isApproved: reviewData.is_approved,
+                                adminResponse: reviewData.admin_response,
+                                helpfulCount: reviewData.helpful_count,
+                                reportedCount: reviewData.reported_count,
+                                status: reviewData.status,
+                                createdAt: reviewData.created_at,
+                                updatedAt: reviewData.updated_at,
+                                product: productData && productData.length > 0 ? {
+                                    name: productData[0].name,
+                                    imageUrl: productData[0].images?.[0]?.url
+                                } : undefined
+                            };
+                            reviewsWithProducts.push(review);
+                        } catch (productError) {
+                            console.error('Error loading product for user review:', productError);
+                            // Continue with review but without product data
+                            const review: Review = {
+                                id: reviewData.id,
+                                userId: reviewData.user_id,
+                                productId: reviewData.product_id,
+                                orderId: reviewData.order_id,
+                                orderItemId: reviewData.order_item_id,
+                                rating: reviewData.rating,
+                                title: reviewData.title,
+                                comment: reviewData.comment,
+                                isVerifiedPurchase: reviewData.is_verified_purchase,
+                                isApproved: reviewData.is_approved,
+                                adminResponse: reviewData.admin_response,
+                                helpfulCount: reviewData.helpful_count,
+                                reportedCount: reviewData.reported_count,
+                                status: reviewData.status,
+                                createdAt: reviewData.created_at,
+                                updatedAt: reviewData.updated_at,
+                                product: undefined
+                            };
+                            reviewsWithProducts.push(review);
+                        }
+                    }
+
+                    console.log('User reviews loaded successfully:', reviewsWithProducts.length);
+                    return OrdersActions.loadUserReviewsSuccess({ reviews: reviewsWithProducts });
+                }).catch(error => {
+                    console.error('Error loading user reviews:', error);
+                    return OrdersActions.loadUserReviewsFailure({ error: error.message });
+                })
+            )
+        )
     );
 }

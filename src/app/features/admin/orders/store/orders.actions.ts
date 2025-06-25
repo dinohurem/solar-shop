@@ -1,5 +1,6 @@
 import { createAction, props } from '@ngrx/store';
 import { Order } from '../../../../shared/models/order.model';
+import { Review } from '../../../../shared/models/review.model';
 
 // Load orders actions
 export const loadOrders = createAction('[Admin Orders] Load Orders');
@@ -27,6 +28,22 @@ export const loadUserOrdersSuccess = createAction(
 
 export const loadUserOrdersFailure = createAction(
     '[User Orders] Load User Orders Failure',
+    props<{ error: string }>()
+);
+
+// Load user reviews by user ID actions
+export const loadUserReviews = createAction(
+    '[User Reviews] Load User Reviews',
+    props<{ userId: string }>()
+);
+
+export const loadUserReviewsSuccess = createAction(
+    '[User Reviews] Load User Reviews Success',
+    props<{ reviews: Review[] }>()
+);
+
+export const loadUserReviewsFailure = createAction(
+    '[User Reviews] Load User Reviews Failure',
     props<{ error: string }>()
 );
 

@@ -15,13 +15,14 @@ import { Review } from '../../../shared/models/review.model';
 import { SupabaseService } from '../../../services/supabase.service';
 import * as WishlistActions from '../wishlist/store/wishlist.actions';
 import { selectWishlistItems, selectWishlistLoading, selectWishlistError } from '../wishlist/store/wishlist.selectors';
-import { selectUserOrders, selectUserOrdersLoading } from '../../admin/orders/store/orders.selectors';
+import { selectUserOrders, selectUserOrdersLoading, selectUserReviews, selectUserReviewsLoading } from '../../admin/orders/store/orders.selectors';
 import * as OrdersActions from '../../admin/orders/store/orders.actions';
+import { WriteReviewModalComponent } from '../../../shared/components/modals/write-review-modal/write-review-modal.component';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule, TranslatePipe],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, TranslatePipe, WriteReviewModalComponent],
   template: `
     <div class="min-h-screen bg-gray-50 py-8">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -447,10 +448,32 @@ import * as OrdersActions from '../../admin/orders/store/orders.actions';
                       class="text-solar-600 hover:text-solar-700 text-sm font-medium font-['DM_Sans']">
                       {{ 'profile.viewDetails' | translate }}
                     </button>
-                    <button *ngIf="order.status === 'delivered'" 
-                            class="text-solar-600 hover:text-solar-700 text-sm font-medium font-['DM_Sans']">
-                      {{ 'profile.writeReview' | translate }}
-                    </button>
+                    
+                    <!-- Review Status for Delivered Orders -->
+                    <div *ngIf="order.status === 'delivered'" class="flex items-center">
+                      <!-- All products reviewed -->
+                      <div *ngIf="getOrderReviewStatus(order.id) === 'all-reviewed'" class="flex items-center text-green-600">
+                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                        <span class="text-sm font-medium font-['DM_Sans']">{{ 'profile.reviewWritten' | translate }}</span>
+                      </div>
+                      
+                      <!-- No reviews written -->
+                      <button *ngIf="getOrderReviewStatus(order.id) === 'no-reviews'" 
+                              (click)="writeReviewForOrder(order.id)"
+                              class="text-solar-600 hover:text-solar-700 text-sm font-medium font-['DM_Sans']">
+                        {{ 'profile.writeReview' | translate }}
+                      </button>
+                      
+                      <!-- Partial reviews -->
+                      <button *ngIf="getOrderReviewStatus(order.id) === 'partial-reviews'" 
+                              (click)="writeReviewForOrder(order.id)"
+                              class="text-orange-600 hover:text-orange-700 text-sm font-medium font-['DM_Sans']">
+                        {{ 'profile.missingReviews' | translate:{ count: getMissingReviewCount(order.id) } }}
+                      </button>
+                    </div>
+                    
                     <button *ngIf="order.trackingNumber" 
                             class="text-solar-600 hover:text-solar-700 text-sm font-medium font-['DM_Sans']">
                       {{ 'profile.trackOrder' | translate }}
@@ -655,14 +678,14 @@ import * as OrdersActions from '../../admin/orders/store/orders.actions';
                       </div>
 
                       <!-- Actions -->
-                      <div class="flex space-x-3 mt-4">
+                      <!-- <div class="flex space-x-3 mt-4">
                         <button class="text-solar-600 hover:text-solar-700 text-sm font-medium font-['DM_Sans']">
                           {{ 'profile.editReview' | translate }}
                         </button>
                         <button class="text-red-600 hover:text-red-700 text-sm font-medium font-['DM_Sans']">
                           {{ 'profile.deleteReview' | translate }}
                         </button>
-                      </div>
+                      </div> -->
                     </div>
                   </div>
                 </div>
@@ -687,6 +710,16 @@ import * as OrdersActions from '../../admin/orders/store/orders.actions';
         </div>
       </div>
     </div>
+
+    <!-- Review Modal -->
+    <app-write-review-modal
+      [isOpen]="showReviewModal"
+      [productId]="selectedProductId"
+      [userId]="(currentUser$ | async)?.id || ''"
+      [preselectedOrderId]="selectedOrderId"
+      (submitted)="onReviewSubmitted($event)"
+      (cancelled)="onReviewCancelled()"
+    ></app-write-review-modal>
   `,
   styles: [`
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap');
@@ -707,20 +740,21 @@ export class ProfileComponent implements OnInit {
   userInfoForm: FormGroup;
   showSuccessMessage = false;
 
-  // Orders - using NgRx
   orders$: Observable<Order[]> = this.store.select(selectUserOrders);
   ordersLoading$: Observable<boolean> = this.store.select(selectUserOrdersLoading);
 
-  // Reviews - keeping BehaviorSubject for now (to be migrated to NgRx later)
-  private reviewsSubject = new BehaviorSubject<Review[]>([]);
-  private reviewsLoadingSubject = new BehaviorSubject<boolean>(false);
-  reviews$ = this.reviewsSubject.asObservable();
-  reviewsLoading$ = this.reviewsLoadingSubject.asObservable();
+  reviews$: Observable<Review[]> = this.store.select(selectUserReviews);
+  reviewsLoading$: Observable<boolean> = this.store.select(selectUserReviewsLoading);
 
-  // Wishlist - using NgRx
   wishlist$ = this.store.select(selectWishlistItems);
   wishlistLoading$ = this.store.select(selectWishlistLoading);
   wishlistError$ = this.store.select(selectWishlistError);
+
+  showReviewModal = false;
+  selectedOrderId = '';
+  selectedProductId = '';
+
+  private orderReviewStatusCache = new Map<string, { status: string; missingCount: number }>();
 
   constructor() {
     this.currentUser$ = this.store.select(selectCurrentUser);
@@ -728,8 +762,8 @@ export class ProfileComponent implements OnInit {
     this.error$ = this.store.select(selectAuthError);
 
     this.userInfoForm = this.fb.group({
-      firstName: ['', [Validators.required]],
-      lastName: ['', [Validators.required]],
+      firstName: ['', Validators.required],
+      lastName: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       phone: [''],
       dateOfBirth: [''],
@@ -738,39 +772,37 @@ export class ProfileComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Load user profile data
     this.store.dispatch(AuthActions.loadUserProfile());
-
-    // Load initial data
     this.store.dispatch(WishlistActions.loadWishlist());
 
-    // Load user orders when user data is available
     this.currentUser$.pipe(
       filter(user => !!user?.email),
       take(1)
     ).subscribe(user => {
-      if (user?.email) {
-        console.log('Profile Component: Loading orders for user:', user.email);
+      if (user) {
         this.store.dispatch(OrdersActions.loadUserOrders({ userEmail: user.email }));
+        this.store.dispatch(OrdersActions.loadUserReviews({ userId: user.id }));
       }
     });
 
-    // Debug: Subscribe to orders to see when they load
     this.orders$.subscribe(orders => {
       console.log('Profile Component: User orders updated:', orders?.length || 0, orders);
+      // Update review status when orders are loaded
+      this.updateOrderReviewStatus();
     });
 
-    this.ordersLoading$.subscribe(loading => {
-      console.log('Profile Component: Orders loading state:', loading);
+    this.reviews$.subscribe(reviews => {
+      console.log('Profile Component: User reviews updated:', reviews?.length || 0, reviews);
+      // Update review status when reviews are loaded
+      this.updateOrderReviewStatus();
     });
 
-    // Subscribe to user data and populate form
     this.currentUser$.subscribe(user => {
       if (user) {
         this.userInfoForm.patchValue({
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
+          firstName: user.firstName || '',
+          lastName: user.lastName || '',
+          email: user.email || '',
           phone: user.phone || '',
           dateOfBirth: user.dateOfBirth || '',
           gender: user.gender || ''
@@ -778,25 +810,21 @@ export class ProfileComponent implements OnInit {
       }
     });
 
-    // Listen for successful profile updates
     this.actions$.pipe(
-      ofType(AuthActions.updateUserProfileSuccess),
-      take(1)
+      ofType(AuthActions.updateUserProfileSuccess)
     ).subscribe(() => {
       this.showSuccessMessage = true;
       setTimeout(() => {
         this.showSuccessMessage = false;
-      }, 5000);
+      }, 3000);
     });
   }
 
   setActiveTab(tab: 'user-info' | 'billing-shipping' | 'my-orders' | 'my-wishlist' | 'my-reviews'): void {
     this.activeTab = tab;
-    this.showSuccessMessage = false; // Hide success message when switching tabs
+    this.showSuccessMessage = false;
 
-    // Load data when switching to specific tabs
     if (tab === 'my-orders') {
-      // Load user orders using NgRx
       this.currentUser$.pipe(
         filter(user => !!user?.email),
         take(1)
@@ -806,9 +834,15 @@ export class ProfileComponent implements OnInit {
         }
       });
     } else if (tab === 'my-reviews') {
-      this.loadUserReviews();
+      this.currentUser$.pipe(
+        filter(user => !!user?.id),
+        take(1)
+      ).subscribe(user => {
+        if (user?.id) {
+          this.store.dispatch(OrdersActions.loadUserReviews({ userId: user.id }));
+        }
+      });
     } else if (tab === 'my-wishlist') {
-      // Load wishlist using NgRx
       this.store.dispatch(WishlistActions.loadWishlist());
     }
   }
@@ -820,7 +854,6 @@ export class ProfileComponent implements OnInit {
       };
       this.store.dispatch(AuthActions.updateUserProfile({ user: updatedUser }));
     } else {
-      // Mark all fields as touched to show validation errors
       Object.keys(this.userInfoForm.controls).forEach(key => {
         this.userInfoForm.get(key)?.markAsTouched();
       });
@@ -837,21 +870,6 @@ export class ProfileComponent implements OnInit {
 
   viewOrderDetails(orderId: string): void {
     this.router.navigate(['/order-details', orderId]);
-  }
-
-  private async loadUserReviews(): Promise<void> {
-    this.reviewsLoadingSubject.next(true);
-    try {
-      // TODO: Implement actual review loading from Supabase
-      // For now, return empty array as placeholder
-      const reviews: Review[] = [];
-      this.reviewsSubject.next(reviews);
-    } catch (error) {
-      console.error('Error loading user reviews:', error);
-      this.reviewsSubject.next([]);
-    } finally {
-      this.reviewsLoadingSubject.next(false);
-    }
   }
 
   removeFromWishlist(productId: string): void {
@@ -872,5 +890,62 @@ export class ProfileComponent implements OnInit {
     if (productId) {
       this.router.navigate(['/products', productId]);
     }
+  }
+
+  writeReviewForOrder(orderId: string): void {
+    this.selectedOrderId = orderId;
+    this.selectedProductId = '';
+    this.showReviewModal = true;
+  }
+
+  onReviewSubmitted(reviewData: any): void {
+    this.showReviewModal = false;
+    this.orderReviewStatusCache.clear();
+    // Reload user reviews after submitting a new review
+    this.currentUser$.pipe(take(1)).subscribe(user => {
+      if (user?.id) {
+        this.store.dispatch(OrdersActions.loadUserReviews({ userId: user.id }));
+      }
+    });
+  }
+
+  onReviewCancelled(): void {
+    this.showReviewModal = false;
+  }
+
+  getOrderReviewStatus(orderId: string): string {
+    if (this.orderReviewStatusCache.has(orderId)) {
+      return this.orderReviewStatusCache.get(orderId)!.status;
+    }
+
+    // Default to no-reviews if we don't have the data yet
+    return 'no-reviews';
+  }
+
+  getMissingReviewCount(orderId: string): number {
+    return this.orderReviewStatusCache.get(orderId)?.missingCount || 0;
+  }
+
+  private updateOrderReviewStatus(): void {
+    // This method will be called when orders and reviews are loaded
+    this.orders$.pipe(take(1)).subscribe(orders => {
+      this.reviews$.pipe(take(1)).subscribe(reviews => {
+        orders.forEach(order => {
+          const orderReviews = reviews.filter((r: Review) => r.orderId === order.id);
+          const orderItems = order.items || [];
+
+          if (orderReviews.length === 0) {
+            this.orderReviewStatusCache.set(order.id, { status: 'no-reviews', missingCount: orderItems.length });
+          } else if (orderReviews.length === orderItems.length) {
+            this.orderReviewStatusCache.set(order.id, { status: 'all-reviewed', missingCount: 0 });
+          } else {
+            this.orderReviewStatusCache.set(order.id, {
+              status: 'partial-reviews',
+              missingCount: orderItems.length - orderReviews.length
+            });
+          }
+        });
+      });
+    });
   }
 } 

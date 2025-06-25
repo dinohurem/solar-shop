@@ -31,6 +31,8 @@ import { companiesReducer } from '../features/admin/companies/store/companies.re
 import { CompaniesState } from '../features/admin/companies/store/companies.state';
 import { ordersReducer } from '../features/admin/orders/store/orders.reducer';
 import { OrdersState } from '../features/admin/orders/store/orders.state';
+import { reviewsReducer } from '../features/admin/reviews/store/reviews.reducer';
+import { ReviewsState } from '../features/admin/reviews/store/reviews.state';
 
 export interface State {
   auth: AuthState;
@@ -47,6 +49,7 @@ export interface State {
   wishlist: WishlistState;
   companies: CompaniesState;
   adminOrders: OrdersState;
+  reviews: ReviewsState;
 }
 
 export const reducers: ActionReducerMap<State> = {
@@ -64,6 +67,7 @@ export const reducers: ActionReducerMap<State> = {
   wishlist: wishlistReducer,
   companies: companiesReducer,
   adminOrders: ordersReducer,
+  reviews: reviewsReducer,
 };
 
 export const metaReducers: MetaReducer<State>[] = isDevMode() ? [] : [];
