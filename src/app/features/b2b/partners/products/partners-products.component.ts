@@ -287,81 +287,81 @@ import { ProductWithPricing, Category } from '../../shared/store/products.action
                       </div>
 
                       <!-- Product Name -->
-                      <h3 class="text-lg font-semibold text-gray-900 mb-2 font-['Poppins'] line-clamp-2 min-h-[3.5rem]">
+                      <h3 class="text-lg font-semibold text-gray-900 mb-2 font-['Poppins'] line-clamp-2 min-h-[3.5rem] flex items-start">
                         {{ product.name }}
                       </h3>
 
                       <!-- Description -->
-                      <p class="text-sm text-gray-600 mb-4 line-clamp-3 font-['DM_Sans'] min-h-[4.5rem]">
+                      <p class="text-sm text-gray-600 mb-3 line-clamp-3 font-['DM_Sans'] min-h-[4rem] flex-grow overflow-hidden">
                         {{ product.description }}
                       </p>
 
                       <!-- Pricing Section -->
-                      <div class="mb-4">
-                        <div *ngIf="!isAuthenticated" class="text-center py-4 bg-gray-50 rounded-lg">
-                          <svg class="w-8 h-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div class="mb-3 min-h-[100px] flex flex-col justify-center">
+                        <div *ngIf="!isAuthenticated" class="text-center py-2 bg-gray-50 rounded-lg">
+                          <svg class="w-6 h-6 text-gray-400 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                           </svg>
-                          <p class="text-sm text-gray-500 font-medium">
+                          <p class="text-xs text-gray-500 font-medium">
                             {{ 'b2b.products.loginToViewPrices' | translate }}
                           </p>
                         </div>
 
-                        <div *ngIf="isAuthenticated" class="space-y-2">
+                        <div *ngIf="isAuthenticated" class="space-y-1">
                           <!-- Company Specific Price -->
                           <div *ngIf="product.company_price && isCompanyContact" class="flex items-center justify-between">
-                            <span class="text-sm font-medium text-green-700">{{ 'b2b.products.yourPrice' | translate }}:</span>
-                            <span class="text-lg font-bold text-green-600">€{{ product.company_price | number:'1.2-2' }}</span>
+                            <span class="text-xs font-medium text-green-700">{{ 'b2b.products.yourPrice' | translate }}:</span>
+                            <span class="text-sm font-bold text-green-600">€{{ product.company_price | number:'1.2-2' }}</span>
                           </div>
 
                           <!-- Partner Price -->
                           <div *ngIf="product.partner_price && (!product.company_price || !isCompanyContact)" class="flex items-center justify-between">
-                            <span class="text-sm font-medium text-solar-700">{{ 'b2b.products.partnerPrice' | translate }}:</span>
-                            <span class="text-lg font-bold text-solar-600">€{{ product.partner_price | number:'1.2-2' }}</span>
+                            <span class="text-xs font-medium text-solar-700">{{ 'b2b.products.partnerPrice' | translate }}:</span>
+                            <span class="text-sm font-bold text-solar-600">€{{ product.partner_price | number:'1.2-2' }}</span>
                           </div>
 
                           <!-- Retail Price -->
                           <div class="flex items-center justify-between">
-                            <span class="text-sm text-gray-500">{{ 'b2b.products.retailPrice' | translate }}:</span>
-                            <span class="text-sm text-gray-500 line-through">€{{ product.price | number:'1.2-2' }}</span>
+                            <span class="text-xs text-gray-500">{{ 'b2b.products.retailPrice' | translate }}:</span>
+                            <span class="text-xs text-gray-500 line-through">€{{ product.price | number:'1.2-2' }}</span>
                           </div>
 
                           <!-- Savings -->
                           <div *ngIf="product.savings" class="flex items-center justify-between">
-                            <span class="text-sm font-medium text-green-700">{{ 'b2b.products.savings' | translate }}:</span>
-                            <span class="text-sm font-bold text-green-600">€{{ product.savings | number:'1.2-2' }}</span>
+                            <span class="text-xs font-medium text-green-700">{{ 'b2b.products.savings' | translate }}:</span>
+                            <span class="text-xs font-bold text-green-600">€{{ product.savings | number:'1.2-2' }}</span>
                           </div>
                         </div>
                       </div>
 
                       <!-- Minimum Order -->
-                      <div class="mb-4">
-                        <div class="flex items-center justify-between text-sm">
+                      <div class="mb-2 min-h-[20px]">
+                        <div class="flex items-center justify-between text-xs">
                           <span class="text-gray-600">{{ 'b2b.products.minimumOrder' | translate }}:</span>
                           <span class="font-medium">{{ product.minimum_order || 1 }} {{ 'b2b.products.pieces' | translate }}</span>
                         </div>
                       </div>
 
                       <!-- Status Badges -->
-                      <div class="flex items-center justify-between mb-4">
-                        <div class="flex space-x-2 flex-wrap">
+                      <div class="flex items-center justify-between mb-3 min-h-[32px]">
+                        <div class="flex space-x-1 flex-wrap">
                           <span *ngIf="product.in_stock" 
-                                class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                             {{ 'b2b.products.inStock' | translate }}
                           </span>
                           <span *ngIf="!product.in_stock" 
-                                class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
                             {{ 'b2b.products.outOfStock' | translate }}
                           </span>
                           <span *ngIf="product.partner_only" 
-                                class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-solar-100 text-solar-800">
+                                class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-solar-100 text-solar-800">
                             {{ 'b2b.products.partnerOnly' | translate }}
                           </span>
                         </div>
                       </div>
 
-                      <!-- Actions - Always at bottom -->
-                      <div class="mt-auto space-y-2">
+                      <!-- Actions - Always at bottom with fixed height -->
+                      <div class="mt-auto space-y-2 min-h-[100px] flex flex-col justify-end">
                         <!-- Add to Cart Button - only show if has B2B price and in stock -->
                         <button *ngIf="isCompanyContact && product.in_stock && hasB2BPrice(product)" 
                                 (click)="addToCart(product, $event)"
@@ -494,6 +494,7 @@ import { ProductWithPricing, Category } from '../../shared/store/products.action
       -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
       overflow: hidden;
+      text-overflow: ellipsis;
     }
   `]
 })

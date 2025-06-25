@@ -96,33 +96,40 @@ import { Subject, takeUntil, switchMap, from, catchError, of } from 'rxjs';
               
               <div class="relative">
                 <button (click)="toggleUserMenu()" 
-                        class="flex items-center space-x-2 text-gray-700 hover:text-solar-600 px-3 py-2 text-sm font-medium">
+                        class="p-2 text-gray-600 hover:text-solar-600 transition-all duration-300 hover:scale-110 hover:bg-solar-50 rounded-full">
                   <div class="w-8 h-8 bg-solar-100 rounded-full flex items-center justify-center">
                     <svg class="w-5 h-5 text-solar-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                     </svg>
                   </div>
-                  <span>{{ currentUser?.name || ('b2bNav.partner' | translate) }}</span>
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                  </svg>
                 </button>
                 
                 <!-- User Dropdown Menu -->
                 <div *ngIf="showUserMenu" 
-                     class="absolute right-0 top-full mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50">
-                  <div class="py-1">
-                    <a routerLink="/partners/profile" 
-                       (click)="closeUserMenu()"
-                       class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                      {{ 'b2bNav.profile' | translate }}
-                    </a>
-                    <div class="border-t border-gray-100"></div>
-                    <button (click)="signOut()" 
-                            class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                      {{ 'b2bNav.signOut' | translate }}
-                    </button>
+                     class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-xl py-1 z-50 border border-gray-200 transform transition-all duration-300 ease-out scale-100 opacity-100">
+                  <div class="px-4 py-3 text-sm text-gray-700 border-b border-gray-100 bg-gray-50 rounded-t-lg">
+                    <div class="font-semibold text-gray-900">{{ currentUser?.name || ('b2bNav.partner' | translate) }}</div>
+                    <div class="text-gray-500 truncate">{{ currentUser?.email }}</div>
                   </div>
+                  <a routerLink="/partners/profile" 
+                     (click)="closeUserMenu()"
+                     class="block px-4 py-3 text-sm text-gray-700 hover:bg-solar-50 hover:text-solar-600 transition-all duration-200">
+                    <div class="flex items-center space-x-3">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                      </svg>
+                      <span>{{ 'b2bNav.profile' | translate }}</span>
+                    </div>
+                  </a>
+                  <button (click)="signOut()" 
+                          class="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-accent-50 hover:text-accent-600 transition-all duration-200 rounded-b-lg">
+                    <div class="flex items-center space-x-3">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                      </svg>
+                      <span>{{ 'b2bNav.signOut' | translate }}</span>
+                    </div>
+                  </button>
                 </div>
               </div>
               

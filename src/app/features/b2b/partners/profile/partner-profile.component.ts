@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable, Subject, BehaviorSubject } from 'rxjs';
@@ -378,6 +378,7 @@ export class PartnerProfileComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private store = inject(Store);
   private router = inject(Router);
+  private activatedRoute = inject(ActivatedRoute);
   private supabaseService = inject(SupabaseService);
   private fb = inject(FormBuilder);
 
@@ -411,6 +412,13 @@ export class PartnerProfileComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    // Check for order success query param
+    this.activatedRoute.queryParams.subscribe((params: any) => {
+      if (params['orderSuccess'] && params['orderNumber']) {
+        this.showOrderSuccessMessage(params['orderNumber']);
+      }
+    });
+
     // Subscribe to current user from NgRx store
     this.currentUser$.pipe(
       takeUntil(this.destroy$)
@@ -806,5 +814,13 @@ export class PartnerProfileComponent implements OnInit, OnDestroy {
 
   navigateToHome(): void {
     this.router.navigate(['/']);
+  }
+
+  private showOrderSuccessMessage(orderNumber: string): void {
+    this.showSuccessMessage = true;
+    // Hide success message after 5 seconds
+    setTimeout(() => {
+      this.showSuccessMessage = false;
+    }, 5000);
   }
 } 

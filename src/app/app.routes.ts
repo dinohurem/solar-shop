@@ -28,6 +28,10 @@ import { PartnersOfferDetailsComponent } from './features/b2b/partners/offers/pa
 import { PartnersContactComponent } from './features/b2b/partners/contact/partners-contact.component';
 import { PartnerProfileComponent } from './features/b2b/partners/profile/partner-profile.component';
 import { B2bLayoutComponent } from './features/b2b/shared/layout/b2b-layout.component';
+import { B2bCheckoutComponent } from './features/b2b/checkout/b2b-checkout.component';
+import { B2bOrderReviewComponent } from './features/b2b/checkout/steps/b2b-order-review/b2b-order-review.component';
+import { B2bShippingComponent } from './features/b2b/checkout/steps/b2b-shipping/b2b-shipping.component';
+import { B2bPaymentComponent } from './features/b2b/checkout/steps/b2b-payment/b2b-payment.component';
 import { CompanyApprovedGuard } from './guards/company-approved.guard';
 import { CheckoutComponent } from './features/b2c/checkout/checkout.component';
 import { OrderReviewComponent } from './features/b2c/checkout/steps/order-review/order-review.component';
@@ -119,6 +123,19 @@ export const routes: Routes = [
             { path: 'offers/:id', component: PartnersOfferDetailsComponent, canActivate: [CompanyApprovedGuard] },
             { path: 'profile', component: PartnerProfileComponent, canActivate: [AuthGuard] },
             { path: 'contact', component: PartnersContactComponent },
+
+            // B2B Checkout routes
+            {
+                path: 'checkout',
+                component: B2bCheckoutComponent,
+                canActivate: [CompanyApprovedGuard],
+                children: [
+                    { path: '', redirectTo: 'order-review', pathMatch: 'full' },
+                    { path: 'order-review', component: B2bOrderReviewComponent },
+                    { path: 'shipping', component: B2bShippingComponent },
+                    { path: 'payment', component: B2bPaymentComponent }
+                ]
+            }
         ]
     },
 

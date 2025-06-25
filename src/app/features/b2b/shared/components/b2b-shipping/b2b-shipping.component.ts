@@ -9,10 +9,10 @@ import { selectCurrentUser } from '../../../../../core/auth/store/auth.selectors
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 
 @Component({
-    selector: 'app-b2b-shipping',
-    standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, TranslatePipe],
-    template: `
+  selector: 'app-b2b-shipping',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, TranslatePipe],
+  template: `
     <div class="bg-white rounded-lg shadow-sm border p-6">
       <h2 class="text-xl font-semibold text-gray-900 mb-6">
         {{ 'b2bShipping.title' | translate }}
@@ -177,68 +177,75 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
   `
 })
 export class B2BShippingComponent implements OnInit, OnDestroy {
-    private destroy$ = new Subject<void>();
+  private destroy$ = new Subject<void>();
 
-    shippingForm!: FormGroup;
-    currentUser$ = this.store.select(selectCurrentUser);
+  shippingForm!: FormGroup;
+  currentUser$ = this.store.select(selectCurrentUser);
 
-    constructor(
-        private fb: FormBuilder,
-        private store: Store
-    ) {
-        this.initializeForm();
-    }
+  constructor(
+    private fb: FormBuilder,
+    private store: Store
+  ) {
+    this.initializeForm();
+  }
 
-    ngOnInit(): void {
-        this.loadUserAndCompanyData();
-    }
+  ngOnInit(): void {
+    this.loadUserAndCompanyData();
+  }
 
-    ngOnDestroy(): void {
-        this.destroy$.next();
-        this.destroy$.complete();
-    }
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
-    private initializeForm(): void {
-        this.shippingForm = this.fb.group({
-            companyName: [{ value: '', disabled: true }],
-            companyEmail: [{ value: '', disabled: true }],
-            contactPersonName: ['', [Validators.required]],
-            contactPersonEmail: ['', [Validators.required, Validators.email]],
-            deliveryAddress: ['', [Validators.required]],
-            deliveryCity: ['', [Validators.required]],
-            deliveryPostalCode: ['', [Validators.required]],
-            deliveryCountry: ['HR', [Validators.required]],
-            shippingMethod: ['standard', [Validators.required]]
+  private initializeForm(): void {
+    this.shippingForm = this.fb.group({
+      companyName: [{ value: '', disabled: true }],
+      companyEmail: [{ value: '', disabled: true }],
+      contactPersonName: ['', [Validators.required]],
+      contactPersonEmail: ['', [Validators.required, Validators.email]],
+      deliveryAddress: ['', [Validators.required]],
+      deliveryCity: ['', [Validators.required]],
+      deliveryPostalCode: ['', [Validators.required]],
+      deliveryCountry: ['HR', [Validators.required]],
+      shippingMethod: ['standard', [Validators.required]]
+    });
+  }
+
+  private loadUserAndCompanyData(): void {
+    this.currentUser$.pipe(
+      filter(user => !!user),
+      takeUntil(this.destroy$)
+    ).subscribe(user => {
+      if (user) {
+        const mockCompanyData = {
+          companyName: 'Solar Innovations d.o.o.',
+          companyEmail: 'orders@solarinnovations.hr'
+        };
+
+        this.shippingForm.patchValue({
+          ...mockCompanyData,
+          contactPersonName: `${user.firstName} ${user.lastName}`,
+          contactPersonEmail: user.email
         });
-    }
+      }
+    });
+  }
 
-    private loadUserAndCompanyData(): void {
-        this.currentUser$.pipe(
-            filter(user => !!user),
-            takeUntil(this.destroy$)
-        ).subscribe(user => {
-            if (user) {
-                const mockCompanyData = {
-                    companyName: 'Solar Innovations d.o.o.',
-                    companyEmail: 'orders@solarinnovations.hr'
-                };
+  onSubmit(): void {
+    if (this.shippingForm.valid) {
+      // Save shipping info to localStorage for the payment step
+      const shippingData = this.shippingForm.value;
+      localStorage.setItem('b2b_shipping_info', JSON.stringify(shippingData));
 
-                this.shippingForm.patchValue({
-                    ...mockCompanyData,
-                    contactPersonName: `${user.firstName} ${user.lastName}`,
-                    contactPersonEmail: user.email
-                });
-            }
-        });
+      // Navigate to payment step
+      if (typeof window !== 'undefined') {
+        window.location.href = '/partners/checkout/payment';
+      }
+    } else {
+      Object.keys(this.shippingForm.controls).forEach(key => {
+        this.shippingForm.get(key)?.markAsTouched();
+      });
     }
-
-    onSubmit(): void {
-        if (this.shippingForm.valid) {
-            console.log('B2B Shipping form submitted:', this.shippingForm.value);
-        } else {
-            Object.keys(this.shippingForm.controls).forEach(key => {
-                this.shippingForm.get(key)?.markAsTouched();
-            });
-        }
-    }
+  }
 } 
