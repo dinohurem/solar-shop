@@ -16,6 +16,10 @@ import {
 } from '../../../../../b2c/wishlist/store/wishlist.selectors';
 import { selectCurrentUser } from '../../../../../../core/auth/store/auth.selectors';
 import * as CartActions from '../../../../../b2c/cart/store/cart.actions';
+import {
+  selectAverageRating,
+  selectReviewCount
+} from '../../store/product-details.selectors';
 
 @Component({
   selector: 'app-product-info',
@@ -34,19 +38,31 @@ import * as CartActions from '../../../../../b2c/cart/store/cart.actions';
           <div class="flex items-center">
             <div class="flex">
               <svg 
-                *ngFor="let star of getStarArray(product.rating)" 
-                class="w-5 h-5 text-yellow-400 fill-current"
+                *ngFor="let star of getStarArray((averageRating$ | async) || 0); let i = index" 
+                class="w-5 h-5"
+                [class]="star === 1 ? 'text-yellow-400 fill-current' : star === 0.5 ? 'text-yellow-400' : 'text-gray-300'"
                 viewBox="0 0 20 20"
               >
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                <defs *ngIf="star === 0.5">
+                  <linearGradient id="half-star-{{i}}">
+                    <stop offset="50%" stop-color="currentColor"/>
+                    <stop offset="50%" stop-color="transparent"/>
+                  </linearGradient>
+                </defs>
+                <path 
+                  [attr.fill]="star === 0.5 ? 'url(#half-star-' + i + ')' : 'currentColor'"
+                  d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
               </svg>
             </div>
-            <span class="ml-2 text-sm font-medium text-gray-900">{{ product.rating }}</span>
+            <span class="ml-2 text-sm font-medium text-gray-900">{{ (averageRating$ | async) || 0 }}</span>
           </div>
           <span class="mx-2 text-gray-300">|</span>
-          <a href="#reviews" class="text-sm text-solar-600 hover:text-solar-700 font-['DM_Sans']">
-            {{ product.reviewCount }} {{ 'productList.reviews' | translate }}
-          </a>
+          <button 
+            (click)="scrollToReviews()"
+            class="text-sm text-solar-600 hover:text-solar-700 font-['DM_Sans'] cursor-pointer"
+          >
+            {{ (reviewCount$ | async) || 0 }} {{ 'productList.reviews' | translate }}
+          </button>
         </div>
 
         <!-- Availability -->
@@ -361,6 +377,10 @@ export class ProductInfoComponent implements OnInit, OnDestroy {
     removingFromWishlist: string | null;
   }>;
 
+  // Product reviews observables
+  averageRating$ = this.store.select(selectAverageRating);
+  reviewCount$ = this.store.select(selectReviewCount);
+
   specificationsOpen = false;
   featuresOpen = false;
 
@@ -388,7 +408,27 @@ export class ProductInfoComponent implements OnInit, OnDestroy {
   }
 
   getStarArray(rating: number): number[] {
-    return Array(5).fill(0).map((_, i) => i < Math.floor(rating) ? 1 : 0);
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+
+    // Add full stars
+    for (let i = 0; i < fullStars; i++) {
+      stars.push(1);
+    }
+
+    // Add half star if needed
+    if (hasHalfStar) {
+      stars.push(0.5);
+    }
+
+    // Add empty stars to complete 5 stars
+    const remainingStars = 5 - stars.length;
+    for (let i = 0; i < remainingStars; i++) {
+      stars.push(0);
+    }
+
+    return stars;
   }
 
   getAvailabilityText(availability: string): string {
@@ -476,5 +516,15 @@ export class ProductInfoComponent implements OnInit, OnDestroy {
 
   toggleFeatures() {
     this.featuresOpen = !this.featuresOpen;
+  }
+
+  scrollToReviews() {
+    const reviewsElement = document.getElementById('reviews');
+    if (reviewsElement) {
+      reviewsElement.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
   }
 } 

@@ -5,10 +5,12 @@ import * as OrdersActions from './orders.actions';
 export const initialState: OrdersState = {
     orders: [],
     userOrders: [],
+    userReviews: [],
     currentOrder: null,
     loading: false,
     loadingOrder: false,
     loadingUserOrders: false,
+    loadingUserReviews: false,
     error: null,
     updatingStatus: false,
     confirmingPurchase: false
@@ -54,6 +56,26 @@ export const ordersReducer = createReducer(
     on(OrdersActions.loadUserOrdersFailure, (state, { error }) => ({
         ...state,
         loadingUserOrders: false,
+        error
+    })),
+
+    // Load user reviews
+    on(OrdersActions.loadUserReviews, (state) => ({
+        ...state,
+        loadingUserReviews: true,
+        error: null
+    })),
+
+    on(OrdersActions.loadUserReviewsSuccess, (state, { reviews }) => ({
+        ...state,
+        userReviews: reviews,
+        loadingUserReviews: false,
+        error: null
+    })),
+
+    on(OrdersActions.loadUserReviewsFailure, (state, { error }) => ({
+        ...state,
+        loadingUserReviews: false,
         error
     })),
 

@@ -16,6 +16,7 @@ import { WishlistEffects } from './features/b2c/wishlist/store/wishlist.effects'
 import { CompaniesEffects } from './features/admin/companies/store/companies.effects';
 import { OrdersEffects } from './features/admin/orders/store/orders.effects';
 import { CompanyPricingEffects } from './features/admin/company-pricing/store/company-pricing.effects';
+import { ReviewsEffects } from './features/admin/reviews/store/reviews.effects';
 import { FooterEffects } from './features/b2c/footer/store/footer.effects';
 import { ProductsEffects } from './features/b2c/products/store/products.effects';
 import { ProductsEffects as B2BProductsEffects } from './features/b2b/shared/store/products.effects';
@@ -35,7 +36,7 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(),
     { provide: LOCALE_ID, useValue: 'en-US' },
     provideStore(reducers, { metaReducers }),
-    provideEffects([AuthEffects, ProductListEffects, ProductDetailsEffects, ProductsEffects, CartEffects, NavbarEffects, OffersEffects, BlogEffects, WishlistEffects, CompaniesEffects, OrdersEffects, CompanyPricingEffects, FooterEffects, B2BProductsEffects, B2BCartEffects]),
+    provideEffects([AuthEffects, ProductListEffects, ProductDetailsEffects, ProductsEffects, CartEffects, NavbarEffects, OffersEffects, BlogEffects, WishlistEffects, CompaniesEffects, OrdersEffects, CompanyPricingEffects, FooterEffects, ReviewsEffects, B2BProductsEffects, B2BCartEffects]),
     provideStoreDevtools({
       maxAge: 25, // Retains last 25 states
       logOnly: environment.production, // Restrict extension to log-only mode

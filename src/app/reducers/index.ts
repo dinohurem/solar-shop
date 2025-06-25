@@ -37,6 +37,8 @@ import { productsReducer as b2bProductsReducer } from '../features/b2b/shared/st
 import { ProductsState as B2BProductsState } from '../features/b2b/shared/store/products.reducer';
 import { b2bCartReducer } from '../features/b2b/cart/store/b2b-cart.reducer';
 import { B2BCartState } from '../features/b2b/cart/models/b2b-cart.model';
+import { reviewsReducer } from '../features/admin/reviews/store/reviews.reducer';
+import { ReviewsState } from '../features/admin/reviews/store/reviews.state';
 
 export interface State {
   auth: AuthState;
@@ -56,6 +58,7 @@ export interface State {
   companyPricing: AdminCompanyPricingState;
   b2bProducts: B2BProductsState;
   b2bCart: B2BCartState;
+  reviews: ReviewsState;
 }
 
 export const reducers: ActionReducerMap<State> = {
@@ -76,6 +79,7 @@ export const reducers: ActionReducerMap<State> = {
   companyPricing: companyPricingReducer,
   b2bProducts: b2bProductsReducer,
   b2bCart: b2bCartReducer,
+  reviews: reviewsReducer,
 };
 
 export const metaReducers: MetaReducer<State>[] = isDevMode() ? [] : [];
