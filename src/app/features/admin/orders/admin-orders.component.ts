@@ -88,7 +88,7 @@ export class AdminOrdersComponent implements OnInit {
     // Filtered orders (B2C only - no B2B orders)
     filteredOrders$: Observable<Order[]> = this.orders$.pipe(
         map(orders => orders
-            .filter(order => !order.is_b2b)
+            .filter(order => order.is_b2b !== true)
             .sort((a, b) => {
                 // Sort by createdAt ascending (oldest first)
                 const dateA = new Date(a.createdAt || '').getTime();

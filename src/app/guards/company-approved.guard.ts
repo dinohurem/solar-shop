@@ -2,44 +2,50 @@ import { Injectable } from '@angular/core';
 import { CanActivate, Router, UrlTree } from '@angular/router';
 import { SupabaseService } from '../services/supabase.service';
 import { Observable, from, of } from 'rxjs';
-import { switchMap, map, catchError, take } from 'rxjs/operators';
+import { switchMap, map, catchError } from 'rxjs/operators';
 
 @Injectable({
     providedIn: 'root'
 })
 export class CompanyApprovedGuard implements CanActivate {
-    constructor(private supabase: SupabaseService, private router: Router) {}
+    constructor(private supabase: SupabaseService, private router: Router) { }
 
     canActivate(): Observable<boolean | UrlTree> {
-        return this.supabase.isAuthenticated().pipe(
-            take(1),
-            switchMap(isAuth => {
-                if (!isAuth) {
+        // First check if we have a stored session, then wait for auth state
+        return from(this.supabase.getSession()).pipe(
+            switchMap(session => {
+                if (session?.user) {
+                    // User is authenticated, check company status
+                    return from(
+                        this.supabase.client
+                            .from('companies')
+                            .select('status')
+                            .eq('contact_person_id', session.user.id)
+                            .single()
+                    ).pipe(
+                        map(({ data, error }) => {
+                            if (error) {
+                                // No company found, redirect to register
+                                return this.router.createUrlTree(['/partners/register']);
+                            }
+
+                            if (data && data.status === 'approved') {
+                                return true;
+                            }
+
+                            // Company exists but not approved
+                            return this.router.createUrlTree(['/partners/register']);
+                        }),
+                        catchError(() => of(this.router.createUrlTree(['/partners/register'])))
+                    );
+                } else {
+                    // No session, redirect to login
                     return of(this.router.createUrlTree(['/login']));
                 }
-                return from(this.supabase.getSession()).pipe(
-                    switchMap(session => {
-                        const userId = session?.user?.id;
-                        if (!userId) {
-                            return of(this.router.createUrlTree(['/login']));
-                        }
-                        return from(
-                            this.supabase.client
-                                .from('companies')
-                                .select('status')
-                                .eq('contact_person_id', userId)
-                                .single()
-                        ).pipe(
-                            map(({ data }) => {
-                                if (data && data.status === 'approved') {
-                                    return true;
-                                }
-                                return this.router.createUrlTree(['/partners/register']);
-                            }),
-                            catchError(() => of(this.router.createUrlTree(['/partners/register'])))
-                        );
-                    })
-                );
+            }),
+            catchError(() => {
+                // Error getting session, redirect to login
+                return of(this.router.createUrlTree(['/login']));
             })
         );
     }

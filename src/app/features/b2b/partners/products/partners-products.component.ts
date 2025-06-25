@@ -287,17 +287,17 @@ import { ProductWithPricing, Category } from '../../shared/store/products.action
                       </div>
 
                       <!-- Product Name -->
-                      <h3 class="text-lg font-semibold text-gray-900 mb-2 font-['Poppins'] line-clamp-2 min-h-[3.5rem] flex items-start">
+                      <h3 class="text-lg font-semibold text-gray-900 mb-2 font-['Poppins'] line-clamp-2 h-[3.5rem] flex items-start">
                         {{ product.name }}
                       </h3>
 
                       <!-- Description -->
-                      <p class="text-sm text-gray-600 mb-3 line-clamp-3 font-['DM_Sans'] min-h-[4rem] flex-grow overflow-hidden">
+                      <p class="text-sm text-gray-600 mb-3 line-clamp-3 font-['DM_Sans'] h-[4.5rem] overflow-hidden">
                         {{ product.description }}
                       </p>
 
                       <!-- Pricing Section -->
-                      <div class="mb-3 min-h-[100px] flex flex-col justify-center">
+                      <div class="mb-3 h-[100px] flex flex-col justify-center">
                         <div *ngIf="!isAuthenticated" class="text-center py-2 bg-gray-50 rounded-lg">
                           <svg class="w-6 h-6 text-gray-400 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
@@ -335,15 +335,15 @@ import { ProductWithPricing, Category } from '../../shared/store/products.action
                       </div>
 
                       <!-- Minimum Order -->
-                      <div class="mb-2 min-h-[20px]">
-                        <div class="flex items-center justify-between text-xs">
+                      <div class="mb-2 h-[20px] flex items-center">
+                        <div class="flex items-center justify-between text-xs w-full">
                           <span class="text-gray-600">{{ 'b2b.products.minimumOrder' | translate }}:</span>
                           <span class="font-medium">{{ product.minimum_order || 1 }} {{ 'b2b.products.pieces' | translate }}</span>
                         </div>
                       </div>
 
                       <!-- Status Badges -->
-                      <div class="flex items-center justify-between mb-3 min-h-[32px]">
+                      <div class="flex items-center justify-between mb-3 h-[32px]">
                         <div class="flex space-x-1 flex-wrap">
                           <span *ngIf="product.in_stock" 
                                 class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -361,7 +361,7 @@ import { ProductWithPricing, Category } from '../../shared/store/products.action
                       </div>
 
                       <!-- Actions - Always at bottom with fixed height -->
-                      <div class="mt-auto space-y-2 min-h-[100px] flex flex-col justify-end">
+                      <div class="mt-auto space-y-2 h-[100px] flex flex-col justify-end">
                         <!-- Add to Cart Button - only show if has B2B price and in stock -->
                         <button *ngIf="isCompanyContact && product.in_stock && hasB2BPrice(product)" 
                                 (click)="addToCart(product, $event)"

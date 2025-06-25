@@ -56,6 +56,7 @@ export class OrdersEffects {
                                 trackingNumber: orderData.tracking_number,
                                 notes: orderData.notes,
                                 adminNotes: orderData.admin_notes,
+                                is_b2b: (orderData as any).is_b2b,
                                 items: (orderItemsData || []).map((itemData: any) => ({
                                     id: itemData.id,
                                     orderId: itemData.order_id,
@@ -99,6 +100,7 @@ export class OrdersEffects {
                                 trackingNumber: orderData.tracking_number,
                                 notes: orderData.notes,
                                 adminNotes: orderData.admin_notes,
+                                is_b2b: (orderData as any).is_b2b,
                                 items: [],
                                 createdAt: orderData.created_at,
                                 updatedAt: orderData.updated_at
@@ -154,6 +156,7 @@ export class OrdersEffects {
                                 trackingNumber: orderData.tracking_number,
                                 notes: orderData.notes,
                                 adminNotes: orderData.admin_notes,
+                                is_b2b: (orderData as any).is_b2b,
                                 items: (orderItemsData || []).map((itemData: any) => ({
                                     id: itemData.id,
                                     orderId: itemData.order_id,
@@ -199,6 +202,7 @@ export class OrdersEffects {
                                 trackingNumber: orderData.tracking_number,
                                 notes: orderData.notes,
                                 adminNotes: orderData.admin_notes,
+                                is_b2b: (orderData as any).is_b2b,
                                 items: [],
                                 createdAt: orderData.created_at,
                                 updatedAt: orderData.updated_at
@@ -254,6 +258,7 @@ export class OrdersEffects {
                         trackingNumber: orderData.tracking_number,
                         notes: orderData.notes,
                         adminNotes: orderData.admin_notes,
+                        is_b2b: orderData.is_b2b,
                         items: (orderItemsData || []).map((itemData: any) => ({
                             id: itemData.id,
                             orderId: itemData.order_id,
