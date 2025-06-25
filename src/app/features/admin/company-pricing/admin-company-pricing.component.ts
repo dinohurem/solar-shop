@@ -82,7 +82,9 @@ export class AdminCompanyPricingComponent implements OnInit {
   }
 
   onRowClick(item: CompanyPricingSummary): void {
-    this.router.navigate(['/admin/company-pricing/company', item.company_id]);
+    this.router.navigate(['/admin/company-pricing/create'], {
+      queryParams: { companyId: item.company_id }
+    });
   }
 
   onAdd(): void {
@@ -113,15 +115,22 @@ export class AdminCompanyPricingComponent implements OnInit {
       companyGroups.get(pricing.company_id)!.push(pricing);
     });
 
-    const profiles = await this.supabase.getTable('profiles');
-    const companyProfiles = (profiles || []).filter((p: any) => p.role === 'company_admin');
+    // Get companies from the companies table
+    const { data: companies, error } = await this.supabase.client
+      .from('companies')
+      .select('*')
+      .eq('status', 'approved');
+
+    if (error) {
+      console.error('Error loading companies:', error);
+    }
 
     const summaries: CompanyPricingSummary[] = [];
 
     companyGroups.forEach((pricings, companyId) => {
-      const companyProfile = companyProfiles.find((p: any) => p.id === companyId);
-      const companyName = companyProfile ?
-        (companyProfile.full_name || `${companyProfile.first_name} ${companyProfile.last_name}`) :
+      const company = (companies || []).find((c: any) => c.id === companyId);
+      const companyName = company ?
+        company.company_name || company.companyName :
         `Company ${companyId}`;
 
       const sortedPricings = pricings.sort((a, b) =>

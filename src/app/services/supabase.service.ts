@@ -417,9 +417,7 @@ export class SupabaseService {
             .select('*')
             .eq('is_active', true)
             .eq('is_b2b', true)
-            .eq('status', 'active')
-            .lte('start_date', new Date().toISOString())
-            .or('end_date.is.null,end_date.gte.' + new Date().toISOString());
+            .eq('status', 'active');
 
         if (filters?.featured !== undefined) {
             query = query.eq('featured', filters.featured);

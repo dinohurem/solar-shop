@@ -44,6 +44,15 @@ export interface AdminCompaniesState {
     selectedCompany: any | null;
 }
 
+export interface AdminCompanyPricingState {
+    companyPricing: any[];
+    companies: any[];
+    products: any[];
+    loading: boolean;
+    error: string | null;
+    selectedPricing: any | null;
+}
+
 // Main admin state interface
 export interface AdminState {
     orders: AdminOrdersState;
@@ -52,6 +61,7 @@ export interface AdminState {
     reviews: AdminReviewsState;
     products: AdminProductsState;
     companies: AdminCompaniesState;
+    companyPricing: AdminCompanyPricingState;
 }
 
 // Initial state values
@@ -97,11 +107,21 @@ export const initialAdminCompaniesState: AdminCompaniesState = {
     selectedCompany: null
 };
 
+export const initialAdminCompanyPricingState: AdminCompanyPricingState = {
+    companyPricing: [],
+    companies: [],
+    products: [],
+    loading: false,
+    error: null,
+    selectedPricing: null
+};
+
 export const initialAdminState: AdminState = {
     orders: initialAdminOrdersState,
     users: initialAdminUsersState,
     categories: initialAdminCategoriesState,
     reviews: initialAdminReviewsState,
     products: initialAdminProductsState,
-    companies: initialAdminCompaniesState
+    companies: initialAdminCompaniesState,
+    companyPricing: initialAdminCompanyPricingState
 }; 

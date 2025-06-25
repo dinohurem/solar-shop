@@ -31,6 +31,10 @@ import { companiesReducer } from '../features/admin/companies/store/companies.re
 import { CompaniesState } from '../features/admin/companies/store/companies.state';
 import { ordersReducer } from '../features/admin/orders/store/orders.reducer';
 import { OrdersState } from '../features/admin/orders/store/orders.state';
+import { companyPricingReducer } from '../features/admin/company-pricing/store/company-pricing.reducer';
+import { AdminCompanyPricingState } from '../features/admin/store/admin.state';
+import { productsReducer as b2bProductsReducer } from '../features/b2b/shared/store/products.reducer';
+import { ProductsState as B2BProductsState } from '../features/b2b/shared/store/products.reducer';
 
 export interface State {
   auth: AuthState;
@@ -47,6 +51,8 @@ export interface State {
   wishlist: WishlistState;
   companies: CompaniesState;
   adminOrders: OrdersState;
+  companyPricing: AdminCompanyPricingState;
+  b2bProducts: B2BProductsState;
 }
 
 export const reducers: ActionReducerMap<State> = {
@@ -64,6 +70,8 @@ export const reducers: ActionReducerMap<State> = {
   wishlist: wishlistReducer,
   companies: companiesReducer,
   adminOrders: ordersReducer,
+  companyPricing: companyPricingReducer,
+  b2bProducts: b2bProductsReducer,
 };
 
 export const metaReducers: MetaReducer<State>[] = isDevMode() ? [] : [];

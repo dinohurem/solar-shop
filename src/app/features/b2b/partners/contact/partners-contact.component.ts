@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { SupabaseService } from '../../../../services/supabase.service';
 
@@ -250,12 +251,28 @@ import { SupabaseService } from '../../../../services/supabase.service';
                       <option value="">{{ 'b2b.contact.selectSubject' | translate }}</option>
                       <option value="partnership">{{ 'b2b.contact.partnershipInquiry' | translate }}</option>
                       <option value="pricing">{{ 'b2b.contact.pricingInquiry' | translate }}</option>
+                      <option value="pricingInquiry">{{ 'b2b.contact.productPricingInquiry' | translate }}</option>
                       <option value="technical">{{ 'b2b.contact.technicalSupport' | translate }}</option>
                       <option value="sales">{{ 'b2b.contact.salesInquiry' | translate }}</option>
                       <option value="other">{{ 'partnersRegister.other' | translate }}</option>
                     </select>
                     <div *ngIf="isFieldInvalid('subject')" class="mt-1 text-sm text-red-600">
                       {{ 'b2b.contact.subjectRequired' | translate }}
+                    </div>
+                  </div>
+
+                  <!-- Product Information (shown for pricing inquiries) -->
+                  <div *ngIf="contactForm.get('subject')?.value === 'pricingInquiry'" class="col-span-1 md:col-span-2">
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                      <h4 class="text-sm font-medium text-yellow-800 mb-2">Product Information</h4>
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-yellow-700">
+                        <div *ngIf="productName">
+                          <span class="font-medium">Product:</span> {{ productName }}
+                        </div>
+                        <div *ngIf="productSku">
+                          <span class="font-medium">SKU:</span> {{ productSku }}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -290,12 +307,21 @@ import { SupabaseService } from '../../../../services/supabase.service';
     </div>
   `,
 })
-export class PartnersContactComponent {
+export class PartnersContactComponent implements OnInit {
   contactForm: FormGroup;
   isSubmitting = false;
   messageSent = false;
 
-  constructor(private fb: FormBuilder, private supabase: SupabaseService) {
+  // Properties for product quote requests
+  productId: string | null = null;
+  productName: string | null = null;
+  productSku: string | null = null;
+
+  constructor(
+    private fb: FormBuilder,
+    private supabase: SupabaseService,
+    private route: ActivatedRoute
+  ) {
     this.contactForm = this.fb.group({
       firstName: ['', [Validators.required]],
       lastName: ['', [Validators.required]],
@@ -304,6 +330,30 @@ export class PartnersContactComponent {
       company: [''],
       subject: ['', [Validators.required]],
       message: ['', [Validators.required]]
+    });
+  }
+
+  ngOnInit(): void {
+    // Check for query parameters from product quote requests
+    this.route.queryParams.subscribe(params => {
+      if (params['subject'] === 'pricingInquiry') {
+        this.contactForm.patchValue({
+          subject: 'pricingInquiry'
+        });
+
+        // Set product information
+        this.productId = params['productId'] || null;
+        this.productName = params['productName'] || null;
+        this.productSku = params['sku'] || null;
+
+        // Pre-fill the message with product details
+        if (this.productName && this.productSku) {
+          const message = `I would like to request a quote for the following product:\n\nProduct: ${this.productName}\nSKU: ${this.productSku}\n\nPlease provide pricing information and availability.`;
+          this.contactForm.patchValue({
+            message: message
+          });
+        }
+      }
     });
   }
 

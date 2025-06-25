@@ -1,8 +1,12 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { Subject, takeUntil } from 'rxjs';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
+import { selectCurrentUser } from '../../../../../core/auth/store/auth.selectors';
+import { User } from '../../../../../shared/models/user.model';
 
 @Component({
   selector: 'app-shipping',
@@ -200,11 +204,14 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap');
   `]
 })
-export class ShippingComponent {
+export class ShippingComponent implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private router = inject(Router);
+  private store = inject(Store);
+  private destroy$ = new Subject<void>();
 
   shippingForm: FormGroup;
+  currentUser: User | null = null;
 
   constructor() {
     this.shippingForm = this.fb.group({
@@ -218,6 +225,27 @@ export class ShippingComponent {
       country: ['', [Validators.required]],
       shippingOption: ['standard', [Validators.required]]
     });
+  }
+
+  ngOnInit(): void {
+    // Subscribe to current user and pre-populate email if logged in
+    this.store.select(selectCurrentUser)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(user => {
+        this.currentUser = user;
+        if (user?.email) {
+          this.shippingForm.patchValue({
+            email: user.email
+          });
+          // Disable email field for authenticated users
+          this.shippingForm.get('email')?.disable();
+        }
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   onSubmit() {

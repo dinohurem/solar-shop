@@ -8,6 +8,7 @@ import { takeUntil } from 'rxjs/operators';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { Company } from '../../../shared/models/company.model';
 import { DeleteConfirmationModalComponent } from '../../../shared/components/modals/delete-confirmation-modal/delete-confirmation-modal.component';
+import { CompanyApprovalModalComponent } from '../../../shared/components/modals/company-approval-modal/company-approval-modal.component';
 import { DataTableComponent, TableConfig } from '../shared/data-table/data-table.component';
 import * as CompaniesActions from './store/companies.actions';
 import {
@@ -27,7 +28,7 @@ import { TranslationService } from '../../../shared/services/translation.service
 @Component({
   selector: 'app-admin-companies',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, DeleteConfirmationModalComponent, TranslatePipe, DataTableComponent],
+  imports: [CommonModule, RouterModule, FormsModule, DeleteConfirmationModalComponent, CompanyApprovalModalComponent, TranslatePipe, DataTableComponent],
   template: `
     <div class="space-y-6">
       <!-- Header -->
@@ -260,6 +261,14 @@ import { TranslationService } from '../../../shared/services/translation.service
       (confirmed)="onDeleteConfirmed()"
       (cancelled)="onDeleteCancelled()"
     ></app-delete-confirmation-modal>
+
+    <!-- Company Approval Modal -->
+    <app-company-approval-modal
+      [isOpen]="showApprovalModal"
+      [company]="pendingApprovalCompany"
+      (approved)="onApprovalConfirmed()"
+      (cancelled)="onApprovalCancelled()"
+    ></app-company-approval-modal>
   `,
 })
 export class AdminCompaniesComponent implements OnInit, OnDestroy {
@@ -285,6 +294,10 @@ export class AdminCompaniesComponent implements OnInit, OnDestroy {
   deleteModalTitle = '';
   deleteModalMessage = '';
   pendingDeleteCompany: Company | null = null;
+
+  // Approval modal properties
+  showApprovalModal = false;
+  pendingApprovalCompany: Company | null = null;
 
   // Table configuration
   tableConfig: TableConfig = {
@@ -493,13 +506,8 @@ export class AdminCompaniesComponent implements OnInit, OnDestroy {
   }
 
   approveCompany(company: Company): void {
-    const confirmMessage = this.translationService.translate('admin.companiesForm.confirmApprove');
-    if (confirm(confirmMessage)) {
-      this.store.dispatch(CompaniesActions.approveCompany({
-        companyId: company.id
-      }));
-      this.closeModal();
-    }
+    this.pendingApprovalCompany = company;
+    this.showApprovalModal = true;
   }
 
   rejectCompany(company: Company): void {
@@ -538,5 +546,21 @@ export class AdminCompaniesComponent implements OnInit, OnDestroy {
   onDeleteCancelled(): void {
     this.pendingDeleteCompany = null;
     this.showDeleteModal = false;
+  }
+
+  onApprovalConfirmed(): void {
+    if (this.pendingApprovalCompany) {
+      this.store.dispatch(CompaniesActions.approveCompany({
+        companyId: this.pendingApprovalCompany.id
+      }));
+      this.pendingApprovalCompany = null;
+      this.showApprovalModal = false;
+      this.closeModal();
+    }
+  }
+
+  onApprovalCancelled(): void {
+    this.pendingApprovalCompany = null;
+    this.showApprovalModal = false;
   }
 }

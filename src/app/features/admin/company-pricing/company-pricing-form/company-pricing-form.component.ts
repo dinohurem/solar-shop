@@ -1,214 +1,201 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, FormsModule, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Title } from '@angular/platform-browser';
-import { AdminFormComponent } from '../../shared/admin-form/admin-form.component';
+import { Store } from '@ngrx/store';
+import { Observable, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { SupabaseService } from '../../../../services/supabase.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import * as CompanyPricingActions from '../store/company-pricing.actions';
+import * as CompanyPricingSelectors from '../store/company-pricing.selectors';
+import { Company, Product } from '../store/company-pricing.actions';
 
-interface Company {
-  id: string;
-  name: string;
-  email: string;
-}
-
-interface Product {
-  id: string;
-  name: string;
-  sku: string;
-  price: number;
+interface ProductWithCustomPrice extends Product {
+  customPrice: number;
+  hasCustomPrice: boolean;
 }
 
 @Component({
   selector: 'app-company-pricing-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, AdminFormComponent, TranslatePipe],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, TranslatePipe],
   template: `
-    <app-admin-form
-      [title]="isEditMode ? ('adminCompanyPricing.editPricing' | translate) : ('adminCompanyPricing.createPricing' | translate)"
-      [subtitle]="'adminCompanyPricing.setPriceForCompany' | translate"
-      [form]="pricingForm"
-      [isEditMode]="isEditMode"
-      [isSubmitting]="loading"
-      backRoute="/admin/company-pricing"
-      (formSubmit)="onSave()">
-      
-      <div [formGroup]="pricingForm" class="space-y-8">
-        <!-- Company Selection -->
-        <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-6">
-          <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
-            <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-            </svg>
-            Company Information
-          </h3>
-          
-          <div class="grid grid-cols-1 gap-6">
-            <div class="relative">
-              <select
-                id="company_id"
-                formControlName="company_id"
-                class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 bg-white appearance-none"
-                [class.border-red-500]="pricingForm.get('company_id')?.invalid && pricingForm.get('company_id')?.touched">
-                <option value="">Select a company</option>
-                <option *ngFor="let company of companies" [value]="company.id">
-                  {{ company.name }} ({{ company.email }})
-                </option>
-              </select>
-              <label class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700">
-                Company *
-              </label>
-              <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                </svg>
-              </div>
-              <div *ngIf="pricingForm.get('company_id')?.invalid && pricingForm.get('company_id')?.touched" 
-                   class="mt-2 text-sm text-red-600 flex items-center">
-                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                </svg>
-                Company selection is required
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Product Selection -->
-        <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-6">
-          <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
-            <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-            </svg>
-            Product Selection
-          </h3>
-          
-          <div class="grid grid-cols-1 gap-6">
-            <!-- Product Search -->
-            <div class="relative">
-              <input
-                type="text"
-                id="productSearch"
-                [(ngModel)]="productSearch"
-                (input)="onProductSearch()"
-                (focus)="showProductDropdown = true"
-                class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
-                placeholder="Search products..."
-                autocomplete="off">
-              <label for="productSearch" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700">
-                Search Products
-              </label>
-              
-              <!-- Product Dropdown -->
-              <div *ngIf="showProductDropdown && filteredProducts.length > 0" 
-                   class="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                <div *ngFor="let product of filteredProducts" 
-                     (click)="selectProduct(product)"
-                     class="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0">
-                  <div class="font-medium text-gray-900">{{ product.name }}</div>
-                  <div class="text-sm text-gray-500">SKU: {{ product.sku }} | Current Price: €{{ product.price }}</div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Selected Product Display -->
-            <div *ngIf="selectedProduct" class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <div class="flex items-center justify-between">
+    <div class="space-y-6">
+      <!-- Header -->
+      <div class="flex items-center justify-between">
         <div>
-                  <h4 class="font-medium text-blue-900">{{ selectedProduct.name }}</h4>
-                  <p class="text-sm text-blue-700">SKU: {{ selectedProduct.sku }} | Current Price: €{{ selectedProduct.price }}</p>
-                </div>
-                <button type="button" (click)="clearProductSelection()" 
-                        class="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                  Change
-                </button>
-              </div>
-            </div>
-
-            <div *ngIf="!selectedProduct && pricingForm.get('product_id')?.invalid && pricingForm.get('product_id')?.touched" 
-                 class="text-sm text-red-600 flex items-center">
-              <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+          <h1 class="text-2xl font-bold text-gray-900">
+            {{ 'admin.companyPricingForm.title' | translate }}
+          </h1>
+          <p class="mt-1 text-sm text-gray-600">
+            {{ 'admin.companyPricingForm.subtitle' | translate }}
+          </p>
+        </div>
+        <div class="flex space-x-3">
+          <button
+            type="button"
+            (click)="goBack()"
+            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+            {{ 'common.cancel' | translate }}
+          </button>
+          <button
+            type="button"
+            (click)="saveChanges()"
+            [disabled]="!hasChanges() || (loading$ | async)"
+            class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
+            <span *ngIf="loading$ | async" class="inline-flex items-center">
+              <svg class="w-4 h-4 mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
-              Product selection is required
-            </div>
-          </div>
+              {{ 'common.saving' | translate }}
+            </span>
+            <span *ngIf="!(loading$ | async)">{{ 'common.save' | translate }}</span>
+          </button>
         </div>
+      </div>
 
-        <!-- Pricing -->
-        <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-6">
-          <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
-          <span class="text-yellow-600 mr-2"> € </span>
-            Custom Pricing
-          </h3>
-          
-          <div class="grid grid-cols-1 gap-6">
-            <div class="relative">
-              <input
-                type="number"
-                id="price"
-                formControlName="price"
-                step="0.01"
-                min="0"
-                class="peer w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
-                placeholder="0.00"
-                [class.border-red-500]="pricingForm.get('price')?.invalid && pricingForm.get('price')?.touched">
-              <label for="price" class="absolute left-10 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                Custom Price (€) *
-              </label>
-              <div *ngIf="pricingForm.get('price')?.invalid && pricingForm.get('price')?.touched" 
-                   class="mt-2 text-sm text-red-600 flex items-center">
-                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                </svg>
-                <span *ngIf="pricingForm.get('price')?.errors?.['required']">Price is required</span>
-                <span *ngIf="pricingForm.get('price')?.errors?.['min']">Price must be greater than 0</span>
-              </div>
-              <p class="mt-3 text-sm text-gray-500 flex items-center">
-                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                This price will override the standard product price for this company
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Additional Information -->
-        <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-6">
-          <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
-            <svg class="w-5 h-5 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      <!-- Company Selection -->
+      <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+          <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+          </svg>
+          {{ 'admin.companyPricingForm.selectCompany' | translate }}
+        </h3>
+        
+        <div class="relative">
+          <select
+            [(ngModel)]="selectedCompanyId"
+            (ngModelChange)="onCompanySelected($event)"
+            class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 bg-white appearance-none">
+            <option value="">{{ 'admin.companyPricingForm.selectCompany' | translate }}</option>
+            <option *ngFor="let company of companies" [value]="company.id">
+              {{ company.name }} ({{ company.email }})
+            </option>
+          </select>
+          <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
             </svg>
-            Important Notes
-          </h3>
-          
-          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <ul class="text-sm text-blue-800 space-y-2">
-              <li class="flex items-start">
-                <svg class="w-4 h-4 text-blue-600 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                </svg>
-                Company-specific pricing takes precedence over standard product pricing
-              </li>
-              <li class="flex items-start">
-                <svg class="w-4 h-4 text-blue-600 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                </svg>
-                Changes will affect all future orders for this company
-              </li>
-              <li class="flex items-start">
-                <svg class="w-4 h-4 text-blue-600 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                </svg>
-                Existing orders will not be affected by price changes
-              </li>
-            </ul>
           </div>
         </div>
       </div>
-    </app-admin-form>
+
+      <!-- Products Table -->
+      <div *ngIf="selectedCompany" class="bg-white shadow-sm rounded-xl border border-gray-100 p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+          <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+          </svg>
+          {{ 'admin.companyPricingForm.productSelection' | translate }} - {{ selectedCompany.name }}
+        </h3>
+
+        <!-- Search -->
+        <div class="mb-6">
+          <div class="relative">
+            <input
+              type="text"
+              [(ngModel)]="productSearchTerm"
+              (ngModelChange)="filterProducts()"
+              placeholder="Search products..."
+              class="w-full px-4 py-3 pl-10 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Products Table -->
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {{ 'admin.companyPricingForm.productName' | translate }}
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {{ 'admin.companyPricingForm.skuLabel' | translate }}
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {{ 'admin.companyPricingForm.currentPrice' | translate }}
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {{ 'admin.companyPricingForm.customPriceEuro' | translate }}
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {{ 'common.actions' | translate }}
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr *ngFor="let product of filteredProducts" class="hover:bg-gray-50">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm font-medium text-gray-900">{{ product.name }}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-500">{{ product.sku }}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">€{{ product.price | number:'1.2-2' }}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    [value]="product.customPrice || ''"
+                    (input)="updateCustomPrice(product, $event)"
+                    [placeholder]="'€' + (product.price | number:'1.2-2')"
+                    class="w-32 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <button
+                    *ngIf="product.hasCustomPrice"
+                    type="button"
+                    (click)="removeCustomPrice(product)"
+                    class="text-red-600 hover:text-red-900 p-1 rounded-md hover:bg-red-50 transition-colors duration-200"
+                    [title]="'common.remove' | translate">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div *ngIf="filteredProducts.length === 0" class="text-center py-8">
+          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+          </svg>
+          <h3 class="mt-2 text-sm font-medium text-gray-900">No products found</h3>
+          <p class="mt-1 text-sm text-gray-500">Try adjusting your search terms.</p>
+        </div>
+      </div>
+
+      <!-- Summary -->
+      <div *ngIf="selectedCompany && getProductsWithCustomPricing().length > 0" class="bg-white shadow-sm rounded-xl border border-gray-100 p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-6">
+          {{ 'admin.companyPricingForm.customPricingSummary' | translate }}
+        </h3>
+        <div class="space-y-3">
+          <div *ngFor="let product of getProductsWithCustomPricing()" class="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
+            <div>
+              <span class="font-medium text-gray-900">{{ product.name }}</span>
+              <span class="text-sm text-gray-500 ml-2">({{ product.sku }})</span>
+            </div>
+            <div class="text-right">
+              <div class="text-sm text-gray-500">€{{ product.price | number:'1.2-2' }} → <span class="font-medium text-green-600">€{{ product.customPrice | number:'1.2-2' }}</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   `,
   styles: [`
     :host {
@@ -216,164 +203,193 @@ interface Product {
     }
   `]
 })
-export class CompanyPricingFormComponent implements OnInit {
+export class CompanyPricingFormComponent implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private supabase = inject(SupabaseService);
   private title = inject(Title);
+  private store = inject(Store);
+  private destroy$ = new Subject<void>();
 
-  pricingForm: FormGroup;
-  loading = false;
-  isEditMode = false;
-  recordId: string | null = null;
+  companies$: Observable<Company[]> = this.store.select(CompanyPricingSelectors.selectCompanies);
+  products$: Observable<Product[]> = this.store.select(CompanyPricingSelectors.selectProducts);
+  loading$: Observable<boolean> = this.store.select(CompanyPricingSelectors.selectCompanyPricingLoading);
 
   companies: Company[] = [];
   products: Product[] = [];
-  filteredProducts: Product[] = [];
-  selectedProduct: Product | null = null;
-  productSearch = '';
-  showProductDropdown = false;
-
-  constructor() {
-    this.pricingForm = this.fb.group({
-      company_id: ['', Validators.required],
-      product_id: ['', Validators.required],
-      price: [0, [Validators.required, Validators.min(0.01)]]
-    });
-  }
+  filteredProducts: ProductWithCustomPrice[] = [];
+  selectedCompanyId: string = '';
+  selectedCompany: Company | null = null;
+  productSearchTerm: string = '';
+  existingPricing: any[] = [];
 
   ngOnInit(): void {
-    this.loadCompanies();
-    this.loadProducts();
-    this.checkEditMode();
+    console.log('Company Pricing Form: ngOnInit called');
 
-    // Close dropdown when clicking outside
-    document.addEventListener('click', (event) => {
-      if (!event.target || !(event.target as Element).closest('.relative')) {
-        this.showProductDropdown = false;
-      }
+    // Dispatch actions to load data
+    console.log('Company Pricing Form: Dispatching loadCompanies action');
+    this.store.dispatch(CompanyPricingActions.loadCompanies());
+    console.log('Company Pricing Form: Dispatching loadProducts action');
+    this.store.dispatch(CompanyPricingActions.loadProducts());
+
+    // Subscribe to data
+    this.companies$.pipe(takeUntil(this.destroy$)).subscribe(companies => {
+      console.log('Company Pricing Form: Companies received:', companies);
+      this.companies = companies;
     });
+
+    this.products$.pipe(takeUntil(this.destroy$)).subscribe(products => {
+      console.log('Company Pricing Form: Products received:', products);
+      this.products = products;
+      this.updateFilteredProducts();
+    });
+
+    this.checkEditMode();
+    this.title.setTitle('Company Pricing - Solar Shop Admin');
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private checkEditMode(): void {
-    const id = this.route.snapshot.paramMap.get('id');
     const companyId = this.route.snapshot.queryParamMap.get('companyId');
-    const productId = this.route.snapshot.queryParamMap.get('productId');
-
-    if (id) {
-      this.isEditMode = true;
-      this.recordId = id;
-      this.loadRecord();
-    } else if (companyId && productId) {
-      // Pre-fill form when coming from company pricing list
-      this.pricingForm.patchValue({
-        company_id: companyId,
-        product_id: productId
-      });
+    if (companyId) {
+      this.selectedCompanyId = companyId;
+      this.onCompanySelected(companyId);
     }
-
-    this.title.setTitle(this.isEditMode ? 'Edit Company Pricing - Solar Shop Admin' : 'Create Company Pricing - Solar Shop Admin');
   }
 
-  private async loadCompanies(): Promise<void> {
+  onCompanySelected(companyId: string): void {
+    this.selectedCompany = this.companies.find(c => c.id === companyId) || null;
+    if (this.selectedCompany) {
+      this.loadExistingPricing();
+    }
+    this.updateFilteredProducts();
+  }
+
+  private async loadExistingPricing(): Promise<void> {
+    if (!this.selectedCompany) return;
+
     try {
-      const data = await this.supabase.getTable('profiles');
-      // Filter for company admin users and map to Company interface
-      this.companies = (data || [])
-        .filter((profile: any) => profile.role === 'company_admin')
-        .map((profile: any) => ({
-          id: profile.id,
-          name: profile.full_name || `${profile.first_name} ${profile.last_name}`,
-          email: profile.email || profile.user_id
-        }));
+      const { data, error } = await this.supabase.client
+        .from('company_pricing')
+        .select('*')
+        .eq('company_id', this.selectedCompany.id);
+
+      if (error) {
+        console.error('Error loading existing pricing:', error);
+        return;
+      }
+
+      this.existingPricing = data || [];
+      this.updateFilteredProducts();
     } catch (error) {
-      console.error('Error loading companies:', error);
-      this.companies = [];
+      console.error('Error loading existing pricing:', error);
     }
   }
 
-  private async loadProducts(): Promise<void> {
-    try {
-      const data = await this.supabase.getTable('products');
-      this.products = (data || []).filter(p => p.is_active !== false);
-      this.filteredProducts = this.products;
-    } catch (error) {
-      console.error('Error loading products:', error);
-      this.products = [];
-      this.filteredProducts = [];
+  private updateFilteredProducts(): void {
+    if (!this.products.length) return;
+
+    let filtered = this.products.map(product => {
+      const existingPrice = this.existingPricing.find(p => p.product_id === product.id);
+      const customPrice = existingPrice ? parseFloat(existingPrice.price) : product.price;
+      return {
+        ...product,
+        customPrice: customPrice,
+        hasCustomPrice: !!existingPrice && customPrice !== product.price
+      };
+    });
+
+    if (this.productSearchTerm) {
+      const searchTerm = this.productSearchTerm.toLowerCase();
+      filtered = filtered.filter(product =>
+        product.name.toLowerCase().includes(searchTerm) ||
+        product.sku.toLowerCase().includes(searchTerm)
+      );
+    }
+
+    this.filteredProducts = filtered;
+  }
+
+  filterProducts(): void {
+    this.updateFilteredProducts();
+  }
+
+  updateCustomPrice(product: ProductWithCustomPrice, event: Event): void {
+    const target = event.target as HTMLInputElement;
+    const value = parseFloat(target.value);
+
+    if (!isNaN(value) && value > 0) {
+      product.customPrice = value;
+      product.hasCustomPrice = value !== product.price;
+    } else {
+      product.customPrice = product.price;
+      product.hasCustomPrice = false;
     }
   }
 
-  private async loadRecord(): Promise<void> {
-    if (!this.recordId) return;
-    this.loading = true;
+  removeCustomPrice(product: ProductWithCustomPrice): void {
+    product.customPrice = product.price;
+    product.hasCustomPrice = false;
+  }
+
+  getProductsWithCustomPricing(): ProductWithCustomPrice[] {
+    return this.filteredProducts.filter(p => p.hasCustomPrice && p.customPrice !== p.price);
+  }
+
+  hasChanges(): boolean {
+    return this.getProductsWithCustomPricing().length > 0;
+  }
+
+  async saveChanges(): Promise<void> {
+    if (!this.selectedCompany) return;
+
+    const productsToSave = this.getProductsWithCustomPricing();
+    const existingProductIds = this.existingPricing.map(p => p.product_id);
+
     try {
-      const data = await this.supabase.getTableById('company_pricing', this.recordId);
-      if (data) {
-        this.pricingForm.patchValue(data);
-        // Find and set selected product
-        const product = this.products.find(p => p.id === data.product_id);
-        if (product) {
-          this.selectedProduct = product;
-          this.productSearch = product.name;
+      // Create new pricing records
+      for (const product of productsToSave) {
+        const existingPricing = this.existingPricing.find(p => p.product_id === product.id);
+
+        if (existingPricing) {
+          // Update existing
+          await this.supabase.updateRecord('company_pricing', existingPricing.id, {
+            price: product.customPrice
+          });
+        } else {
+          // Create new
+          await this.supabase.createRecord('company_pricing', {
+            company_id: this.selectedCompany.id,
+            product_id: product.id,
+            price: product.customPrice
+          });
         }
       }
-    } catch (err) {
-      console.error('Error loading pricing', err);
-    } finally {
-      this.loading = false;
-    }
-  }
 
-  onProductSearch(): void {
-    this.showProductDropdown = true;
-    if (!this.productSearch.trim()) {
-      this.filteredProducts = this.products;
-      return;
-    }
+      // Remove pricing for products that no longer have custom pricing
+      const currentProductIds = productsToSave.map(p => p.id);
+      const toRemove = this.existingPricing.filter(p =>
+        !currentProductIds.includes(p.product_id)
+      );
 
-    const searchTerm = this.productSearch.toLowerCase();
-    this.filteredProducts = this.products.filter(product =>
-      product.name.toLowerCase().includes(searchTerm) ||
-      product.sku.toLowerCase().includes(searchTerm)
-    );
-  }
-
-  selectProduct(product: Product): void {
-    this.selectedProduct = product;
-    this.productSearch = product.name;
-    this.showProductDropdown = false;
-    this.pricingForm.patchValue({ product_id: product.id });
-  }
-
-  clearProductSelection(): void {
-    this.selectedProduct = null;
-    this.productSearch = '';
-    this.filteredProducts = this.products;
-    this.pricingForm.patchValue({ product_id: '' });
-  }
-
-  async onSave(): Promise<void> {
-    if (this.pricingForm.invalid) {
-      this.pricingForm.markAllAsTouched();
-      return;
-    }
-
-    this.loading = true;
-    try {
-      const value = this.pricingForm.value;
-      if (this.isEditMode && this.recordId) {
-        await this.supabase.updateRecord('company_pricing', this.recordId, value);
-      } else {
-        await this.supabase.createRecord('company_pricing', value);
+      for (const pricing of toRemove) {
+        await this.supabase.deleteRecord('company_pricing', pricing.id);
       }
+
+      // Navigate back
       this.router.navigate(['/admin/company-pricing']);
-    } catch (err) {
-      console.error('Error saving pricing', err);
-      alert('Error saving pricing. Please try again.');
-    } finally {
-      this.loading = false;
+    } catch (error) {
+      console.error('Error saving company pricing:', error);
+      alert('Error saving pricing changes. Please try again.');
     }
+  }
+
+  goBack(): void {
+    this.router.navigate(['/admin/company-pricing']);
   }
 }

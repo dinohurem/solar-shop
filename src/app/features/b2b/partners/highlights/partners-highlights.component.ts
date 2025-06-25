@@ -40,15 +40,15 @@ interface HighlightOffer {
               <img [src]="offer.imageUrl" [alt]="offer.title" 
                    class="w-full h-full object-cover">
               
-              <!-- Featured Badge -->
-              <div *ngIf="offer.featured" class="absolute top-3 left-3">
-                <span class="bg-gradient-to-r from-orange-400 to-orange-600 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center space-x-1">
-                  <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                  </svg>
-                  <span>Featured</span>
-                </span>
-              </div>
+                                    <!-- Featured Badge -->
+                      <div *ngIf="offer.featured" class="absolute top-3 left-3">
+                        <span class="bg-gradient-to-r from-orange-400 to-orange-600 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center space-x-1">
+                          <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                          </svg>
+                          <span>{{ 'b2b.offers.featured' | translate }}</span>
+                        </span>
+                      </div>
               
               <!-- Discount Badge -->
               <div class="absolute top-3 right-3">
@@ -60,7 +60,7 @@ interface HighlightOffer {
               <!-- Partner Only Badge -->
               <div class="absolute bottom-3 left-3">
                 <span class="bg-solar-600 text-white px-2 py-1 rounded-full text-xs font-medium">
-                  Partner Only
+                  {{ 'b2b.offers.partnerOnly' | translate }}
                 </span>
               </div>
             </div>
@@ -81,7 +81,7 @@ interface HighlightOffer {
                   </span>
                 </div>
                 <div class="text-xs text-green-600 font-medium">
-                  Save €{{ (offer.originalPrice - offer.discountedPrice) | number:'1.0-0' }}
+                  {{ 'b2b.offers.savings' | translate }} €{{ (offer.originalPrice - offer.discountedPrice) | number:'1.0-0' }}
                 </div>
               </div>
               
@@ -91,7 +91,7 @@ interface HighlightOffer {
                 <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
                 </svg>
-                <span>Ending soon!</span>
+                <span>{{ 'b2b.offers.endingSoon' | translate }}</span>
               </div>
             </div>
           </div>
@@ -123,6 +123,8 @@ export class PartnersHighlightsComponent implements OnInit {
       // Try to load B2B offers from database using the dedicated method
       const offers = await this.supabase.getB2BOffers({ limit: 4 });
 
+      console.log('B2B Offers loaded:', offers); // Debug log
+
       if (offers && offers.length > 0) {
         this.highlights = offers.map((offer: any) => ({
           id: offer.id,
@@ -139,12 +141,47 @@ export class PartnersHighlightsComponent implements OnInit {
           isB2B: offer.is_b2b || false,
           endDate: offer.end_date
         }));
+
+        console.log('Mapped highlights:', this.highlights); // Debug log
       } else {
-        console.warn('No B2B offers found in database. Using fallback sample data.');
+        console.warn('No B2B offers found in database.');
+        // Let's try to create a sample offer to test the component
+        this.highlights = [{
+          id: 'sample-1',
+          title: 'Premium Inverter Bundle - Limited Time',
+          description: 'High-efficiency inverter package with smart monitoring system. Perfect for commercial installations requiring maximum reliability.',
+          shortDescription: 'Premium inverter with smart monitoring',
+          imageUrl: 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=800&h=600&fit=crop',
+          originalPrice: 8500,
+          discountedPrice: 6800,
+          discountPercentage: 20,
+          type: 'bundle_deal',
+          status: 'active',
+          featured: true,
+          isB2B: true,
+          endDate: '2024-12-25'
+        }];
       }
     } catch (error) {
-      console.warn('Error loading B2B offers from database:', error);
-      console.warn('Using fallback sample data. Please ensure the offers table exists and the migration 007_add_is_b2b_to_offers.sql has been run.');
+      console.error('Error loading B2B offers from database:', error);
+      console.warn('Using fallback sample data. Please ensure the offers table exists and the migration has been run.');
+
+      // Fallback sample data
+      this.highlights = [{
+        id: 'sample-1',
+        title: 'Premium Inverter Bundle - Limited Time',
+        description: 'High-efficiency inverter package with smart monitoring system. Perfect for commercial installations requiring maximum reliability.',
+        shortDescription: 'Premium inverter with smart monitoring',
+        imageUrl: 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=800&h=600&fit=crop',
+        originalPrice: 8500,
+        discountedPrice: 6800,
+        discountPercentage: 20,
+        type: 'bundle_deal',
+        status: 'active',
+        featured: true,
+        isB2B: true,
+        endDate: '2024-12-25'
+      }];
     }
   }
 
