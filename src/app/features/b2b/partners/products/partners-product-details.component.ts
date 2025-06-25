@@ -70,13 +70,13 @@ import * as B2BCartActions from '../../cart/store/b2b-cart.actions';
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
           </div>
-          <h3 class="text-lg font-medium text-gray-900 mb-2 font-['Poppins']">Product Not Found</h3>
+          <h3 class="text-lg font-medium text-gray-900 mb-2 font-['Poppins']">{{ 'b2b.products.productNotFound' | translate }}</h3>
           <p class="text-gray-600 mb-6 font-['DM_Sans']">{{ error }}</p>
           <button 
             [routerLink]="['/partners/products']"
             class="px-6 py-3 bg-solar-600 text-white font-semibold rounded-lg hover:bg-solar-700 transition-colors font-['DM_Sans']"
           >
-            Back to Products
+            {{ 'b2b.products.backToProducts' | translate }}
           </button>
         </div>
       </div>
@@ -87,19 +87,19 @@ import * as B2BCartActions from '../../cart/store/b2b-cart.actions';
           <!-- Product Images -->
           <div class="lg:sticky lg:top-8">
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-              <div class="aspect-w-1 aspect-h-1 bg-gray-100 flex items-center justify-center">
+              <div class="aspect-w-1 aspect-h-1 bg-gray-50 flex items-center justify-center min-h-[400px]">
                 <img *ngIf="hasProductImage(product)" 
                      [src]="getProductImageUrl(product)" 
                      [alt]="product.name" 
                      class="w-full h-96 object-cover"
                      (error)="onImageError($event)">
                 <!-- Fallback Icon -->
-                <div *ngIf="!hasProductImage(product)" class="text-gray-400 text-center">
-                  <svg class="w-24 h-24 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                <div *ngIf="!hasProductImage(product)" class="text-gray-500 text-center py-12">
+                  <svg class="w-32 h-32 mx-auto mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="0.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                   </svg>
-                  <p class="text-lg font-medium">{{ product.category || 'Product' }}</p>
-                  <p class="text-sm">No image available</p>
+                  <p class="text-xl font-medium text-gray-600 mb-2">{{ product.category || ('b2b.products.product' | translate) }}</p>
+                  <p class="text-sm text-gray-500">{{ 'b2b.products.noImageAvailable' | translate }}</p>
                 </div>
               </div>
               <!-- Additional Images (if available) -->
@@ -130,9 +130,9 @@ import * as B2BCartActions from '../../cart/store/b2b-cart.actions';
                 <svg class="w-5 h-5 text-solar-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                 </svg>
-                <span class="text-sm font-medium text-solar-800">Viewing as: {{ company.companyName }}</span>
+                <span class="text-sm font-medium text-solar-800">{{ 'b2b.products.viewingAs' | translate }}: {{ company.companyName }}</span>
                 <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                  Approved Partner
+                  {{ 'b2b.products.approvedPartner' | translate }}
                 </span>
               </div>
             </div>
@@ -154,58 +154,58 @@ import * as B2BCartActions from '../../cart/store/b2b-cart.actions';
                 <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                 </svg>
-                In Stock
+                {{ 'b2b.products.inStock' | translate }}
               </span>
               <span *ngIf="!product.in_stock" 
                     class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
                 <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
                 </svg>
-                Out of Stock
+                {{ 'b2b.products.outOfStock' | translate }}
               </span>
               <span *ngIf="product.partner_only" 
                     class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-solar-100 text-solar-800">
-                Partner Exclusive
+                {{ 'b2b.products.partnerExclusive' | translate }}
               </span>
             </div>
 
             <!-- Pricing -->
             <div class="bg-white rounded-lg border border-gray-200 p-6">
-              <h3 class="text-lg font-semibold text-gray-900 mb-4">Pricing</h3>
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ 'b2b.products.pricing' | translate }}</h3>
               
               <div *ngIf="!isAuthenticated" class="text-center py-8 bg-gray-50 rounded-lg">
                 <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                 </svg>
-                <p class="text-gray-500 font-medium">Sign in to view special partner pricing</p>
+                <p class="text-gray-500 font-medium">{{ 'b2b.products.signInToViewPricing' | translate }}</p>
                 <button (click)="navigateToLogin()" 
                         class="mt-4 bg-solar-600 text-white px-6 py-2 rounded-lg hover:bg-solar-700 transition-colors">
-                  Sign In
+                  {{ 'b2b.products.signIn' | translate }}
                 </button>
               </div>
 
               <div *ngIf="isAuthenticated" class="space-y-4">
                 <!-- Company Specific Price -->
                 <div *ngIf="product.company_price && isCompanyContact" class="flex items-center justify-between">
-                  <span class="text-lg font-medium text-green-700">Your Company Price:</span>
+                  <span class="text-lg font-medium text-green-700">{{ 'b2b.products.yourCompanyPrice' | translate }}:</span>
                   <span class="text-2xl font-bold text-green-600">€{{ product.company_price | number:'1.2-2' }}</span>
                 </div>
 
                 <!-- Partner Price -->
                 <div *ngIf="product.partner_price && (!product.company_price || !isCompanyContact)" class="flex items-center justify-between">
-                  <span class="text-lg font-medium text-solar-700">Partner Price:</span>
+                  <span class="text-lg font-medium text-solar-700">{{ 'b2b.products.partnerPrice' | translate }}:</span>
                   <span class="text-2xl font-bold text-solar-600">€{{ product.partner_price | number:'1.2-2' }}</span>
                 </div>
 
                 <!-- Retail Price -->
                 <div class="flex items-center justify-between text-gray-500">
-                  <span>Retail Price:</span>
+                  <span>{{ 'b2b.products.retailPrice' | translate }}:</span>
                   <span class="line-through">€{{ product.price | number:'1.2-2' }}</span>
                 </div>
 
                 <!-- Savings -->
                 <div *ngIf="product.savings" class="flex items-center justify-between">
-                  <span class="font-medium text-green-700">Your Savings:</span>
+                  <span class="font-medium text-green-700">{{ 'b2b.products.yourSavings' | translate }}:</span>
                   <span class="font-bold text-green-600">€{{ product.savings | number:'1.2-2' }}</span>
                 </div>
 
@@ -214,24 +214,24 @@ import * as B2BCartActions from '../../cart/store/b2b-cart.actions';
                   <svg class="w-8 h-8 text-yellow-600 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                   </svg>
-                  <p class="text-yellow-800 font-medium">Custom pricing required</p>
-                  <p class="text-yellow-600 text-sm">Contact us for a personalized quote</p>
+                  <p class="text-yellow-800 font-medium">{{ 'b2b.products.customPricingRequired' | translate }}</p>
+                  <p class="text-yellow-600 text-sm">{{ 'b2b.products.contactForQuote' | translate }}</p>
                 </div>
               </div>
             </div>
 
             <!-- Order Information -->
             <div class="bg-white rounded-lg border border-gray-200 p-6">
-              <h3 class="text-lg font-semibold text-gray-900 mb-4">Order Information</h3>
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ 'b2b.products.orderInformation' | translate }}</h3>
               <div class="space-y-3">
                 <div class="flex items-center justify-between">
-                  <span class="text-gray-600">Minimum Order:</span>
-                  <span class="font-medium">{{ product.minimum_order || 1 }} pieces</span>
+                  <span class="text-gray-600">{{ 'b2b.products.minimumOrder' | translate }}:</span>
+                  <span class="font-medium">{{ product.minimum_order || 1 }} {{ 'b2b.products.pieces' | translate }}</span>
                 </div>
                 <div class="flex items-center justify-between">
-                  <span class="text-gray-600">Availability:</span>
+                  <span class="text-gray-600">{{ 'b2b.products.availability' | translate }}:</span>
                   <span class="font-medium" [class]="product.in_stock ? 'text-green-600' : 'text-red-600'">
-                    {{ product.in_stock ? 'In Stock' : 'Out of Stock' }}
+                    {{ product.in_stock ? ('b2b.products.inStock' | translate) : ('b2b.products.outOfStock' | translate) }}
                   </span>
                 </div>
               </div>
@@ -240,38 +240,38 @@ import * as B2BCartActions from '../../cart/store/b2b-cart.actions';
             <!-- Actions -->
             <div class="space-y-3">
               <!-- Add to Cart Button -->
-                              <button *ngIf="isCompanyContact && product.in_stock && hasB2BPrice(product)" 
+              <button *ngIf="isCompanyContact && product.in_stock && hasB2BPrice(product)" 
                       (click)="addToCart(product)"
                       class="w-full bg-solar-600 text-white py-3 px-6 rounded-lg text-lg font-medium hover:bg-solar-700 transition-colors">
-                Add to Cart
+                {{ 'b2b.products.addToCart' | translate }}
               </button>
               
               <!-- Request Quote Button -->
-                              <button *ngIf="isCompanyContact && (!hasB2BPrice(product) || !product.in_stock)" 
+              <button *ngIf="isCompanyContact && (!hasB2BPrice(product) || !product.in_stock)" 
                       (click)="requestQuote(product)"
                       class="w-full bg-yellow-600 text-white py-3 px-6 rounded-lg text-lg font-medium hover:bg-yellow-700 transition-colors">
-                Request Quote
+                {{ 'b2b.products.requestQuote' | translate }}
               </button>
               
               <!-- Sign In / Apply Buttons -->
               <div *ngIf="!isAuthenticated" class="space-y-2">
                 <button (click)="navigateToLogin()"
                         class="w-full bg-solar-600 text-white py-3 px-6 rounded-lg text-lg font-medium hover:bg-solar-700 transition-colors">
-                  Sign In to Order
+                  {{ 'b2b.products.signInToOrder' | translate }}
                 </button>
               </div>
               
               <div *ngIf="isAuthenticated && !isCompanyContact" class="space-y-2">
                 <button (click)="navigateToRegister()"
                         class="w-full bg-yellow-600 text-white py-3 px-6 rounded-lg text-lg font-medium hover:bg-yellow-700 transition-colors">
-                  Apply for Partnership
+                  {{ 'b2b.products.applyForPartnership' | translate }}
                 </button>
               </div>
             </div>
 
             <!-- Specifications -->
             <div *ngIf="product.specifications" class="bg-white rounded-lg border border-gray-200 p-6">
-              <h3 class="text-lg font-semibold text-gray-900 mb-4">Specifications</h3>
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ 'b2b.products.specifications' | translate }}</h3>
               <dl class="space-y-3">
                 <div *ngFor="let spec of getSpecifications(product.specifications)" class="flex justify-between">
                   <dt class="text-gray-600">{{ spec.key }}:</dt>

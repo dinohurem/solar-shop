@@ -35,6 +35,8 @@ import { companyPricingReducer } from '../features/admin/company-pricing/store/c
 import { AdminCompanyPricingState } from '../features/admin/store/admin.state';
 import { productsReducer as b2bProductsReducer } from '../features/b2b/shared/store/products.reducer';
 import { ProductsState as B2BProductsState } from '../features/b2b/shared/store/products.reducer';
+import { b2bCartReducer } from '../features/b2b/cart/store/b2b-cart.reducer';
+import { B2BCartState } from '../features/b2b/cart/models/b2b-cart.model';
 
 export interface State {
   auth: AuthState;
@@ -53,6 +55,7 @@ export interface State {
   adminOrders: OrdersState;
   companyPricing: AdminCompanyPricingState;
   b2bProducts: B2BProductsState;
+  b2bCart: B2BCartState;
 }
 
 export const reducers: ActionReducerMap<State> = {
@@ -72,6 +75,7 @@ export const reducers: ActionReducerMap<State> = {
   adminOrders: ordersReducer,
   companyPricing: companyPricingReducer,
   b2bProducts: b2bProductsReducer,
+  b2bCart: b2bCartReducer,
 };
 
 export const metaReducers: MetaReducer<State>[] = isDevMode() ? [] : [];

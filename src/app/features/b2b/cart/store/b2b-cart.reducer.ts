@@ -11,7 +11,8 @@ export const initialB2BCartState: B2BCartState = {
     error: null,
     companyId: null,
     companyName: null,
-    lastUpdated: null
+    lastUpdated: null,
+    sidebarOpen: false
 };
 
 export const b2bCartReducer = createReducer(
@@ -208,6 +209,22 @@ export const b2bCartReducer = createReducer(
     on(B2BCartActions.clearB2BCartError, (state) => ({
         ...state,
         error: null
+    })),
+
+    // Sidebar visibility actions
+    on(B2BCartActions.toggleB2BCartSidebar, (state) => ({
+        ...state,
+        sidebarOpen: !state.sidebarOpen
+    })),
+
+    on(B2BCartActions.openB2BCartSidebar, (state) => ({
+        ...state,
+        sidebarOpen: true
+    })),
+
+    on(B2BCartActions.closeB2BCartSidebar, (state) => ({
+        ...state,
+        sidebarOpen: false
     }))
 );
 

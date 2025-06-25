@@ -126,8 +126,9 @@ export class B2BCartService {
      */
     syncCart(companyId: string): Observable<B2BCartItem[]> {
         return this.loadCart(companyId).pipe(
+            map(({ items }) => items),
             delay(300)
-        ) as any;
+        );
     }
 
     /**

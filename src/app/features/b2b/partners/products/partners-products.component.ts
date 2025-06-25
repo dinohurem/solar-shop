@@ -251,7 +251,7 @@ import { ProductWithPricing, Category } from '../../shared/store/products.action
                 <div *ngFor="let product of filteredProducts" 
                      [ngClass]="{
                        'bg-white rounded-lg shadow-sm border-2 border-orange-200 hover:border-orange-300 overflow-hidden hover:shadow-md transition-all flex flex-col h-full': gridView === 'grid',
-                       'bg-white rounded-lg shadow-sm border-2 border-orange-200 hover:border-orange-300 p-4 flex items-center space-x-4 hover:shadow-md transition-all': gridView === 'list'
+                       'bg-white rounded-lg shadow-sm border border-orange-200 hover:border-orange-300 p-4 flex items-center space-x-4 hover:shadow-md transition-all': gridView === 'list'
                      }"
                      (click)="viewDetails(product)"
                      class="cursor-pointer">
@@ -259,7 +259,7 @@ import { ProductWithPricing, Category } from '../../shared/store/products.action
                   <!-- Grid View Layout -->
                   <ng-container *ngIf="gridView === 'grid'">
                     <!-- Product Image -->
-                    <div class="w-full h-48 bg-gray-100 relative overflow-hidden flex items-center justify-center">
+                    <div class="w-full h-48 bg-gray-50 relative overflow-hidden flex items-center justify-center border-b border-gray-100">
                       <img *ngIf="hasProductImage(product)" 
                            [src]="getProductImageUrl(product)" 
                            [alt]="product.name" 
@@ -267,11 +267,12 @@ import { ProductWithPricing, Category } from '../../shared/store/products.action
                            (error)="onImageError($event)"
                            loading="lazy">
                       <!-- Fallback Icon -->
-                      <div *ngIf="!hasProductImage(product)" class="text-gray-400">
-                        <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                      <div *ngIf="!hasProductImage(product)" class="text-gray-500 text-center">
+                        <svg class="w-20 h-20 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                         </svg>
-                        <p class="text-xs mt-2 text-center font-medium">{{ product.category || 'Product' }}</p>
+                        <p class="text-sm font-medium text-gray-600">{{ product.category || 'Product' }}</p>
+                        <p class="text-xs text-gray-500 mt-1">{{ 'b2b.products.noImageAvailable' | translate }}</p>
                       </div>
                     </div>
 
@@ -401,7 +402,7 @@ import { ProductWithPricing, Category } from '../../shared/store/products.action
                   <!-- List View Layout -->
                   <ng-container *ngIf="gridView === 'list'">
                     <!-- Product Image -->
-                    <div class="w-24 h-24 bg-gray-100 rounded-lg flex-shrink-0 flex items-center justify-center">
+                    <div class="w-24 h-24 bg-gray-50 rounded-lg flex-shrink-0 flex items-center justify-center border border-gray-200">
                       <img *ngIf="hasProductImage(product)" 
                            [src]="getProductImageUrl(product)" 
                            [alt]="product.name" 
@@ -409,10 +410,11 @@ import { ProductWithPricing, Category } from '../../shared/store/products.action
                            (error)="onImageError($event)"
                            loading="lazy">
                       <!-- Fallback Icon -->
-                      <div *ngIf="!hasProductImage(product)" class="text-gray-400">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                      <div *ngIf="!hasProductImage(product)" class="text-gray-500 text-center">
+                        <svg class="w-10 h-10 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                         </svg>
+                        <p class="text-xs text-gray-600 mt-1">{{ 'b2b.products.noImage' | translate }}</p>
                       </div>
                     </div>
                     

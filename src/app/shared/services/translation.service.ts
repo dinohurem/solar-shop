@@ -331,9 +331,24 @@ export class TranslationService {
                     listView: 'Prikaz liste',
                     noProductsFound: 'Nema pronađenih proizvoda',
                     tryAdjustingFilters: 'Pokušajte prilagoditi filtere ili pojmove pretrage.',
+                    noImageAvailable: 'Nema dostupne slike',
+                    noImage: 'Nema slike',
+                    product: 'Proizvod',
+                    productNotFound: 'Proizvod nije pronađen',
+                    backToProducts: 'Povratak na proizvode',
+                    viewingAs: 'Prikazuje se kao',
+                    approvedPartner: 'Odobreni partner',
+                    partnerExclusive: 'Ekskluzivno za partnere',
+                    pricing: 'Cijene',
+                    signInToViewPricing: 'Prijavite se za pregled posebnih partnerskih cijena',
+                    yourCompanyPrice: 'Vaša tvrtka cijena',
+                    yourSavings: 'Vaše uštede',
+                    customPricingRequired: 'Potrebna je prilagođena cijena',
+                    contactForQuote: 'Kontaktirajte nas za personaliziranu ponudu',
+                    orderInformation: 'Informacije o narudžbi',
+                    specifications: 'Specifikacije',
                     // Status labels
                     pendingApproval: 'Čeka odobrenje',
-                    approvedPartner: 'Odobreni partner',
                     rejected: 'Odbačeno'
                 },
                 offers: {
@@ -427,6 +442,13 @@ export class TranslationService {
                     viewCustomPrices: 'Pregledajte vaše prilagođene cijene',
                     noPricingInfo: 'Nema informacija o cijenama',
                     contactSalesTeam: 'Kontaktirajte naš prodajni tim za prilagođene cijene'
+                },
+                cart: {
+                    orderingFor: 'Naručujete za',
+                    sku: 'SKU',
+                    save: 'Uštedite',
+                    totalSavings: 'Ukupne uštede',
+                    clearCart: 'Obriši korpu'
                 }
             },
             // Admin Company Management
@@ -2398,9 +2420,24 @@ export class TranslationService {
                     listView: 'List View',
                     noProductsFound: 'No products found',
                     tryAdjustingFilters: 'Try adjusting your filters or search terms.',
+                    noImageAvailable: 'No image available',
+                    noImage: 'No image',
+                    product: 'Product',
+                    productNotFound: 'Product not found',
+                    backToProducts: 'Back to Products',
+                    viewingAs: 'Viewing as',
+                    approvedPartner: 'Approved Partner',
+                    partnerExclusive: 'Partner Exclusive',
+                    pricing: 'Pricing',
+                    signInToViewPricing: 'Sign in to view special partner pricing',
+                    yourCompanyPrice: 'Your Company Price',
+                    yourSavings: 'Your Savings',
+                    customPricingRequired: 'Custom pricing required',
+                    contactForQuote: 'Contact us for a personalized quote',
+                    orderInformation: 'Order Information',
+                    specifications: 'Specifications',
                     // Status labels
                     pendingApproval: 'Pending Approval',
-                    approvedPartner: 'Approved Partner',
                     rejected: 'Rejected'
                 },
                 offers: {
@@ -2494,6 +2531,13 @@ export class TranslationService {
                     viewCustomPrices: 'View your custom pricing',
                     noPricingInfo: 'No pricing information',
                     contactSalesTeam: 'Contact our sales team for custom pricing'
+                },
+                cart: {
+                    orderingFor: 'Ordering for',
+                    sku: 'SKU',
+                    save: 'Save',
+                    totalSavings: 'Total Savings',
+                    clearCart: 'Clear Cart'
                 }
             },
             // Admin Company Management

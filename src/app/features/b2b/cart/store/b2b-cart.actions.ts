@@ -119,4 +119,17 @@ export const clearB2BShippingInfo = createAction(
 // Error handling
 export const clearB2BCartError = createAction(
     '[B2B Cart] Clear Error'
+);
+
+// Sidebar visibility actions
+export const toggleB2BCartSidebar = createAction(
+    '[B2B Cart] Toggle Sidebar'
+);
+
+export const openB2BCartSidebar = createAction(
+    '[B2B Cart] Open Sidebar'
+);
+
+export const closeB2BCartSidebar = createAction(
+    '[B2B Cart] Close Sidebar'
 ); 

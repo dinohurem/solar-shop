@@ -1,9 +1,14 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { TranslationService } from '../../../../shared/services/translation.service';
 import { SupabaseService } from '../../../../services/supabase.service';
+import { selectCurrentUser } from '../../../../core/auth/store/auth.selectors';
+import { selectB2BCartTotalItems } from '../../cart/store/b2b-cart.selectors';
+import * as B2BCartActions from '../../cart/store/b2b-cart.actions';
 import { Subject, takeUntil, switchMap, from, catchError, of } from 'rxjs';
 
 @Component({
@@ -75,6 +80,20 @@ import { Subject, takeUntil, switchMap, from, catchError, of } from 'rxjs';
 
             <!-- User Dropdown (when authenticated and is company contact) -->
             <div *ngIf="isAuthenticated && isCompanyContact" class="flex items-center space-x-4">
+              <!-- Cart Button -->
+              <button (click)="toggleCart()" 
+                      class="relative p-2 text-gray-600 hover:text-solar-600 transition-all duration-300 hover:scale-110 hover:bg-solar-50 rounded-full"
+                      [title]="'cart.cart' | translate">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.1 5H19M7 13v6a2 2 0 002 2h6a2 2 0 002-2v-6"/>
+                </svg>
+                <!-- Cart Items Count Badge -->
+                <span *ngIf="(cartItemsCount$ | async) && (cartItemsCount$ | async)! > 0" 
+                      class="absolute -top-1 -right-1 bg-solar-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium min-w-[1.25rem]">
+                  {{ cartItemsCount$ | async }}
+                </span>
+              </button>
+              
               <div class="relative">
                 <button (click)="toggleUserMenu()" 
                         class="flex items-center space-x-2 text-gray-700 hover:text-solar-600 px-3 py-2 text-sm font-medium">
@@ -203,6 +222,7 @@ export class B2bNavbarComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private translationService = inject(TranslationService);
   private supabaseService = inject(SupabaseService);
+  private store = inject(Store);
   private destroy$ = new Subject<void>();
 
   showMobileMenu = false;
@@ -210,6 +230,15 @@ export class B2bNavbarComponent implements OnInit, OnDestroy {
   isAuthenticated = false;
   currentUser: any = null;
   isCompanyContact = false; // Flag to check if user is a company contact person
+  company: any = null;
+
+  currentUser$: Observable<any>;
+  cartItemsCount$: Observable<number>;
+
+  constructor() {
+    this.currentUser$ = this.store.select(selectCurrentUser);
+    this.cartItemsCount$ = this.store.select(selectB2BCartTotalItems);
+  }
 
   ngOnInit(): void {
     // Initialize authentication state and user data
@@ -237,6 +266,12 @@ export class B2bNavbarComponent implements OnInit, OnDestroy {
       )
       .subscribe(({ data }) => {
         this.isCompanyContact = !!data && data.status === 'approved';
+        this.company = data;
+
+        // Load cart items if user is company contact
+        if (this.isCompanyContact && this.company) {
+          this.store.dispatch(B2BCartActions.loadB2BCart({ companyId: this.company.id }));
+        }
       });
   }
 
@@ -263,6 +298,10 @@ export class B2bNavbarComponent implements OnInit, OnDestroy {
       this.currentUser = null;
       this.router.navigate(['/partners']);
     });
+  }
+
+  toggleCart(): void {
+    this.store.dispatch(B2BCartActions.toggleB2BCartSidebar());
   }
 
   // Close dropdowns when clicking outside

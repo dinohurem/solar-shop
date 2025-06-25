@@ -1,175 +1,197 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, take } from 'rxjs/operators';
 import { B2BCartItem, B2BCartSummary } from '../../models/b2b-cart.model';
 import * as B2BCartSelectors from '../../store/b2b-cart.selectors';
 import * as B2BCartActions from '../../store/b2b-cart.actions';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 
 @Component({
-    selector: 'app-b2b-cart-sidebar',
-    standalone: true,
-    imports: [CommonModule, RouterModule, TranslatePipe],
-    template: `
-    <div class="fixed inset-0 z-50 overflow-hidden" [class.hidden]="!isOpen">
-      <!-- Backdrop -->
-      <div class="absolute inset-0 bg-black bg-opacity-50" (click)="closeSidebar()"></div>
+  selector: 'app-b2b-cart-sidebar',
+  standalone: true,
+  imports: [CommonModule, RouterModule, TranslatePipe],
+  template: `
+    <!-- Cart Overlay -->
+    <div 
+      *ngIf="sidebarOpen$ | async" 
+      class="fixed inset-0 z-50 overflow-hidden cart-overlay"
+      (click)="onOverlayClick($event)"
+    >
+      <!-- Background overlay -->
+      <div 
+        class="absolute inset-0 bg-black bg-opacity-50 transition-opacity duration-300"
+        (click)="closeSidebar()"
+      ></div>
       
-      <!-- Sidebar -->
-      <div class="absolute right-0 top-0 h-full w-96 bg-white shadow-xl transform transition-transform duration-300"
-           [class.translate-x-full]="!isOpen">
-        
-        <!-- Header -->
-        <div class="flex items-center justify-between p-4 border-b">
-          <h2 class="text-lg font-semibold text-gray-900">
-            {{ 'b2bCart.title' | translate }}
-          </h2>
-          <button (click)="closeSidebar()" 
-                  class="p-2 text-gray-400 hover:text-gray-600 transition-colors">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <!-- Cart sidebar -->
+      <div 
+        class="absolute right-0 top-0 h-screen w-full max-w-md bg-white shadow-xl transform transition-all duration-300 ease-out flex flex-col cart-sidebar animate-slide-in-right"
+        (click)="$event.stopPropagation()"
+      >
+        <!-- Cart Header -->
+        <div class="flex items-center justify-between p-4 border-b border-gray-200">
+          <h2 class="text-lg font-semibold text-gray-900">{{ 'cart.yourCart' | translate }}</h2>
+          <button 
+            (click)="closeSidebar()"
+            class="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+            aria-label="Close cart"
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
             </svg>
           </button>
         </div>
 
-        <!-- Content -->
-        <div class="flex-1 overflow-y-auto">
-          
+        <!-- Cart Content -->
+        <div class="flex flex-col flex-1 min-h-0">
           <!-- Loading State -->
-          <div *ngIf="loading$ | async" class="flex items-center justify-center p-8">
-            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <div *ngIf="loading$ | async" class="flex-1 flex items-center justify-center p-8">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-solar-600"></div>
           </div>
 
-          <!-- Empty Cart -->
-          <div *ngIf="(isEmpty$ | async) && !(loading$ | async)" class="p-6 text-center">
-            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 48 48">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                    d="M4 6h16l2 12H8l-2-8H4zm16 0l2 8h8l2-8m-8 8v8m0 0l-4-4m4 4l4-4"/>
-            </svg>
-            <h3 class="mt-4 text-lg font-medium text-gray-900">
-              {{ 'b2bCart.emptyTitle' | translate }}
-            </h3>
-            <p class="mt-2 text-sm text-gray-500">
-              {{ 'b2bCart.emptyMessage' | translate }}
-            </p>
-            <button (click)="closeSidebar()" 
-                    class="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
-              {{ 'b2bCart.continueShopping' | translate }}
+          <!-- Empty Cart State -->
+          <div 
+            *ngIf="(isEmpty$ | async) && !(loading$ | async)" 
+            class="flex-1 flex flex-col items-center justify-center p-8 text-center"
+          >
+            <div class="w-24 h-24 mb-6 text-gray-300">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 11-4 0v-6m4 0V9a2 2 0 10-4 0v4.01"/>
+              </svg>
+            </div>
+            <h3 class="text-xl font-medium text-gray-900 mb-2">{{ 'cart.empty' | translate }}</h3>
+            <p class="text-gray-500 mb-6">{{ 'cart.emptyText' | translate }}</p>
+            <button 
+              (click)="closeSidebar()"
+              class="px-6 py-3 bg-solar-600 text-white rounded-lg hover:bg-solar-700 transition-colors"
+            >
+              {{ 'cart.continueShopping' | translate }}
             </button>
           </div>
 
-          <!-- Cart Items -->
-          <div *ngIf="!(isEmpty$ | async) && !(loading$ | async)">
-            
+          <!-- Populated Cart State -->
+          <div *ngIf="!(isEmpty$ | async) && !(loading$ | async)" class="flex-1 flex flex-col min-h-0">
             <!-- Company Info -->
-            <div *ngIf="companyInfo$ | async as company" class="p-4 bg-blue-50 border-b">
-              <div class="text-sm text-blue-800">
+            <div *ngIf="companyInfo$ | async as company" class="p-4 bg-solar-50 border-b border-gray-200">
+              <div class="text-sm text-solar-800">
                 <span class="font-medium">{{ 'b2bCart.orderingFor' | translate }}:</span> 
                 {{ company.companyName }}
               </div>
             </div>
 
-            <!-- Items List -->
-            <div class="divide-y divide-gray-200">
-              <div *ngFor="let item of cartItems$ | async; trackBy: trackByProductId" 
-                   class="p-4 hover:bg-gray-50 transition-colors">
-                
-                <div class="flex space-x-3">
+            <!-- Cart Items -->
+            <div class="flex-1 overflow-y-auto p-4 min-h-0">
+              <div class="space-y-3">
+                <div 
+                  *ngFor="let item of cartItems$ | async; trackBy: trackByProductId"
+                  class="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg cart-item"
+                >
                   <!-- Product Image -->
                   <div class="flex-shrink-0">
-                    <img [src]="item.imageUrl" [alt]="item.name" 
-                         class="h-16 w-16 rounded-md object-cover border">
+                    <img 
+                      [src]="getImageSrc(item.imageUrl)" 
+                      [alt]="item.name"
+                      class="w-14 h-14 object-cover rounded-lg bg-gray-100"
+                      (error)="onImageError($event, item.productId)"
+                      loading="lazy"
+                    >
                   </div>
 
-                  <!-- Product Info -->
+                  <!-- Product Details -->
                   <div class="flex-1 min-w-0">
                     <h4 class="text-sm font-medium text-gray-900 truncate">{{ item.name }}</h4>
-                    <p class="text-xs text-gray-500">{{ 'b2bCart.sku' | translate }}: {{ item.sku }}</p>
+                    <p class="text-xs text-gray-500 mt-1">{{ 'b2bCart.sku' | translate }}: {{ item.sku }}</p>
                     
-                    <!-- Pricing -->
-                    <div class="mt-1 space-y-1">
-                      <div class="flex items-center space-x-2">
-                        <span class="text-sm font-medium text-green-600">€{{ item.unitPrice }}</span>
-                        <span *ngIf="item.retailPrice > item.unitPrice" 
-                              class="text-xs text-gray-400 line-through">€{{ item.retailPrice }}</span>
-                        <span *ngIf="item.savings > 0" 
-                              class="text-xs text-green-600 font-medium">
-                          {{ 'b2bCart.save' | translate }} €{{ item.savings / item.quantity }}
-                        </span>
-                      </div>
+                    <!-- Price -->
+                    <div class="flex items-center space-x-2 mt-2">
+                      <span class="text-sm font-semibold text-gray-900">
+                        €{{ item.unitPrice }}
+                      </span>
+                      <span 
+                        *ngIf="item.retailPrice && item.retailPrice > item.unitPrice"
+                        class="text-xs text-gray-500 line-through"
+                      >
+                        €{{ item.retailPrice }}
+                      </span>
+                      <span *ngIf="item.savings && item.savings > 0" 
+                            class="text-xs text-green-600 font-medium">
+                        {{ 'b2bCart.save' | translate }} €{{ (item.savings / item.quantity).toFixed(2) }}
+                      </span>
                     </div>
 
                     <!-- Quantity Controls -->
-                    <div class="mt-2 flex items-center space-x-2">
-                      <button (click)="decreaseQuantity(item.productId)" 
-                              [disabled]="item.quantity <= 1"
-                              class="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-sm 
-                                     hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                        -
-                      </button>
-                      <span class="text-sm font-medium min-w-[2rem] text-center">{{ item.quantity }}</span>
-                      <button (click)="increaseQuantity(item.productId)" 
-                              class="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-sm 
-                                     hover:bg-gray-300 transition-colors">
-                        +
-                      </button>
-                      <span class="text-xs text-gray-500 ml-2">
-                        = €{{ item.totalPrice }}
-                      </span>
-                    </div>
-                  </div>
+                    <div class="flex items-center justify-between mt-2">
+                      <div class="flex items-center space-x-1">
+                        <button 
+                          (click)="decreaseQuantity(item.productId)"
+                          [disabled]="item.quantity <= 1"
+                          class="w-7 h-7 flex items-center justify-center border border-gray-300 rounded-full hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                          </svg>
+                        </button>
+                        
+                        <span class="w-7 text-center text-sm font-medium">{{ item.quantity }}</span>
+                        
+                        <button 
+                          (click)="increaseQuantity(item.productId)"
+                          class="w-7 h-7 flex items-center justify-center border border-gray-300 rounded-full hover:bg-gray-50"
+                        >
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                          </svg>
+                        </button>
+                      </div>
 
-                  <!-- Remove Button -->
-                  <div class="flex-shrink-0">
-                    <button (click)="removeItem(item.productId)" 
-                            class="p-1 text-gray-400 hover:text-red-500 transition-colors">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                      </svg>
-                    </button>
+                      <!-- Remove Button -->
+                      <button 
+                        (click)="removeItem(item.productId)"
+                        class="text-red-500 hover:text-red-700 text-sm"
+                      >
+                        {{ 'cart.remove' | translate }}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- Summary -->
-            <div *ngIf="cartSummary$ | async as summary" class="p-4 border-t bg-gray-50">
-              <div class="space-y-2">
-                <div class="flex justify-between text-sm">
-                  <span>{{ 'b2bCart.subtotal' | translate }}</span>
-                  <span>€{{ summary.subtotal }}</span>
+            <!-- Cart Summary -->
+            <div class="border-t border-gray-200 p-4 flex-shrink-0">
+              <div class="space-y-2 text-sm">
+                <div class="flex justify-between">
+                  <span class="text-gray-600">{{ 'cart.subtotal' | translate }}</span>
+                  <span>€{{ (cartSummary$ | async)?.subtotal }}</span>
                 </div>
-                <div *ngIf="summary.totalSavings > 0" class="flex justify-between text-sm text-green-600">
+                <div 
+                  *ngIf="(cartSummary$ | async)?.totalSavings && (cartSummary$ | async)!.totalSavings > 0"
+                  class="flex justify-between text-green-600"
+                >
                   <span>{{ 'b2bCart.totalSavings' | translate }}</span>
-                  <span>-€{{ summary.totalSavings }}</span>
+                  <span>-€{{ (cartSummary$ | async)?.totalSavings }}</span>
                 </div>
-                <div class="flex justify-between text-sm text-gray-500">
-                  <span>{{ 'b2bCart.estimatedTax' | translate }}</span>
-                  <span>€{{ summary.estimatedTax }}</span>
-                </div>
-                <div class="flex justify-between text-sm text-gray-500">
-                  <span>{{ 'b2bCart.shipping' | translate }}</span>
-                  <span>{{ summary.estimatedShipping === 0 ? ('b2bCart.freeShipping' | translate) : '€' + summary.estimatedShipping }}</span>
-                </div>
-                <div class="border-t pt-2 flex justify-between font-medium">
-                  <span>{{ 'b2bCart.total' | translate }}</span>
-                  <span>€{{ summary.total }}</span>
+                <div class="flex justify-between font-semibold text-lg border-t pt-2">
+                  <span>{{ 'cart.total' | translate }}</span>
+                  <span>€{{ (cartSummary$ | async)?.total }}</span>
                 </div>
               </div>
 
-              <!-- Action Buttons -->
-              <div class="mt-4 space-y-2">
-                <button [routerLink]="['/partners/checkout']" (click)="closeSidebar()"
-                        class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 
-                               transition-colors font-medium">
-                  {{ 'b2bCart.proceedToCheckout' | translate }}
+              <!-- Checkout Button -->
+              <div class="mt-6">
+                <button 
+                  (click)="proceedToCheckout()"
+                  class="w-full px-6 py-4 bg-solar-600 text-white rounded-lg hover:bg-solar-700 transition-colors font-semibold text-lg font-['DM_Sans']"
+                >
+                  {{ 'cart.proceedToCheckout' | translate }}
                 </button>
-                <button (click)="clearCart()" 
-                        class="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 
-                               transition-colors text-sm">
+                <button 
+                  (click)="clearCart()" 
+                  class="w-full mt-2 bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300 transition-colors text-sm"
+                >
                   {{ 'b2bCart.clearCart' | translate }}
                 </button>
               </div>
@@ -179,97 +201,200 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
       </div>
     </div>
   `,
-    styles: [`
+  styles: [`
     :host {
-      position: relative;
-      z-index: 1000;
+      display: block;
+    }
+
+    .cart-overlay {
+      backdrop-filter: blur(4px);
+      pointer-events: auto;
+    }
+
+    .cart-sidebar {
+      will-change: transform;
+      backface-visibility: hidden;
+      pointer-events: auto;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideInRight {
+      from {
+        transform: translate3d(100%, 0, 0);
+      }
+      to {
+        transform: translate3d(0, 0, 0);
+      }
+    }
+
+    .animate-slide-in-right {
+      animation: slideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Cart item animations - staggered for better performance */
+    .cart-item {
+      opacity: 0;
+      transform: translateY(10px);
+      animation: slideInUp 0.5s ease-out forwards;
+    }
+
+    .cart-item:nth-child(1) { animation-delay: 0.05s; }
+    .cart-item:nth-child(2) { animation-delay: 0.1s; }
+    .cart-item:nth-child(3) { animation-delay: 0.15s; }
+    .cart-item:nth-child(4) { animation-delay: 0.2s; }
+    .cart-item:nth-child(n+5) { animation-delay: 0.25s; }
+
+    @keyframes slideInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Smooth transitions for quantity changes */
+    .cart-item {
+      transition: all 0.5s ease;
     }
   `]
 })
 export class B2BCartSidebarComponent implements OnInit, OnDestroy {
-    private destroy$ = new Subject<void>();
+  private destroy$ = new Subject<void>();
+  private imageErrors = new Set<string>();
 
-    isOpen = false;
+  // Observables
+  cartItems$: Observable<B2BCartItem[]>;
+  cartSummary$: Observable<B2BCartSummary>;
+  loading$: Observable<boolean>;
+  isEmpty$: Observable<boolean>;
+  companyInfo$: Observable<{ companyId: string | null; companyName: string | null }>;
+  sidebarOpen$: Observable<boolean>;
 
-    // Observables
-    cartItems$: Observable<B2BCartItem[]>;
-    cartSummary$: Observable<B2BCartSummary>;
-    loading$: Observable<boolean>;
-    isEmpty$: Observable<boolean>;
-    companyInfo$: Observable<{ companyId: string | null; companyName: string | null }>;
+  constructor(private store: Store, private router: Router) {
+    this.cartItems$ = this.store.select(B2BCartSelectors.selectB2BCartItems);
+    this.cartSummary$ = this.store.select(B2BCartSelectors.selectB2BCartSummary);
+    this.loading$ = this.store.select(B2BCartSelectors.selectB2BCartLoading);
+    this.isEmpty$ = this.store.select(B2BCartSelectors.selectB2BCartIsEmpty);
+    this.companyInfo$ = this.store.select(B2BCartSelectors.selectB2BCartCompanyInfo);
+    this.sidebarOpen$ = this.store.select(B2BCartSelectors.selectB2BCartSidebarOpen);
+  }
 
-    constructor(private store: Store) {
-        this.cartItems$ = this.store.select(B2BCartSelectors.selectB2BCartItems);
-        this.cartSummary$ = this.store.select(B2BCartSelectors.selectB2BCartSummary);
-        this.loading$ = this.store.select(B2BCartSelectors.selectB2BCartLoading);
-        this.isEmpty$ = this.store.select(B2BCartSelectors.selectB2BCartIsEmpty);
-        this.companyInfo$ = this.store.select(B2BCartSelectors.selectB2BCartCompanyInfo);
+  ngOnInit(): void {
+    // Component initialization
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  @HostListener('document:keydown.escape', ['$event'])
+  onEscapeKey(event: KeyboardEvent) {
+    this.closeSidebar();
+  }
+
+  closeSidebar(): void {
+    this.store.dispatch(B2BCartActions.closeB2BCartSidebar());
+  }
+
+  onOverlayClick(event: MouseEvent) {
+    // Close cart if clicking on the overlay (not the sidebar content)
+    const target = event.target as HTMLElement;
+    const currentTarget = event.currentTarget as HTMLElement;
+
+    // Check if the click target is the overlay itself or the background div
+    if (target === currentTarget || target.classList.contains('cart-overlay') || target.classList.contains('bg-black')) {
+      this.closeSidebar();
+    }
+  }
+
+  increaseQuantity(productId: string): void {
+    // Get current quantity and increase by 1
+    this.cartItems$.pipe(
+      takeUntil(this.destroy$),
+      // Take only the first emission to avoid multiple subscriptions
+      take(1)
+    ).subscribe((items: B2BCartItem[]) => {
+      const item = items.find((i: B2BCartItem) => i.productId === productId);
+      if (item) {
+        this.store.dispatch(B2BCartActions.updateB2BCartItem({
+          productId,
+          quantity: item.quantity + 1
+        }));
+      }
+    });
+  }
+
+  decreaseQuantity(productId: string): void {
+    // Get current quantity and decrease by 1 (minimum 1)
+    this.cartItems$.pipe(
+      takeUntil(this.destroy$),
+      // Take only the first emission to avoid multiple subscriptions
+      take(1)
+    ).subscribe((items: B2BCartItem[]) => {
+      const item = items.find((i: B2BCartItem) => i.productId === productId);
+      if (item && item.quantity > 1) {
+        this.store.dispatch(B2BCartActions.updateB2BCartItem({
+          productId,
+          quantity: item.quantity - 1
+        }));
+      }
+    });
+  }
+
+  removeItem(productId: string): void {
+    this.store.dispatch(B2BCartActions.removeFromB2BCart({ productId }));
+  }
+
+  clearCart(): void {
+    if (confirm('Are you sure you want to clear your cart?')) {
+      this.store.dispatch(B2BCartActions.clearB2BCart());
+    }
+  }
+
+  proceedToCheckout(): void {
+    this.closeSidebar();
+    this.router.navigate(['/partners/checkout']);
+  }
+
+  trackByProductId(index: number, item: B2BCartItem): string {
+    return item.productId;
+  }
+
+  getImageSrc(imagePath: string): string {
+    // Ensure we have a valid image path and handle potential errors
+    if (!imagePath) {
+      return 'assets/images/product-placeholder.svg';
     }
 
-    ngOnInit(): void {
-        // Auto-close sidebar when route changes (optional)
-        // this.router.events.pipe(
-        //   filter(event => event instanceof NavigationEnd),
-        //   takeUntil(this.destroy$)
-        // ).subscribe(() => {
-        //   this.closeSidebar();
-        // });
+    // If this image has already failed to load, return the fallback immediately
+    if (this.imageErrors.has(imagePath)) {
+      return 'assets/images/product-placeholder.svg';
     }
 
-    ngOnDestroy(): void {
-        this.destroy$.next();
-        this.destroy$.complete();
+    return imagePath;
+  }
+
+  onImageError(event: any, productId: string) {
+    // Prevent infinite error loops by tracking failed images
+    const originalSrc = event.target.src;
+
+    // Add to error set to prevent retrying
+    this.imageErrors.add(originalSrc);
+
+    // Set fallback image only if it's not already the fallback
+    if (!originalSrc.includes('product-placeholder.svg')) {
+      event.target.src = 'assets/images/product-placeholder.svg';
     }
 
-    openSidebar(): void {
-        this.isOpen = true;
-    }
-
-    closeSidebar(): void {
-        this.isOpen = false;
-    }
-
-    toggleSidebar(): void {
-        this.isOpen = !this.isOpen;
-    }
-
-    increaseQuantity(productId: string): void {
-        // Get current quantity and increase by 1
-        this.store.select(B2BCartSelectors.selectB2BCartItemQuantity(productId))
-            .pipe(takeUntil(this.destroy$))
-            .subscribe(currentQuantity => {
-                this.store.dispatch(B2BCartActions.updateB2BCartItem({
-                    productId,
-                    quantity: currentQuantity + 1
-                }));
-            });
-    }
-
-    decreaseQuantity(productId: string): void {
-        // Get current quantity and decrease by 1 (minimum 1)
-        this.store.select(B2BCartSelectors.selectB2BCartItemQuantity(productId))
-            .pipe(takeUntil(this.destroy$))
-            .subscribe(currentQuantity => {
-                if (currentQuantity > 1) {
-                    this.store.dispatch(B2BCartActions.updateB2BCartItem({
-                        productId,
-                        quantity: currentQuantity - 1
-                    }));
-                }
-            });
-    }
-
-    removeItem(productId: string): void {
-        this.store.dispatch(B2BCartActions.removeFromB2BCart({ productId }));
-    }
-
-    clearCart(): void {
-        if (confirm('Are you sure you want to clear your cart?')) {
-            this.store.dispatch(B2BCartActions.clearB2BCart());
-        }
-    }
-
-    trackByProductId(index: number, item: B2BCartItem): string {
-        return item.productId;
-    }
+    // Suppress console errors by preventing default behavior
+    event.preventDefault();
+  }
 } 

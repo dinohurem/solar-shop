@@ -142,4 +142,10 @@ export const selectB2BCartProductPricing = (productId: string) => createSelector
             hasPartnerPrice: !!item.partnerPrice
         };
     }
+);
+
+// Sidebar visibility selector
+export const selectB2BCartSidebarOpen = createSelector(
+    selectB2BCartState,
+    (state: B2BCartState) => state.sidebarOpen
 ); 

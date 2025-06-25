@@ -27,6 +27,7 @@ export interface B2BCartState {
     companyId: string | null; // The company this cart belongs to
     companyName: string | null;
     lastUpdated: Date | null;
+    sidebarOpen: boolean; // Sidebar visibility state
 }
 
 export interface B2BCartSummary {

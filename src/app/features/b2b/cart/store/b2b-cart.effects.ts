@@ -132,8 +132,8 @@ export class B2BCartEffects {
         this.actions$.pipe(
             ofType(B2BCartActions.syncB2BCart),
             switchMap(({ companyId }) =>
-                this.b2bCartService.syncCart(companyId).pipe(
-                    map(items => B2BCartActions.syncB2BCartSuccess({ items })),
+                this.b2bCartService.loadCart(companyId).pipe(
+                    map(({ items }) => B2BCartActions.syncB2BCartSuccess({ items })),
                     catchError(error =>
                         of(B2BCartActions.syncB2BCartFailure({
                             error: error.message || 'Failed to sync cart'
@@ -150,8 +150,7 @@ export class B2BCartEffects {
             ofType(B2BCartActions.addToB2BCartSuccess),
             tap(({ item }) => {
                 this.toastService.showSuccess(
-                    `${item.name} added to cart`,
-                    'Success'
+                    `${item.name} added to cart`
                 );
             })
         ),
@@ -163,8 +162,7 @@ export class B2BCartEffects {
             ofType(B2BCartActions.updateB2BCartItemSuccess),
             tap(() => {
                 this.toastService.showSuccess(
-                    'Cart updated successfully',
-                    'Success'
+                    'Cart updated successfully'
                 );
             })
         ),
@@ -176,8 +174,7 @@ export class B2BCartEffects {
             ofType(B2BCartActions.removeFromB2BCartSuccess),
             tap(() => {
                 this.toastService.showSuccess(
-                    'Item removed from cart',
-                    'Success'
+                    'Item removed from cart'
                 );
             })
         ),
@@ -189,8 +186,7 @@ export class B2BCartEffects {
             ofType(B2BCartActions.clearB2BCartSuccess),
             tap(() => {
                 this.toastService.showSuccess(
-                    'Cart cleared successfully',
-                    'Success'
+                    'Cart cleared successfully'
                 );
             })
         ),
@@ -209,7 +205,7 @@ export class B2BCartEffects {
                 B2BCartActions.syncB2BCartFailure
             ),
             tap(({ error }) => {
-                this.toastService.showError(error, 'Cart Error');
+                this.toastService.showError(error);
             })
         ),
         { dispatch: false }
