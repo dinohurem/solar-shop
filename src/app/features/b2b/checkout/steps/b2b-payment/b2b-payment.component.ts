@@ -327,8 +327,6 @@ export class B2bPaymentComponent implements OnInit, OnDestroy {
         customer_email: this.currentUser.email,
         customer_name: `${this.currentUser.firstName} ${this.currentUser.lastName}`,
         customer_phone: this.currentUser.phone || '',
-        company_id: this.company.id,
-        company_name: this.company.companyName,
         total_amount: totalAmount,
         subtotal: subtotal,
         tax_amount: taxAmount,
@@ -350,6 +348,7 @@ export class B2bPaymentComponent implements OnInit, OnDestroy {
           purchaseOrderNumber: shippingInfo.purchaseOrderNumber || ''
         },
         billing_address: {
+          companyId: this.company.id,
           companyName: this.company.companyName,
           address: this.company.companyAddress,
           email: this.company.companyEmail,
