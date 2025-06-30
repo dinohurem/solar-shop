@@ -247,7 +247,7 @@ export class TranslationService {
                     minimumOrder: 'Minimalna narudžba',
                     pieces: 'komada',
                     contactForPricing: 'Kontaktirajte za cijenu',
-                    addToCart: 'Dodaj u korpu',
+                    addToCart: 'Dodaj u košaricu',
                     requestQuote: 'Zatraži ponudu',
                     viewDetails: 'Pogledaj detalje',
                     signInToOrder: 'Prijavite se za narudžbu',
@@ -408,9 +408,9 @@ export class TranslationService {
             },
             // B2B Cart translations
             b2bCart: {
-                title: 'Korpa',
-                emptyTitle: 'Vaša korpa je prazna',
-                emptyMessage: 'Dodajte proizvode u korpu da biste nastavili s narudžbom',
+                title: 'Košarica',
+                emptyTitle: 'Vaša košarica je prazna',
+                emptyMessage: 'Dodajte proizvode u košaricu da biste nastavili s narudžbom',
                 continueShopping: 'Nastavi kupovinu',
                 orderingFor: 'Naručujete za',
                 sku: 'SKU',
@@ -422,7 +422,7 @@ export class TranslationService {
                 freeShipping: 'Besplatna dostava',
                 total: 'Ukupno',
                 proceedToCheckout: 'Idi na naplatu',
-                clearCart: 'Očisti korpu'
+                clearCart: 'Očisti košaricu'
             },
             // B2B Shipping translations
             b2bShipping: {
@@ -1515,7 +1515,7 @@ export class TranslationService {
                 offersAvailable: '{{count}} ponuda dostupno',
                 sale: 'RASPRODAJA',
                 youSave: 'Štedite {{amount}}',
-                addToCart: 'Dodaj u korpu',
+                addToCart: 'Dodaj u košaricu',
                 viewDetails: 'Pogledaj detalje',
                 noOffers: 'Nema dostupnih ponuda',
                 noOffersText: 'Trenutno nema aktivnih ponuda. Provjerite našu ponudu proizvoda.',
@@ -1628,8 +1628,8 @@ export class TranslationService {
             },
             // Cart
             cart: {
-                title: 'Vaša korpa',
-                empty: 'Vaša korpa je prazna!',
+                title: 'Vaša košarica',
+                empty: 'Vaša košarica je prazna!',
                 emptyText: 'Dodajte proizvode za početak kupovine.',
                 continueShopping: 'Nastavite kupovinu',
                 remove: 'Ukloni',
@@ -1642,13 +1642,13 @@ export class TranslationService {
                 discount: 'Popust',
                 total: 'Ukupno',
                 proceedToCheckout: 'Nastavi na naplatu',
-                itemAddedToCart: 'Proizvod dodan u korpu!',
+                itemAddedToCart: 'Proizvod dodan u košaricu!',
                 adding: 'Dodavanje...',
-                openCart: 'Otvori korpu',
+                openCart: 'Otvori košaricu',
                 freeShipping: 'Besplatna dostava',
                 freeShippingProgress: 'Dodajte još {{amount}} za besplatnu dostavu!',
                 freeShippingRemaining: 'Dodajte {{amount}} za besplatnu dostavu!',
-                yourCart: 'Vaša korpa',
+                yourCart: 'Vaša košarica',
                 checkout: 'Naplata'
             },
             // Checkout
@@ -1883,7 +1883,7 @@ export class TranslationService {
                 available: 'Dostupno',
                 limited: 'Ograničeno',
                 outOfStock: 'Nema na stanju',
-                addToCart: 'Dodaj u korpu',
+                addToCart: 'Dodaj u košaricu',
                 reviews: 'recenzija',
                 noProductsFound: 'Nema pronađenih proizvoda',
                 adjustFilters: 'Pokušajte prilagoditi filtere da biste vidjeli više rezultata.'
@@ -1914,7 +1914,7 @@ export class TranslationService {
                 dimensions: 'Dimenzije',
                 certifications: 'Certifikati',
                 quantity: 'Količina',
-                addToCart: 'Dodaj u korpu',
+                addToCart: 'Dodaj u košaricu',
                 addToWishlist: 'Dodaj na listu želja',
                 removeFromWishlist: 'Ukloni s liste želja',
                 addedToWishlist: 'Dodano na listu želja!',

@@ -140,6 +140,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
               <!-- Add to Cart -->
               <div class="space-y-3">
                 <app-add-to-cart-button 
+                  [availability]="product.availability"
                   [productId]="product.id" 
                   [quantity]="1" 
                   buttonText="Add to Cart"

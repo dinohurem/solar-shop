@@ -57,17 +57,21 @@ export class ProductDetailsEffects {
                     });
 
                     const mappedReviews: ProductReview[] = filteredReviews.map((review: any) => {
-                        // Extract user name from auth.users metadata
-                        const userMetaData = review.user?.raw_user_meta_data || {};
-                        const firstName = userMetaData.first_name || userMetaData.name?.split(' ')[0] || '';
-                        const lastName = userMetaData.last_name || userMetaData.name?.split(' ').slice(1).join(' ') || '';
-                        const userName = firstName && lastName ? `${firstName} ${lastName}` :
-                            userMetaData.name || review.user?.email?.split('@')[0] || 'Anonymous';
+                        // Extract user first name and last name by using the review.user_id to get the user from the auth.users table
+                        // const { data: user } = await this.supabaseService.client
+                        //     .from('auth.users')
+                        //     .select('first_name, last_name')
+                        //     .eq('id', review.user_id)
+                        //     .single()
+                        //     .throwOnError();
+                        // const firstName = user?.first_name || '';
+                        // const lastName = user?.last_name || '';
+
 
                         return {
                             id: review.id,
-                            userName: userName,
-                            userAvatar: userMetaData.avatar_url || '/assets/images/default-avatar.png',
+                            userName: 'Dino' + ' ' + 'Hurem',
+                            userAvatar: '/assets/images/default-avatar.png',
                             rating: review.rating,
                             title: review.title || '',
                             comment: review.comment || '',

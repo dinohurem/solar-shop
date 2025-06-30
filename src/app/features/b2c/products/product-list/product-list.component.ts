@@ -285,6 +285,7 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
                       [productId]="product.id" 
                       [quantity]="1" 
                       [buttonText]="'productList.addToCart' | translate"
+                      [availability]="product.availability"
                       size="sm"
                       [fullWidth]="true"
                       (click)="$event.stopPropagation()">

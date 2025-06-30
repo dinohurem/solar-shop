@@ -13,10 +13,10 @@ import { TranslatePipe } from "../../../../../shared/pipes/translate.pipe";
     <button 
       #addButton
       (click)="addToCart()"
-      [disabled]="isLoading$ | async"
+      [disabled]="(isLoading$ | async) || isOutOfStock"
       [class]="buttonClasses"
     >
-      <span *ngIf="!(isLoading$ | async)" class="flex items-center space-x-2">
+      <span *ngIf="!(isLoading$ | async) && !isOutOfStock" class="flex items-center space-x-2">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.1 5H19M7 13v6a2 2 0 002 2h6a2 2 0 002-2v-6"/>
         </svg>
@@ -29,6 +29,13 @@ import { TranslatePipe } from "../../../../../shared/pipes/translate.pipe";
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
         <span> {{ 'cart.adding' | translate }}</span>
+      </span>
+
+      <span *ngIf="isOutOfStock" class="flex items-center space-x-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+        </svg>
+        <span>{{ 'productDetails.outOfStock' | translate }}</span>
       </span>
     </button>
   `,
@@ -102,9 +109,14 @@ export class AddToCartButtonComponent {
   @Input() size: 'sm' | 'md' | 'lg' = 'md';
   @Input() variant: 'primary' | 'secondary' | 'outline' = 'primary';
   @Input() fullWidth: boolean = false;
+  @Input() availability: 'available' | 'limited' | 'out-of-stock' = 'available';
 
   isLoading$ = this.store.select(CartSelectors.selectIsCartLoading);
   isAnimating = false;
+
+  get isOutOfStock(): boolean {
+    return this.availability === 'out-of-stock';
+  }
 
   get buttonClasses(): string {
     const baseClasses = 'inline-flex items-center justify-center font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed';
@@ -116,11 +128,17 @@ export class AddToCartButtonComponent {
       lg: 'px-6 py-3 text-base'
     };
 
-    // Variant classes
+    // Variant classes - handle out-of-stock state
     const variantClasses = {
-      primary: 'bg-solar-600 text-white hover:bg-solar-700 focus:ring-2 focus:ring-solar-500 focus:ring-offset-2',
-      secondary: 'bg-gray-600 text-white hover:bg-gray-700 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2',
-      outline: 'border-2 border-solar-600 text-solar-600 hover:bg-solar-600 hover:text-white focus:ring-2 focus:ring-solar-500 focus:ring-offset-2'
+      primary: this.isOutOfStock
+        ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+        : 'bg-solar-600 text-white hover:bg-solar-700 focus:ring-2 focus:ring-solar-500 focus:ring-offset-2',
+      secondary: this.isOutOfStock
+        ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+        : 'bg-gray-600 text-white hover:bg-gray-700 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2',
+      outline: this.isOutOfStock
+        ? 'border-2 border-gray-400 text-gray-600 cursor-not-allowed'
+        : 'border-2 border-solar-600 text-solar-600 hover:bg-solar-600 hover:text-white focus:ring-2 focus:ring-solar-500 focus:ring-offset-2'
     };
 
     // Width classes
@@ -135,7 +153,7 @@ export class AddToCartButtonComponent {
   }
 
   addToCart() {
-    if (this.productId) {
+    if (this.productId && !this.isOutOfStock) {
 
       // Dispatch the add to cart action
       this.store.dispatch(CartActions.addToCart({
