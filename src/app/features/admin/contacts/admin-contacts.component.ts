@@ -110,7 +110,8 @@ export class AdminContactsComponent implements OnInit {
         key: 'is_newsletter',
         label: this.translationService.translate('footer.newsletter'),
         type: 'boolean',
-        sortable: true
+        sortable: true,
+        format: (value) => value ? this.translationService.translate('admin.common.yes') : this.translationService.translate('admin.common.no')
       },
       {
         key: 'created_at',

@@ -243,7 +243,7 @@ import { PartnerRegistrationService } from '../services/partner-registration.ser
                 <!-- Business Type -->
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2">
-                    {{ 'partnersRegister.businessType' | translate }}*
+                    {{ 'partnersRegister.businessType' | translate }}
                   </label>
                   <select formControlName="businessType" 
                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-solar-500 focus:border-transparent">
@@ -254,22 +254,16 @@ import { PartnerRegistrationService } from '../services/partner-registration.ser
                     <option value="distributor">{{ 'partnersRegister.distributor' | translate }}</option>
                     <option value="other">{{ 'partnersRegister.other' | translate }}</option>
                   </select>
-                  <div *ngIf="isFieldInvalid('businessType')" class="mt-1 text-sm text-red-600">
-                    {{ 'partnersRegister.businessTypeRequired' | translate }}
-                  </div>
                 </div>
 
                 <!-- Years in Business -->
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2">
-                    {{ 'partnersRegister.yearsInBusiness' | translate }}*
+                    {{ 'partnersRegister.yearsInBusiness' | translate }}
                   </label>
                   <input formControlName="yearsInBusiness" type="number" min="0" 
                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-solar-500 focus:border-transparent"
                          [placeholder]="'partnersRegister.enterYearsInBusiness' | translate">
-                  <div *ngIf="isFieldInvalid('yearsInBusiness')" class="mt-1 text-sm text-red-600">
-                    {{ 'partnersRegister.yearsInBusinessRequired' | translate }}
-                  </div>
                 </div>
 
                 <!-- Annual Revenue -->

@@ -103,87 +103,20 @@ export class AdminOrdersComponent implements OnInit {
     successModalTitle = '';
     successModalMessage = '';
 
-    tableConfig: TableConfig = {
-        columns: [
-            {
-                key: 'orderNumber',
-                label: this.translationService.translate('admin.ordersForm.orderNumber'),
-                type: 'text',
-                sortable: true,
-                searchable: true
-            },
-            {
-                key: 'customerEmail',
-                label: this.translationService.translate('admin.ordersForm.customer'),
-                type: 'text',
-                sortable: true,
-                searchable: true
-            },
-            {
-                key: 'totalAmount',
-                label: this.translationService.translate('admin.ordersForm.total'),
-                type: 'number',
-                sortable: true,
-                format: (value) => value ? `€${value.toFixed(2)}` : '€0.00'
-            },
-            {
-                key: 'status',
-                label: this.translationService.translate('admin.ordersForm.status'),
-                type: 'status',
-                sortable: true,
-                searchable: true,
-                format: (value) => {
-                    return this.translationService.translate(`admin.orderStatus.${value}`) || value;
-                }
-            },
-            {
-                key: 'paymentStatus',
-                label: this.translationService.translate('admin.ordersForm.payment'),
-                type: 'status',
-                sortable: true,
-                format: (value) => {
-                    return this.translationService.translate(`admin.paymentStatus.${value}`) || value;
-                }
-            },
-            {
-                key: 'items',
-                label: this.translationService.translate('admin.ordersForm.items'),
-                type: 'number',
-                sortable: true,
-                format: (value) => Array.isArray(value) ? value.length.toString() : '0'
-            },
-            {
-                key: 'createdAt',
-                label: this.translationService.translate('admin.ordersForm.orderDate'),
-                type: 'date',
-                sortable: true
-            }
-        ],
-        actions: [
-            {
-                label: this.translationService.translate('admin.ordersForm.edit'),
-                icon: 'edit',
-                action: 'edit',
-                class: 'text-blue-600 hover:text-blue-900'
-            },
-            {
-                label: this.translationService.translate('admin.ordersForm.delete'),
-                icon: 'trash2',
-                action: 'delete',
-                class: 'text-red-600 hover:text-red-900'
-            }
-        ],
-        searchable: true,
-        sortable: true,
-        paginated: true,
-        pageSize: 20,
-        allowCsvImport: false,
-        allowExport: true,
-        rowClickable: true
-    };
+    tableConfig!: TableConfig;
 
     ngOnInit(): void {
         this.title.setTitle(this.translationService.translate('admin.ordersForm.longTitle'));
+
+        // Initialize table config with translations
+        this.initializeTableConfig();
+
+        // Subscribe to language changes to reinitialize table config
+        this.translationService.currentLanguage$.pipe(
+            takeUntil(this.destroy$)
+        ).subscribe(() => {
+            this.initializeTableConfig();
+        });
 
         // Load orders
         this.store.dispatch(OrdersActions.loadOrders());
@@ -203,6 +136,87 @@ export class AdminOrdersComponent implements OnInit {
         ).subscribe(({ error }) => {
             console.error('Failed to delete order:', error);
         });
+    }
+
+    private initializeTableConfig(): void {
+        this.tableConfig = {
+            columns: [
+                {
+                    key: 'orderNumber',
+                    label: this.translationService.translate('admin.ordersForm.orderNumber'),
+                    type: 'text',
+                    sortable: true,
+                    searchable: true
+                },
+                {
+                    key: 'customerEmail',
+                    label: this.translationService.translate('admin.ordersForm.customer'),
+                    type: 'text',
+                    sortable: true,
+                    searchable: true
+                },
+                {
+                    key: 'totalAmount',
+                    label: this.translationService.translate('admin.ordersForm.total'),
+                    type: 'number',
+                    sortable: true,
+                    format: (value) => value ? `€${value.toFixed(2)}` : '€0.00'
+                },
+                {
+                    key: 'status',
+                    label: this.translationService.translate('admin.ordersForm.status'),
+                    type: 'status',
+                    sortable: true,
+                    searchable: true,
+                    format: (value) => {
+                        return this.translationService.translate(`admin.orderStatus.${value}`) || value;
+                    }
+                },
+                {
+                    key: 'paymentStatus',
+                    label: this.translationService.translate('admin.ordersForm.payment'),
+                    type: 'status',
+                    sortable: true,
+                    format: (value) => {
+                        return this.translationService.translate(`admin.paymentStatus.${value}`) || value;
+                    }
+                },
+                {
+                    key: 'items',
+                    label: this.translationService.translate('admin.ordersForm.items'),
+                    type: 'number',
+                    sortable: true,
+                    format: (value) => Array.isArray(value) ? value.length.toString() : '0'
+                },
+                {
+                    key: 'createdAt',
+                    label: this.translationService.translate('admin.ordersForm.orderDate'),
+                    type: 'date',
+                    sortable: true
+                }
+            ],
+            actions: [
+                {
+                    label: this.translationService.translate('admin.ordersForm.edit'),
+                    icon: 'edit',
+                    action: 'edit',
+                    class: 'text-blue-600 hover:text-blue-900'
+                },
+                {
+                    label: this.translationService.translate('admin.ordersForm.delete'),
+                    icon: 'trash2',
+                    action: 'delete',
+                    class: 'text-red-600 hover:text-red-900'
+                }
+            ],
+            searchable: true,
+            sortable: true,
+            paginated: true,
+            pageSize: 20,
+            allowCsvImport: false,
+            allowExport: true,
+            rowClickable: true
+        };
     }
 
     ngOnDestroy(): void {
@@ -247,18 +261,5 @@ export class AdminOrdersComponent implements OnInit {
         this.showSuccessModal = false;
         this.successModalTitle = '';
         this.successModalMessage = '';
-    }
-
-
-
-    // Custom status class handler for payment status
-    getPaymentStatusClass(status: string): string {
-        const statusClasses: { [key: string]: string } = {
-            'paid': 'bg-green-100 text-green-800',
-            'pending': 'bg-yellow-100 text-yellow-800',
-            'failed': 'bg-red-100 text-red-800',
-            'refunded': 'bg-gray-100 text-gray-800'
-        };
-        return statusClasses[status?.toLowerCase()] || 'bg-gray-100 text-gray-800';
     }
 }

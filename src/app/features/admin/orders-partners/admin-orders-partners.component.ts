@@ -83,87 +83,20 @@ export class AdminOrdersPartnersComponent implements OnInit {
     successModalTitle = '';
     successModalMessage = '';
 
-    tableConfig: TableConfig = {
-        columns: [
-            {
-                key: 'orderNumber',
-                label: this.translationService.translate('admin.partnerOrdersForm.orderNumber'),
-                type: 'text',
-                sortable: true,
-                searchable: true
-            },
-            {
-                key: 'customerEmail',
-                label: this.translationService.translate('admin.partnerOrdersForm.customer'),
-                type: 'text',
-                sortable: true,
-                searchable: true
-            },
-            {
-                key: 'totalAmount',
-                label: this.translationService.translate('admin.partnerOrdersForm.total'),
-                type: 'number',
-                sortable: true,
-                format: (value) => value ? `€${value.toFixed(2)}` : '€0.00'
-            },
-            {
-                key: 'status',
-                label: this.translationService.translate('admin.partnerOrdersForm.status'),
-                type: 'status',
-                sortable: true,
-                searchable: true,
-                format: (value) => {
-                    return this.translationService.translate(`admin.orderStatus.${value}`) || value;
-                }
-            },
-            {
-                key: 'paymentStatus',
-                label: this.translationService.translate('admin.partnerOrdersForm.payment'),
-                type: 'status',
-                sortable: true,
-                format: (value) => {
-                    return this.translationService.translate(`admin.paymentStatus.${value}`) || value;
-                }
-            },
-            {
-                key: 'items',
-                label: this.translationService.translate('admin.partnerOrdersForm.items'),
-                type: 'number',
-                sortable: true,
-                format: (value) => Array.isArray(value) ? value.length.toString() : '0'
-            },
-            {
-                key: 'createdAt',
-                label: this.translationService.translate('admin.partnerOrdersForm.orderDate'),
-                type: 'date',
-                sortable: true
-            }
-        ],
-        actions: [
-            {
-                label: this.translationService.translate('admin.partnerOrdersForm.edit'),
-                icon: 'edit',
-                action: 'edit',
-                class: 'text-blue-600 hover:text-blue-900'
-            },
-            {
-                label: this.translationService.translate('admin.partnerOrdersForm.delete'),
-                icon: 'trash2',
-                action: 'delete',
-                class: 'text-red-600 hover:text-red-900'
-            }
-        ],
-        searchable: true,
-        sortable: true,
-        paginated: true,
-        pageSize: 20,
-        allowCsvImport: false,
-        allowExport: true,
-        rowClickable: true
-    };
+    tableConfig!: TableConfig;
 
     ngOnInit(): void {
         this.title.setTitle(this.translationService.translate('admin.partnerOrdersForm.longTitle'));
+
+        // Initialize table config with translations
+        this.initializeTableConfig();
+
+        // Subscribe to language changes to reinitialize table config
+        this.translationService.currentLanguage$.pipe(
+            takeUntil(this.destroy$)
+        ).subscribe(() => {
+            this.initializeTableConfig();
+        });
 
         // Load orders
         this.store.dispatch(OrdersActions.loadOrders());
@@ -183,6 +116,87 @@ export class AdminOrdersPartnersComponent implements OnInit {
         ).subscribe(({ error }) => {
             this.showSuccess(this.translationService.translate('admin.partnerOrdersForm.error'), this.translationService.translate('admin.partnerOrdersForm.failedToDeleteOrder', { error }));
         });
+    }
+
+    private initializeTableConfig(): void {
+        this.tableConfig = {
+            columns: [
+                {
+                    key: 'orderNumber',
+                    label: this.translationService.translate('admin.partnerOrdersForm.orderNumber'),
+                    type: 'text',
+                    sortable: true,
+                    searchable: true
+                },
+                {
+                    key: 'customerEmail',
+                    label: this.translationService.translate('admin.partnerOrdersForm.customer'),
+                    type: 'text',
+                    sortable: true,
+                    searchable: true
+                },
+                {
+                    key: 'totalAmount',
+                    label: this.translationService.translate('admin.partnerOrdersForm.total'),
+                    type: 'number',
+                    sortable: true,
+                    format: (value) => value ? `€${value.toFixed(2)}` : '€0.00'
+                },
+                {
+                    key: 'status',
+                    label: this.translationService.translate('admin.partnerOrdersForm.status'),
+                    type: 'status',
+                    sortable: true,
+                    searchable: true,
+                    format: (value) => {
+                        return this.translationService.translate(`admin.orderStatus.${value}`) || value;
+                    }
+                },
+                {
+                    key: 'paymentStatus',
+                    label: this.translationService.translate('admin.partnerOrdersForm.payment'),
+                    type: 'status',
+                    sortable: true,
+                    format: (value) => {
+                        return this.translationService.translate(`admin.paymentStatus.${value}`) || value;
+                    }
+                },
+                {
+                    key: 'items',
+                    label: this.translationService.translate('admin.partnerOrdersForm.items'),
+                    type: 'number',
+                    sortable: true,
+                    format: (value) => Array.isArray(value) ? value.length.toString() : '0'
+                },
+                {
+                    key: 'createdAt',
+                    label: this.translationService.translate('admin.partnerOrdersForm.orderDate'),
+                    type: 'date',
+                    sortable: true
+                }
+            ],
+            actions: [
+                {
+                    label: this.translationService.translate('admin.partnerOrdersForm.edit'),
+                    icon: 'edit',
+                    action: 'edit',
+                    class: 'text-blue-600 hover:text-blue-900'
+                },
+                {
+                    label: this.translationService.translate('admin.partnerOrdersForm.delete'),
+                    icon: 'trash2',
+                    action: 'delete',
+                    class: 'text-red-600 hover:text-red-900'
+                }
+            ],
+            searchable: true,
+            sortable: true,
+            paginated: true,
+            pageSize: 20,
+            allowCsvImport: false,
+            allowExport: true,
+            rowClickable: true
+        };
     }
 
     ngOnDestroy(): void {

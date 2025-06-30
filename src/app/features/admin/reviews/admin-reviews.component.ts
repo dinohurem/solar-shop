@@ -121,7 +121,10 @@ export class AdminReviewsComponent implements OnInit {
                 label: this.translationService.translate('admin.reviewsForm.reviewStatus'),
                 type: 'status',
                 sortable: true,
-                searchable: true
+                searchable: true,
+                format: (value) => {
+                    return this.translationService.translate(`admin.reviewsForm.${value}`) || value;
+                }
             },
             {
                 key: 'isApproved',

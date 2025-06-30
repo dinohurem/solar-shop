@@ -101,7 +101,8 @@ export class AdminCategoriesComponent implements OnInit {
                 key: 'is_active',
                 label: this.translationService.translate('admin.common.status'),
                 type: 'boolean',
-                sortable: true
+                sortable: true,
+                format: (value) => value ? this.translationService.translate('admin.common.yes') : this.translationService.translate('admin.common.no')
             }
         ],
         actions: [

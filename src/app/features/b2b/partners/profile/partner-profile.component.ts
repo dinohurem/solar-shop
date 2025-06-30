@@ -402,7 +402,7 @@ export class PartnerProfileComponent implements OnInit, OnDestroy {
 
     this.companyInfoForm = this.fb.group({
       companyName: ['', [Validators.required]],
-      businessType: ['', [Validators.required]],
+      businessType: [''],
       taxNumber: ['', [Validators.required]],
       website: [''],
       companyEmail: ['', [Validators.required, Validators.email]],

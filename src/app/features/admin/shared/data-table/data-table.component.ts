@@ -202,14 +202,14 @@ export interface TableConfig {
                         [class.text-green-800]="getColumnValue(item, column.key)"
                         [class.bg-red-100]="!getColumnValue(item, column.key)"
                         [class.text-red-800]="!getColumnValue(item, column.key)">
-                    {{ getColumnValue(item, column.key) ? 'Yes' : 'No' }}
+                    {{ column.format ? column.format(getColumnValue(item, column.key)) : (getColumnValue(item, column.key) ? 'Yes' : 'No') }}
                   </span>
                   
                   <!-- Status -->
                   <span *ngSwitchCase="'status'" 
                         class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
                         [ngClass]="getStatusClass(getColumnValue(item, column.key))">
-                    {{ getColumnValue(item, column.key) }}
+                    {{ column.format ? column.format(getColumnValue(item, column.key)) : getColumnValue(item, column.key) }}
                   </span>
                   
                   <!-- Array -->
@@ -484,6 +484,57 @@ export class DataTableComponent implements OnInit, OnChanges {
   }
 
   getStatusClass(status: string): string {
+    // Map translated status values back to their original keys for styling
+    const statusMapping: { [key: string]: string } = {
+      // Croatian translations
+      'Na čekanju': 'pending',
+      'Potvrđeno': 'confirmed',
+      'U obradi': 'processing',
+      'Poslano': 'shipped',
+      'Dostavljeno': 'delivered',
+      'Otkazano': 'cancelled',
+      'Povraćeno': 'refunded',
+      'Plaćeno': 'paid',
+      'Neuspješno': 'failed',
+      'Djelomično povraćeno': 'partially_refunded',
+      // Blog status translations (Croatian)
+      'Skica': 'draft',
+      'Objavljeno': 'published',
+      'Arhivirano': 'archived',
+      // Review status translations (Croatian)
+      'Odobreno': 'approved',
+      'Odbaceno': 'rejected',
+      // Offer status translations (Croatian)
+      'Aktivno': 'active',
+      'Pauzirano': 'paused',
+      'Isteklo': 'expired',
+      // English translations
+      'Pending': 'pending',
+      'Confirmed': 'confirmed',
+      'Processing': 'processing',
+      'Shipped': 'shipped',
+      'Delivered': 'delivered',
+      'Cancelled': 'cancelled',
+      'Refunded': 'refunded',
+      'Paid': 'paid',
+      'Failed': 'failed',
+      'Partially Refunded': 'partially_refunded',
+      // Blog status translations (English)
+      'Draft': 'draft',
+      'Published': 'published',
+      'Archived': 'archived',
+      // Review status translations (English)
+      'Approved': 'approved',
+      'Rejected': 'rejected',
+      // Offer status translations (English)
+      'Active': 'active',
+      'Paused': 'paused',
+      'Expired': 'expired'
+    };
+
+    // Get the original status key for styling
+    const originalStatus = statusMapping[status] || status;
+
     const statusClasses: { [key: string]: string } = {
       'active': 'bg-green-100 text-green-800',
       'inactive': 'bg-red-100 text-red-800',
@@ -491,15 +542,23 @@ export class DataTableComponent implements OnInit, OnChanges {
       'draft': 'bg-yellow-100 text-yellow-800',
       'archived': 'bg-gray-100 text-gray-800',
       'pending': 'bg-yellow-100 text-yellow-800',
+      'confirmed': 'bg-blue-100 text-blue-800',
+      'processing': 'bg-purple-100 text-purple-800',
+      'shipped': 'bg-indigo-100 text-indigo-800',
+      'delivered': 'bg-green-100 text-green-800',
+      'cancelled': 'bg-red-100 text-red-800',
+      'refunded': 'bg-gray-100 text-gray-800',
       'approved': 'bg-green-100 text-green-800',
       'rejected': 'bg-red-100 text-red-800',
       // Payment status colors
       'paid': 'bg-green-100 text-green-800',
       'failed': 'bg-red-100 text-red-800',
-      'refunded': 'bg-gray-100 text-gray-800',
-      'partially_refunded': 'bg-orange-100 text-orange-800'
+      'partially_refunded': 'bg-orange-100 text-orange-800',
+      // Offer status colors
+      'paused': 'bg-orange-100 text-orange-800',
+      'expired': 'bg-gray-100 text-gray-800'
     };
-    return statusClasses[status?.toLowerCase()] || 'bg-gray-100 text-gray-800';
+    return statusClasses[originalStatus?.toLowerCase()] || 'bg-gray-100 text-gray-800';
   }
 
   formatDate(date: string): string {

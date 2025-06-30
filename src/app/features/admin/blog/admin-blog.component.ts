@@ -86,7 +86,10 @@ export class AdminBlogComponent implements OnInit {
                 key: 'status',
                 label: this.translationService.translate('admin.common.status'),
                 type: 'status',
-                sortable: true
+                sortable: true,
+                format: (value) => {
+                    return this.translationService.translate(`admin.blogForm.${value}`) || value;
+                }
             },
             {
                 key: 'published_at',

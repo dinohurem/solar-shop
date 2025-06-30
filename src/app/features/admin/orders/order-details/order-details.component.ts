@@ -6,6 +6,7 @@ import { Title } from '@angular/platform-browser';
 import { Store } from '@ngrx/store';
 import { SupabaseService } from '../../../../services/supabase.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../shared/services/translation.service';
 import * as OrdersActions from '../store/orders.actions';
 
 @Component({
@@ -378,6 +379,7 @@ export class OrderDetailsComponent implements OnInit {
   private title = inject(Title);
   private fb = inject(FormBuilder);
   private store = inject(Store);
+  private translationService = inject(TranslationService);
 
   order: any = null;
   orderItems: any[] = [];
@@ -598,7 +600,7 @@ export class OrderDetailsComponent implements OnInit {
     this.pendingPaymentStatusUpdate = 'paid';
     this.checkForChanges();
 
-    this.statusUpdateMessage = 'Payment status marked for update. Click "Save Changes" to apply.';
+    this.statusUpdateMessage = this.translationService.translate('admin.common.paymentStatusChangeMessage');
     this.statusUpdateSuccess = true;
 
     // Clear message after 3 seconds
@@ -616,7 +618,10 @@ export class OrderDetailsComponent implements OnInit {
     this.checkForChanges();
 
     const oldStatus = this.order.status;
-    this.statusUpdateMessage = `Order status marked to change from "${this.formatStatus(oldStatus)}" to "${this.formatStatus(newStatus)}". Click "Save Changes" to apply.`;
+    this.statusUpdateMessage = this.translationService.translate('admin.common.orderStatusChangeMessage', {
+      oldStatus: this.formatStatus(oldStatus),
+      newStatus: this.formatStatus(newStatus)
+    });
     this.statusUpdateSuccess = true;
 
     // Clear message after 3 seconds
@@ -653,7 +658,7 @@ export class OrderDetailsComponent implements OnInit {
     if (!this.hasChanges || !this.order?.id) return;
 
     try {
-      this.statusUpdateMessage = 'Saving changes...';
+      this.statusUpdateMessage = this.translationService.translate('admin.common.savingChanges');
       this.statusUpdateSuccess = true;
 
       // Handle status updates via NgRx/Supabase
@@ -706,7 +711,7 @@ export class OrderDetailsComponent implements OnInit {
       this.originalOrderDiscount = currentDiscount;
       this.hasChanges = false;
 
-      this.statusUpdateMessage = 'All changes saved successfully!';
+      this.statusUpdateMessage = this.translationService.translate('admin.common.allChangesSaved');
       this.statusUpdateSuccess = true;
 
       // Clear message after 5 seconds
@@ -716,7 +721,7 @@ export class OrderDetailsComponent implements OnInit {
 
     } catch (error) {
       console.error('Error saving order changes:', error);
-      this.statusUpdateMessage = 'Error saving changes. Please try again.';
+      this.statusUpdateMessage = this.translationService.translate('admin.common.errorSavingChanges');
       this.statusUpdateSuccess = false;
 
       // Clear message after 5 seconds
@@ -727,7 +732,9 @@ export class OrderDetailsComponent implements OnInit {
   }
 
   printInvoice(): void {
-    this.statusUpdateMessage = `Invoice printing for order ${this.order.order_number} initiated successfully!`;
+    this.statusUpdateMessage = this.translationService.translate('admin.common.invoicePrintingInitiated', {
+      orderNumber: this.order.order_number
+    });
     this.statusUpdateSuccess = true;
 
     // Clear message after 5 seconds
@@ -781,26 +788,11 @@ export class OrderDetailsComponent implements OnInit {
   }
 
   formatStatus(status: string): string {
-    const statusMap: { [key: string]: string } = {
-      'pending': 'Pending',
-      'confirmed': 'Confirmed',
-      'processing': 'Processing',
-      'shipped': 'Shipped',
-      'delivered': 'Delivered',
-      'cancelled': 'Cancelled',
-      'refunded': 'Refunded'
-    };
-    return statusMap[status] || status;
+    return this.translationService.translate(`admin.orderStatus.${status}`) || status;
   }
 
   formatPaymentStatus(status: string): string {
-    const statusMap: { [key: string]: string } = {
-      'pending': 'Payment Pending',
-      'paid': 'Paid',
-      'failed': 'Payment Failed',
-      'refunded': 'Refunded'
-    };
-    return statusMap[status] || status;
+    return this.translationService.translate(`admin.paymentStatus.${status}`) || status;
   }
 
   getPaymentMethodTranslation(paymentMethod: string): string {

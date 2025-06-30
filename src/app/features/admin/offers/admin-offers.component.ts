@@ -95,13 +95,7 @@ export class AdminOffersComponent implements OnInit {
         type: 'status',
         sortable: true,
         format: (value) => {
-          const statusMap: { [key: string]: string } = {
-            'draft': this.translationService.translate('admin.offersForm.draft'),
-            'active': this.translationService.translate('admin.offersForm.active'),
-            'paused': this.translationService.translate('admin.offersForm.paused'),
-            'expired': this.translationService.translate('admin.offersForm.expired')
-          };
-          return statusMap[value] || value || this.translationService.translate('admin.offersForm.draft');
+          return this.translationService.translate(`admin.offersForm.${value}`) || value;
         }
       }
     ],
