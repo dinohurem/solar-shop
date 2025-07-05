@@ -420,9 +420,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
 
     // Calculate totals from CartItem objects
     const subtotal = cartItems.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0);
-    const tax = subtotal * 0.25; // 25% VAT
-    const shipping = subtotal > 500 ? 0 : 50; // Free shipping over €500
-    const total = subtotal + tax + shipping;
+    const total = subtotal; // No tax or shipping
 
     // Generate order number
     this.orderNumber = 'ORD-' + Date.now();
@@ -456,8 +454,8 @@ export class PaymentComponent implements OnInit, OnDestroy {
 
       // Amounts
       subtotal: subtotal,
-      tax_amount: tax,
-      shipping_cost: shipping,
+      tax_amount: 0,
+      shipping_cost: 0,
       discount_amount: 0,
       total_amount: total,
 

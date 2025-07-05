@@ -309,7 +309,7 @@ import { SupabaseService } from '../../../../services/supabase.service';
                             [class]="getOrderStatusClass(order.status)">
                         {{ getOrderStatusLabel(order.status) }}
                       </span>
-                      <p class="text-lg font-semibold text-gray-900 mt-1">{{ order.totalAmount | currency:'EUR':'symbol':'1.2-2' }}</p>
+                      <p class="text-lg font-semibold text-gray-900 mt-1">{{ order.subtotal | currency:'EUR':'symbol':'1.2-2' }}</p>
                     </div>
                   </div>
 
@@ -770,7 +770,7 @@ export class PartnerProfileComponent implements OnInit, OnDestroy {
   }
 
   getTotalSpent(): number {
-    return this.companyOrders.reduce((total, order) => total + order.totalAmount, 0);
+    return this.companyOrders.reduce((total, order) => total + order.subtotal, 0);
   }
 
   getActiveOrders(): number {
@@ -792,7 +792,7 @@ export class PartnerProfileComponent implements OnInit, OnDestroy {
   }
 
   viewOrderDetails(order: Order): void {
-    this.router.navigate(['/order-details', order.id]);
+    this.router.navigate(['/partners/order-details', order.id]);
   }
 
   reorderItems(order: Order): void {
@@ -801,7 +801,7 @@ export class PartnerProfileComponent implements OnInit, OnDestroy {
   }
 
   contactSupport(): void {
-    this.router.navigate(['/contact']);
+    this.router.navigate(['/partners/contact']);
   }
 
   navigateToProducts(): void {

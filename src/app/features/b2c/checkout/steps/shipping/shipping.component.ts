@@ -140,40 +140,30 @@ import { User } from '../../../../../shared/models/user.model';
           </div>
         </div>
 
-        <!-- Shipping Options -->
+        <!-- Pickup Options -->
         <div class="mb-8">
-          <h3 class="text-lg font-semibold text-[#324053] mb-4 font-['Poppins']">{{ 'checkout.shippingOptions' | translate }}</h3>
+          <h3 class="text-lg font-semibold text-[#324053] mb-4 font-['Poppins']">{{ 'checkout.pickupOptions' | translate }}</h3>
           <div class="space-y-3">
-            <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+            <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 bg-green-50 border-green-200">
               <input
                 type="radio"
                 name="shippingOption"
-                value="standard"
+                value="pickup_at_storage"
                 formControlName="shippingOption"
                 class="text-[#0ACF83] focus:ring-[#0ACF83]"
+                checked
               >
               <div class="ml-3 flex-1">
                 <div class="flex justify-between items-center">
-                  <span class="font-medium text-[#324053] font-['DM_Sans']">{{ 'checkout.standardShipping' | translate }}</span>
-                  <span class="font-semibold text-[#324053] font-['DM_Sans']">{{ 'checkout.free' | translate }}</span>
+                  <span class="font-medium text-[#324053] font-['DM_Sans']">{{ 'checkout.pickupAtStorage' | translate }}</span>
+                  <div class="flex items-center space-x-2">
+                    <span class="font-semibold text-green-600 font-['DM_Sans']">{{ 'checkout.free' | translate }}</span>
+                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                  </div>
                 </div>
-                <p class="text-sm text-gray-600 font-['DM_Sans']">{{ 'checkout.standardShippingDays' | translate }}</p>
-              </div>
-            </label>
-            <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
-              <input
-                type="radio"
-                name="shippingOption"
-                value="express"
-                formControlName="shippingOption"
-                class="text-[#0ACF83] focus:ring-[#0ACF83]"
-              >
-              <div class="ml-3 flex-1">
-                <div class="flex justify-between items-center">
-                  <span class="font-medium text-[#324053] font-['DM_Sans']">{{ 'checkout.expressShipping' | translate }}</span>
-                  <span class="font-semibold text-[#324053] font-['DM_Sans']">{{ 'checkout.expressShippingPrice' | translate }}</span>
-                </div>
-                <p class="text-sm text-gray-600 font-['DM_Sans']">{{ 'checkout.expressShippingDays' | translate }}</p>
+                <p class="text-sm text-gray-600 font-['DM_Sans']">{{ 'checkout.pickupAtStorageDescription' | translate }}</p>
               </div>
             </label>
           </div>
@@ -223,22 +213,27 @@ export class ShippingComponent implements OnInit, OnDestroy {
       city: ['', [Validators.required]],
       postalCode: ['', [Validators.required]],
       country: ['', [Validators.required]],
-      shippingOption: ['standard', [Validators.required]]
+      shippingOption: ['pickup_at_storage', [Validators.required]]
     });
   }
 
   ngOnInit(): void {
-    // Subscribe to current user and pre-populate email if logged in
+    // Subscribe to current user and pre-populate form fields if logged in
     this.store.select(selectCurrentUser)
       .pipe(takeUntil(this.destroy$))
       .subscribe(user => {
         this.currentUser = user;
-        if (user?.email) {
+        if (user) {
           this.shippingForm.patchValue({
-            email: user.email
+            firstName: user.firstName || '',
+            lastName: user.lastName || '',
+            email: user.email || '',
+            phone: user.phone || ''
           });
           // Disable email field for authenticated users
-          this.shippingForm.get('email')?.disable();
+          if (user.email) {
+            this.shippingForm.get('email')?.disable();
+          }
         }
       });
   }

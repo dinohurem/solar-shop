@@ -267,7 +267,8 @@ export class B2bShippingComponent implements OnInit, OnDestroy {
           // Pre-populate contact information
           this.shippingForm.patchValue({
             contactName: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
-            contactEmail: user.email
+            contactEmail: user.email,
+            contactPhone: user.phone || ''
           });
         }
       });
@@ -288,7 +289,32 @@ export class B2bShippingComponent implements OnInit, OnDestroy {
         .single();
 
       if (!error && companies) {
-        this.company = companies;
+        // Map database fields to Company interface
+        this.company = {
+          id: companies.id,
+          contactPersonId: companies.contact_person_id,
+          contactPersonName: companies.contact_person_name,
+          companyName: companies.company_name,
+          taxNumber: companies.tax_number,
+          companyAddress: companies.company_address,
+          companyPhone: companies.company_phone,
+          companyEmail: companies.company_email,
+          website: companies.website,
+          businessType: companies.business_type,
+          yearsInBusiness: companies.years_in_business,
+          annualRevenue: companies.annual_revenue,
+          numberOfEmployees: companies.number_of_employees,
+          description: companies.description,
+          status: companies.status,
+          approved: companies.approved,
+          approvedAt: companies.approved_at ? new Date(companies.approved_at) : undefined,
+          approvedBy: companies.approved_by,
+          rejectedAt: companies.rejected_at ? new Date(companies.rejected_at) : undefined,
+          rejectedBy: companies.rejected_by,
+          rejectionReason: companies.rejection_reason,
+          createdAt: new Date(companies.created_at),
+          updatedAt: new Date(companies.updated_at)
+        };
       }
     } catch (error) {
       console.error('Error loading company info:', error);

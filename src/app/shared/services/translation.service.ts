@@ -507,6 +507,8 @@ export class TranslationService {
                 cashOnDeliveryDescription: 'Platite kada vam narudžba stigne',
                 creditTerms30: 'Kreditni uvjeti (30 dana)',
                 creditTerms30Description: 'Platite u roku od 30 dana od fakture',
+                paymentUponCollection: 'Plaćanje po preuzimanju',
+                paymentUponCollectionDescription: 'Platite kada preuzmete robu u našoj trgovini',
                 specialInstructions: 'Posebne instrukcije',
                 specialInstructionsPlaceholder: 'Bilo koji posebni zahtjevi ili napomene za vašu narudžbu...',
                 acceptTermsText: 'Slažem se s',
@@ -1704,6 +1706,9 @@ export class TranslationService {
                 expressShipping: 'Express dostava',
                 expressShippingPrice: '15.00 KM',
                 expressShippingDays: '2-3 radnih dana',
+                pickupOptions: 'Opcije preuzimanja',
+                pickupAtStorage: 'Preuzimanje na skladištu',
+                pickupAtStorageDescription: 'Preuzmite svoju narudžbu izravno iz našeg skladišta. Besplatno i dostupno radnim danima.',
                 paymentMethod: 'Način plaćanja',
                 payOnDeliveryDescription: 'Plaćanje pouzećem. Kupac plaća nakon dostave proizvoda.',
                 creditCardDescription: 'Vaša kartica će biti sigurno obrađena. Sve informacije o kartici su šifrirane.',
@@ -1738,7 +1743,7 @@ export class TranslationService {
             // Order Details
             orderDetails: {
                 title: 'Detalji narudžbe',
-                orderPlacedOn: 'Narudžba stvorena',
+                orderPlacedOn: 'Narudžba kreirana',
                 backToOrders: 'Natrag na profil',
                 orderNotFound: 'Narudžba nije pronađena',
                 orderNotFoundMessage: 'Narudžba koju tražite nije mogla biti pronađena.',
@@ -1938,7 +1943,22 @@ export class TranslationService {
                 easyReturns: 'Jednostavan povrat',
                 // Product Photos
                 zoomImage: 'Povećaj sliku',
-                loginRequiredForWishlist: 'Molimo prijavite se za korištenje liste želja'
+                loginRequiredForWishlist: 'Molimo prijavite se za korištenje liste želja',
+                // Bundles & Offers
+                bundlesOffers: 'Paketi i ponude',
+                bundle: 'Paket',
+                save: 'Uštedi',
+                specialOffer: 'Posebna ponuda',
+                limitedTime: 'Ograničeno vrijeme',
+                viewBundle: 'Pogledaj paket',
+                claimOffer: 'Preuzmi ponudu',
+                noOffersAvailable: 'Nema dostupnih ponuda',
+                solarStarterBundle: 'Solar početni paket',
+                solarStarterBundleDescription: 'Kompletno rješenje za početnike s panelima, inverterima i osnovnim dodatnom opremom.',
+                freeInstallationOffer: 'Besplatna instalacija',
+                freeInstallationOfferDescription: 'Profesionalna instalacija uključena u cijenu. Limitirana ponuda za prva 50 kupaca.',
+                freeInstallation: 'Besplatna instalacija',
+                worthValue: 'vrijednost'
             },
             // Privacy Policy
             privacyPolicy: {
@@ -3805,6 +3825,9 @@ export class TranslationService {
                 expressShipping: 'Express Shipping',
                 expressShippingPrice: '€15.00',
                 expressShippingDays: '2-3 working days',
+                pickupOptions: 'Pickup Options',
+                pickupAtStorage: 'Pickup at Storage',
+                pickupAtStorageDescription: 'Pick up your order directly from our warehouse. Free and available on working days.',
                 paymentMethod: 'Payment Method',
                 payOnDeliveryDescription: 'Pay when your order is delivered. Cash or card payment accepted at delivery.',
                 creditCardDescription: 'Your payment will be processed securely. All card information is encrypted.',
@@ -4040,7 +4063,22 @@ export class TranslationService {
                 easyReturns: 'Easy returns',
                 // Product Photos
                 zoomImage: 'Zoom Image',
-                loginRequiredForWishlist: 'Please log in to use wishlist'
+                loginRequiredForWishlist: 'Please log in to use wishlist',
+                // Bundles & Offers
+                bundlesOffers: 'Bundles & Offers',
+                bundle: 'Bundle',
+                save: 'Save',
+                specialOffer: 'Special Offer',
+                limitedTime: 'Limited Time',
+                viewBundle: 'View Bundle',
+                claimOffer: 'Claim Offer',
+                noOffersAvailable: 'No offers available',
+                solarStarterBundle: 'Solar Starter Bundle',
+                solarStarterBundleDescription: 'Complete solution for beginners with panels, inverters, and essential accessories.',
+                freeInstallationOffer: 'Free Installation',
+                freeInstallationOfferDescription: 'Professional installation included in price. Limited offer for first 50 customers.',
+                freeInstallation: 'Free Installation',
+                worthValue: 'worth'
             },
             // Privacy Policy
             privacyPolicy: {
@@ -4380,6 +4418,8 @@ export class TranslationService {
                 cashOnDeliveryDescription: 'Pay when your order arrives',
                 creditTerms30: 'Credit Terms (30 days)',
                 creditTerms30Description: 'Pay within 30 days of invoice',
+                paymentUponCollection: 'Payment upon collection',
+                paymentUponCollectionDescription: 'Pay when you collect goods at our store',
                 specialInstructions: 'Special Instructions',
                 specialInstructionsPlaceholder: 'Any special requirements or notes for your order...',
                 acceptTermsText: 'I agree to the',

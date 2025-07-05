@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Product } from '../../../product-list/product-list.component';
 import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
@@ -10,11 +10,12 @@ import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
   template: `
     <div class="space-y-4">
       <!-- Main Image -->
-      <div class="aspect-square overflow-hidden rounded-lg bg-gray-100">
+      <div class="aspect-square overflow-hidden rounded-lg bg-gray-100 relative">
         <img 
           [src]="selectedImage" 
           [alt]="product.name"
-          class="w-full h-full object-cover"
+          class="w-full h-full object-cover cursor-zoom-in"
+          (click)="openZoom()"
         >
       </div>
 
@@ -51,6 +52,60 @@ import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
         {{ 'productDetails.zoomImage' | translate }}
       </button>
     </div>
+
+    <!-- Zoom Modal -->
+    <div 
+      *ngIf="isZoomOpen" 
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90"
+      (click)="closeZoom()"
+      (keydown.escape)="closeZoom()"
+    >
+      <div class="relative max-w-4xl max-h-screen p-4">
+        <!-- Close Button -->
+        <button 
+          (click)="closeZoom()"
+          class="absolute top-2 right-2 z-10 p-2 text-white hover:text-gray-300 transition-colors"
+        >
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+
+        <!-- Navigation Arrows -->
+        <button 
+          *ngIf="productImages.length > 1"
+          (click)="previousImage(); $event.stopPropagation()"
+          class="absolute left-2 top-1/2 transform -translate-y-1/2 z-10 p-2 text-white hover:text-gray-300 transition-colors"
+        >
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </button>
+
+        <button 
+          *ngIf="productImages.length > 1"
+          (click)="nextImage(); $event.stopPropagation()"
+          class="absolute right-2 top-1/2 transform -translate-y-1/2 z-10 p-2 text-white hover:text-gray-300 transition-colors"
+        >
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </button>
+
+        <!-- Zoomed Image -->
+        <img 
+          [src]="selectedImage" 
+          [alt]="product.name"
+          class="max-w-full max-h-full object-contain"
+          (click)="$event.stopPropagation()"
+        >
+
+        <!-- Image Counter in Modal -->
+        <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white text-sm bg-black bg-opacity-50 px-3 py-1 rounded">
+          {{ getCurrentImageIndex() + 1 }} / {{ productImages.length }}
+        </div>
+      </div>
+    </div>
   `,
   styles: [`
     :host {
@@ -58,11 +113,12 @@ import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
     }
   `]
 })
-export class ProductPhotosComponent implements OnInit {
+export class ProductPhotosComponent implements OnInit, OnDestroy {
   @Input() product!: Product;
 
   selectedImage: string = '';
   productImages: string[] = [];
+  isZoomOpen: boolean = false;
 
   ngOnInit(): void {
     // Generate multiple images for the product (in a real app, these would come from the product data)
@@ -84,6 +140,52 @@ export class ProductPhotosComponent implements OnInit {
   }
 
   openZoom(): void {
-    // TODO: Implement image zoom functionality
+    this.isZoomOpen = true;
+    // Prevent body scroll when modal is open
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeZoom(): void {
+    this.isZoomOpen = false;
+    // Restore body scroll
+    document.body.style.overflow = 'auto';
+  }
+
+  nextImage(): void {
+    const currentIndex = this.getCurrentImageIndex();
+    const nextIndex = (currentIndex + 1) % this.productImages.length;
+    this.selectedImage = this.productImages[nextIndex];
+  }
+
+  previousImage(): void {
+    const currentIndex = this.getCurrentImageIndex();
+    const prevIndex = currentIndex === 0 ? this.productImages.length - 1 : currentIndex - 1;
+    this.selectedImage = this.productImages[prevIndex];
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  handleKeydown(event: KeyboardEvent): void {
+    if (!this.isZoomOpen) return;
+
+    switch (event.key) {
+      case 'Escape':
+        this.closeZoom();
+        break;
+      case 'ArrowLeft':
+        event.preventDefault();
+        this.previousImage();
+        break;
+      case 'ArrowRight':
+        event.preventDefault();
+        this.nextImage();
+        break;
+    }
+  }
+
+  ngOnDestroy(): void {
+    // Ensure body scroll is restored if component is destroyed while zoom is open
+    if (this.isZoomOpen) {
+      document.body.style.overflow = 'auto';
+    }
   }
 } 

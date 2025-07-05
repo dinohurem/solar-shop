@@ -45,7 +45,13 @@ export const selectOrderById = (orderId: string) => createSelector(
 
 export const selectUserOrders = createSelector(
     selectOrdersState,
-    (state: OrdersState) => state.userOrders
+    (state: OrdersState) => {
+        if (!state.userOrders) return [];
+        // Sort orders by creation date, most recent first
+        return [...state.userOrders].sort((a, b) => 
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+    }
 );
 
 export const selectUserOrdersLoading = createSelector(

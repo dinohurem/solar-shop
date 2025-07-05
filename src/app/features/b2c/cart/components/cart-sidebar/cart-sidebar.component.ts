@@ -198,17 +198,6 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
                   <span class="text-gray-600">{{ 'cart.subtotal' | translate }}</span>
                   <span>{{ (cartSummary$ | async)?.subtotal | currency:'EUR':'symbol':'1.2-2' }}</span>
                 </div>
-                <div class="flex justify-between">
-                  <span class="text-gray-600">{{ 'cart.tax' | translate }}</span>
-                  <span>{{ (cartSummary$ | async)?.tax | currency:'EUR':'symbol':'1.2-2' }}</span>
-                </div>
-                <div class="flex justify-between">
-                  <span class="text-gray-600">{{ 'cart.shipping' | translate }}</span>
-                     <span>
-                       <span *ngIf="(cartSummary$ | async)?.shipping === 0; else shippingCost">{{ 'cart.freeShipping' | translate }}</span>
-                       <ng-template #shippingCost>{{ (cartSummary$ | async)?.shipping | currency:'EUR':'symbol':'1.2-2' }}</ng-template>
-                     </span>
-                </div>
                 <div 
                   *ngIf="(cartSummary$ | async)?.discount && (cartSummary$ | async)!.discount > 0"
                   class="flex justify-between text-green-600"
@@ -218,25 +207,10 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
                 </div>
                 <div class="flex justify-between font-semibold text-lg border-t pt-2">
                   <span>{{ 'cart.total' | translate }}</span>
-                  <span>{{ (cartSummary$ | async)?.total | currency:'EUR':'symbol':'1.2-2' }}</span>
+                  <span>{{ (cartSummary$ | async)?.subtotal | currency:'EUR':'symbol':'1.2-2' }}</span>
                 </div>
               </div>
 
-              <!-- Free Shipping Progress -->
-              <div 
-                *ngIf="(cartSummary$ | async)?.freeShippingRemaining && (cartSummary$ | async)!.freeShippingRemaining > 0"
-                class="mt-4 p-3 bg-blue-50 rounded-lg"
-              >
-                <div class="text-sm text-blue-800 mb-2">
-                  {{ 'cart.freeShippingProgress' | translate:{ amount: (cartSummary$ | async)?.freeShippingRemaining || 0 } }}
-                </div>
-                <div class="w-full bg-blue-200 rounded-full h-2">
-                  <div 
-                    class="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                    [style.width.%]="getFreeShippingProgress()"
-                  ></div>
-                </div>
-              </div>
 
               <!-- Checkout Button -->
               <div class="mt-6">

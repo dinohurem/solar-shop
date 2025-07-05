@@ -146,15 +146,52 @@ import {
 
       <!-- Product Description -->
       <div class="border-t border-gray-200 pt-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-3 font-['Poppins']">{{ 'productDetails.description' | translate }}</h3>
-        <p class="text-gray-700 leading-relaxed font-['DM_Sans']">
-          {{ product.description }}
-        </p>
+        <button 
+          type="button" 
+          (click)="toggleDescription()" 
+          class="flex items-center w-full justify-between group focus:outline-none" 
+          [attr.aria-expanded]="descriptionOpen" 
+          [attr.aria-controls]="'description-content'"
+        >
+          <h3 class="text-lg font-semibold text-gray-900 font-['Poppins']">{{ 'productDetails.description' | translate }}</h3>
+          <svg 
+            [ngClass]="{'rotate-180': descriptionOpen, 'rotate-0': !descriptionOpen}" 
+            class="w-5 h-5 text-gray-500 transition-transform duration-200" 
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        <div id="description-content" *ngIf="descriptionOpen" class="mt-3">
+          <p class="text-gray-700 leading-relaxed font-['DM_Sans']">
+            {{ product.description }}
+          </p>
+        </div>
       </div>
 
       <!-- Product Details -->
       <div class="border-t border-gray-200 pt-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4 font-['Poppins']">{{ 'productDetails.productDetails' | translate }}</h3>
+        <button 
+          type="button" 
+          (click)="toggleProductDetails()" 
+          class="flex items-center w-full justify-between group focus:outline-none" 
+          [attr.aria-expanded]="productDetailsOpen" 
+          [attr.aria-controls]="'product-details-content'"
+        >
+          <h3 class="text-lg font-semibold text-gray-900 font-['Poppins']">{{ 'productDetails.productDetails' | translate }}</h3>
+          <svg 
+            [ngClass]="{'rotate-180': productDetailsOpen, 'rotate-0': !productDetailsOpen}" 
+            class="w-5 h-5 text-gray-500 transition-transform duration-200" 
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        <div id="product-details-content" *ngIf="productDetailsOpen" class="mt-4">
         <dl class="grid grid-cols-1 gap-4">
           <div class="flex justify-between">
             <dt class="text-sm font-medium text-gray-500 font-['DM_Sans']">{{ 'productDetails.category' | translate }}:</dt>
@@ -223,18 +260,38 @@ import {
             </div>
           </div>
         </ng-container>
+        </div>
       </div>
 
       <!-- Certificates -->
       <div class="border-t border-gray-200 pt-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4 font-['Poppins']">{{ 'productDetails.certifications' | translate }}</h3>
-        <div class="flex flex-wrap gap-2">
-          <span 
-            *ngFor="let certificate of product.certificates"
-            class="px-3 py-1 bg-gray-100 text-gray-800 text-sm rounded-full font-['DM_Sans']"
+        <button 
+          type="button" 
+          (click)="toggleCertificates()" 
+          class="flex items-center w-full justify-between group focus:outline-none" 
+          [attr.aria-expanded]="certificatesOpen" 
+          [attr.aria-controls]="'certificates-content'"
+        >
+          <h3 class="text-lg font-semibold text-gray-900 font-['Poppins']">{{ 'productDetails.certifications' | translate }}</h3>
+          <svg 
+            [ngClass]="{'rotate-180': certificatesOpen, 'rotate-0': !certificatesOpen}" 
+            class="w-5 h-5 text-gray-500 transition-transform duration-200" 
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
           >
-            {{ certificate }}
-          </span>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        <div id="certificates-content" *ngIf="certificatesOpen" class="mt-4">
+          <div class="flex flex-wrap gap-2">
+            <span 
+              *ngFor="let certificate of product.certificates"
+              class="px-3 py-1 bg-gray-100 text-gray-800 text-sm rounded-full font-['DM_Sans']"
+            >
+              {{ certificate }}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -381,6 +438,10 @@ export class ProductInfoComponent implements OnInit, OnDestroy {
   averageRating$ = this.store.select(selectAverageRating);
   reviewCount$ = this.store.select(selectReviewCount);
 
+  // Collapsible sections - all collapsed by default
+  descriptionOpen = false;
+  productDetailsOpen = false;
+  certificatesOpen = false;
   specificationsOpen = false;
   featuresOpen = false;
 
@@ -508,6 +569,18 @@ export class ProductInfoComponent implements OnInit, OnDestroy {
 
   hasFeatures(): boolean {
     return !!(this.product.features && this.product.features.length > 0);
+  }
+
+  toggleDescription() {
+    this.descriptionOpen = !this.descriptionOpen;
+  }
+
+  toggleProductDetails() {
+    this.productDetailsOpen = !this.productDetailsOpen;
+  }
+
+  toggleCertificates() {
+    this.certificatesOpen = !this.certificatesOpen;
   }
 
   toggleSpecifications() {

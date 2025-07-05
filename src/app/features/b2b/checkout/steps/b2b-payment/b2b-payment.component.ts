@@ -21,72 +21,34 @@ import { B2BCartItem } from '../../../cart/models/b2b-cart.model';
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
       <h2 class="text-2xl font-bold text-gray-900 mb-6 font-['Poppins']">{{ 'b2bCheckout.paymentMethod' | translate }}</h2>
       
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <!-- Payment Form -->
-        <div class="lg:col-span-2">
+        <div class="lg:col-span-1">
           <form [formGroup]="paymentForm" (ngSubmit)="onSubmit()">
             <!-- Payment Methods -->
             <div class="mb-8">
               <h3 class="text-lg font-semibold text-gray-900 mb-4 font-['Poppins']">{{ 'b2bCheckout.selectPaymentMethod' | translate }}</h3>
               <div class="space-y-3">
                 
-                <!-- Bank Transfer -->
+                <!-- Payment upon collection -->
                 <label class="flex items-start p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
                   <input
                     type="radio"
                     name="paymentMethod"
-                    value="bank_transfer"
+                    value="payment_upon_collection"
                     formControlName="paymentMethod"
                     class="mt-1 text-solar-600 focus:ring-solar-500"
+                    checked
+                    readonly
                   >
                   <div class="ml-3 flex-1">
                     <div class="flex items-center justify-between">
-                      <span class="font-medium text-gray-900 font-['DM_Sans']">{{ 'b2bCheckout.bankTransfer' | translate }}</span>
-                      <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
-                      </svg>
-                    </div>
-                    <p class="text-sm text-gray-600 font-['DM_Sans'] mt-1">{{ 'b2bCheckout.bankTransferDescription' | translate }}</p>
-                  </div>
-                </label>
-
-                <!-- Cash on Delivery -->
-                <label class="flex items-start p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value="cash_on_delivery"
-                    formControlName="paymentMethod"
-                    class="mt-1 text-solar-600 focus:ring-solar-500"
-                  >
-                  <div class="ml-3 flex-1">
-                    <div class="flex items-center justify-between">
-                      <span class="font-medium text-gray-900 font-['DM_Sans']">{{ 'b2bCheckout.cashOnDelivery' | translate }}</span>
+                      <span class="font-medium text-gray-900 font-['DM_Sans']">{{ 'b2bCheckout.paymentUponCollection' | translate }}</span>
                       <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
                       </svg>
                     </div>
-                    <p class="text-sm text-gray-600 font-['DM_Sans'] mt-1">{{ 'b2bCheckout.cashOnDeliveryDescription' | translate }}</p>
-                  </div>
-                </label>
-
-                <!-- Credit Terms (30 days) -->
-                <label class="flex items-start p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value="credit_30_days"
-                    formControlName="paymentMethod"
-                    class="mt-1 text-solar-600 focus:ring-solar-500"
-                  >
-                  <div class="ml-3 flex-1">
-                    <div class="flex items-center justify-between">
-                      <span class="font-medium text-gray-900 font-['DM_Sans']">{{ 'b2bCheckout.creditTerms30' | translate }}</span>
-                      <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                      </svg>
-                    </div>
-                    <p class="text-sm text-gray-600 font-['DM_Sans'] mt-1">{{ 'b2bCheckout.creditTerms30Description' | translate }}</p>
+                    <p class="text-sm text-gray-600 font-['DM_Sans'] mt-1">{{ 'b2bCheckout.paymentUponCollectionDescription' | translate }}</p>
                   </div>
                 </label>
               </div>
@@ -180,18 +142,10 @@ import { B2BCartItem } from '../../../cart/models/b2b-cart.model';
                 <span class="text-gray-600">{{ 'b2bCheckout.subtotal' | translate }}</span>
                 <span class="font-medium">€{{ cartTotal | number:'1.2-2' }}</span>
               </div>
-              <div class="flex justify-between text-sm">
-                <span class="text-gray-600">{{ 'b2bCheckout.shipping' | translate }}</span>
-                <span class="font-medium">{{ 'b2bCheckout.free' | translate }}</span>
-              </div>
-              <div class="flex justify-between text-sm">
-                <span class="text-gray-600">{{ 'b2bCheckout.tax' | translate }} (25%)</span>
-                <span class="font-medium">€{{ (cartTotal * 0.25) | number:'1.2-2' }}</span>
-              </div>
               <div class="border-t border-gray-200 pt-2">
                 <div class="flex justify-between">
                   <span class="text-base font-semibold text-gray-900">{{ 'b2bCheckout.total' | translate }}</span>
-                  <span class="text-base font-semibold text-gray-900">€{{ (cartTotal * 1.25) | number:'1.2-2' }}</span>
+                  <span class="text-base font-semibold text-gray-900">€{{ cartTotal | number:'1.2-2' }}</span>
                 </div>
               </div>
             </div>
@@ -231,7 +185,7 @@ export class B2bPaymentComponent implements OnInit, OnDestroy {
 
   constructor() {
     this.paymentForm = this.fb.group({
-      paymentMethod: ['bank_transfer', [Validators.required]],
+      paymentMethod: ['payment_upon_collection', [Validators.required]],
       specialInstructions: [''],
       acceptTerms: [false, [Validators.requiredTrue]]
     });
@@ -314,8 +268,7 @@ export class B2bPaymentComponent implements OnInit, OnDestroy {
 
       // Calculate totals
       const subtotal = this.cartTotal;
-      const taxAmount = subtotal * 0.25; // 25% tax
-      const totalAmount = subtotal + taxAmount;
+      const totalAmount = subtotal; // No tax for B2B
 
       // Generate order number
       const orderNumber = 'B2B-' + Date.now() + '-' + Math.random().toString(36).substr(2, 6).toUpperCase();
@@ -329,7 +282,7 @@ export class B2bPaymentComponent implements OnInit, OnDestroy {
         customer_phone: this.currentUser.phone || '',
         total_amount: totalAmount,
         subtotal: subtotal,
-        tax_amount: taxAmount,
+        tax_amount: 0,
         shipping_cost: 0,
         discount_amount: 0,
         status: 'pending',

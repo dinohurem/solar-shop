@@ -92,7 +92,7 @@ import { Order } from '../../../shared/models/order.model';
               <div>
                 <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide font-['DM_Sans']">{{ 'orderDetails.total' | translate }}</h3>
                 <p class="mt-1 text-lg font-semibold text-gray-900 font-['Poppins']">
-                  {{ order.totalAmount | currency:'EUR':'symbol':'1.2-2' }}
+                  {{ order.subtotal | currency:'EUR':'symbol':'1.2-2' }}
                 </p>
               </div>
             </div>
@@ -186,14 +186,6 @@ import { Order } from '../../../shared/models/order.model';
                 <span class="text-gray-600">{{ 'orderDetails.subtotal' | translate }}</span>
                 <span class="text-gray-900">{{ order.subtotal | currency:'EUR':'symbol':'1.2-2' }}</span>
               </div>
-              <div class="flex justify-between font-['DM_Sans']" *ngIf="order.taxAmount > 0">
-                <span class="text-gray-600">{{ 'orderDetails.tax' | translate }}</span>
-                <span class="text-gray-900">{{ order.taxAmount | currency:'EUR':'symbol':'1.2-2' }}</span>
-              </div>
-              <div class="flex justify-between font-['DM_Sans']" *ngIf="order.shippingCost > 0">
-                <span class="text-gray-600">{{ 'orderDetails.shipping' | translate }}</span>
-                <span class="text-gray-900">{{ order.shippingCost | currency:'EUR':'symbol':'1.2-2' }}</span>
-              </div>
               <div class="flex justify-between font-['DM_Sans']" *ngIf="order.discountAmount > 0">
                 <span class="text-gray-600">{{ 'orderDetails.discount' | translate }}</span>
                 <span class="text-red-600">-{{ order.discountAmount | currency:'EUR':'symbol':'1.2-2' }}</span>
@@ -201,7 +193,7 @@ import { Order } from '../../../shared/models/order.model';
               <div class="border-t border-gray-200 pt-3">
                 <div class="flex justify-between text-lg font-semibold text-gray-900 font-['Poppins']">
                   <span>{{ 'orderDetails.total' | translate }}</span>
-                  <span>{{ order.totalAmount | currency:'EUR':'symbol':'1.2-2' }}</span>
+                  <span>{{ order.subtotal | currency:'EUR':'symbol':'1.2-2' }}</span>
                 </div>
               </div>
             </div>

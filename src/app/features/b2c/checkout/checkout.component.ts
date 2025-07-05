@@ -140,10 +140,6 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
                   <span class="text-gray-600 font-['DM_Sans']">{{ 'checkout.subtotal' | translate }}</span>
                   <span class="font-['DM_Sans']">{{ (cartSummary$ | async)?.subtotal | currency:'EUR':'symbol':'1.2-2' }}</span>
                 </div>
-                <div class="flex justify-between">
-                  <span class="text-gray-600 font-['DM_Sans']">{{ 'checkout.tax' | translate }}</span>
-                  <span class="font-['DM_Sans']">{{ (cartSummary$ | async)?.tax | currency:'EUR':'symbol':'1.2-2' }}</span>
-                </div>
               </div>
 
               <!-- Divider -->
@@ -152,7 +148,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
               <!-- Total -->
               <div class="flex justify-between text-lg font-semibold">
                 <span class="font-['DM_Sans']">{{ 'checkout.total' | translate }}</span>
-                <span class="font-['DM_Sans']">{{ (cartSummary$ | async)?.total | currency:'EUR':'symbol':'1.2-2' }}</span>
+                <span class="font-['DM_Sans']">{{ (cartSummary$ | async)?.subtotal | currency:'EUR':'symbol':'1.2-2' }}</span>
               </div>
             </div>
           </div>
