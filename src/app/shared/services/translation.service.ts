@@ -425,7 +425,10 @@ export class TranslationService {
                 clearCart: 'Očisti košaricu',
                 addedToCart: 'dodano u košaricu',
                 unknownCompany: 'Nepoznata tvrtka',
-                clearCartConfirm: 'Jeste li sigurni da želite obrisati košaricu?'
+                clearCartConfirm: 'Jeste li sigurni da želite obrisati košaricu?',
+                minimumOrder: 'Min. narudžba',
+                minimumOrderViolation: 'Neki proizvodi ne ispunjavaju minimalne uvjete narudžbe',
+                minimumOrderRequired: 'Minimalna narudžba: {{minimum}} komada (trenutno: {{current}})'
             },
             // B2B Shipping translations
             b2bShipping: {
@@ -611,6 +614,7 @@ export class TranslationService {
                 orderNumber: 'Narudžba broj',
                 orderDetailsAndLineItems: 'Detalji narudžbe i stavke',
                 editOrder: 'Uredi narudžbu',
+                printOrder: 'Ispiši narudžbu',
                 totalAmount: 'Ukupan iznos',
                 items: 'Stavke',
                 orderDate: 'Datum narudžbe',
@@ -879,6 +883,7 @@ export class TranslationService {
                     productRequired: 'Odabir proizvoda je obavezan',
                     customPricing: 'Prilagođena cijena',
                     customPriceEuro: 'Prilagođena cijena (€)',
+                    minimumOrder: 'Minimalna narudžba',
                     priceMinimum: 'Cijena mora biti veća od 0',
                     priceOverrideNote: 'Ova cijena će zamijeniti standardnu cijenu proizvoda za ovu tvrtku',
                     importantNotes: 'Važne napomene',
@@ -2748,6 +2753,7 @@ export class TranslationService {
                 orderNumber: 'Order Number',
                 orderDetailsAndLineItems: 'Order Details & Line Items',
                 editOrder: 'Edit Order',
+                printOrder: 'Print Order',
                 totalAmount: 'Total Amount',
                 items: 'Items',
                 orderDate: 'Order Date',
@@ -3016,6 +3022,7 @@ export class TranslationService {
                     productRequired: 'Product selection is required',
                     customPricing: 'Custom Pricing',
                     customPriceEuro: 'Custom Price (€)',
+                    minimumOrder: 'Minimum Order',
                     priceOverrideNote: 'This price will override the standard product price for this company',
                     importantNotes: 'Important Notes',
                     noteSpecificPricing: 'Company-specific pricing takes precedence over standard product pricing',

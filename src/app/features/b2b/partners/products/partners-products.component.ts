@@ -260,40 +260,31 @@ import { ProductWithPricing, Category } from '../../shared/store/products.action
                   <ng-container *ngIf="gridView === 'grid'">
                     <!-- Product Image -->
                     <div class="w-full h-48 bg-gray-50 relative overflow-hidden flex items-center justify-center border-b border-gray-100">
-                      <img *ngIf="hasProductImage(product)" 
-                           [src]="getProductImageUrl(product)" 
+                      <img [src]="getProductImageUrl(product)" 
                            [alt]="product.name" 
                            class="w-full h-full object-cover"
                            (error)="onImageError($event)"
                            loading="lazy">
-                      <!-- Fallback Icon -->
-                      <div *ngIf="!hasProductImage(product)" class="text-gray-500 text-center">
-                        <svg class="w-20 h-20 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                        </svg>
-                        <p class="text-sm font-medium text-gray-600">{{ product.category || 'Product' }}</p>
-                        <p class="text-xs text-gray-500 mt-1">{{ 'b2b.products.noImageAvailable' | translate }}</p>
-                      </div>
                     </div>
 
                     <!-- Product Info -->
-                    <div class="p-4 flex-1 flex flex-col">
+                    <div class="p-4 flex-1 flex flex-col min-h-0">
                       <!-- Category & SKU -->
-                      <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                      <div class="flex items-center justify-between mb-2 h-[20px]">
+                        <span class="text-xs font-medium text-gray-500 uppercase tracking-wide truncate">
                           {{ product.category }}
                         </span>
-                        <span class="text-xs text-gray-400">{{ product.sku }}</span>
+                        <span class="text-xs text-gray-400 ml-2 flex-shrink-0">{{ product.sku }}</span>
                       </div>
 
                       <!-- Product Name -->
-                      <h3 class="text-lg font-semibold text-gray-900 mb-2 font-['Poppins'] line-clamp-2 h-[3.5rem] flex items-start">
-                        {{ product.name }}
+                      <h3 class="text-lg font-semibold text-gray-900 mb-2 font-['Poppins'] h-[3.5rem] overflow-hidden">
+                        <span class="line-clamp-2">{{ product.name }}</span>
                       </h3>
 
                       <!-- Description -->
-                      <p class="text-sm text-gray-600 mb-3 line-clamp-3 font-['DM_Sans'] h-[4.5rem] overflow-hidden">
-                        {{ product.description }}
+                      <p class="text-sm text-gray-600 mb-3 font-['DM_Sans'] h-[4.5rem] overflow-hidden">
+                        <span class="line-clamp-3">{{ product.description }}</span>
                       </p>
 
                       <!-- Pricing Section -->
@@ -338,7 +329,7 @@ import { ProductWithPricing, Category } from '../../shared/store/products.action
                       <div class="mb-2 h-[20px] flex items-center">
                         <div class="flex items-center justify-between text-xs w-full">
                           <span class="text-gray-600">{{ 'b2b.products.minimumOrder' | translate }}:</span>
-                          <span class="font-medium">{{ product.minimum_order || 1 }} {{ 'b2b.products.pieces' | translate }}</span>
+                          <span class="font-medium">{{ getMinimumOrder(product) }} {{ 'b2b.products.pieces' | translate }}</span>
                         </div>
                       </div>
 
@@ -403,30 +394,22 @@ import { ProductWithPricing, Category } from '../../shared/store/products.action
                   <ng-container *ngIf="gridView === 'list'">
                     <!-- Product Image -->
                     <div class="w-24 h-24 bg-gray-50 rounded-lg flex-shrink-0 flex items-center justify-center border border-gray-200">
-                      <img *ngIf="hasProductImage(product)" 
-                           [src]="getProductImageUrl(product)" 
+                      <img [src]="getProductImageUrl(product)" 
                            [alt]="product.name" 
                            class="w-full h-full object-cover rounded-lg"
                            (error)="onImageError($event)"
                            loading="lazy">
-                      <!-- Fallback Icon -->
-                      <div *ngIf="!hasProductImage(product)" class="text-gray-500 text-center">
-                        <svg class="w-10 h-10 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                        </svg>
-                        <p class="text-xs text-gray-600 mt-1">{{ 'b2b.products.noImage' | translate }}</p>
-                      </div>
                     </div>
                     
                     <!-- Product Info -->
                     <div class="flex-1 min-w-0">
                       <div class="flex items-start justify-between">
                         <div class="min-w-0 flex-1">
-                          <h3 class="text-lg font-semibold text-gray-900 font-['Poppins'] truncate">
-                            {{ product.name }}
+                          <h3 class="text-lg font-semibold text-gray-900 font-['Poppins'] overflow-hidden">
+                            <span class="line-clamp-1">{{ product.name }}</span>
                           </h3>
-                          <p class="text-sm text-gray-600 mt-1 line-clamp-2 font-['DM_Sans']">
-                            {{ product.description }}
+                          <p class="text-sm text-gray-600 mt-1 font-['DM_Sans'] overflow-hidden">
+                            <span class="line-clamp-2">{{ product.description }}</span>
                           </p>
                           <div class="flex items-center space-x-4 mt-2 flex-wrap">
                             <span class="text-xs font-medium text-gray-500 uppercase">{{ product.category }}</span>
@@ -483,11 +466,19 @@ import { ProductWithPricing, Category } from '../../shared/store/products.action
     </div>
   `,
   styles: [`
+    .line-clamp-1 {
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
     .line-clamp-2 {
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
+      text-overflow: ellipsis;
     }
     .line-clamp-3 {
       display: -webkit-box;
@@ -603,6 +594,17 @@ export class PartnersProductsComponent implements OnInit, OnDestroy {
    */
   hasB2BPrice(product: ProductWithPricing): boolean {
     return !!(product.company_price || product.partner_price);
+  }
+
+  /**
+   * Get minimum order for a product, using company-specific minimum order if available
+   */
+  getMinimumOrder(product: ProductWithPricing): number {
+    // Use company-specific minimum order if available, otherwise use product default
+    if (this.isCompanyContact && product.company_minimum_order !== undefined) {
+      return product.company_minimum_order;
+    }
+    return product.minimum_order || 1;
   }
 
   getStatusClass(status: string): string {
@@ -743,8 +745,9 @@ export class PartnersProductsComponent implements OnInit, OnDestroy {
   onImageError(event: Event): void {
     const img = event.target as HTMLImageElement;
     if (img) {
-      // Hide the broken image and let the fallback icon show
-      img.style.display = 'none';
+      // Replace with stock image URL
+      img.src = 'https://plus.unsplash.com/premium_photo-1716913071257-76d30af4f817?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
+      img.style.display = 'block';
     }
   }
 
@@ -766,8 +769,8 @@ export class PartnersProductsComponent implements OnInit, OnDestroy {
       return product.images[0].url;
     }
 
-    // Return null to indicate no image available - will show fallback icon
-    return '';
+    // Return stock image URL as fallback
+    return 'https://plus.unsplash.com/premium_photo-1716913071257-76d30af4f817?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
   }
 
   hasProductImage(product: ProductWithPricing): boolean {

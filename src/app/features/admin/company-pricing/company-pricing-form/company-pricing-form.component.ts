@@ -15,6 +15,7 @@ import { Company, Product } from '../store/company-pricing.actions';
 interface ProductWithCustomPrice extends Product {
   customPrice: number;
   hasCustomPrice: boolean;
+  minimumOrder: number;
 }
 
 @Component({
@@ -127,6 +128,9 @@ interface ProductWithCustomPrice extends Product {
                   {{ 'admin.companyPricingForm.customPriceEuro' | translate }}
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {{ 'admin.companyPricingForm.minimumOrder' | translate }}
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   {{ 'common.actions' | translate }}
                 </th>
               </tr>
@@ -151,6 +155,16 @@ interface ProductWithCustomPrice extends Product {
                     (input)="updateCustomPrice(product, $event)"
                     [placeholder]="'€' + (product.price | number:'1.2-2')"
                     class="w-32 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <input
+                    type="number"
+                    step="1"
+                    min="1"
+                    [value]="product.minimumOrder || 1"
+                    (input)="updateMinimumOrder(product, $event)"
+                    placeholder="1"
+                    class="w-24 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <button
@@ -190,7 +204,14 @@ interface ProductWithCustomPrice extends Product {
               <span class="text-sm text-gray-500 ml-2">({{ product.sku }})</span>
             </div>
             <div class="text-right">
-              <div class="text-sm text-gray-500">€{{ product.price | number:'1.2-2' }} → <span class="font-medium text-green-600">€{{ product.customPrice | number:'1.2-2' }}</span></div>
+              <div class="text-sm text-gray-500">
+                <div *ngIf="product.hasCustomPrice && product.customPrice !== product.price">
+                  €{{ product.price | number:'1.2-2' }} → <span class="font-medium text-green-600">€{{ product.customPrice | number:'1.2-2' }}</span>
+                </div>
+                <div *ngIf="product.minimumOrder !== 1" class="text-xs text-blue-600 mt-1">
+                  Min. Order: {{ product.minimumOrder }}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -276,7 +297,7 @@ export class CompanyPricingFormComponent implements OnInit, OnDestroy {
     try {
       const { data, error } = await this.supabase.client
         .from('company_pricing')
-        .select('*')
+        .select('*, minimum_order')
         .eq('company_id', this.selectedCompany.id);
 
       if (error) {
@@ -297,10 +318,12 @@ export class CompanyPricingFormComponent implements OnInit, OnDestroy {
     let filtered = this.products.map(product => {
       const existingPrice = this.existingPricing.find(p => p.product_id === product.id);
       const customPrice = existingPrice ? parseFloat(existingPrice.price) : product.price;
+      const minimumOrder = existingPrice ? (existingPrice.minimum_order || 1) : 1;
       return {
         ...product,
         customPrice: customPrice,
-        hasCustomPrice: !!existingPrice && customPrice !== product.price
+        hasCustomPrice: !!existingPrice && customPrice !== product.price,
+        minimumOrder: minimumOrder
       };
     });
 
@@ -332,13 +355,28 @@ export class CompanyPricingFormComponent implements OnInit, OnDestroy {
     }
   }
 
+  updateMinimumOrder(product: ProductWithCustomPrice, event: Event): void {
+    const target = event.target as HTMLInputElement;
+    const value = parseInt(target.value);
+
+    if (!isNaN(value) && value > 0) {
+      product.minimumOrder = value;
+    } else {
+      product.minimumOrder = 1;
+    }
+  }
+
   removeCustomPrice(product: ProductWithCustomPrice): void {
     product.customPrice = product.price;
     product.hasCustomPrice = false;
+    product.minimumOrder = 1; // Reset minimum order to default when removing custom pricing
   }
 
   getProductsWithCustomPricing(): ProductWithCustomPrice[] {
-    return this.filteredProducts.filter(p => p.hasCustomPrice && p.customPrice !== p.price);
+    return this.filteredProducts.filter(p => 
+      (p.hasCustomPrice && p.customPrice !== p.price) || 
+      p.minimumOrder !== 1
+    );
   }
 
   hasChanges(): boolean {
@@ -359,19 +397,23 @@ export class CompanyPricingFormComponent implements OnInit, OnDestroy {
         if (existingPricing) {
           // Update existing
           await this.supabase.updateRecord('company_pricing', existingPricing.id, {
-            price: product.customPrice
+            price: product.customPrice,
+            minimum_order: product.minimumOrder
           });
         } else {
-          // Create new
-          await this.supabase.createRecord('company_pricing', {
-            company_id: this.selectedCompany.id,
-            product_id: product.id,
-            price: product.customPrice
-          });
+          // Create new - only create if there's a custom price or minimum order different from default
+          if (product.hasCustomPrice || product.minimumOrder !== 1) {
+            await this.supabase.createRecord('company_pricing', {
+              company_id: this.selectedCompany.id,
+              product_id: product.id,
+              price: product.customPrice,
+              minimum_order: product.minimumOrder
+            });
+          }
         }
       }
 
-      // Remove pricing for products that no longer have custom pricing
+      // Remove pricing for products that no longer have custom pricing or minimum order requirements
       const currentProductIds = productsToSave.map(p => p.id);
       const toRemove = this.existingPricing.filter(p =>
         !currentProductIds.includes(p.product_id)

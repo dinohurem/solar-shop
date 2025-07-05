@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subject } from 'rxjs';
-import { takeUntil, take } from 'rxjs/operators';
+import { takeUntil, take, map } from 'rxjs/operators';
 import { B2BCartItem, B2BCartSummary } from '../../models/b2b-cart.model';
 import * as B2BCartSelectors from '../../store/b2b-cart.selectors';
 import * as B2BCartActions from '../../store/b2b-cart.actions';
@@ -88,7 +88,10 @@ import { TranslationService } from '../../../../../shared/services/translation.s
               <div class="space-y-3">
                 <div 
                   *ngFor="let item of cartItems$ | async; trackBy: trackByProductId"
-                  class="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg cart-item"
+                  class="flex items-start space-x-3 p-3 border rounded-lg cart-item"
+                  [class.border-gray-200]="isMinimumOrderMet(item)"
+                  [class.border-amber-300]="!isMinimumOrderMet(item)"
+                  [class.bg-amber-50]="!isMinimumOrderMet(item)"
                 >
                   <!-- Product Image -->
                   <div class="flex-shrink-0">
@@ -128,7 +131,7 @@ import { TranslationService } from '../../../../../shared/services/translation.s
                       <div class="flex items-center space-x-1">
                         <button 
                           (click)="decreaseQuantity(item.productId)"
-                          [disabled]="item.quantity <= 1"
+                          [disabled]="!canDecreaseQuantity(item)"
                           class="w-7 h-7 flex items-center justify-center border border-gray-300 rounded-full hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -155,6 +158,16 @@ import { TranslationService } from '../../../../../shared/services/translation.s
                       >
                         {{ 'cart.remove' | translate }}
                       </button>
+                    </div>
+
+                    <!-- Minimum Order Warning -->
+                    <div *ngIf="!isMinimumOrderMet(item)" class="mt-2">
+                      <div class="flex items-center space-x-1 text-xs text-amber-600 bg-amber-50 p-2 rounded">
+                        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.884-.833-2.654 0L3.16 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                        </svg>
+                        <span>{{ 'b2bCart.minimumOrder' | translate }}: {{ item.minimumOrder }}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -183,9 +196,20 @@ import { TranslationService } from '../../../../../shared/services/translation.s
 
               <!-- Checkout Button -->
               <div class="mt-6">
+                <!-- Minimum Order Violations Warning -->
+                <div *ngIf="hasMinimumOrderViolations$ | async" class="mb-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                  <div class="flex items-center space-x-2 text-amber-700">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.884-.833-2.654 0L3.16 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                    </svg>
+                    <span class="text-sm font-medium">{{ 'b2bCart.minimumOrderViolation' | translate }}</span>
+                  </div>
+                </div>
+                
                 <button 
                   (click)="proceedToCheckout()"
-                  class="w-full px-6 py-4 bg-solar-600 text-white rounded-lg hover:bg-solar-700 transition-colors font-semibold text-lg font-['DM_Sans']"
+                  [disabled]="hasMinimumOrderViolations$ | async"
+                  class="w-full px-6 py-4 bg-solar-600 text-white rounded-lg hover:bg-solar-700 transition-colors font-semibold text-lg font-['DM_Sans'] disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:bg-gray-400"
                 >
                   {{ 'cart.proceedToCheckout' | translate }}
                 </button>
@@ -264,6 +288,17 @@ import { TranslationService } from '../../../../../shared/services/translation.s
     .cart-item {
       transition: all 0.5s ease;
     }
+
+    /* Minimum order violation styling */
+    .cart-item.border-amber-300 {
+      border-left: 4px solid #f59e0b;
+    }
+
+    /* Disabled button styling */
+    .disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
   `]
 })
 export class B2BCartSidebarComponent implements OnInit, OnDestroy {
@@ -277,6 +312,7 @@ export class B2BCartSidebarComponent implements OnInit, OnDestroy {
   isEmpty$: Observable<boolean>;
   companyInfo$: Observable<{ companyId: string | null; companyName: string | null }>;
   sidebarOpen$: Observable<boolean>;
+  hasMinimumOrderViolations$: Observable<boolean>;
 
   constructor(private store: Store, private router: Router, private translationService: TranslationService) {
     this.cartItems$ = this.store.select(B2BCartSelectors.selectB2BCartItems);
@@ -285,6 +321,11 @@ export class B2BCartSidebarComponent implements OnInit, OnDestroy {
     this.isEmpty$ = this.store.select(B2BCartSelectors.selectB2BCartIsEmpty);
     this.companyInfo$ = this.store.select(B2BCartSelectors.selectB2BCartCompanyInfo);
     this.sidebarOpen$ = this.store.select(B2BCartSelectors.selectB2BCartSidebarOpen);
+    this.hasMinimumOrderViolations$ = this.cartItems$.pipe(
+      takeUntil(this.destroy$),
+      // Check if any item has quantity below minimum order
+      map((items: B2BCartItem[]) => items.some(item => item.quantity < item.minimumOrder))
+    );
   }
 
   ngOnInit(): void {
@@ -334,14 +375,14 @@ export class B2BCartSidebarComponent implements OnInit, OnDestroy {
   }
 
   decreaseQuantity(productId: string): void {
-    // Get current quantity and decrease by 1 (minimum 1)
+    // Get current quantity and decrease by 1 (minimum is the minimum order requirement)
     this.cartItems$.pipe(
       takeUntil(this.destroy$),
       // Take only the first emission to avoid multiple subscriptions
       take(1)
     ).subscribe((items: B2BCartItem[]) => {
       const item = items.find((i: B2BCartItem) => i.productId === productId);
-      if (item && item.quantity > 1) {
+      if (item && item.quantity > item.minimumOrder) {
         this.store.dispatch(B2BCartActions.updateB2BCartItem({
           productId,
           quantity: item.quantity - 1
@@ -368,6 +409,25 @@ export class B2BCartSidebarComponent implements OnInit, OnDestroy {
 
   trackByProductId(_index: number, item: B2BCartItem): string {
     return item.productId;
+  }
+
+  // Minimum order validation methods
+  isMinimumOrderMet(item: B2BCartItem): boolean {
+    return item.quantity >= item.minimumOrder;
+  }
+
+  canDecreaseQuantity(item: B2BCartItem): boolean {
+    return item.quantity > item.minimumOrder;
+  }
+
+  getMinimumOrderMessage(item: B2BCartItem): string {
+    if (this.isMinimumOrderMet(item)) {
+      return '';
+    }
+    return this.translationService.translate('b2bCart.minimumOrderRequired', {
+      minimum: item.minimumOrder,
+      current: item.quantity
+    });
   }
 
   getImageSrc(imagePath: string): string {

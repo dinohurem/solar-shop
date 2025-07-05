@@ -5,6 +5,7 @@ export interface CompanyPricing {
     company_id: string;
     product_id: string;
     price: number;
+    minimum_order: number;
     created_at: string;
     updated_at: string;
 }

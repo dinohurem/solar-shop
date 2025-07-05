@@ -74,7 +74,7 @@ export class ProductsEffects {
                 from(
                     this.supabaseService.client
                         .from('company_pricing')
-                        .select('*')
+                        .select('id, company_id, product_id, price, minimum_order, created_at, updated_at')
                         .eq('company_id', companyId)
                 ).pipe(
                     map(({ data, error }) => {

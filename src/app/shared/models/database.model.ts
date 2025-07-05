@@ -471,6 +471,7 @@ export interface Database {
                     company_id: string;
                     product_id: string;
                     price: number;
+                    minimum_order: number;
                     created_at: string;
                     updated_at: string;
                 };
@@ -479,6 +480,7 @@ export interface Database {
                     company_id: string;
                     product_id: string;
                     price: number;
+                    minimum_order?: number;
                     created_at?: string;
                     updated_at?: string;
                 };
@@ -487,6 +489,7 @@ export interface Database {
                     company_id?: string;
                     product_id?: string;
                     price?: number;
+                    minimum_order?: number;
                     updated_at?: string;
                 };
             };

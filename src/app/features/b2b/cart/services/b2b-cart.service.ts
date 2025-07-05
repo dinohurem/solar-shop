@@ -204,7 +204,7 @@ export class B2BCartService {
         // Get company-specific pricing
         const { data: companyPricing } = await this.supabaseService.client
             .from('company_pricing')
-            .select('price')
+            .select('price, minimum_order')
             .eq('company_id', companyId)
             .eq('product_id', productId)
             .single();
@@ -212,6 +212,7 @@ export class B2BCartService {
         return {
             ...product,
             company_price: companyPricing?.price,
+            minimum_order: companyPricing?.minimum_order || 1,
             partner_price: undefined // TODO: Add partner pricing logic
         };
     }

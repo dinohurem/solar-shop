@@ -47,6 +47,7 @@ export const selectProductsWithPricing = createSelector(
         return products.map(product => {
             const customPricing = companyPricing.find(p => p.product_id === product.id);
             const company_price = customPricing ? customPricing.price : undefined;
+            const company_minimum_order = customPricing ? customPricing.minimum_order : undefined;
 
             // Calculate savings if there's a company price
             const savings = company_price ? product.price - company_price : undefined;
@@ -58,7 +59,8 @@ export const selectProductsWithPricing = createSelector(
                 savings,
                 in_stock: (product.stock_quantity || 0) > 0,
                 partner_only: false, // TODO: Add partner only logic
-                has_pending_price: !company_price
+                has_pending_price: !company_price,
+                company_minimum_order
             };
         });
     }

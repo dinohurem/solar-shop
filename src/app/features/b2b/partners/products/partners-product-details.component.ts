@@ -226,7 +226,7 @@ import * as B2BCartActions from '../../cart/store/b2b-cart.actions';
               <div class="space-y-3">
                 <div class="flex items-center justify-between">
                   <span class="text-gray-600">{{ 'b2b.products.minimumOrder' | translate }}:</span>
-                  <span class="font-medium">{{ product.minimum_order || 1 }} {{ 'b2b.products.pieces' | translate }}</span>
+                  <span class="font-medium">{{ getMinimumOrder(product) }} {{ 'b2b.products.pieces' | translate }}</span>
                 </div>
                 <div class="flex items-center justify-between">
                   <span class="text-gray-600">{{ 'b2b.products.availability' | translate }}:</span>
@@ -271,13 +271,37 @@ import * as B2BCartActions from '../../cart/store/b2b-cart.actions';
 
             <!-- Specifications -->
             <div *ngIf="product.specifications" class="bg-white rounded-lg border border-gray-200 p-6">
-              <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ 'b2b.products.specifications' | translate }}</h3>
-              <dl class="space-y-3">
-                <div *ngFor="let spec of getSpecifications(product.specifications)" class="flex justify-between">
-                  <dt class="text-gray-600">{{ spec.key }}:</dt>
-                  <dd class="font-medium text-gray-900">{{ spec.value }}</dd>
-                </div>
-              </dl>
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">{{ 'b2b.products.specifications' | translate }}</h3>
+                <button 
+                  (click)="toggleSpecifications()"
+                  class="flex items-center space-x-2 text-solar-600 hover:text-solar-700 transition-colors duration-200"
+                  [attr.aria-expanded]="isSpecificationsExpanded"
+                  [attr.aria-label]="isSpecificationsExpanded ? 'Collapse specifications' : 'Expand specifications'"
+                >
+                  <svg 
+                    class="w-5 h-5 transition-transform duration-200"
+                    [class.rotate-180]="isSpecificationsExpanded"
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                  </svg>
+                </button>
+              </div>
+              <div 
+                class="overflow-hidden transition-all duration-300 ease-in-out"
+                [class.max-h-0]="!isSpecificationsExpanded"
+                [class.max-h-screen]="isSpecificationsExpanded"
+              >
+                <dl class="space-y-3">
+                  <div *ngFor="let spec of getSpecifications(product.specifications)" class="flex justify-between">
+                    <dt class="text-gray-600">{{ spec.key }}:</dt>
+                    <dd class="font-medium text-gray-900">{{ spec.value }}</dd>
+                  </div>
+                </dl>
+              </div>
             </div>
           </div>
         </div>
@@ -289,6 +313,26 @@ import * as B2BCartActions from '../../cart/store/b2b-cart.actions';
     
     :host {
       display: block;
+    }
+    
+    /* Collapsible specifications animation */
+    .max-h-0 {
+      max-height: 0;
+      opacity: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+    
+    .max-h-screen {
+      max-height: 100vh;
+      opacity: 1;
+    }
+    
+    /* Smooth rotation for chevron icon */
+    .rotate-180 {
+      transform: rotate(180deg);
     }
   `]
 })
@@ -307,6 +351,9 @@ export class PartnersProductDetailsComponent implements OnInit, OnDestroy {
   product: ProductWithPricing | null = null;
   loading = true;
   error: string | null = null;
+
+  // Collapsible specifications state
+  isSpecificationsExpanded = true;
 
   products$: Observable<ProductWithPricing[]>;
   loading$: Observable<boolean>;
@@ -409,6 +456,14 @@ export class PartnersProductDetailsComponent implements OnInit, OnDestroy {
     return !!(product.company_price || product.partner_price);
   }
 
+  getMinimumOrder(product: ProductWithPricing): number {
+    // Use company-specific minimum order if available, otherwise use product default
+    if (this.isCompanyContact && product.company_minimum_order !== undefined) {
+      return product.company_minimum_order;
+    }
+    return product.minimum_order || 1;
+  }
+
   getSpecifications(specs: Record<string, string>): Array<{ key: string, value: string }> {
     return Object.entries(specs).map(([key, value]) => ({ key, value }));
   }
@@ -474,5 +529,9 @@ export class PartnersProductDetailsComponent implements OnInit, OnDestroy {
 
   navigateToRegister(): void {
     this.router.navigate(['/partners/register']);
+  }
+
+  toggleSpecifications(): void {
+    this.isSpecificationsExpanded = !this.isSpecificationsExpanded;
   }
 } 

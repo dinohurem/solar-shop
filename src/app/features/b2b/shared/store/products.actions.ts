@@ -35,6 +35,7 @@ export interface CompanyPricing {
     company_id: string;
     product_id: string;
     price: number;
+    minimum_order: number;
     created_at: string;
     updated_at: string;
 }
@@ -47,6 +48,7 @@ export interface ProductWithPricing extends Product {
     partner_only: boolean;
     has_pending_price?: boolean;
     image_url?: string; // computed from images array for easier template access
+    company_minimum_order?: number; // company-specific minimum order from company_pricing table
 }
 
 // Load products

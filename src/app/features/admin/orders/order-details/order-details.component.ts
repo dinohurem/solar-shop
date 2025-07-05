@@ -87,6 +87,16 @@ import * as OrdersActions from '../store/orders.actions';
               <span>{{ isUpdatingPayment ? ('common.updating' | translate) : ('admin.markPurchased' | translate) }}</span>
             </button>
             
+            <!-- Print Order Button -->
+            <button 
+              (click)="printOrder()"
+              class="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors duration-200 flex items-center space-x-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+              </svg>
+              <span>{{ 'admin.printOrder' | translate }}</span>
+            </button>
+            
             <!-- Edit Order Button -->
             <button 
               (click)="editOrder()"
@@ -732,15 +742,384 @@ export class OrderDetailsComponent implements OnInit {
   }
 
   printInvoice(): void {
-    this.statusUpdateMessage = this.translationService.translate('admin.common.invoicePrintingInitiated', {
-      orderNumber: this.order.order_number
-    });
-    this.statusUpdateSuccess = true;
+    this.printOrder();
+  }
 
-    // Clear message after 5 seconds
+  printOrder(): void {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert('Please allow popups for this website to print the order.');
+      return;
+    }
+
+    const printContent = this.generatePrintContent();
+    
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Order ${this.order.order_number} - Solar Shop</title>
+          <meta charset="utf-8">
+          <style>
+            ${this.getPrintStyles()}
+          </style>
+        </head>
+        <body>
+          ${printContent}
+        </body>
+      </html>
+    `);
+    
+    printWindow.document.close();
+    printWindow.focus();
+    
+    // Wait for content to load then print
     setTimeout(() => {
-      this.statusUpdateMessage = '';
-    }, 5000);
+      printWindow.print();
+    }, 500);
+  }
+
+  private generatePrintContent(): string {
+    const orderDate = new Date(this.order.created_at).toLocaleDateString();
+    const currentFormItems = this.orderItemsForm.value.items || [];
+    
+    return `
+      <div class="invoice-container">
+        <!-- Header -->
+        <div class="invoice-header">
+          <div class="company-info">
+            <h1>Solar Shop</h1>
+            <p>Your Solar Energy Partner</p>
+            <p>Email: info@solarshop.com</p>
+            <p>Phone: +1 (555) 123-4567</p>
+          </div>
+          <div class="invoice-title">
+            <h2>Order Confirmation</h2>
+            <p><strong>Order #:</strong> ${this.order.order_number}</p>
+            <p><strong>Date:</strong> ${orderDate}</p>
+            <p><strong>Status:</strong> ${this.formatStatus(this.order.status)}</p>
+          </div>
+        </div>
+
+        <!-- Customer Information -->
+        <div class="customer-section">
+          <div class="billing-info">
+            <h3>Bill To:</h3>
+            <p><strong>${this.order.customer_name || this.order.customer_email}</strong></p>
+            <p>${this.order.billing_address?.street || 'N/A'}</p>
+            <p>${this.order.billing_address?.city || 'N/A'}, ${this.order.billing_address?.postal_code || 'N/A'}</p>
+            <p>${this.order.billing_address?.country || 'N/A'}</p>
+            <p>Email: ${this.order.customer_email}</p>
+            ${this.order.customer_phone ? `<p>Phone: ${this.order.customer_phone}</p>` : ''}
+          </div>
+          <div class="shipping-info">
+            <h3>Ship To:</h3>
+            <p><strong>${this.order.shipping_address?.name || this.order.customer_name || this.order.customer_email}</strong></p>
+            <p>${this.order.shipping_address?.street || this.order.billing_address?.street || 'N/A'}</p>
+            <p>${this.order.shipping_address?.city || this.order.billing_address?.city || 'N/A'}, ${this.order.shipping_address?.postal_code || this.order.billing_address?.postal_code || 'N/A'}</p>
+            <p>${this.order.shipping_address?.country || this.order.billing_address?.country || 'N/A'}</p>
+          </div>
+        </div>
+
+        <!-- Order Items -->
+        <div class="items-section">
+          <h3>Order Items</h3>
+          <table class="items-table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>SKU</th>
+                <th>Price</th>
+                <th>Qty</th>
+                <th>Discount</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${currentFormItems.map((item: any, index: number) => `
+                <tr>
+                  <td>${item.product_name || 'N/A'}</td>
+                  <td>${item.product_sku || 'N/A'}</td>
+                  <td>€${(item.unit_price || 0).toFixed(2)}</td>
+                  <td>${item.quantity || 0}</td>
+                  <td>${item.discount_percentage || 0}%</td>
+                  <td>€${this.getItemSubtotal(index).toFixed(2)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="summary-section">
+          <div class="summary-table">
+            <table>
+              <tr>
+                <td>Subtotal:</td>
+                <td>€${this.getSubtotal().toFixed(2)}</td>
+              </tr>
+              <tr>
+                <td>Item Discounts:</td>
+                <td>-€${this.getItemDiscountsTotal().toFixed(2)}</td>
+              </tr>
+              <tr>
+                <td>Order Discount (${this.orderDiscountForm.get('discount_percentage')?.value || 0}%):</td>
+                <td>-€${this.getOrderDiscountAmount().toFixed(2)}</td>
+              </tr>
+              <tr>
+                <td>Shipping:</td>
+                <td>€${(this.order.shipping_cost || 0).toFixed(2)}</td>
+              </tr>
+              <tr>
+                <td>Tax (${this.order.tax_percentage || 0}%):</td>
+                <td>€${(this.order.tax_amount || 0).toFixed(2)}</td>
+              </tr>
+              <tr class="total-row">
+                <td><strong>Total:</strong></td>
+                <td><strong>€${this.getOrderTotal().toFixed(2)}</strong></td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <!-- Payment Information -->
+        <div class="payment-section">
+          <h3>Payment Information</h3>
+          <p><strong>Payment Method:</strong> ${this.getPaymentMethodTranslation(this.order.payment_method)}</p>
+          <p><strong>Payment Status:</strong> ${this.formatPaymentStatus(this.order.payment_status)}</p>
+        </div>
+
+        <!-- Footer -->
+        <div class="invoice-footer">
+          <p>Thank you for your business!</p>
+          <p>For any questions about this order, please contact us at info@solarshop.com</p>
+        </div>
+      </div>
+    `;
+  }
+
+  private getPrintStyles(): string {
+    return `
+      @media print {
+        @page {
+          size: A4;
+          margin: 2cm;
+        }
+        
+        body {
+          font-family: Arial, sans-serif;
+          line-height: 1.4;
+          color: #000;
+          -webkit-print-color-adjust: exact;
+        }
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        margin: 0;
+        padding: 20px;
+        background: white;
+        color: #333;
+      }
+
+      .invoice-container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        padding: 30px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      }
+
+      .invoice-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 40px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #e5e7eb;
+      }
+
+      .company-info h1 {
+        margin: 0 0 10px 0;
+        font-size: 28px;
+        color: #1e40af;
+        font-weight: bold;
+      }
+
+      .company-info p {
+        margin: 5px 0;
+        color: #666;
+      }
+
+      .invoice-title {
+        text-align: right;
+      }
+
+      .invoice-title h2 {
+        margin: 0 0 15px 0;
+        font-size: 24px;
+        color: #1e40af;
+      }
+
+      .invoice-title p {
+        margin: 8px 0;
+        font-size: 16px;
+      }
+
+      .customer-section {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 40px;
+        gap: 40px;
+      }
+
+      .billing-info, .shipping-info {
+        flex: 1;
+      }
+
+      .billing-info h3, .shipping-info h3 {
+        margin: 0 0 15px 0;
+        font-size: 18px;
+        color: #1e40af;
+        border-bottom: 1px solid #e5e7eb;
+        padding-bottom: 5px;
+      }
+
+      .billing-info p, .shipping-info p {
+        margin: 8px 0;
+        font-size: 14px;
+      }
+
+      .items-section {
+        margin-bottom: 30px;
+      }
+
+      .items-section h3 {
+        margin: 0 0 20px 0;
+        font-size: 20px;
+        color: #1e40af;
+        border-bottom: 2px solid #e5e7eb;
+        padding-bottom: 10px;
+      }
+
+      .items-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+      }
+
+      .items-table th {
+        background-color: #f8fafc;
+        padding: 12px 8px;
+        text-align: left;
+        font-weight: bold;
+        border: 1px solid #e5e7eb;
+        font-size: 14px;
+      }
+
+      .items-table td {
+        padding: 12px 8px;
+        border: 1px solid #e5e7eb;
+        font-size: 14px;
+      }
+
+      .items-table tbody tr:nth-child(even) {
+        background-color: #f8fafc;
+      }
+
+      .summary-section {
+        margin-bottom: 30px;
+      }
+
+      .summary-table {
+        float: right;
+        width: 300px;
+      }
+
+      .summary-table table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .summary-table td {
+        padding: 8px 12px;
+        border-bottom: 1px solid #e5e7eb;
+        font-size: 14px;
+      }
+
+      .summary-table td:first-child {
+        text-align: left;
+        font-weight: 500;
+      }
+
+      .summary-table td:last-child {
+        text-align: right;
+        font-weight: 600;
+      }
+
+      .total-row {
+        border-top: 2px solid #1e40af;
+        background-color: #f8fafc;
+      }
+
+      .total-row td {
+        padding: 12px;
+        font-size: 16px;
+        font-weight: bold;
+        color: #1e40af;
+      }
+
+      .payment-section {
+        clear: both;
+        margin-bottom: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #e5e7eb;
+      }
+
+      .payment-section h3 {
+        margin: 0 0 15px 0;
+        font-size: 18px;
+        color: #1e40af;
+      }
+
+      .payment-section p {
+        margin: 8px 0;
+        font-size: 14px;
+      }
+
+      .invoice-footer {
+        text-align: center;
+        margin-top: 40px;
+        padding-top: 20px;
+        border-top: 2px solid #e5e7eb;
+        color: #666;
+      }
+
+      .invoice-footer p {
+        margin: 10px 0;
+        font-size: 14px;
+      }
+
+      @media print {
+        .invoice-container {
+          box-shadow: none;
+          padding: 0;
+        }
+        
+        .customer-section {
+          page-break-inside: avoid;
+        }
+        
+        .items-section {
+          page-break-inside: avoid;
+        }
+        
+        .summary-section {
+          page-break-inside: avoid;
+        }
+      }
+    `;
   }
 
   editOrder(): void {
