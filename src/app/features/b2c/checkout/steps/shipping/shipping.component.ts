@@ -144,7 +144,7 @@ import { User } from '../../../../../shared/models/user.model';
         <div class="mb-8">
           <h3 class="text-lg font-semibold text-[#324053] mb-4 font-['Poppins']">{{ 'checkout.pickupOptions' | translate }}</h3>
           <div class="space-y-3">
-            <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 bg-green-50 border-green-200">
+            <label class="flex items-center p-4 border border-green-200 rounded-lg cursor-pointer hover:bg-gray-50 bg-green-50">
               <input
                 type="radio"
                 name="shippingOption"

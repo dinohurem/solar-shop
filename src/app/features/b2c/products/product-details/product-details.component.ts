@@ -138,7 +138,7 @@ import { Offer } from '../../../../shared/models/offer.model';
                     [src]="offer.imageUrl" 
                     [alt]="offer.title"
                     class="w-full h-full object-cover"
-                    (error)="$event.target.src='https://images.unsplash.com/photo-1509391366360-2e959784a276?w=500&h=500&fit=crop'"
+                    (error)="onImageError($event)"
                   >
                 </div>
                 
@@ -306,7 +306,14 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
     this.router.navigate(['/offers', offerId]);
   }
 
-  trackByOfferId(_index: number, offer: Offer): string {
+  public trackByOfferId(_index: number, offer: Offer): string {
     return offer.id;
+  }
+
+  public onImageError(event: Event): void {
+    const target = event.target as HTMLImageElement;
+    if (target) {
+      target.src = 'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=500&h=500&fit=crop';
+    }
   }
 } 
