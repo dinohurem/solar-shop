@@ -4,6 +4,7 @@ import { Store } from '@ngrx/store';
 import { of } from 'rxjs';
 import { map, catchError, switchMap, withLatestFrom, tap } from 'rxjs/operators';
 import { ToastService } from '../../../../shared/services/toast.service';
+import { TranslationService } from '../../../../shared/services/translation.service';
 import { B2BCartService } from '../services/b2b-cart.service';
 import { B2BCartItem } from '../models/b2b-cart.model';
 import * as B2BCartActions from './b2b-cart.actions';
@@ -16,7 +17,8 @@ export class B2BCartEffects {
         private actions$: Actions,
         private store: Store,
         private b2bCartService: B2BCartService,
-        private toastService: ToastService
+        private toastService: ToastService,
+        private translationService: TranslationService
     ) { }
 
     // Load cart effect
@@ -149,8 +151,9 @@ export class B2BCartEffects {
         this.actions$.pipe(
             ofType(B2BCartActions.addToB2BCartSuccess),
             tap(({ item }) => {
+                const addedToCartMessage = this.translationService.translate('b2bCart.addedToCart');
                 this.toastService.showSuccess(
-                    `${item.name} added to cart`
+                    `${item.name} ${addedToCartMessage}`
                 );
             })
         ),

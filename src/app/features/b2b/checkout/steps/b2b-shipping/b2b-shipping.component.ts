@@ -29,7 +29,8 @@ import { Company } from '../../../../../shared/models/company.model';
                 type="text"
                 [value]="company?.companyName || ''"
                 readonly
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 font-['DM_Sans']"
+                disabled
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 font-['DM_Sans'] cursor-not-allowed"
               >
             </div>
             <div>
@@ -38,7 +39,8 @@ import { Company } from '../../../../../shared/models/company.model';
                 type="email"
                 [value]="company?.companyEmail || ''"
                 readonly
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 font-['DM_Sans']"
+                disabled
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 font-['DM_Sans'] cursor-not-allowed"
               >
             </div>
             <div class="md:col-span-2">
@@ -47,7 +49,8 @@ import { Company } from '../../../../../shared/models/company.model';
                 type="text"
                 [value]="company?.companyAddress || ''"
                 readonly
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 font-['DM_Sans']"
+                disabled
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 font-['DM_Sans'] cursor-not-allowed"
               >
             </div>
           </div>
@@ -168,16 +171,6 @@ import { Company } from '../../../../../shared/models/company.model';
           <h3 class="text-lg font-semibold text-gray-900 mb-4 font-['Poppins']">{{ 'b2bCheckout.additionalInfo' | translate }}</h3>
           <div class="space-y-4">
             <div>
-              <label for="purchaseOrderNumber" class="block text-sm font-medium text-gray-700 mb-2 font-['DM_Sans']">{{ 'b2bCheckout.purchaseOrderNumber' | translate }}</label>
-              <input
-                type="text"
-                id="purchaseOrderNumber"
-                formControlName="purchaseOrderNumber"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-solar-500 focus:border-transparent font-['DM_Sans']"
-                [placeholder]="'b2bCheckout.purchaseOrderNumber' | translate"
-              >
-            </div>
-            <div>
               <label for="deliveryInstructions" class="block text-sm font-medium text-gray-700 mb-2 font-['DM_Sans']">{{ 'b2bCheckout.deliveryInstructions' | translate }}</label>
               <textarea
                 id="deliveryInstructions"
@@ -198,48 +191,16 @@ import { Company } from '../../../../../shared/models/company.model';
               <input
                 type="radio"
                 name="shippingMethod"
-                value="standard"
+                value="pickup"
                 formControlName="shippingMethod"
                 class="text-solar-600 focus:ring-solar-500"
               >
               <div class="ml-3 flex-1">
                 <div class="flex justify-between items-center">
-                  <span class="font-medium text-gray-900 font-['DM_Sans']">{{ 'b2bCheckout.standardShipping' | translate }}</span>
+                  <span class="font-medium text-gray-900 font-['DM_Sans']">{{ 'b2bCheckout.pickupAtStore' | translate }}</span>
                   <span class="font-semibold text-gray-900 font-['DM_Sans']">{{ 'b2bCheckout.free' | translate }}</span>
                 </div>
-                <p class="text-sm text-gray-600 font-['DM_Sans']">{{ 'b2bCheckout.standardShippingDays' | translate }}</p>
-              </div>
-            </label>
-            <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
-              <input
-                type="radio"
-                name="shippingMethod"
-                value="express"
-                formControlName="shippingMethod"
-                class="text-solar-600 focus:ring-solar-500"
-              >
-              <div class="ml-3 flex-1">
-                <div class="flex justify-between items-center">
-                  <span class="font-medium text-gray-900 font-['DM_Sans']">{{ 'b2bCheckout.expressShipping' | translate }}</span>
-                  <span class="font-semibold text-gray-900 font-['DM_Sans']">{{ 'b2bCheckout.expressShippingPrice' | translate }}</span>
-                </div>
-                <p class="text-sm text-gray-600 font-['DM_Sans']">{{ 'b2bCheckout.expressShippingDays' | translate }}</p>
-              </div>
-            </label>
-            <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
-              <input
-                type="radio"
-                name="shippingMethod"
-                value="scheduled"
-                formControlName="shippingMethod"
-                class="text-solar-600 focus:ring-solar-500"
-              >
-              <div class="ml-3 flex-1">
-                <div class="flex justify-between items-center">
-                  <span class="font-medium text-gray-900 font-['DM_Sans']">{{ 'b2bCheckout.scheduledDelivery' | translate }}</span>
-                  <span class="font-semibold text-gray-900 font-['DM_Sans']">{{ 'b2bCheckout.contactForPricing' | translate }}</span>
-                </div>
-                <p class="text-sm text-gray-600 font-['DM_Sans']">{{ 'b2bCheckout.scheduledDeliveryDescription' | translate }}</p>
+                <p class="text-sm text-gray-600 font-['DM_Sans']">{{ 'b2bCheckout.pickupAtStoreDescription' | translate }}</p>
               </div>
             </label>
           </div>
@@ -290,9 +251,8 @@ export class B2bShippingComponent implements OnInit, OnDestroy {
       deliveryCity: ['', [Validators.required]],
       deliveryPostalCode: ['', [Validators.required]],
       deliveryCountry: ['', [Validators.required]],
-      purchaseOrderNumber: [''],
       deliveryInstructions: [''],
-      shippingMethod: ['standard', [Validators.required]]
+      shippingMethod: ['pickup', [Validators.required]]
     });
   }
 

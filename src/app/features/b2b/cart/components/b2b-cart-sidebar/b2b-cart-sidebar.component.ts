@@ -8,6 +8,7 @@ import { B2BCartItem, B2BCartSummary } from '../../models/b2b-cart.model';
 import * as B2BCartSelectors from '../../store/b2b-cart.selectors';
 import * as B2BCartActions from '../../store/b2b-cart.actions';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-b2b-cart-sidebar',
@@ -78,7 +79,7 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
             <div *ngIf="companyInfo$ | async as company" class="p-4 bg-solar-50 border-b border-gray-200">
               <div class="text-sm text-solar-800">
                 <span class="font-medium">{{ 'b2bCart.orderingFor' | translate }}:</span> 
-                {{ company.companyName }}
+                {{ company.companyName || ('b2bCart.unknownCompany' | translate) }}
               </div>
             </div>
 
@@ -277,7 +278,7 @@ export class B2BCartSidebarComponent implements OnInit, OnDestroy {
   companyInfo$: Observable<{ companyId: string | null; companyName: string | null }>;
   sidebarOpen$: Observable<boolean>;
 
-  constructor(private store: Store, private router: Router) {
+  constructor(private store: Store, private router: Router, private translationService: TranslationService) {
     this.cartItems$ = this.store.select(B2BCartSelectors.selectB2BCartItems);
     this.cartSummary$ = this.store.select(B2BCartSelectors.selectB2BCartSummary);
     this.loading$ = this.store.select(B2BCartSelectors.selectB2BCartLoading);
@@ -296,7 +297,7 @@ export class B2BCartSidebarComponent implements OnInit, OnDestroy {
   }
 
   @HostListener('document:keydown.escape', ['$event'])
-  onEscapeKey(event: KeyboardEvent) {
+  onEscapeKey(_event: KeyboardEvent) {
     this.closeSidebar();
   }
 
@@ -354,7 +355,8 @@ export class B2BCartSidebarComponent implements OnInit, OnDestroy {
   }
 
   clearCart(): void {
-    if (confirm('Are you sure you want to clear your cart?')) {
+    const confirmMessage = this.translationService.translate('b2bCart.clearCartConfirm');
+    if (confirm(confirmMessage)) {
       this.store.dispatch(B2BCartActions.clearB2BCart());
     }
   }
@@ -364,7 +366,7 @@ export class B2BCartSidebarComponent implements OnInit, OnDestroy {
     this.router.navigate(['/partners/checkout']);
   }
 
-  trackByProductId(index: number, item: B2BCartItem): string {
+  trackByProductId(_index: number, item: B2BCartItem): string {
     return item.productId;
   }
 
@@ -382,7 +384,7 @@ export class B2BCartSidebarComponent implements OnInit, OnDestroy {
     return imagePath;
   }
 
-  onImageError(event: any, productId: string) {
+  onImageError(event: any, _productId: string) {
     // Prevent infinite error loops by tracking failed images
     const originalSrc = event.target.src;
 

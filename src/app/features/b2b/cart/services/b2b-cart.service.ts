@@ -25,9 +25,10 @@ export class B2BCartService {
             addedAt: new Date(item.addedAt)
         }));
 
-        const companyName = this.getCompanyName(companyId);
-
-        return of({ items: parsedItems, companyName }).pipe(delay(300));
+        return from(this.getCompanyName(companyId)).pipe(
+            map(companyName => ({ items: parsedItems, companyName })),
+            delay(300)
+        );
     }
 
     /**
@@ -162,15 +163,26 @@ export class B2BCartService {
     }
 
     /**
-     * Get mock company name (in real app, this would come from API)
+     * Get company name from database
      */
-    private getCompanyName(companyId: string): string {
-        const companies: Record<string, string> = {
-            'comp-001': 'Solar Innovations d.o.o.',
-            'comp-002': 'Green Energy Solutions',
-            'comp-003': 'EcoTech Croatia'
-        };
-        return companies[companyId] || 'Unknown Company';
+    private async getCompanyName(companyId: string): Promise<string> {
+        try {
+            const { data: company, error } = await this.supabaseService.client
+                .from('companies')
+                .select('company_name')
+                .eq('id', companyId)
+                .eq('status', 'approved')
+                .single();
+
+            if (error || !company) {
+                return 'Unknown Company';
+            }
+
+            return company.company_name;
+        } catch (error) {
+            console.error('Error fetching company name:', error);
+            return 'Unknown Company';
+        }
     }
 
     /**

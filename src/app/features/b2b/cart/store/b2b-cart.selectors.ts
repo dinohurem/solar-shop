@@ -74,16 +74,18 @@ export const selectB2BCartItemQuantity = (productId: string) => createSelector(
 export const selectB2BCartSummary = createSelector(
     selectB2BCartState,
     (state: B2BCartState): B2BCartSummary => {
-        const estimatedTax = state.subtotal * 0.25; // 25% VAT (typical for Croatia)
-        const estimatedShipping = state.subtotal > 1000 ? 0 : 50; // Free shipping over €1000
+        // B2B prices are without tax - no tax calculation needed
+        const estimatedTax = 0;
+        // B2B uses pickup at store - no shipping costs
+        const estimatedShipping = 0;
 
         return {
             itemCount: state.totalItems,
             subtotal: state.subtotal,
             totalSavings: state.totalSavings,
-            estimatedTax: Math.round(estimatedTax * 100) / 100,
+            estimatedTax,
             estimatedShipping,
-            total: Math.round((state.subtotal + estimatedTax + estimatedShipping) * 100) / 100
+            total: Math.round(state.subtotal * 100) / 100
         };
     }
 );

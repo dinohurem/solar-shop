@@ -422,7 +422,10 @@ export class TranslationService {
                 freeShipping: 'Besplatna dostava',
                 total: 'Ukupno',
                 proceedToCheckout: 'Idi na naplatu',
-                clearCart: 'Očisti košaricu'
+                clearCart: 'Očisti košaricu',
+                addedToCart: 'dodano u košaricu',
+                unknownCompany: 'Nepoznata tvrtka',
+                clearCartConfirm: 'Jeste li sigurni da želite obrisati košaricu?'
             },
             // B2B Shipping translations
             b2bShipping: {
@@ -490,6 +493,8 @@ export class TranslationService {
                 standardShipping: 'Standardna dostava',
                 expressShipping: 'Brza dostava',
                 scheduledDelivery: 'Zakazana dostava',
+                pickupAtStore: 'Preuzmi u trgovini',
+                pickupAtStoreDescription: 'Preuzmi proizvode direktno iz naše trgovine',
                 expressShippingPrice: '€50',
                 contactForPricing: 'Kontaktirajte za cijenu',
                 standardShippingDays: '5-7 radnih dana',
@@ -2609,43 +2614,47 @@ export class TranslationService {
                     contactSalesTeam: 'Contact our sales team for custom pricing'
                 },
                 // B2B Cart translations
-                b2bCart: {
-                    title: 'B2B Cart',
-                    emptyTitle: 'Your cart is empty',
-                    emptyMessage: 'Add products to your cart to continue with your order',
-                    continueShopping: 'Continue Shopping',
-                    orderingFor: 'Ordering for',
-                    sku: 'SKU',
-                    save: 'Save',
-                    subtotal: 'Subtotal',
-                    totalSavings: 'Total Savings',
-                    estimatedTax: 'Estimated Tax',
-                    shipping: 'Shipping',
-                    freeShipping: 'Free Shipping',
-                    total: 'Total',
-                    proceedToCheckout: 'Proceed to Checkout',
-                    clearCart: 'Clear Cart'
-                },
-                // B2B Shipping translations
-                b2bShipping: {
-                    title: 'Shipping Information',
-                    companyInformation: 'Company Information',
-                    companyName: 'Company Name',
-                    companyEmail: 'Company Email',
-                    contactPerson: 'Contact Person',
-                    contactPersonName: 'Contact Person Name',
-                    contactPersonEmail: 'Contact Person Email',
-                    deliveryAddress: 'Delivery Address',
-                    deliveryAddressField: 'Delivery Address',
-                    deliveryCity: 'City',
-                    deliveryPostalCode: 'Postal Code',
-                    deliveryCountry: 'Country',
-                    selectCountry: 'Select Country',
-                    shippingMethod: 'Shipping Method',
-                    standardShipping: 'Standard Shipping',
-                    standardShippingDesc: '5-7 business days',
-                    continue: 'Continue'
-                }
+
+            },
+            b2bCart: {
+                title: 'B2B Cart',
+                emptyTitle: 'Your cart is empty',
+                emptyMessage: 'Add products to your cart to continue with your order',
+                continueShopping: 'Continue Shopping',
+                orderingFor: 'Ordering for',
+                sku: 'SKU',
+                save: 'Save',
+                subtotal: 'Subtotal',
+                totalSavings: 'Total Savings',
+                estimatedTax: 'Estimated Tax',
+                shipping: 'Shipping',
+                freeShipping: 'Free Shipping',
+                total: 'Total',
+                proceedToCheckout: 'Proceed to Checkout',
+                clearCart: 'Clear Cart',
+                addedToCart: 'added to cart',
+                unknownCompany: 'Unknown Company',
+                clearCartConfirm: 'Are you sure you want to clear your cart?'
+            },
+            // B2B Shipping translations
+            b2bShipping: {
+                title: 'Shipping Information',
+                companyInformation: 'Company Information',
+                companyName: 'Company Name',
+                companyEmail: 'Company Email',
+                contactPerson: 'Contact Person',
+                contactPersonName: 'Contact Person Name',
+                contactPersonEmail: 'Contact Person Email',
+                deliveryAddress: 'Delivery Address',
+                deliveryAddressField: 'Delivery Address',
+                deliveryCity: 'City',
+                deliveryPostalCode: 'Postal Code',
+                deliveryCountry: 'Country',
+                selectCountry: 'Select Country',
+                shippingMethod: 'Shipping Method',
+                standardShipping: 'Standard Shipping',
+                standardShippingDesc: '5-7 business days',
+                continue: 'Continue'
             },
             // Admin Company Management
             adminCompany: {
@@ -4338,6 +4347,8 @@ export class TranslationService {
                 standardShipping: 'Standard Shipping',
                 expressShipping: 'Express Shipping',
                 scheduledDelivery: 'Scheduled Delivery',
+                pickupAtStore: 'Pickup at Store',
+                pickupAtStoreDescription: 'Pick up products directly from our store',
                 free: 'Free',
                 expressShippingPrice: '€50',
                 contactForPricing: 'Contact for pricing',
