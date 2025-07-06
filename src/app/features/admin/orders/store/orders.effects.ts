@@ -5,6 +5,7 @@ import { map, mergeMap, catchError, switchMap, tap } from 'rxjs/operators';
 import { SupabaseService } from '../../../../services/supabase.service';
 import { ToastService } from '../../../../shared/services/toast.service';
 import { TranslationService } from '../../../../shared/services/translation.service';
+import { EmailService } from '../../../../services/email.service';
 import * as OrdersActions from './orders.actions';
 import { Order } from '../../../../shared/models/order.model';
 import { Review } from '../../../../shared/models/review.model';
@@ -16,7 +17,8 @@ export class OrdersEffects {
         private actions$: Actions,
         private supabaseService: SupabaseService,
         private toastService: ToastService,
-        private translationService: TranslationService
+        private translationService: TranslationService,
+        private emailService: EmailService
     ) { }
 
     loadOrders$ = createEffect(() =>
@@ -316,6 +318,51 @@ export class OrdersEffects {
         )
     );
 
+    // Send order status change emails when order status is updated
+    sendOrderStatusChangeEmails$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(OrdersActions.updateOrderStatusSuccess),
+            switchMap(async ({ orderId, status }) => {
+                try {
+                    console.log('Sending order status change emails for order:', orderId, 'new status:', status);
+
+                    // Get the updated order data
+                    const orderData = await this.supabaseService.getTable('orders', { id: orderId });
+                    const order = orderData && orderData.length > 0 ? orderData[0] : null;
+
+                    if (!order) {
+                        console.error('Order not found for status change email:', orderId);
+                        return { success: false, error: 'Order not found' };
+                    }
+
+                    const emailData = {
+                        to: order.customer_email,
+                        orderNumber: order.order_number,
+                        orderId: order.id,
+                        orderDate: new Date(order.order_date).toLocaleDateString('hr-HR'),
+                        customerName: order.customer_name || 'Kupac',
+                        customerEmail: order.customer_email,
+                        newStatus: status
+                    };
+
+                    // Send email to customer
+                    const customerEmailSent = await this.emailService.sendOrderStatusChangeEmail(emailData);
+                    console.log('Customer order status change email sent:', customerEmailSent);
+
+                    // Send email to admin
+                    const adminEmailSent = await this.emailService.sendOrderStatusChangeNotificationToAdmin(emailData);
+                    console.log('Admin order status change notification email sent:', adminEmailSent);
+
+                    return { success: true };
+                } catch (error) {
+                    console.error('Error sending order status change emails:', error);
+                    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+                }
+            })
+        ),
+        { dispatch: false }
+    );
+
     updatePaymentStatus$ = createEffect(() =>
         this.actions$.pipe(
             ofType(OrdersActions.updatePaymentStatus),
@@ -466,6 +513,56 @@ export class OrdersEffects {
                 console.log('Showing success toast for order:', orderNumber);
                 const message = this.translationService.translate('checkout.orderCreated', { number: orderNumber });
                 this.toastService.showSuccess(message, 4000);
+            })
+        ),
+        { dispatch: false }
+    );
+
+    // Send order confirmation emails when B2C order is created
+    sendOrderConfirmationEmails$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(OrdersActions.createB2COrderSuccess),
+            switchMap(async ({ order, orderNumber }) => {
+                try {
+                    console.log('Sending order confirmation emails for order:', orderNumber);
+
+                    // Prepare order items for email
+                    const orderItems = await this.supabaseService.getTable('order_items', {
+                        order_id: order.id
+                    });
+
+                    const emailData = {
+                        to: order.customerEmail,
+                        orderNumber: order.orderNumber,
+                        orderDate: new Date(order.orderDate).toLocaleDateString('hr-HR'),
+                        customerName: order.customerName || 'Kupac',
+                        customerEmail: order.customerEmail,
+                        items: (orderItems || []).map((item: any) => ({
+                            productName: item.product_name,
+                            productSku: item.product_sku || 'SKU-N/A',
+                            quantity: item.quantity,
+                            unitPrice: item.unit_price,
+                            totalPrice: item.total_price
+                        })),
+                        subtotal: order.subtotal,
+                        taxAmount: order.taxAmount,
+                        shippingCost: order.shippingCost,
+                        totalAmount: order.totalAmount
+                    };
+
+                    // Send email to customer
+                    const customerEmailSent = await this.emailService.sendOrderConfirmationEmail(emailData);
+                    console.log('Customer order confirmation email sent:', customerEmailSent);
+
+                    // Send email to admin
+                    const adminEmailSent = await this.emailService.sendOrderNotificationToAdmin(emailData);
+                    console.log('Admin order notification email sent:', adminEmailSent);
+
+                    return { success: true };
+                } catch (error) {
+                    console.error('Error sending order confirmation emails:', error);
+                    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+                }
             })
         ),
         { dispatch: false }

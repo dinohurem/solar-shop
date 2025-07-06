@@ -452,7 +452,7 @@ export class OrderDetailsComponent implements OnInit {
           shipping_cost: this.order.shipping_cost,
           total_amount: this.order.total_amount
         });
-        this.title.setTitle(`Order ${this.order.order_number} - Order Details - Solar Shop Admin`);
+        this.title.setTitle(`${this.translationService.t('orderDetails.orderNumber')} ${this.order.order_number} - ${this.translationService.t('orderDetails.title')} - Solar Shop Admin`);
         await this.loadOrderItems(orderId);
         this.loadOrderDiscount();
       } else {
@@ -753,7 +753,7 @@ export class OrderDetailsComponent implements OnInit {
     }
 
     const printContent = this.generatePrintContent();
-    
+
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
@@ -769,10 +769,10 @@ export class OrderDetailsComponent implements OnInit {
         </body>
       </html>
     `);
-    
+
     printWindow.document.close();
     printWindow.focus();
-    
+
     // Wait for content to load then print
     setTimeout(() => {
       printWindow.print();
@@ -782,38 +782,38 @@ export class OrderDetailsComponent implements OnInit {
   private generatePrintContent(): string {
     const orderDate = new Date(this.order.created_at).toLocaleDateString();
     const currentFormItems = this.orderItemsForm.value.items || [];
-    
+
     return `
       <div class="invoice-container">
         <!-- Header -->
         <div class="invoice-header">
           <div class="company-info">
             <h1>Solar Shop</h1>
-            <p>Your Solar Energy Partner</p>
-            <p>Email: info@solarshop.com</p>
-            <p>Phone: +1 (555) 123-4567</p>
+            <p>${this.translationService.t('orderDetails.yourSolarEnergyPartner')}</p>
+            <p>${this.translationService.t('orderDetails.email')}: info@solarshop.hr</p>
+            <p>${this.translationService.t('orderDetails.phone')}: +385 1 234 5678</p>
           </div>
           <div class="invoice-title">
-            <h2>Order Confirmation</h2>
-            <p><strong>Order #:</strong> ${this.order.order_number}</p>
-            <p><strong>Date:</strong> ${orderDate}</p>
-            <p><strong>Status:</strong> ${this.formatStatus(this.order.status)}</p>
+            <h2>${this.translationService.t('orderDetails.orderConfirmation')}</h2>
+            <p><strong>${this.translationService.t('orderDetails.orderNumber')}:</strong> ${this.order.order_number}</p>
+            <p><strong>${this.translationService.t('admin.orderDate')}:</strong> ${orderDate}</p>
+            <p><strong>${this.translationService.t('orderDetails.status')}:</strong> ${this.formatStatus(this.order.status)}</p>
           </div>
         </div>
 
         <!-- Customer Information -->
         <div class="customer-section">
           <div class="billing-info">
-            <h3>Bill To:</h3>
+            <h3>${this.translationService.t('orderDetails.billTo')}:</h3>
             <p><strong>${this.order.customer_name || this.order.customer_email}</strong></p>
             <p>${this.order.billing_address?.street || 'N/A'}</p>
             <p>${this.order.billing_address?.city || 'N/A'}, ${this.order.billing_address?.postal_code || 'N/A'}</p>
             <p>${this.order.billing_address?.country || 'N/A'}</p>
-            <p>Email: ${this.order.customer_email}</p>
-            ${this.order.customer_phone ? `<p>Phone: ${this.order.customer_phone}</p>` : ''}
+            <p>${this.translationService.t('orderDetails.email')}: ${this.order.customer_email}</p>
+            ${this.order.customer_phone ? `<p>${this.translationService.t('orderDetails.phone')}: ${this.order.customer_phone}</p>` : ''}
           </div>
           <div class="shipping-info">
-            <h3>Ship To:</h3>
+            <h3>${this.translationService.t('orderDetails.shipTo')}:</h3>
             <p><strong>${this.order.shipping_address?.name || this.order.customer_name || this.order.customer_email}</strong></p>
             <p>${this.order.shipping_address?.street || this.order.billing_address?.street || 'N/A'}</p>
             <p>${this.order.shipping_address?.city || this.order.billing_address?.city || 'N/A'}, ${this.order.shipping_address?.postal_code || this.order.billing_address?.postal_code || 'N/A'}</p>
@@ -823,16 +823,16 @@ export class OrderDetailsComponent implements OnInit {
 
         <!-- Order Items -->
         <div class="items-section">
-          <h3>Order Items</h3>
+          <h3>${this.translationService.t('orderDetails.orderItems')}</h3>
           <table class="items-table">
             <thead>
               <tr>
-                <th>Product</th>
-                <th>SKU</th>
-                <th>Price</th>
-                <th>Qty</th>
-                <th>Discount</th>
-                <th>Total</th>
+                <th>${this.translationService.t('orderDetails.product')}</th>
+                <th>${this.translationService.t('orderDetails.sku')}</th>
+                <th>${this.translationService.t('orderDetails.price')}</th>
+                <th>${this.translationService.t('orderDetails.qty')}</th>
+                <th>${this.translationService.t('orderDetails.discount')}</th>
+                <th>${this.translationService.t('orderDetails.total')}</th>
               </tr>
             </thead>
             <tbody>
@@ -855,27 +855,27 @@ export class OrderDetailsComponent implements OnInit {
           <div class="summary-table">
             <table>
               <tr>
-                <td>Subtotal:</td>
+                <td>${this.translationService.t('orderDetails.subtotal')}:</td>
                 <td>€${this.getSubtotal().toFixed(2)}</td>
               </tr>
               <tr>
-                <td>Item Discounts:</td>
+                <td>${this.translationService.t('orderDetails.itemDiscounts')}:</td>
                 <td>-€${this.getItemDiscountsTotal().toFixed(2)}</td>
               </tr>
               <tr>
-                <td>Order Discount (${this.orderDiscountForm.get('discount_percentage')?.value || 0}%):</td>
+                <td>${this.translationService.t('orderDetails.orderDiscount')} (${this.orderDiscountForm.get('discount_percentage')?.value || 0}%):</td>
                 <td>-€${this.getOrderDiscountAmount().toFixed(2)}</td>
               </tr>
               <tr>
-                <td>Shipping:</td>
+                <td>${this.translationService.t('orderDetails.shipping')}:</td>
                 <td>€${(this.order.shipping_cost || 0).toFixed(2)}</td>
               </tr>
               <tr>
-                <td>Tax (${this.order.tax_percentage || 0}%):</td>
+                <td>${this.translationService.t('orderDetails.tax')} (${this.order.tax_percentage || 0}%):</td>
                 <td>€${(this.order.tax_amount || 0).toFixed(2)}</td>
               </tr>
               <tr class="total-row">
-                <td><strong>Total:</strong></td>
+                <td><strong>${this.translationService.t('orderDetails.total')}:</strong></td>
                 <td><strong>€${this.getOrderTotal().toFixed(2)}</strong></td>
               </tr>
             </table>
@@ -884,15 +884,15 @@ export class OrderDetailsComponent implements OnInit {
 
         <!-- Payment Information -->
         <div class="payment-section">
-          <h3>Payment Information</h3>
-          <p><strong>Payment Method:</strong> ${this.getPaymentMethodTranslation(this.order.payment_method)}</p>
-          <p><strong>Payment Status:</strong> ${this.formatPaymentStatus(this.order.payment_status)}</p>
+          <h3>${this.translationService.t('orderDetails.paymentInformation')}</h3>
+          <p><strong>${this.translationService.t('orderDetails.paymentMethod')}:</strong> ${this.translationService.t(this.getPaymentMethodTranslation(this.order.payment_method))}</p>
+          <p><strong>${this.translationService.t('orderDetails.paymentStatus')}:</strong> ${this.formatPaymentStatus(this.order.payment_status)}</p>
         </div>
 
         <!-- Footer -->
         <div class="invoice-footer">
-          <p>Thank you for your business!</p>
-          <p>For any questions about this order, please contact us at info@solarshop.com</p>
+          <p>${this.translationService.t('orderDetails.thankYouForBusiness')}</p>
+          <p>${this.translationService.t('orderDetails.contactForQuestions')} info@solarshop.com</p>
         </div>
       </div>
     `;

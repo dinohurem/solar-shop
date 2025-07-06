@@ -147,6 +147,15 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
                   </svg>
                   <span>{{ 'admin.contacts' | translate }}</span>
                 </a>
+
+                <a routerLink="/admin/email-test"
+                   routerLinkActive="bg-blue-50 text-blue-700 border-blue-300"
+                   class="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 transition-colors border border-transparent">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                  </svg>
+                  <span>Email Test</span>
+                </a>
               </div>
 
               <!-- Company Management -->

@@ -4,14 +4,17 @@
         <div class="w-full max-w-md">
             <!-- Logo/Brand -->
             <div class="mb-8">
-                <h1 class="text-2xl lg:text-3xl font-bold text-[#222529] font-['Poppins']">Check Your Email</h1>
-                <p class="text-[#324053] text-sm mt-2 font-['DM_Sans']">We've sent a confirmation link to your email</p>
+                <h1 class="text-2xl lg:text-3xl font-bold text-[#222529] font-['Poppins']"> {{ 'register.checkYourEmail'
+                    | translate }}</h1>
+                <p class="text-[#324053] text-sm mt-2 font-['DM_Sans']"> {{ 'register.confirmationLinkSent' | translate
+                    }}</p>
             </div>
 
             <!-- Email display -->
             <div class="mb-8" *ngIf="email">
                 <div class="bg-gray-50 rounded-lg p-4 border">
-                    <p class="text-sm text-[#324053] font-['DM_Sans'] mb-1">Confirmation email sent to:</p>
+                    <p class="text-sm text-[#324053] font-['DM_Sans'] mb-1"> {{ 'register.confirmationEmailSentTo' |
+                        translate }}</p>
                     <p class="text-[#222529] font-medium font-['DM_Sans']">{{ email }}</p>
                 </div>
             </div>
@@ -27,12 +30,13 @@
                                 clip-rule="evenodd"></path>
                         </svg>
                         <div>
-                            <h3 class="text-sm font-medium text-blue-800 font-['DM_Sans']">Next Steps</h3>
+                            <h3 class="text-sm font-medium text-blue-800 font-['DM_Sans']"> {{ 'register.nextSteps' |
+                                translate }}</h3>
                             <div class="mt-2 text-sm text-blue-700 font-['DM_Sans']">
                                 <ol class="list-decimal list-inside space-y-1">
-                                    <li>Check your email inbox (and spam folder)</li>
-                                    <li>Click the confirmation link in the email</li>
-                                    <li>Return to the login page to sign in</li>
+                                    <li> {{ 'register.checkEmailInbox' | translate }}</li>
+                                    <li> {{ 'register.clickConfirmationLink' | translate }}</li>
+                                    <li> {{ 'register.returnToLogin' | translate }}</li>
                                 </ol>
                             </div>
                         </div>
@@ -73,26 +77,27 @@
                     <app-loader *ngIf="resendLoading" class="w-5 h-5 mr-2"></app-loader>
 
                     <span *ngIf="!resendLoading && resendCooldown === 0">
-                        Resend Confirmation Email
+                        {{ 'register.resendConfirmationEmail' | translate }}
                     </span>
 
                     <span *ngIf="!resendLoading && resendCooldown > 0">
-                        Resend in {{ resendCooldown }}s
+                        {{ 'register.resendInSeconds' | translate: { seconds: resendCooldown } }}
                     </span>
                 </button>
 
                 <!-- Back to Login Button -->
                 <button type="button" (click)="goToLogin()"
                     class="w-full h-12 bg-white hover:bg-gray-50 border border-gray-300 text-[#222529] font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-solar-500 focus:ring-offset-2 font-['DM_Sans']">
-                    Back to Login
+                    {{ 'register.backToLogin' | translate }}
                 </button>
             </div>
 
             <!-- Additional Help -->
             <div class="mt-8 text-center">
                 <p class="text-sm text-[#324053] font-['DM_Sans']">
-                    Still having trouble?
-                    <a href="/contact" class="text-solar-600 hover:text-solar-700 font-medium">Contact Support</a>
+                    {{ 'register.stillHavingTrouble' | translate }}
+                    <a href="/contact" class="text-solar-600 hover:text-solar-700 font-medium"> {{
+                        'register.contactSupport' | translate }}</a>
                 </p>
             </div>
         </div>
@@ -120,10 +125,10 @@
                 <div class="w-32 h-32 mx-auto mb-6 flex items-center justify-center">
                     <img src="assets/images/logo.svg" alt="SolarShop" class="w-full h-auto filter brightness-0 invert">
                 </div>
-                <h2 class="text-3xl font-bold font-['Poppins'] mb-2">Almost There!</h2>
-                <p class="text-white/90 font-['DM_Sans']">Just one more step to get started</p>
+                <h2 class="text-3xl font-bold font-['Poppins'] mb-2"> {{ 'register.almostThere' | translate }}</h2>
+                <p class="text-white/90 font-['DM_Sans']"> {{ 'register.oneMoreStep' | translate }}</p>
                 <p class="text-white/80 text-sm mt-4 font-['DM_Sans']">
-                    Confirm your email to unlock all the features of SolarShop
+                    {{ 'register.confirmEmailToUnlock' | translate }}
                 </p>
             </div>
         </div>

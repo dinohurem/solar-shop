@@ -3,13 +3,16 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { SupabaseService } from '../../../../services/supabase.service';
 import { LoaderComponent } from '../../../../shared/components/loader/loader.component';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../shared/services/translation.service';
 
 @Component({
     selector: 'app-confirmation',
     templateUrl: './confirmation.component.html',
     styleUrls: ['./confirmation.component.scss'],
     standalone: true,
-    imports: [CommonModule, RouterModule, LoaderComponent]
+    imports: [CommonModule, RouterModule, LoaderComponent, TranslatePipe],
+    providers: [TranslationService]
 })
 export class ConfirmationComponent implements OnInit, OnDestroy {
     email: string = '';
@@ -23,7 +26,8 @@ export class ConfirmationComponent implements OnInit, OnDestroy {
     constructor(
         private router: Router,
         private route: ActivatedRoute,
-        private supabaseService: SupabaseService
+        private supabaseService: SupabaseService,
+        private translateService: TranslationService
     ) { }
 
     ngOnInit(): void {
@@ -54,11 +58,11 @@ export class ConfirmationComponent implements OnInit, OnDestroy {
             if (error) {
                 this.errorMessage = error;
             } else {
-                this.successMessage = 'Confirmation email sent successfully! Please check your inbox.';
+                this.successMessage = this.translateService.translate('register.confirmationEmailSentSuccess');
                 this.startCooldown();
             }
         } catch (error: any) {
-            this.errorMessage = error.message || 'Failed to resend confirmation email';
+            this.errorMessage = error.message || this.translateService.translate('register.failedToResendEmail');
         } finally {
             this.resendLoading = false;
         }

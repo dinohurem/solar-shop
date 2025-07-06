@@ -8,6 +8,7 @@ import { LoaderComponent } from '../../../../shared/components/loader/loader.com
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import * as AuthActions from '../../store/auth.actions';
 import { selectAuthLoading, selectAuthError } from '../../store/auth.selectors';
+import { TranslationService } from '../../../../shared/services/translation.service';
 
 @Component({
     selector: 'app-register',
@@ -28,7 +29,8 @@ export class RegisterComponent {
     constructor(
         private store: Store,
         private fb: FormBuilder,
-        private router: Router
+        private router: Router,
+        private translateService: TranslationService
     ) {
         this.loading$ = this.store.select(selectAuthLoading);
         this.error$ = this.store.select(selectAuthError);
@@ -102,22 +104,22 @@ export class RegisterComponent {
         const field = this.registerForm.get(fieldName);
         if (field && field.errors && (field.dirty || field.touched)) {
             if (field.errors['required']) {
-                return `${this.getFieldDisplayName(fieldName)} is required`;
+                return this.translateService.translate('auth.fieldRequired', { field: this.getFieldDisplayName(fieldName) });
             }
             if (field.errors['email']) {
-                return 'Please enter a valid email address';
+                return this.translateService.translate('register.emailInvalid');
             }
             if (field.errors['minlength']) {
                 const requiredLength = field.errors['minlength'].requiredLength;
-                return `${this.getFieldDisplayName(fieldName)} must be at least ${requiredLength} characters long`;
+                return this.translateService.translate('register.fieldMinLength', { field: this.getFieldDisplayName(fieldName), min: requiredLength });
             }
             if (field.errors['pattern']) {
                 if (fieldName === 'phoneNumber') {
-                    return 'Please enter a valid phone number';
+                    return this.translateService.translate('register.phoneNumberInvalid');
                 }
             }
             if (field.errors['passwordMismatch']) {
-                return 'Passwords do not match';
+                return this.translateService.translate('register.passwordMismatch');
             }
         }
         return '';
@@ -125,13 +127,13 @@ export class RegisterComponent {
 
     private getFieldDisplayName(fieldName: string): string {
         const displayNames: { [key: string]: string } = {
-            email: 'Email',
-            firstName: 'First name',
-            lastName: 'Last name',
-            phoneNumber: 'Phone number',
-            address: 'Address',
-            password: 'Password',
-            confirmPassword: 'Confirm password'
+            email: this.translateService.translate('register.email'),
+            firstName: this.translateService.translate('register.firstName'),
+            lastName: this.translateService.translate('register.lastName'),
+            phoneNumber: this.translateService.translate('register.phoneNumber'),
+            address: this.translateService.translate('register.address'),
+            password: this.translateService.translate('register.password'),
+            confirmPassword: this.translateService.translate('register.confirmPassword')
         };
         return displayNames[fieldName] || fieldName;
     }

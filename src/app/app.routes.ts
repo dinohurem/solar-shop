@@ -65,6 +65,7 @@ import { OrderDetailsComponent } from './features/b2c/order-details/order-detail
 // Import admin detail components
 import { OfferDetailsComponent as AdminOfferDetailsComponent } from './features/admin/offers/offer-details/offer-details.component';
 import { OrderDetailsComponent as AdminOrderDetailsComponent } from './features/admin/orders/order-details/order-details.component';
+import { EmailTestComponent } from './shared/components/email-test/email-test.component';
 
 export const routes: Routes = [
     // Authentication routes (no layout) - no guards needed, Supabase handles auth state
@@ -199,7 +200,10 @@ export const routes: Routes = [
             { path: 'wishlist', component: AdminWishlistComponent },
 
             // Reviews
-            { path: 'reviews', component: AdminReviewsComponent }
+            { path: 'reviews', component: AdminReviewsComponent },
+
+            // Email Test
+            { path: 'email-test', component: EmailTestComponent }
         ]
     },
 

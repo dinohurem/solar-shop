@@ -9,6 +9,7 @@ import { Router } from '@angular/router';
 import { User } from '../../../shared/models/user.model';
 import { AuthResponse, AuthUser } from '../../../shared/models/auth.model';
 import { SupabaseService } from '../../../services/supabase.service';
+import { EmailService } from '../../../services/email.service';
 
 @Injectable()
 export class AuthEffects {
@@ -17,7 +18,8 @@ export class AuthEffects {
         private authService: AuthService,
         private authPersistence: AuthPersistenceService,
         private router: Router,
-        private supabaseService: SupabaseService
+        private supabaseService: SupabaseService,
+        private emailService: EmailService
     ) { }
 
     login$ = createEffect(() =>

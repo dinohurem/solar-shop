@@ -2,8 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
 import { Router } from '@angular/router';
-import { OffersService, Offer } from './services/offers.service';
+import { OffersService } from './services/offers.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { Offer } from '../../../shared/models/offer.model';
 
 @Component({
   selector: 'app-offers',

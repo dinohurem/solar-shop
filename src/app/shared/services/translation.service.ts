@@ -57,7 +57,7 @@ export class TranslationService {
                 emailInvalid: 'Unesite valjanu email adresu',
                 passwordRequired: 'Lozinka je obavezna',
                 passwordMinLength: 'Lozinka mora imati najmanje {{min}} znakova',
-                fieldRequired: '{{field}} je obavezno',
+                fieldRequired: '{{field}} je obavezno polje',
                 loginError: 'Neispravni podaci za prijavu',
                 required: '{{field}} je obavezno',
                 invalidEmail: 'Unesite valjanu email adresu'
@@ -75,6 +75,7 @@ export class TranslationService {
                 email: 'Email adresa',
                 emailRequired: 'Email adresa je obavezna',
                 emailInvalid: 'Unesite valjanu email adresu',
+                fieldMinLength: '{{field}} mora imati najmanje {{min}} znakova',
                 phoneNumber: 'Broj telefona',
                 phoneNumberInvalid: 'Unesite valjan broj telefona',
                 address: 'Adresa',
@@ -92,7 +93,25 @@ export class TranslationService {
                 enterPhone: 'Unesite svoj broj telefona',
                 enterAddress: 'Unesite svoju punu adresu',
                 createPassword: 'Stvorite lozinku',
-                confirmYourPassword: 'Potvrdite svoju lozinku'
+                confirmYourPassword: 'Potvrdite svoju lozinku',
+                // Confirmation page labels
+                checkYourEmail: 'Provjerite svoju email adresu',
+                confirmationLinkSent: 'Poslali smo vam potvrdu na vašu email adresu',
+                confirmationEmailSentTo: 'Potvrda poslana na:',
+                nextSteps: 'Daljnji koraci',
+                checkEmailInbox: 'Provjerite svoju email inbox (i spam folder)',
+                clickConfirmationLink: 'Kliknite na potvrdu u emailu',
+                returnToLogin: 'Vratite se na stranicu za prijavu',
+                resendConfirmationEmail: 'Pošalji ponovno potvrdu',
+                resendInSeconds: 'Pošalji ponovno za {{seconds}} sekundi',
+                backToLogin: 'Vratite se na prijavu',
+                stillHavingTrouble: 'Imaš li još problema?',
+                contactSupport: 'Kontaktirajte podršku',
+                almostThere: 'Gotovo!',
+                oneMoreStep: 'Samo još jedan korak do početka',
+                confirmEmailToUnlock: 'Potvrdite svoju email adresu da biste otvorili sve funkcije SolarShop-a',
+                confirmationEmailSentSuccess: 'Potvrda emaila poslana uspješno! Provjerite svoju inbox.',
+                failedToResendEmail: 'Neuspjelo ponovno slanje potvrde emaila'
             },
             // Forgot Password
             forgotPassword: {
@@ -336,7 +355,8 @@ export class TranslationService {
                     contactForDetails: 'Kontaktirajte za detalje',
                     productsIncluded: 'Proizvodi uključeni u ovu ponudu',
                     featured: 'Istaknuto',
-                    endingSoon: 'Uskoro završava!'
+                    endingSoon: 'Uskoro završava!',
+                    addToCartPartnerPrice: 'Dodaj u košaricu - Partnerska cijena'
                 },
                 profile: {
                     title: 'Partner profil',
@@ -1743,7 +1763,8 @@ export class TranslationService {
                 businessOrderDescription: 'Označite ovu opciju za poslovne kupnje s mogućnostima posebnih cijena, fakturiranja i prioritetne podrške.',
                 bulkDiscounts: 'Količinski popusti',
                 prioritySupport: 'Prioritetna podrška',
-                customInvoicing: 'Posebno fakturiranje'
+                customInvoicing: 'Posebno fakturiranje',
+                oneOrMoreItemsUnavailable: 'Jedan ili više proizvoda u vašoj košarici nije dostupan u traženoj količini. Molimo provjerite vašu košaricu i pokušajte ponovno.'
             },
             // Order Details
             orderDetails: {
@@ -1774,7 +1795,24 @@ export class TranslationService {
                 viewDetails: 'Prikaži detalje',
                 searchForProduct: 'Traži proizvod',
                 productDetailsNotAvailable: 'Detalji proizvoda nisu dostupni',
-                noItemsFound: 'Nema pronađenih stavki'
+                noItemsFound: 'Nema pronađenih stavki',
+                // Invoice/Print specific labels
+                orderConfirmation: 'Potvrda narudžbe',
+                yourSolarEnergyPartner: 'Vaš partner za solarnu energiju',
+                billTo: 'Naplatiti na',
+                shipTo: 'Dostaviti na',
+                product: 'Proizvod',
+                sku: 'SKU',
+                price: 'Cijena',
+                quantity: 'Količina',
+                itemDiscounts: 'Popusti na stavke',
+                orderDiscount: 'Popust na narudžbu',
+                paymentInformation: 'Informacije o plaćanju',
+                paymentStatus: 'Status plaćanja',
+                thankYouForBusiness: 'Hvala vam na poslovanju!',
+                contactForQuestions: 'Za sva pitanja o ovoj narudžbi, kontaktirajte nas na',
+                email: 'Email',
+                phone: 'Telefon'
             },
             // Footer
             footer: {
@@ -2307,6 +2345,7 @@ export class TranslationService {
                 email: 'Email Address',
                 emailRequired: 'Email address is required',
                 emailInvalid: 'Please enter a valid email address',
+                fieldMinLength: '{{field}} must be at least {{min}} characters long',
                 phoneNumber: 'Phone Number',
                 phoneNumberInvalid: 'Please enter a valid phone number',
                 address: 'Address',
@@ -2324,7 +2363,25 @@ export class TranslationService {
                 enterPhone: 'Enter your phone number',
                 enterAddress: 'Enter your full address',
                 createPassword: 'Create Password',
-                confirmYourPassword: 'Confirm your password'
+                confirmYourPassword: 'Confirm your password',
+                // Confirmation page labels
+                checkYourEmail: 'Check Your Email',
+                confirmationLinkSent: 'We\'ve sent a confirmation link to your email',
+                confirmationEmailSentTo: 'Confirmation email sent to:',
+                nextSteps: 'Next Steps',
+                checkEmailInbox: 'Check your email inbox (and spam folder)',
+                clickConfirmationLink: 'Click the confirmation link in the email',
+                returnToLogin: 'Return to the login page to sign in',
+                resendConfirmationEmail: 'Resend Confirmation Email',
+                resendInSeconds: 'Resend in {{seconds}}s',
+                backToLogin: 'Back to Login',
+                stillHavingTrouble: 'Still having trouble?',
+                contactSupport: 'Contact Support',
+                almostThere: 'Almost There!',
+                oneMoreStep: 'Just one more step to get started',
+                confirmEmailToUnlock: 'Confirm your email to unlock all the features of SolarShop',
+                confirmationEmailSentSuccess: 'Confirmation email sent successfully! Please check your inbox.',
+                failedToResendEmail: 'Failed to resend confirmation email'
             },
             // Forgot Password
             forgotPassword: {
@@ -2569,7 +2626,8 @@ export class TranslationService {
                     contactForDetails: 'Contact us for details',
                     productsIncluded: 'Products included in this offer',
                     featured: 'Featured',
-                    endingSoon: 'Ending soon!'
+                    endingSoon: 'Ending soon!',
+                    addToCartPartnerPrice: 'Add to Cart - Partner Price'
                 },
                 profile: {
                     title: 'Partner Profile',
@@ -3864,7 +3922,8 @@ export class TranslationService {
                 businessOrderDescription: 'Check this option for business purchases with special pricing, invoicing and priority support options.',
                 bulkDiscounts: 'Bulk Discounts',
                 prioritySupport: 'Priority Support',
-                customInvoicing: 'Custom Invoicing'
+                customInvoicing: 'Custom Invoicing',
+                oneOrMoreItemsUnavailable: 'One or more items in your cart are no longer available in the requested quantity. Please review your cart and try again.'
             },
             // Order Details
             orderDetails: {
@@ -3895,7 +3954,24 @@ export class TranslationService {
                 viewDetails: 'View Details',
                 searchForProduct: 'Search for Product',
                 productDetailsNotAvailable: 'Product details not available',
-                noItemsFound: 'No items found'
+                noItemsFound: 'No items found',
+                // Invoice/Print specific labels
+                orderConfirmation: 'Order Confirmation',
+                yourSolarEnergyPartner: 'Your Solar Energy Partner',
+                billTo: 'Bill To',
+                shipTo: 'Ship To',
+                product: 'Product',
+                sku: 'SKU',
+                price: 'Price',
+                quantity: 'Quantity',
+                itemDiscounts: 'Item Discounts',
+                orderDiscount: 'Order Discount',
+                paymentInformation: 'Payment Information',
+                paymentStatus: 'Payment Status',
+                thankYouForBusiness: 'Thank you for your business!',
+                contactForQuestions: 'For any questions about this order, please contact us at',
+                email: 'Email',
+                phone: 'Phone'
             },
             // Footer
             footer: {

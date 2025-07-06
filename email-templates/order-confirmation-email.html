@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="hr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Potvrda narudžbe - SolarShop</title>
+    <style>
+        body,
+        table,
+        td,
+        p,
+        a,
+        li,
+        blockquote {
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }
+
+        table,
+        td {
+            mso-table-lspace: 0pt;
+            mso-table-rspace: 0pt;
+        }
+
+        img {
+            -ms-interpolation-mode: bicubic;
+            border: 0;
+            height: auto;
+            line-height: 100%;
+            outline: none;
+            text-decoration: none;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            font-family: 'Poppins', Arial, sans-serif;
+            line-height: 1.6;
+            color: #0a2541;
+        }
+
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #f47424 0%, #e05d1a 100%);
+            padding: 0;
+            text-align: center;
+        }
+
+        .logo-area {
+            background-color: #ffffff;
+            padding: 20px;
+        }
+
+        .logo {
+            width: 120px;
+            height: auto;
+        }
+
+        .header-text {
+            padding: 20px;
+        }
+
+        .header-text h1 {
+            color: #ffffff;
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .header-text p {
+            color: #ffffff;
+            font-size: 18px;
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px 30px;
+        }
+
+        .order-message h2 {
+            color: #8B2635;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .order-message p {
+            color: #57534e;
+            font-size: 16px;
+            margin: 0 0 30px 0;
+        }
+
+        .order-info {
+            background-color: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .order-info h3 {
+            color: #8B2635;
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0 0 15px 0;
+        }
+
+        .order-items {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .order-items th,
+        .order-items td {
+            padding: 12px 10px;
+        }
+
+        .order-items th {
+            text-align: left;
+            font-size: 14px;
+            border-bottom: 2px solid #e7e5e4;
+            color: #374151;
+        }
+
+        .order-items td {
+            font-size: 14px;
+            border-bottom: 1px solid #e7e5e4;
+        }
+
+        .item-name {
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .item-sku,
+        .item-qty {
+            color: #6b7280;
+            font-size: 12px;
+        }
+
+        .item-price {
+            color: #8B2635;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .order-total {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .order-total td {
+            padding: 8px 0;
+            font-size: 14px;
+        }
+
+        .total-label {
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .total-value {
+            color: #6b7280;
+            text-align: right;
+        }
+
+        .grand-total td {
+            border-top: 2px solid #e7e5e4;
+            padding-top: 10px;
+            margin-top: 10px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #8B2635;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #f47424 0%, #e05d1a 100%);
+            color: #ffffff !important;
+            text-decoration: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+
+        .footer {
+            background-color: #f8fafc;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .footer h3 {
+            color: #8B2635;
+            font-size: 20px;
+            font-weight: 600;
+            margin: 0 0 15px 0;
+        }
+
+        .footer p {
+            color: #57534e;
+            font-size: 14px;
+            margin: 0 0 20px 0;
+        }
+
+        .social-links {
+            margin: 20px 0;
+        }
+
+        .social-link {
+            display: inline-block;
+            margin: 0 10px;
+            text-decoration: none;
+        }
+
+        .social-link svg {
+            width: 24px;
+            height: 24px;
+            fill: #f47424;
+        }
+
+        .contact-info {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e7e5e4;
+        }
+
+        .contact-info p {
+            color: #78716c;
+            font-size: 12px;
+            margin: 5px 0;
+        }
+
+        .contact-info a {
+            color: #f47424;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="email-container">
+        <div class="header">
+            <div class="logo-area">
+                <img src="https://i.imgur.com/vsYOkkQ.png" alt="SolarShop" class="logo" />
+            </div>
+            <div class="header-text">
+                <h1>Potvrda narudžbe</h1>
+                <p>Hvala vam na narudžbi!</p>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="order-message">
+                <h2 style="text-align: center;">Vaša narudžba je uspješno kreirana! 🎉</h2>
+                <p>Drago nam je što ste odabrali SolarShop. Vaša narudžba je zaprimljena i obrađuje se.</p>
+
+                <div class="order-info">
+                    <h3>Informacije o narudžbi</h3>
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                        <tr>
+                            <td class="total-label">Broj narudžbe:</td>
+                            <td class="total-value" align="right">{{orderNumber}}</td>
+                        </tr>
+                        <tr>
+                            <td class="total-label">Datum narudžbe:</td>
+                            <td class="total-value" align="right">{{orderDate}}</td>
+                        </tr>
+                        <tr>
+                            <td class="total-label">Status:</td>
+                            <td class="total-value" align="right">Na čekanju</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <table class="order-items">
+                    <thead>
+                        <tr>
+                            <th>Proizvod</th>
+                            <th style="text-align: right;">Cijena</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each items}}
+                        <tr>
+                            <td>
+                                <div class="item-name">{{productName}}</div>
+                                <div class="item-sku">SKU: {{productSku}}</div>
+                                <div class="item-qty">Količina: {{quantity}} kom</div>
+                            </td>
+                            <td class="item-price" align="right">{{unitPrice}} €</td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+
+                <table class="order-total">
+                    <tr>
+                        <td class="total-label">Iznos:</td>
+                        <td class="total-value" align="right">{{subtotal}} €</td>
+                    </tr>
+                    <tr>
+                        <td class="total-label">PDV:</td>
+                        <td class="total-value" align="right">{{taxAmount}} €</td>
+                    </tr>
+                    <tr>
+                        <td class="total-label">Dostava:</td>
+                        <td class="total-value" align="right">{{shippingCost}} €</td>
+                    </tr>
+                    <tr class="grand-total">
+                        <td class="total-label">Ukupno:</td>
+                        <td class="total-value" align="right">{{totalAmount}} €</td>
+                    </tr>
+                </table>
+
+                <div style="text-align: center;">
+                    <a href="{{orderTrackingUrl}}" class="cta-button">Pratite status narudžbe</a>
+                </div>
+
+                <p style="margin-top: 20px; font-size: 14px; color: #6b7280;">
+                    <strong>Važno:</strong> Ako imate bilo kakvih pitanja o vašoj narudžbi, pišite na
+                    <a href="mailto:info@solarshop.hr">info@solarshop.hr</a>
+                </p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <h3>Ostanite povezani</h3>
+            <p>Pratite nas za novosti, savjete i ekskluzivne ponude</p>
+
+            <div class="social-links">
+                <a href="{{facebookUrl}}" class="social-link" aria-label="Facebook">FB</a>
+                <a href="{{instagramUrl}}" class="social-link" aria-label="Instagram">IG</a>
+                <a href="{{youtubeUrl}}" class="social-link" aria-label="YouTube">YT</a>
+            </div>
+
+            <div class="contact-info">
+                <p><strong>SolarShop</strong></p>
+                <p>📍 Ilica 1, 10000 Zagreb, Hrvatska</p>
+                <p>📧 <a href="mailto:info@solarshop.hr">info@solarshop.hr</a></p>
+                <p>📞 <a href="tel:+38512345678">+385 1 234 5678</a></p>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="hr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Odobrenje tvrtke - SolarShop</title>
+    <style>
+        /* Same styling for consistency */
+        body,
+        table,
+        td,
+        p,
+        a,
+        li,
+        blockquote {
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }
+
+        table,
+        td {
+            mso-table-lspace: 0pt;
+            mso-table-rspace: 0pt;
+        }
+
+        img {
+            -ms-interpolation-mode: bicubic;
+            border: 0;
+            height: auto;
+            line-height: 100%;
+            outline: none;
+            text-decoration: none;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            font-family: 'Poppins', Arial, sans-serif;
+            line-height: 1.6;
+            color: #0a2541;
+        }
+
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #f47424 0%, #e05d1a 100%);
+            padding: 0;
+            text-align: center;
+        }
+
+        .logo-area {
+            background-color: #ffffff;
+            padding: 20px;
+        }
+
+        .logo {
+            width: 120px;
+            height: auto;
+        }
+
+        .header-text {
+            padding: 20px;
+        }
+
+        .header-text h1 {
+            color: #ffffff;
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .header-text p {
+            color: #ffffff;
+            font-size: 18px;
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .approval-message h2 {
+            color: #8B2635;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .approval-message p {
+            color: #57534e;
+            font-size: 16px;
+            margin: 0 0 30px 0;
+        }
+
+        .company-info {
+            background-color: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .company-info h3 {
+            color: #8B2635;
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0 0 15px 0;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 14px;
+            padding: 8px 0;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .info-value {
+            color: #6b7280;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #f47424 0%, #e05d1a 100%);
+            color: #ffffff !important;
+            text-decoration: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            margin: 20px 0;
+        }
+
+        .footer {
+            background-color: #f8fafc;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .footer h3 {
+            color: #8B2635;
+            font-size: 20px;
+            font-weight: 600;
+            margin: 0 0 15px 0;
+        }
+
+        .footer p {
+            color: #57534e;
+            font-size: 14px;
+            margin: 0 0 20px 0;
+        }
+
+        .social-links {
+            margin: 20px 0;
+        }
+
+        .social-link {
+            display: inline-block;
+            margin: 0 10px;
+            text-decoration: none;
+        }
+
+        .social-link svg {
+            width: 24px;
+            height: 24px;
+            fill: #f47424;
+        }
+
+        .contact-info {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e7e5e4;
+        }
+
+        .contact-info p {
+            color: #78716c;
+            font-size: 12px;
+            margin: 5px 0;
+        }
+
+        .contact-info a {
+            color: #f47424;
+            text-decoration: none;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .content {
+                padding: 20px 15px !important;
+            }
+
+            .header-text h1 {
+                font-size: 22px !important;
+            }
+
+            .approval-message h2 {
+                font-size: 20px !important;
+            }
+
+            .info-row {
+                flex-direction: column;
+                margin-bottom: 15px;
+            }
+
+            .info-label {
+                margin-bottom: 5px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="email-container">
+        <div class="header">
+            <div class="logo-area">
+                <img src="https://i.imgur.com/vsYOkkQ.png" alt="SolarShop" class="logo" />
+            </div>
+            <div class="header-text">
+                <h1>Odobrenje tvrtke</h1>
+                <p>Čestitamo! Vaša prijava je odobrena</p>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="approval-message">
+                <h2>Dobrodošli u SolarShop partnerstvo! 🎉</h2>
+                <p>Drago nam je što možemo obavijestiti da je vaša prijava tvrtke <strong>odobrena</strong>! Sada ste
+                    službeni SolarShop partner.</p>
+
+                <div class="company-info">
+                    <h3>Informacije o tvrtki</h3>
+                    <div class="info-row">
+                        <span class="info-label">Naziv tvrtke:</span>
+                        <span class="info-value">{{companyName}}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">E-mail adresa:</span>
+                        <span class="info-value">{{companyEmail}}</span>
+                    </div>
+                </div>
+
+                <p>Sada možete pristupiti našoj B2B platformi i početi s naručivanjem solarne opreme.</p>
+
+                <a href="{{loginUrl}}" class="cta-button" style="color: #ffffff !important;">Pristupite partner
+                    dashboardu</a>
+
+                <p style="margin-top: 20px; font-size: 14px; color: #6b7280;">
+                    <strong>Važno:</strong> Možete se prijaviti koristeći svoju e-mail adresu.
+                    Ako niste postavili lozinku, možete je resetirati kroz stranicu za prijavu.
+                </p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <h3>Ostanite povezani</h3>
+            <p>Pratite nas za najnovije novosti, savjete i ekskluzivne ponude</p>
+
+            <div class="social-links">
+                <a href="{{facebookUrl}}" class="social-link" aria-label="Facebook">
+                    <svg viewBox="0 0 24 24">
+                        <path
+                            d="M22 12a10 10 0 10-11.5 9.9v-7h-2v-3h2v-2.3c0-2 1.2-3.2 3-3.2.9 0 1.8.1 1.8.1v2h-1c-1 0-1.3.6-1.3 1.3V12h2.6l-.4 3h-2.2v7A10 10 0 0022 12z" />
+                    </svg>
+                </a>
+                <a href="{{instagramUrl}}" class="social-link" aria-label="Instagram">
+                    <svg viewBox="0 0 24 24">
+                        <path
+                            d="M7 2C4.243 2 2 4.243 2 7v10c0 2.757 2.243 5 5 5h10c2.757 0 5-2.243 5-5V7c0-2.757-2.243-5-5-5H7zm10 2a3 3 0 013 3v10a3 3 0 01-3 3H7a3 3 0 01-3-3V7a3 3 0 013-3h10zm-5 3a5 5 0 100 10 5 5 0 000-10zm0 2a3 3 0 110 6 3 3 0 010-6zm4.5-.9a1.1 1.1 0 100 2.2 1.1 1.1 0 000-2.2z" />
+                    </svg>
+                </a>
+                <a href="{{youtubeUrl}}" class="social-link" aria-label="YouTube">
+                    <svg viewBox="0 0 24 24">
+                        <path
+                            d="M19.6 3.2H4.4C3.1 3.2 2 4.3 2 5.6v12.8c0 1.3 1.1 2.4 2.4 2.4h15.2c1.3 0 2.4-1.1 2.4-2.4V5.6c0-1.3-1.1-2.4-2.4-2.4zM10 15.5V8.5l6 3.5-6 3.5z" />
+                    </svg>
+                </a>
+            </div>
+
+            <div class="contact-info">
+                <p><strong>SolarShop</strong></p>
+                <p>📍 Ilica 1, 10000 Zagreb, Hrvatska</p>
+                <p>📧 <a href="mailto:info@solarshop.hr">info@solarshop.hr</a></p>
+                <p>📞 <a href="tel:+38512345678">+385 1 234 5678</a></p>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

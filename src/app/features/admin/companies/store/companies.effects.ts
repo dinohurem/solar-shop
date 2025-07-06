@@ -1,10 +1,11 @@
 import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { of } from 'rxjs';
-import { map, mergeMap, catchError } from 'rxjs/operators';
+import { of, from } from 'rxjs';
+import { map, mergeMap, catchError, switchMap } from 'rxjs/operators';
 import { CompaniesService } from '../services/companies.service';
 import { ToastService } from '../../../../shared/services/toast.service';
+import { EmailService } from '../../../../services/email.service';
 import * as CompaniesActions from './companies.actions';
 
 @Injectable()
@@ -12,6 +13,7 @@ export class CompaniesEffects {
     private actions$ = inject(Actions);
     private companiesService = inject(CompaniesService);
     private toastService = inject(ToastService);
+    private emailService = inject(EmailService);
     private store = inject(Store);
 
     loadCompanies$ = createEffect(() =>
@@ -34,9 +36,23 @@ export class CompaniesEffects {
             ofType(CompaniesActions.approveCompany),
             mergeMap(action =>
                 this.companiesService.approveCompany(action.companyId).pipe(
-                    map(company => {
-                        this.toastService.showSuccess('Company approved successfully');
-                        return CompaniesActions.approveCompanySuccess({ company });
+                    switchMap(company => {
+                        // Send approval email
+                        return from(this.emailService.sendCompanyApprovalEmail({
+                            to: company.companyEmail,
+                            companyName: company.companyName,
+                            companyEmail: company.companyEmail
+                        })).pipe(
+                            map(() => {
+                                this.toastService.showSuccess('Company approved successfully and notification email sent');
+                                return CompaniesActions.approveCompanySuccess({ company });
+                            }),
+                            catchError(emailError => {
+                                console.error('Failed to send approval email:', emailError);
+                                this.toastService.showSuccess('Company approved successfully');
+                                return of(CompaniesActions.approveCompanySuccess({ company }));
+                            })
+                        );
                     }),
                     catchError(error => {
                         this.toastService.showError('Failed to approve company');

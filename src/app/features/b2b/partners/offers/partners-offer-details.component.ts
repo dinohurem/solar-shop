@@ -222,7 +222,7 @@ interface PartnerProduct {
                   (click)="addToCart(product, offer)"
                   class="w-full px-4 py-3 bg-solar-600 text-white rounded-lg hover:bg-solar-700 transition-colors font-semibold font-['DM_Sans']"
                 >
-                  Add to Cart - Partner Price
+                  {{ 'b2b.offers.addToCartPartnerPrice' | translate }}
                 </button>
                 
                 <button 
@@ -251,33 +251,6 @@ interface PartnerProduct {
                   {{ offer.description || 'Take advantage of this exclusive partner offer to get exceptional savings on premium solar and energy products.' }}
                 </p>
               </div>
-            </div>
-
-            <!-- Partner Benefits -->
-            <div class="bg-gray-50 rounded-2xl p-6">
-              <h3 class="text-xl font-bold text-gray-900 mb-4 font-['Poppins']">
-                Partner Benefits
-              </h3>
-              <ul class="space-y-3">
-                <li class="flex items-center gap-3">
-                  <svg class="w-5 h-5 text-solar-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/>
-                  </svg>
-                  <span class="text-gray-700 font-['DM_Sans']">Additional 15% Partner Discount</span>
-                </li>
-                <li class="flex items-center gap-3">
-                  <svg class="w-5 h-5 text-solar-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/>
-                  </svg>
-                  <span class="text-gray-700 font-['DM_Sans']">Exclusive Partner Access</span>
-                </li>
-                <li class="flex items-center gap-3">
-                  <svg class="w-5 h-5 text-solar-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/>
-                  </svg>
-                  <span class="text-gray-700 font-['DM_Sans']">Priority Support</span>
-                </li>
-              </ul>
             </div>
           </div>
         </div>

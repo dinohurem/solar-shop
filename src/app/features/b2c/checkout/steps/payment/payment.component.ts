@@ -12,6 +12,7 @@ import { User } from '../../../../../shared/models/user.model';
 import * as CartActions from '../../../cart/store/cart.actions';
 import * as OrdersActions from '../../../../admin/orders/store/orders.actions';
 import { selectB2COrderCreating, selectB2COrderCreated, selectB2COrderError } from '../../../../admin/orders/store/orders.selectors';
+import { TranslationService } from '../../../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-payment',
@@ -244,6 +245,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private store = inject(Store);
   private supabaseService = inject(SupabaseService);
+  private translationService = inject(TranslationService);
 
   paymentForm: FormGroup;
   isProcessing = false;
@@ -322,7 +324,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
 
             // Check for specific error types
             if (error.includes('Insufficient stock')) {
-              this.orderCreationError$.next('One or more items in your cart are no longer available in the requested quantity. Please review your cart and try again.');
+              this.orderCreationError$.next(this.translationService.translate('checkout.oneOrMoreItemsUnavailable'));
             } else {
               this.orderCreationError$.next('Error creating order. Please try again.');
             }
