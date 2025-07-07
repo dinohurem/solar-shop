@@ -296,7 +296,7 @@ export class HeroComponent implements OnInit, OnDestroy {
 
   private loadFeaturedOffers(): void {
     this.offersLoading = true;
-    this.offersService.getFeaturedOffers(6).subscribe({
+    this.offersService.getActiveOffers(6).subscribe({
       next: (offers) => {
         this.featuredOffers = offers;
         this.offersLoading = false;

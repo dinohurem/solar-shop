@@ -882,7 +882,7 @@ export class TranslationService {
                     firstCreated: 'Prvi put dodano',
                     lastUpdated: 'Zadnje ažuriranje',
                     deleteAll: 'Obriši sve',
-                    companyPrices: 'Cijene tvrtki',
+                    companyPrices: 'Cjenik za tvrtke',
                     confirmDeleteAll: 'Obrisati sve prilagođene cijene za',
                     willRemoveCustomPrices: 'Ovo će ukloniti sve',
                     customPricesForCompany: 'prilagođene cijene za ovu tvrtku.',

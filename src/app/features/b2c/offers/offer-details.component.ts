@@ -97,7 +97,8 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
           {{ 'offers.productsIncluded' | translate }}
         </h2>
 
-        <!-- Product Cards -->
+        <!-- Product Cards --> 
+        <!-- TODO: Only show products that are in the offer or the category if full category is in the offer --> 
         <div *ngIf="relatedProducts$ | async as products" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <div 
             *ngFor="let product of products; trackBy: trackByProductId"

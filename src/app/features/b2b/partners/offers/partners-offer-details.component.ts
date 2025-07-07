@@ -247,7 +247,7 @@ interface PartnerProduct {
               </h2>
               <div class="prose prose-lg max-w-none">
                 <p class="text-gray-600 leading-relaxed font-['DM_Sans']">
-                  {{ offer.description || 'Take advantage of this exclusive partner offer to get exceptional savings on premium solar and energy products.' }}
+                  {{ offer.description }}
                 </p>
               </div>
             </div>
