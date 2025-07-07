@@ -76,8 +76,15 @@ export class AdminOffersComponent implements OnInit {
         searchable: true
       },
       {
-        key: 'type',
-        label: this.translationService.translate('admin.offersForm.offerType'),
+        key: 'code',
+        label: this.translationService.translate('admin.offersForm.couponCode'),
+        type: 'text',
+        sortable: true,
+        searchable: true
+      },
+      {
+        key: 'discount_type',
+        label: this.translationService.translate('admin.offersForm.discountType'),
         type: 'status',
         sortable: true,
         searchable: true
@@ -88,6 +95,14 @@ export class AdminOffersComponent implements OnInit {
         type: 'number',
         sortable: true,
         format: (value) => value ? `${value}%` : ''
+      },
+      {
+        key: 'is_b2b',
+        label: this.translationService.translate('admin.offersForm.b2bOffer'),
+        type: 'boolean',
+        sortable: true,
+        searchable: true,
+        format: (value) => value ? this.translationService.translate('admin.contactsForm.yes') : this.translationService.translate('admin.contactsForm.no')
       },
       {
         key: 'status',
@@ -171,7 +186,6 @@ export class AdminOffersComponent implements OnInit {
         title: row.title || row.Title || '',
         description: row.description || row.Description || '',
         short_description: row.short_description || row['Short Description'] || '',
-        type: (row.type || row.Type || 'product') as any,
         status: (row.status || row['Status'] || 'active') as any,
         featured: (row.featured || row['Featured'] || 'false').toLowerCase() === 'true',
         discount_type: (row.discount_type || row['Discount Type'] || 'percentage') as any,

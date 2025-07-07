@@ -35,9 +35,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
             <!-- Offer Info -->
             <div>
               <div class="mb-6">
-                <span class="inline-block bg-white/20 text-white text-sm font-semibold px-3 py-1 rounded-full mb-4">
-                  {{ getOfferTypeDisplay(offer.type) }}
-                </span>
+
                 <h1 class="text-5xl lg:text-6xl font-bold mb-6 font-['Poppins']">
                   {{ offer.title }}
                 </h1>
@@ -314,18 +312,7 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
     });
   }
 
-  getOfferTypeDisplay(type?: string): string {
-    const typeMap: { [key: string]: string } = {
-      'seasonal_sale': 'Seasonal Sale',
-      'flash_sale': 'Flash Sale',
-      'free_shipping': 'Free Shipping',
-      'bundle_deal': 'Bundle Deal',
-      'percentage_discount': 'Special Discount',
-      'fixed_amount_discount': 'Fixed Discount',
-      'first_time_customer': 'New Customer Offer'
-    };
-    return typeMap[type || ''] || 'Special Offer';
-  }
+
 
   getProductImage(product: any): string {
     if (product.images && Array.isArray(product.images) && product.images.length > 0) {

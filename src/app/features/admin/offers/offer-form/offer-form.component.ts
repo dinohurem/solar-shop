@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { AdminFormComponent } from '../../shared/admin-form/admin-form.component';
@@ -52,27 +52,24 @@ import { TranslationService } from '../../../../shared/services/translation.serv
             </div>
           </div>
 
-            <div class="relative">
-              <select
-                id="type"
-                formControlName="type"
-                class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 bg-white"
-              >
-                <option value="">{{ 'admin.offersForm.selectOfferType' | translate }}</option>
-                <option value="percentage">{{ 'admin.offersForm.percentageDiscount' | translate }}</option>
-                <option value="fixed">{{ 'admin.offersForm.fixedAmount' | translate }}</option>
-                <option value="bogo">{{ 'admin.offersForm.buyOneGetOne' | translate }}</option>
-                <option value="bundle">{{ 'admin.offersForm.bundleDeal' | translate }}</option>
-              </select>
-              <label for="type" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700">
-                {{ 'admin.offersForm.offerType' | translate }} *
+          <!-- Coupon Code -->
+          <div class="relative">
+            <input
+              type="text"
+              id="code"
+              formControlName="code"
+              class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
+              placeholder="Coupon Code"
+            >
+              <label for="code" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+                {{ 'admin.offersForm.couponCode' | translate }}
               </label>
-              <div *ngIf="offerForm.get('type')?.invalid && offerForm.get('type')?.touched" class="mt-2 text-sm text-red-600 flex items-center">
+              <div *ngIf="offerForm.get('code')?.invalid && offerForm.get('code')?.touched" class="mt-2 text-sm text-red-600 flex items-center">
                 <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                 </svg>
-                {{ 'admin.offersForm.offerTypeRequired' | translate }}
-              </div>
+              {{ 'admin.offersForm.couponCodeRequired' | translate }}
+            </div>
             </div>
         </div>
 
@@ -150,18 +147,280 @@ import { TranslationService } from '../../../../shared/services/translation.serv
               </div>
             <input
               type="number"
-              id="minimum_purchase"
-              formControlName="minimum_purchase"
+              id="min_order_amount"
+              formControlName="min_order_amount"
               step="0.01"
               min="0"
                 class="peer w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
               placeholder="0.00"
             >
-              <label for="minimum_purchase" class="absolute left-10 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+              <label for="min_order_amount" class="absolute left-10 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
                 {{ 'admin.offersForm.minimumPurchase' | translate }} (€)
               </label>
             </div>
           </div>
+        </div>
+
+        <!-- Category Selection -->
+        <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+            </svg>
+            {{ 'admin.offersForm.categoryProductsSelection' | translate }}
+          </h3>
+          
+          <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div class="relative">
+              <select
+                id="category_id"
+                formControlName="category_id"
+                (change)="onCategoryChange($any($event.target).value)"
+                class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 bg-white"
+                [disabled]="isLoadingCategories"
+              >
+                <option value="">{{ 'admin.offersForm.selectCategory' | translate }}</option>
+                <option *ngFor="let category of categories" [value]="category.id">
+                  {{ category.name }}
+                </option>
+              </select>
+              <label class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700">
+                {{ 'admin.offersForm.selectCategory' | translate }}
+              </label>
+              
+              <!-- Loading indicator -->
+              <div *ngIf="isLoadingCategories" class="absolute right-3 top-1/2 transform -translate-y-1/2">
+                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+              </div>
+              
+              <!-- Tooltip -->
+              <div class="mt-2 text-sm text-gray-500 flex items-center">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                {{ 'admin.offersForm.categoryTooltip' | translate }}
+              </div>
+            </div>
+
+            <div class="relative">
+              <label class="relative flex items-center p-4 rounded-lg border-2 border-gray-200 cursor-pointer hover:border-blue-300 transition-colors duration-200 w-full">
+                <input
+                  type="checkbox"
+                  formControlName="apply_to_category"
+                  (change)="onApplyToCategoryChange($any($event.target).checked)"
+                  class="sr-only"
+                  [disabled]="!selectedCategory"
+                >
+                <span class="flex items-center">
+                  <span class="flex-shrink-0 w-5 h-5 border-2 border-gray-300 rounded mr-3 transition-colors duration-200" 
+                        [class.bg-blue-600]="offerForm.get('apply_to_category')?.value"
+                        [class.border-blue-600]="offerForm.get('apply_to_category')?.value">
+                    <svg *ngIf="offerForm.get('apply_to_category')?.value" class="w-3 h-3 text-white mx-auto mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                    </svg>
+                  </span>
+                  <span class="text-sm font-medium text-gray-700">{{ 'admin.offersForm.applyToCategory' | translate }}</span>
+                </span>
+              </label>
+              
+              <!-- Tooltip -->
+              <div class="mt-2 text-sm text-gray-500 flex items-center">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                {{ 'admin.offersForm.applyToCategoryTooltip' | translate }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Category Products Info -->
+          <div *ngIf="selectedCategory && categoryProducts.length > 0" class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div class="flex items-center justify-between">
+              <div>
+                <h4 class="text-sm font-medium text-blue-900">{{ 'admin.offersForm.productsInCategory' | translate }}</h4>
+                <p class="text-sm text-blue-700">{{ 'admin.offersForm.categoryProductsCount' | translate: { count: categoryProducts.length } }}</p>
+              </div>
+              
+              <button
+                type="button"
+                (click)="applyDiscountToCategory()"
+                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center space-x-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
+                <span>{{ 'admin.offersForm.addProductsFromCategory' | translate }}</span>
+              </button>
+            </div>
+            
+            <!-- Loading indicator for products -->
+            <div *ngIf="isLoadingProducts" class="mt-4 flex justify-center">
+              <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+            </div>
+
+            <!-- Products Management -->
+            <!-- <div *ngIf="!isLoadingProducts && categoryProducts.length > 0" class="mt-4">
+              <h5 class="text-sm font-medium text-blue-900 mb-3">{{ 'admin.offersForm.selectProductsFromCategory' | translate }}</h5>
+              <div class="space-y-2 max-h-60 overflow-y-auto">
+                <div *ngFor="let product of categoryProducts; let i = index" 
+                     class="bg-white rounded-lg p-3 border border-blue-100 hover:border-blue-300 transition-colors duration-200">
+                  <div class="grid grid-cols-1 lg:grid-cols-4 gap-3 items-center">
+                    <div class="lg:col-span-2">
+                      <p class="font-medium text-gray-900">{{ product.name }}</p>
+                      <p class="text-sm text-gray-500">SKU: {{ product.sku || 'N/A' }}</p>
+                    </div>
+                    
+                    <div class="text-center">
+                      <p class="text-sm font-medium text-gray-700">{{ 'admin.originalPrice' | translate }}</p>
+                      <p class="text-lg font-semibold text-gray-900">€{{ product.price | number:'1.2-2' }}</p>
+                    </div>
+                    
+                    <div class="text-center">
+                      <button 
+                        type="button"
+                        (click)="addProductToOffer(product)"
+                        class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition-colors duration-200">
+                        {{ 'admin.addProduct' | translate }}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div> -->
+          </div>
+        </div>
+
+        <!-- Products Management -->
+        <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-6">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+              <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+              </svg>
+              {{ 'admin.productsInOffer' | translate }}
+            </h3>
+            <button 
+              type="button"
+              (click)="addProduct()"
+              class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 flex items-center space-x-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+              </svg>
+              <span>{{ 'admin.addProduct' | translate }}</span>
+            </button>
+          </div>
+
+          <div formArrayName="products" class="space-y-4" *ngIf="productsArray.length > 0; else noProducts">
+            <div *ngFor="let product of productsArray.controls; let i = index" [formGroupName]="i"
+                 class="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:border-gray-300 transition-colors duration-200">
+              <div class="grid grid-cols-1 lg:grid-cols-7 gap-4 items-end">
+                <div class="relative">
+                  <select
+                    formControlName="id"
+                    (change)="onProductSelect($any($event.target).value, i)"
+                    class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 bg-white"
+                    [disabled]="isLoadingAllProducts"
+                  >
+                    <option value="">{{ 'admin.offersForm.selectProduct' | translate }}</option>
+                    <option *ngFor="let prod of getFilteredProducts()" [value]="prod.id" [disabled]="isProductAlreadyAdded(prod.id)">
+                      {{ prod.name }}{{ isProductAlreadyAdded(prod.id) ? ('admin.offersForm.alreadyAdded' | translate) : '' }}
+                    </option>
+                  </select>
+                  <label class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700">
+                    {{ 'admin.productName' | translate }} *
+                  </label>
+                </div>
+
+                <div class="relative">
+                  <input 
+                    type="text"
+                    formControlName="sku"
+                    class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
+                    placeholder="SKU"
+                    readonly>
+                  <label class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+                    SKU
+                  </label>
+                </div>
+
+                <div class="relative">
+                  <input 
+                    type="text"
+                    formControlName="category"
+                    class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
+                    placeholder="Category"
+                    readonly>
+                  <label class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+                    {{ 'admin.category' | translate }}
+                  </label>
+                </div>
+
+                <div class="relative">
+                  <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <span class="text-gray-500 text-lg">€</span>
+                  </div>
+                  <input 
+                    type="number"
+                    formControlName="price"
+                    step="0.01"
+                    min="0"
+                    class="peer w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent bg-gray-50"
+                    placeholder="0.00"
+                    readonly>
+                  <label class="absolute left-10 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+                    {{ 'admin.originalPrice' | translate }}
+                  </label>
+                </div>
+
+                <div class="relative">
+                  <input 
+                    type="number"
+                    formControlName="discount_percentage"
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
+                    placeholder="0">
+                  <label class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+                    {{ 'admin.discountPercent' | translate }}
+                  </label>
+                </div>
+
+                <div class="text-center">
+                  <p class="text-sm font-medium text-gray-700 mb-2">{{ 'admin.finalPrice' | translate }}</p>
+                  <p class="text-lg font-semibold text-green-600">
+                    {{ calculateDiscountedPrice(getProductPrice(i), getProductDiscount(i)) | currency:'EUR':'symbol':'1.2-2' }}
+                  </p>
+                </div>
+
+                <div class="flex justify-center">
+                  <button 
+                    type="button"
+                    (click)="removeProduct(i)"
+                    class="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors duration-200">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <ng-template #noProducts>
+            <div class="text-center py-12">
+              <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+              </svg>
+              <h3 class="text-lg font-medium text-gray-900 mb-2">{{ 'admin.noProductsAssigned' | translate }}</h3>
+              <p class="text-gray-500 mb-4">{{ 'admin.addProductsToOffer' | translate }}</p>
+              <button 
+                type="button"
+                (click)="addProduct()"
+                class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
+                {{ 'admin.addFirstProduct' | translate }}
+              </button>
+            </div>
+          </ng-template>
         </div>
 
         <!-- Date Range -->
@@ -219,13 +478,13 @@ import { TranslationService } from '../../../../shared/services/translation.serv
             <div class="relative">
             <input
               type="number"
-              id="usage_limit"
-              formControlName="usage_limit"
+              id="max_usage"
+              formControlName="max_usage"
               min="1"
                 class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
               placeholder="Unlimited"
             >
-              <label for="usage_limit" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+              <label for="max_usage" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
                 {{ 'admin.offersForm.usageLimit' | translate }}
               </label>
               <p class="mt-2 text-sm text-gray-500 flex items-center">
@@ -267,7 +526,7 @@ import { TranslationService } from '../../../../shared/services/translation.serv
             Offer Status
           </h3>
           
-          <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
             <div class="relative">
               <select
                 id="status"
@@ -304,6 +563,27 @@ import { TranslationService } from '../../../../shared/services/translation.serv
                 </span>
               </label>
             </div>
+
+            <div class="flex items-center">
+              <label class="relative flex items-center p-4 rounded-lg border-2 border-gray-200 cursor-pointer hover:border-blue-300 transition-colors duration-200 w-full">
+              <input
+                id="is_b2b"
+                type="checkbox"
+                formControlName="is_b2b"
+                  class="sr-only"
+                >
+                <span class="flex items-center">
+                  <span class="flex-shrink-0 w-5 h-5 border-2 border-gray-300 rounded mr-3 transition-colors duration-200" 
+                        [class.bg-blue-600]="offerForm.get('is_b2b')?.value"
+                        [class.border-blue-600]="offerForm.get('is_b2b')?.value">
+                    <svg *ngIf="offerForm.get('is_b2b')?.value" class="w-3 h-3 text-white mx-auto mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                    </svg>
+                  </span>
+                  <span class="text-sm font-medium text-gray-700">{{ 'admin.offersForm.b2bOffer' | translate }}</span>
+                </span>
+              </label>
+            </div>
           </div>
         </div>
       </div>
@@ -322,6 +602,13 @@ export class OfferFormComponent implements OnInit {
   isEditMode = false;
   isSubmitting = false;
   offerId: string | null = null;
+  categories: any[] = [];
+  selectedCategory: any = null;
+  categoryProducts: any[] = [];
+  isLoadingCategories = false;
+  isLoadingProducts = false;
+  allProducts: any[] = [];
+  isLoadingAllProducts = false;
 
   constructor() {
     this.initForm();
@@ -329,6 +616,8 @@ export class OfferFormComponent implements OnInit {
 
   ngOnInit(): void {
     this.checkEditMode();
+    this.loadCategories();
+    this.loadAllProducts();
   }
 
   private initForm(): void {
@@ -338,17 +627,21 @@ export class OfferFormComponent implements OnInit {
 
     this.offerForm = this.fb.group({
       title: ['', [Validators.required]],
-      type: ['', [Validators.required]],
       description: [''],
+      code: ['', [Validators.required]],
       discount_type: ['', [Validators.required]],
       discount_value: [0, [Validators.required, Validators.min(0)]],
-      minimum_purchase: [null],
+      min_order_amount: [null],
       start_date: [this.formatDateTimeLocal(defaultStart), [Validators.required]],
       end_date: [this.formatDateTimeLocal(defaultEnd)],
-      usage_limit: [null],
+      max_usage: [null],
       priority: [0],
       status: ['draft', [Validators.required]],
-      is_active: [false]
+      is_active: [false],
+      is_b2b: [false],
+      category_id: [null],
+      apply_to_category: [false],
+      products: this.fb.array([])
     });
   }
 
@@ -377,15 +670,73 @@ export class OfferFormComponent implements OnInit {
     try {
       const data = await this.supabaseService.getTableById('offers', this.offerId);
       if (data) {
+        // Convert applicable_category_ids array to category_id
+        const categoryId = data.applicable_category_ids && data.applicable_category_ids.length > 0
+          ? data.applicable_category_ids[0]
+          : null;
+
         const formData = {
           ...data,
+          category_id: categoryId,
           start_date: data.start_date ? this.formatDateTimeLocal(new Date(data.start_date)) : '',
           end_date: data.end_date ? this.formatDateTimeLocal(new Date(data.end_date)) : ''
         };
         this.offerForm.patchValue(formData);
+
+        // Load offer products
+        await this.loadOfferProducts();
       }
     } catch (error) {
       console.error('Error loading offer:', error);
+    }
+  }
+
+  private async loadOfferProducts(): Promise<void> {
+    if (!this.offerId) return;
+
+    try {
+      const { data, error } = await this.supabaseService.client
+        .from('offer_products')
+        .select(`
+          *,
+          products (
+            id,
+            name,
+            sku,
+            price,
+            category_id,
+            categories (
+              name
+            )
+          )
+        `)
+        .eq('offer_id', this.offerId)
+        .eq('is_active', true)
+        .order('sort_order');
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        // Clear existing products array
+        this.productsArray.clear();
+
+        // Add each offer product to the form
+        data.forEach((offerProduct: any) => {
+          const product = offerProduct.products;
+          const productFormGroup = this.fb.group({
+            id: [product.id, Validators.required],
+            name: [product.name, Validators.required],
+            sku: [product.sku || ''],
+            category: [product.categories?.name || ''],
+            price: [product.price || 0, [Validators.required, Validators.min(0)]],
+            discount_percentage: [offerProduct.discount_percentage || 0, [Validators.min(0), Validators.max(100)]]
+          });
+
+          this.productsArray.push(productFormGroup);
+        });
+      }
+    } catch (error) {
+      console.error('Error loading offer products:', error);
     }
   }
 
@@ -395,25 +746,383 @@ export class OfferFormComponent implements OnInit {
     this.isSubmitting = true;
 
     try {
-      const offerData = {
-        ...formValue,
-        start_date: formValue.start_date ? new Date(formValue.start_date).toISOString() : null,
-        end_date: formValue.end_date ? new Date(formValue.end_date).toISOString() : null,
+      // Extract products from form array
+      const products = this.productsArray.value;
+
+      // Remove products and apply_to_category from form data to avoid saving them to offers table
+      const { products: _, apply_to_category: __, category_id: ___, ...offerData } = formValue;
+
+      // Convert category_id to applicable_category_ids array
+      const categoryId = formValue.category_id;
+      const applicableCategoryIds = categoryId ? [categoryId] : [];
+
+      // Calculate total original and discounted prices
+      const totalOriginalPrice = this.getTotalOriginalPrice();
+      const totalDiscountedPrice = this.getTotalDiscountedPrice();
+
+      const finalOfferData = {
+        ...offerData,
+        applicable_category_ids: applicableCategoryIds,
+        original_price: totalOriginalPrice,
+        discounted_price: totalDiscountedPrice,
+        start_date: offerData.start_date ? new Date(offerData.start_date).toISOString() : null,
+        end_date: offerData.end_date ? new Date(offerData.end_date).toISOString() : null,
         updated_at: new Date().toISOString()
       };
 
+      let savedOfferId: string;
+
       if (this.isEditMode && this.offerId) {
-        await this.supabaseService.updateRecord('offers', this.offerId, offerData);
+        await this.supabaseService.updateRecord('offers', this.offerId, finalOfferData);
+        savedOfferId = this.offerId;
       } else {
-        offerData.created_at = new Date().toISOString();
-        await this.supabaseService.createRecord('offers', offerData);
+        finalOfferData.created_at = new Date().toISOString();
+        const result = await this.supabaseService.createRecord('offers', finalOfferData);
+        if (!result) {
+          throw new Error('Failed to create offer');
+        }
+        savedOfferId = result.id;
       }
+
+      // Save products to offer_products table
+      await this.saveOfferProducts(savedOfferId, products);
 
       this.router.navigate(['/admin/offers']);
     } catch (error) {
       console.error('Error saving offer:', error);
     } finally {
       this.isSubmitting = false;
+    }
+  }
+
+  private async saveOfferProducts(offerId: string, products: any[]): Promise<void> {
+    try {
+      // First, delete existing offer products for this offer
+      await this.supabaseService.client
+        .from('offer_products')
+        .delete()
+        .eq('offer_id', offerId);
+
+      // Then insert new offer products
+      if (products.length > 0) {
+        const offerProducts = products.map((product, index) => ({
+          offer_id: offerId,
+          product_id: product.id,
+          discount_percentage: product.discount_percentage || 0,
+          original_price: product.price,
+          discounted_price: this.calculateDiscountedPrice(product.price, product.discount_percentage),
+          sort_order: index,
+          is_active: true
+        }));
+
+        await this.supabaseService.client
+          .from('offer_products')
+          .insert(offerProducts);
+      }
+    } catch (error) {
+      console.error('Error saving offer products:', error);
+      throw error;
+    }
+  }
+
+  private async loadCategories(): Promise<void> {
+    this.isLoadingCategories = true;
+    try {
+      const { data, error } = await this.supabaseService.client
+        .from('categories')
+        .select('*')
+        .eq('is_active', true)
+        .order('name');
+
+      if (error) throw error;
+      this.categories = data || [];
+    } catch (error) {
+      console.error('Error loading categories:', error);
+    } finally {
+      this.isLoadingCategories = false;
+    }
+  }
+
+  async onCategoryChange(categoryId: string): Promise<void> {
+    if (!categoryId) {
+      this.selectedCategory = null;
+      this.categoryProducts = [];
+      this.offerForm.patchValue({ category_id: null });
+      return;
+    }
+
+    // Check if there are products already added that don't belong to the selected category
+    const existingProducts = this.getExistingProductsNotInCategory(categoryId);
+
+    if (existingProducts.length > 0) {
+      const categoryName = this.categories.find(c => c.id === categoryId)?.name || '';
+      const promptMessage = this.translationService.translate('admin.offersForm.categoryChangePrompt', {
+        count: existingProducts.length,
+        categoryName: categoryName
+      });
+
+      const shouldClearProducts = confirm(promptMessage);
+
+      if (shouldClearProducts) {
+        // Remove products that don't belong to the selected category
+        this.removeProductsNotInCategory(categoryId);
+      }
+    }
+
+    this.selectedCategory = this.categories.find(c => c.id === categoryId);
+    this.offerForm.patchValue({ category_id: categoryId });
+    await this.loadCategoryProducts(categoryId);
+  }
+
+  private async loadCategoryProducts(categoryId: string): Promise<void> {
+    this.isLoadingProducts = true;
+    try {
+      const { data, error } = await this.supabaseService.client
+        .from('products')
+        .select('*')
+        .eq('category_id', categoryId)
+        .eq('is_active', true)
+        .order('name');
+
+      if (error) throw error;
+      this.categoryProducts = data || [];
+    } catch (error) {
+      console.error('Error loading category products:', error);
+    } finally {
+      this.isLoadingProducts = false;
+    }
+  }
+
+  applyDiscountToCategory(): void {
+    if (!this.selectedCategory || this.categoryProducts.length === 0) return;
+
+    // Get already added product IDs
+    const alreadyAddedIds = this.getAlreadyAddedProductIds();
+
+    // Add only products that haven't been added yet
+    const productsToAdd = this.categoryProducts.filter(product => !alreadyAddedIds.includes(product.id));
+
+    if (productsToAdd.length === 0) {
+      alert(this.translationService.translate('admin.offersForm.allCategoryProductsAdded'));
+      return;
+    }
+
+    // Add remaining products from the category
+    productsToAdd.forEach(product => {
+      this.addProductToOffer(product);
+    });
+  }
+
+  private async loadAllProducts(): Promise<void> {
+    this.isLoadingAllProducts = true;
+    try {
+      const { data, error } = await this.supabaseService.client
+        .from('products')
+        .select('*')
+        .eq('is_active', true)
+        .order('name');
+
+      if (error) throw error;
+      this.allProducts = data || [];
+    } catch (error) {
+      console.error('Error loading all products:', error);
+    } finally {
+      this.isLoadingAllProducts = false;
+    }
+  }
+
+  get productsArray(): FormArray {
+    return this.offerForm.get('products') as FormArray;
+  }
+
+  private createProductFormGroup(product?: any): FormGroup {
+    return this.fb.group({
+      id: [product?.id || '', Validators.required],
+      name: [product?.name || '', Validators.required],
+      sku: [product?.sku || ''],
+      category: [product?.category_name || ''],
+      price: [product?.price || 0, [Validators.required, Validators.min(0)]],
+      discount_percentage: [product?.discount_percentage || 0, [Validators.min(0), Validators.max(100)]]
+    });
+  }
+
+  addProduct(): void {
+    const selectedCategoryId = this.offerForm.get('category_id')?.value;
+
+    if (selectedCategoryId) {
+      // Check if we've already added all products from this category
+      const categoryProducts = this.allProducts.filter(product => product.category_id === selectedCategoryId);
+      const alreadyAddedProducts = this.getAlreadyAddedProductIds();
+      const availableProducts = categoryProducts.filter(product => !alreadyAddedProducts.includes(product.id));
+
+      if (availableProducts.length === 0) {
+        alert(this.translationService.translate('admin.offersForm.allCategoryProductsAdded'));
+        return;
+      }
+    }
+
+    this.productsArray.push(this.createProductFormGroup());
+  }
+
+  addProductToOffer(product: any): void {
+    const existingIndex = this.productsArray.controls.findIndex(
+      (control: any) => control.get('id')?.value === product.id
+    );
+
+    if (existingIndex === -1) {
+      // Check if we're in category mode and if this product belongs to the selected category
+      const selectedCategoryId = this.offerForm.get('category_id')?.value;
+      if (selectedCategoryId && product.category_id !== selectedCategoryId) {
+        alert(this.translationService.translate('admin.offersForm.productNotInSelectedCategory'));
+        return;
+      }
+
+      const productFormGroup = this.fb.group({
+        id: [product.id, Validators.required],
+        name: [product.name, Validators.required],
+        sku: [product.sku || ''],
+        category: [product.category_name || ''],
+        price: [product.price || 0, [Validators.required, Validators.min(0)]],
+        discount_percentage: [0, [Validators.min(0), Validators.max(100)]]
+      });
+
+      this.productsArray.push(productFormGroup);
+    } else {
+      alert(this.translationService.translate('admin.offersForm.productAlreadyAdded'));
+    }
+  }
+
+  removeProduct(index: number): void {
+    this.productsArray.removeAt(index);
+  }
+
+  onProductSelect(productId: string, index: number): void {
+    const product = this.allProducts.find(p => p.id === productId);
+    if (product) {
+      const productControl = this.productsArray.at(index);
+      productControl.patchValue({
+        id: productId,
+        name: product.name,
+        sku: product.sku || '',
+        category: product.category_name || '',
+        price: product.price || 0,
+        discount_percentage: 0 // Reset discount when product is selected
+      });
+    } else if (productId === '') {
+      // Clear the form when no product is selected
+      const productControl = this.productsArray.at(index);
+      productControl.patchValue({
+        id: '',
+        name: '',
+        sku: '',
+        category: '',
+        price: 0,
+        discount_percentage: 0
+      });
+    }
+  }
+
+  getProductPrice(index: number): number {
+    const product = this.productsArray.at(index);
+    return product.get('price')?.value || 0;
+  }
+
+  getProductDiscount(index: number): number {
+    const product = this.productsArray.at(index);
+    return product.get('discount_percentage')?.value || 0;
+  }
+
+  calculateDiscountedPrice(originalPrice: number, discountPercentage: number): number {
+    if (!discountPercentage) return originalPrice;
+    return originalPrice * (1 - discountPercentage / 100);
+  }
+
+  getTotalOriginalPrice(): number {
+    return this.productsArray.controls.reduce((total, productControl) => {
+      const price = productControl.get('price')?.value || 0;
+      return total + price;
+    }, 0);
+  }
+
+  getTotalDiscountedPrice(): number {
+    return this.productsArray.controls.reduce((total, productControl) => {
+      const price = productControl.get('price')?.value || 0;
+      const discountPercentage = productControl.get('discount_percentage')?.value || 0;
+      return total + this.calculateDiscountedPrice(price, discountPercentage);
+    }, 0);
+  }
+
+  getFilteredProducts(): any[] {
+    const selectedCategoryId = this.offerForm.get('category_id')?.value;
+
+    let filteredProducts = this.allProducts;
+
+    if (selectedCategoryId) {
+      filteredProducts = this.allProducts.filter(product => product.category_id === selectedCategoryId);
+    }
+
+    return filteredProducts;
+  }
+
+  getExistingProductsNotInCategory(categoryId: string): any[] {
+    const existingProducts = [];
+    for (let i = 0; i < this.productsArray.length; i++) {
+      const productControl = this.productsArray.at(i);
+      const productId = productControl.get('id')?.value;
+      if (productId) {
+        const product = this.allProducts.find(p => p.id === productId);
+        if (product && product.category_id !== categoryId) {
+          existingProducts.push({ index: i, product });
+        }
+      }
+    }
+    return existingProducts;
+  }
+
+  removeProductsNotInCategory(categoryId: string): void {
+    const productsToRemove = this.getExistingProductsNotInCategory(categoryId);
+    // Remove from the end to avoid index shifting issues
+    productsToRemove.reverse().forEach(({ index }) => {
+      this.productsArray.removeAt(index);
+    });
+  }
+
+  getAlreadyAddedProductIds(): string[] {
+    const addedIds: string[] = [];
+    for (let i = 0; i < this.productsArray.length; i++) {
+      const productId = this.productsArray.at(i).get('id')?.value;
+      if (productId) {
+        addedIds.push(productId);
+      }
+    }
+    return addedIds;
+  }
+
+  isProductAlreadyAdded(productId: string): boolean {
+    return this.getAlreadyAddedProductIds().includes(productId);
+  }
+
+  onApplyToCategoryChange(checked: boolean): void {
+    if (checked && this.selectedCategory && this.categoryProducts.length > 0) {
+      // Clear existing products first
+      this.productsArray.clear();
+
+      // Add all products from the category
+      this.categoryProducts.forEach(product => {
+        const productFormGroup = this.fb.group({
+          id: [product.id, Validators.required],
+          name: [product.name, Validators.required],
+          sku: [product.sku || ''],
+          category: [product.category_name || this.selectedCategory.name],
+          price: [product.price || 0, [Validators.required, Validators.min(0)]],
+          discount_percentage: [0, [Validators.min(0), Validators.max(100)]]
+        });
+
+        this.productsArray.push(productFormGroup);
+      });
+    } else if (!checked) {
+      // Clear all products when unchecking
+      this.productsArray.clear();
     }
   }
 } 

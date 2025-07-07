@@ -335,13 +335,12 @@ export interface Database {
                     title: string;
                     description: string;
                     short_description: string;
-                    type: OfferType;
                     status: OfferStatus;
                     priority: number;
                     featured: boolean;
                     image_url?: string;
                     banner_image_url?: string;
-                    discount_type: 'percentage' | 'fixed_amount' | 'free_shipping' | 'buy_x_get_y';
+                    discount_type: 'percentage' | 'fixed_amount';
                     discount_value: number;
                     max_discount_amount?: number;
                     currency?: string;
@@ -370,13 +369,12 @@ export interface Database {
                     title: string;
                     description: string;
                     short_description: string;
-                    type: OfferType;
                     status?: OfferStatus;
                     priority?: number;
                     featured?: boolean;
                     image_url?: string;
                     banner_image_url?: string;
-                    discount_type: 'percentage' | 'fixed_amount' | 'free_shipping' | 'buy_x_get_y';
+                    discount_type: 'percentage' | 'fixed_amount';
                     discount_value: number;
                     max_discount_amount?: number;
                     currency?: string;
@@ -405,13 +403,12 @@ export interface Database {
                     title?: string;
                     description?: string;
                     short_description?: string;
-                    type?: OfferType;
                     status?: OfferStatus;
                     priority?: number;
                     featured?: boolean;
                     image_url?: string;
                     banner_image_url?: string;
-                    discount_type?: 'percentage' | 'fixed_amount' | 'free_shipping' | 'buy_x_get_y';
+                    discount_type?: 'percentage' | 'fixed_amount';
                     discount_value?: number;
                     max_discount_amount?: number;
                     currency?: string;
@@ -672,19 +669,6 @@ export interface ProductImage {
     type: 'main' | 'gallery' | 'thumbnail' | 'technical';
 }
 
-export type OfferType =
-    | 'percentage_discount'
-    | 'fixed_amount_discount'
-    | 'buy_x_get_y'
-    | 'free_shipping'
-    | 'bundle_deal'
-    | 'flash_sale'
-    | 'seasonal_sale'
-    | 'clearance'
-    | 'loyalty_reward'
-    | 'referral_bonus'
-    | 'first_time_customer'
-    | 'bulk_discount';
 
 export type OfferStatus =
     | 'draft'

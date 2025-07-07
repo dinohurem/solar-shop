@@ -49,14 +49,10 @@ export class OffersService {
         try {
             const supabaseOffers = await this.supabaseService.getActiveOffers();
 
-            let filteredOffers = supabaseOffers;
+            let filteredOffers = supabaseOffers.filter(offer => !offer.is_b2b); // Only B2C offers
 
             if (filters?.featured !== undefined) {
                 filteredOffers = filteredOffers.filter(offer => offer.featured === filters.featured);
-            }
-
-            if (filters?.type) {
-                filteredOffers = filteredOffers.filter(offer => offer.type === filters.type);
             }
 
             if (filters?.limit) {
@@ -74,7 +70,7 @@ export class OffersService {
         try {
             const supabaseOffers = await this.supabaseService.getActiveOffers();
 
-            let offers = supabaseOffers;
+            let offers = supabaseOffers.filter(offer => !offer.is_b2b); // Only B2C offers
             if (limit) {
                 offers = offers.slice(0, limit);
             }
@@ -90,7 +86,7 @@ export class OffersService {
         try {
             const supabaseOffers = await this.supabaseService.getActiveOffers();
 
-            let offers = supabaseOffers.filter(offer => offer.featured);
+            let offers = supabaseOffers.filter(offer => !offer.is_b2b && offer.featured); // Only B2C featured offers
             if (limit) {
                 offers = offers.slice(0, limit);
             }
@@ -105,7 +101,7 @@ export class OffersService {
     private async fetchOfferById(id: string): Promise<Offer | null> {
         try {
             const offer = await this.supabaseService.getTableById('offers', id);
-            if (!offer) return null;
+            if (!offer || offer.is_b2b) return null; // Only return B2C offers
 
             return this.convertSupabaseOfferToLocal(offer);
         } catch (error) {
@@ -133,15 +129,7 @@ export class OffersService {
                 discountPercentage = Math.round(((originalPrice - discountedPrice) / originalPrice) * 100);
             }
 
-            // For display purposes, we'll use reasonable price ranges based on offer type
-            if (offer.type === 'seasonal_sale' || offer.type === 'flash_sale') {
-                originalPrice = 1000;
-                discountedPrice = originalPrice * (1 - offer.discount_value / 100);
-            } else if (offer.type === 'free_shipping') {
-                originalPrice = 50; // Shipping cost
-                discountedPrice = 0;
-                discountPercentage = 100;
-            }
+
 
             return {
                 id: offer.id,
@@ -149,12 +137,11 @@ export class OffersService {
                 originalPrice: Math.round(originalPrice * 100) / 100,
                 discountedPrice: Math.round(discountedPrice * 100) / 100,
                 discountPercentage: Math.round(discountPercentage),
-                imageUrl: offer.image_url || this.getDefaultOfferImage(offer.type),
+                imageUrl: offer.image_url || this.getDefaultOfferImage(),
                 description: offer.description,
                 shortDescription: offer.short_description,
-                type: offer.type,
                 status: offer.status,
-                couponCode: offer.coupon_code,
+                couponCode: offer.code,
                 startDate: offer.start_date,
                 endDate: offer.end_date,
                 featured: offer.featured
@@ -165,16 +152,7 @@ export class OffersService {
         }
     }
 
-    private getDefaultOfferImage(offerType: string): string {
-        const imageMap: { [key: string]: string } = {
-            'seasonal_sale': 'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=500&h=500&fit=crop',
-            'flash_sale': 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=500&fit=crop',
-            'free_shipping': 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=500&h=500&fit=crop',
-            'bundle_deal': 'https://images.unsplash.com/photo-1558002038-1055907df827?w=500&h=500&fit=crop',
-            'percentage_discount': 'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=500&h=500&fit=crop',
-            'fixed_amount_discount': 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=500&fit=crop'
-        };
-
-        return imageMap[offerType] || 'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=500&h=500&fit=crop';
+    private getDefaultOfferImage(): string {
+        return 'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=500&h=500&fit=crop';
     }
 } 

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterModule, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -148,7 +148,8 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
                   <span>{{ 'admin.contacts' | translate }}</span>
                 </a>
 
-                <a routerLink="/admin/email-test"
+                <a *ngIf="showEmailTest"
+                   routerLink="/admin/email-test"
                    routerLinkActive="bg-blue-50 text-blue-700 border-blue-300"
                    class="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 transition-colors border border-transparent">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -233,6 +234,7 @@ export class AdminLayoutComponent implements OnInit {
 
   currentUser$: Observable<User | null>;
   currentLanguage: SupportedLanguage = 'hr';
+  showEmailTest = false;
 
   constructor() {
     this.currentUser$ = this.store.select(selectCurrentUser);
@@ -240,6 +242,16 @@ export class AdminLayoutComponent implements OnInit {
   }
 
   ngOnInit(): void { }
+
+  @HostListener('document:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent): void {
+    // Show Email Test option when Shift+L is pressed
+    if (event.shiftKey && event.key === 'L' && !event.ctrlKey && !event.altKey) {
+      event.preventDefault();
+      this.showEmailTest = !this.showEmailTest;
+      console.log('Email Test visibility toggled:', this.showEmailTest);
+    }
+  }
 
   viewSite(): void {
     this.router.navigate(['/']);

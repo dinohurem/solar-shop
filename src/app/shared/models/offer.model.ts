@@ -7,7 +7,6 @@ export interface Offer {
     imageUrl: string;
     description?: string;
     shortDescription?: string;
-    type?: string;
     status?: string;
     code?: string;
     couponCode?: string;
@@ -15,11 +14,11 @@ export interface Offer {
     endDate?: string;
     featured?: boolean;
     isB2B?: boolean; // Flag to separate B2B offers from regular offers
+    discount_type?: string;
 }
 
 export interface OfferFilters {
     featured?: boolean;
-    type?: string;
     status?: string;
     limit?: number;
     offset?: number;

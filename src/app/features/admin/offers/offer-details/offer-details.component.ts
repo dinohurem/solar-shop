@@ -1,6 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { SupabaseService } from '../../../../services/supabase.service';
@@ -9,7 +8,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 @Component({
   selector: 'app-offer-details',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, TranslatePipe],
+  imports: [CommonModule, TranslatePipe],
   template: `
     <div class="space-y-6" *ngIf="offer">
       <!-- Header -->
@@ -57,8 +56,8 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
                 <p class="text-gray-700 mb-4">{{ offer.description }}</p>
                 <div class="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span class="font-medium text-gray-900">{{ 'admin.type' | translate }}:</span>
-                    <span class="ml-2 text-gray-600 capitalize">{{ offer.type }}</span>
+                    <span class="font-medium text-gray-900">{{ 'admin.offersForm.couponCode' | translate }}:</span>
+                    <span class="ml-2 text-gray-600 capitalize">{{ offer.code }}</span>
                   </div>
                   <div>
                     <span class="font-medium text-gray-900">{{ 'admin.discountType' | translate }}:</span>
@@ -68,9 +67,30 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
                     <span class="font-medium text-gray-900">{{ 'admin.discountValue' | translate }}:</span>
                     <span class="ml-2 text-gray-600">{{ offer.discount_value }}{{ offer.discount_type === 'percentage' ? '%' : '€' }}</span>
                   </div>
-                  <div *ngIf="offer.minimum_purchase">
+                  <div *ngIf="offer.min_order_amount">
                     <span class="font-medium text-gray-900">{{ 'admin.minPurchase' | translate }}:</span>
-                    <span class="ml-2 text-gray-600">{{ offer.minimum_purchase | currency:'EUR':'symbol':'1.2-2' }}</span>
+                    <span class="ml-2 text-gray-600">{{ offer.min_order_amount | currency:'EUR':'symbol':'1.2-2' }}</span>
+                  </div>
+                  <div>
+                    <span class="font-medium text-gray-900">{{ 'admin.offersForm.b2bOffer' | translate }}:</span>
+                    <span class="ml-2 text-gray-600">
+                      <span *ngIf="offer.is_b2b" class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                        {{ 'admin.contactsForm.yes' | translate }}
+                      </span>
+                      <span *ngIf="!offer.is_b2b" class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                        </svg>
+                        {{ 'admin.contactsForm.no' | translate }}
+                      </span>
+                    </span>
+                  </div>
+                  <div *ngIf="offerCategory">
+                    <span class="font-medium text-gray-900">{{ 'admin.category' | translate }}:</span>
+                    <span class="ml-2 text-gray-600">{{ offerCategory.name }}</span>
                   </div>
                 </div>
               </div>
@@ -90,120 +110,56 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
               </div>
               <div class="flex items-center justify-between">
                 <span class="text-sm font-medium text-gray-700">{{ 'admin.usageLimit' | translate }}:</span>
-                <span class="text-sm text-gray-600">{{ offer.usage_limit || ('admin.unlimited' | translate) }}</span>
+                <span class="text-sm text-gray-600">{{ offer.max_usage || ('admin.unlimited' | translate) }}</span>
               </div>
             </div>
           </div>
         </div>
       </div>
 
+
+
       <!-- Offer Products -->
-      <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-6" [formGroup]="offerProductsForm">
+      <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-6">
         <div class="flex items-center justify-between mb-6">
           <h2 class="text-xl font-semibold text-gray-900">{{ 'admin.productsInOffer' | translate }}</h2>
-          <div class="flex items-center space-x-3">
-            <button 
-              (click)="addProduct()"
-              class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 flex items-center space-x-2">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-              </svg>
-              <span>{{ 'admin.addProduct' | translate }}</span>
-            </button>
-            <button 
-              (click)="saveChanges()"
-              [disabled]="!hasChanges"
-              class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200 flex items-center space-x-2">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
-              </svg>
-              <span>{{ 'admin.saveChanges' | translate }}</span>
-            </button>
-          </div>
         </div>
 
-        <div formArrayName="products" class="space-y-4" *ngIf="offerProductsArray.length > 0; else noProducts">
-          <div *ngFor="let product of offerProductsArray.controls; let i = index" [formGroupName]="i"
-               class="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:border-gray-300 transition-colors duration-200">
-            <div class="grid grid-cols-1 lg:grid-cols-7 gap-4 items-end">
-              <div class="relative">
-                <input 
-                  type="text"
-                  formControlName="name"
-                  class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
-                  placeholder="Product Name">
-                <label class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                  {{ 'admin.productName' | translate }}
-                </label>
+        <div class="space-y-4" *ngIf="offerProducts.length > 0; else noProducts">
+          <div *ngFor="let product of offerProducts; let i = index"
+               class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+            <div class="grid grid-cols-1 lg:grid-cols-6 gap-4 items-center">
+              <div>
+                <p class="font-medium text-gray-900">{{ product.name }}</p>
+                <p class="text-sm text-gray-500">SKU: {{ product.sku || 'N/A' }}</p>
               </div>
 
-              <div class="relative">
-                <input 
-                  type="text"
-                  formControlName="sku"
-                  class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
-                  placeholder="SKU">
-                <label class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                  SKU
-                </label>
-              </div>
-
-              <div class="relative">
-                <input 
-                  type="text"
-                  formControlName="category"
-                  class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
-                  placeholder="Category">
-                <label class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                  {{ 'admin.category' | translate }}
-                </label>
-              </div>
-
-              <div class="relative">
-                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <span class="text-gray-500 text-lg">€</span>
-                </div>
-                <input 
-                  type="number"
-                  formControlName="price"
-                  step="0.01"
-                  min="0"
-                  class="peer w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
-                  placeholder="0.00">
-                <label class="absolute left-10 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                  {{ 'admin.originalPrice' | translate }}
-                </label>
-              </div>
-
-              <div class="relative">
-                <input 
-                  type="number"
-                  formControlName="discount_percentage"
-                  min="0"
-                  max="100"
-                  step="0.1"
-                  class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
-                  placeholder="0">
-                <label class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                  {{ 'admin.discountPercent' | translate }}
-                </label>
+              <div>
+                <p class="text-sm text-gray-600">{{ product.category }}</p>
               </div>
 
               <div class="text-center">
-                <p class="text-sm font-medium text-gray-700 mb-2">{{ 'admin.finalPrice' | translate }}</p>
+                <p class="text-sm font-medium text-gray-700">{{ 'admin.originalPrice' | translate }}</p>
+                <p class="text-lg font-semibold text-gray-900">{{ product.price | currency:'EUR':'symbol':'1.2-2' }}</p>
+              </div>
+
+              <div class="text-center">
+                <p class="text-sm font-medium text-gray-700">{{ 'admin.discountPercent' | translate }}</p>
+                <p class="text-lg font-semibold text-blue-600">{{ product.discount_percentage }}%</p>
+              </div>
+
+              <div class="text-center">
+                <p class="text-sm font-medium text-gray-700">{{ 'admin.finalPrice' | translate }}</p>
                 <p class="text-lg font-semibold text-green-600">
-                  {{ calculateDiscountedPrice(getProductPrice(i), getProductDiscount(i)) | currency:'EUR':'symbol':'1.2-2' }}
+                  {{ calculateDiscountedPrice(product.price, product.discount_percentage) | currency:'EUR':'symbol':'1.2-2' }}
                 </p>
               </div>
 
-              <div class="flex justify-center">
-                <button 
-                  (click)="removeProduct(i)"
-                  class="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors duration-200">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                  </svg>
-                </button>
+              <div class="text-center">
+                <p class="text-sm font-medium text-gray-700">{{ 'admin.savings' | translate }}</p>
+                <p class="text-lg font-semibold text-red-600">
+                  {{ (product.price * product.discount_percentage / 100) | currency:'EUR':'symbol':'1.2-2' }}
+                </p>
               </div>
             </div>
           </div>
@@ -215,18 +171,13 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
             </svg>
             <h3 class="text-lg font-medium text-gray-900 mb-2">{{ 'admin.noProductsAssigned' | translate }}</h3>
-            <p class="text-gray-500 mb-4">{{ 'admin.addProductsToOffer' | translate }}</p>
-            <button 
-              (click)="addProduct()"
-              class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
-              {{ 'admin.addFirstProduct' | translate }}
-            </button>
+            <p class="text-gray-500">{{ 'admin.noProductsAssigned' | translate }}</p>
           </div>
         </ng-template>
       </div>
 
       <!-- Offer Summary Card -->
-      <div class="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl border border-blue-200 p-6" *ngIf="offerProductsArray.length > 0">
+      <div class="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl border border-blue-200 p-6" *ngIf="offerProducts.length > 0">
         <h3 class="text-xl font-semibold text-gray-900 mb-6 flex items-center">
           <svg class="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
@@ -237,7 +188,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
           <div class="bg-white rounded-lg p-4 text-center border border-blue-100">
             <p class="text-sm text-gray-600 mb-1">{{ 'admin.products' | translate }}</p>
-            <p class="text-2xl font-bold text-gray-900">{{ offerProductsArray.length }}</p>
+            <p class="text-2xl font-bold text-gray-900">{{ offerProducts.length }}</p>
           </div>
           
           <div class="bg-white rounded-lg p-4 text-center border border-blue-100">
@@ -289,28 +240,11 @@ export class OfferDetailsComponent implements OnInit {
   private router = inject(Router);
   private supabaseService = inject(SupabaseService);
   private title = inject(Title);
-  private fb = inject(FormBuilder);
 
   offer: any = null;
   offerProducts: any[] = [];
-  originalOfferProducts: any[] = [];
-  hasChanges = false;
+  offerCategory: any = null;
   error: string | null = null;
-
-  offerProductsForm: FormGroup;
-
-  constructor() {
-    this.offerProductsForm = this.fb.group({
-      products: this.fb.array([])
-    });
-
-    // Subscribe to form changes
-    this.offerProductsForm.valueChanges.subscribe(() => this.checkForChanges());
-  }
-
-  get offerProductsArray(): FormArray {
-    return this.offerProductsForm.get('products') as FormArray;
-  }
 
   ngOnInit(): void {
     const offerId = this.route.snapshot.paramMap.get('id');
@@ -327,6 +261,7 @@ export class OfferDetailsComponent implements OnInit {
       if (this.offer) {
         this.title.setTitle(`${this.offer.title} - Offer Details - Solar Shop Admin`);
         await this.loadOfferProducts(offerId);
+        await this.loadOfferCategory();
       } else {
         this.error = 'Offer not found';
       }
@@ -338,61 +273,47 @@ export class OfferDetailsComponent implements OnInit {
 
   private async loadOfferProducts(offerId: string): Promise<void> {
     try {
-      // For now, load all products and simulate offer products
-      // In a real implementation, you would have an offer_products table
-      const allProducts = await this.supabaseService.getTable('products');
+      const { data, error } = await this.supabaseService.client
+        .from('offer_products')
+        .select(`
+          *,
+          products (
+            id,
+            name,
+            sku,
+            price,
+            category_id,
+            categories (
+              name
+            )
+          )
+        `)
+        .eq('offer_id', offerId)
+        .eq('is_active', true)
+        .order('sort_order');
 
-      // Simulate some products being part of this offer
-      const simulatedOfferProducts = (allProducts || []).slice(0, 3).map((product: any, index: number) => ({
-        id: product.id,
-        name: product.name,
-        sku: product.sku,
-        category: product.category_name || 'Solar Equipment',
-        price: product.price || 0,
-        discount_percentage: [10, 15, 20][index] || 0, // Sample discounts
-        offer_product_id: `${offerId}_${product.id}` // Simulated ID
-      }));
+      if (error) throw error;
 
-      this.offerProducts = simulatedOfferProducts;
-      this.originalOfferProducts = JSON.parse(JSON.stringify(simulatedOfferProducts));
+      if (data && data.length > 0) {
+        const offerProducts = data.map((offerProduct: any) => ({
+          id: offerProduct.products.id,
+          name: offerProduct.products.name,
+          sku: offerProduct.products.sku,
+          category: offerProduct.products.categories?.name || 'Solar Equipment',
+          price: offerProduct.products.price || 0,
+          discount_percentage: offerProduct.discount_percentage || 0,
+          offer_product_id: offerProduct.id
+        }));
 
-      // Populate form array
-      const productsArray = this.offerProductsArray;
-      productsArray.clear();
-      this.offerProducts.forEach(product => {
-        productsArray.push(this.createProductFormGroup(product));
-      });
+        this.offerProducts = offerProducts;
+      } else {
+        this.offerProducts = [];
+      }
 
     } catch (error) {
       console.error('Error loading offer products:', error);
       this.offerProducts = [];
-      this.originalOfferProducts = [];
     }
-  }
-
-  private createProductFormGroup(product?: any): FormGroup {
-    return this.fb.group({
-      id: [product?.id || ''],
-      name: [product?.name || '', Validators.required],
-      sku: [product?.sku || ''],
-      category: [product?.category || ''],
-      price: [product?.price || 0, [Validators.required, Validators.min(0)]],
-      discount_percentage: [product?.discount_percentage || 0, [Validators.min(0), Validators.max(100)]]
-    });
-  }
-
-  trackByProductId(index: number, product: any): any {
-    return product.id;
-  }
-
-  getProductPrice(index: number): number {
-    const product = this.offerProductsArray.at(index);
-    return product.get('price')?.value || 0;
-  }
-
-  getProductDiscount(index: number): number {
-    const product = this.offerProductsArray.at(index);
-    return product.get('discount_percentage')?.value || 0;
   }
 
   calculateDiscountedPrice(originalPrice: number, discountPercentage: number): number {
@@ -401,65 +322,17 @@ export class OfferDetailsComponent implements OnInit {
   }
 
   getTotalOriginalPrice(): number {
-    let total = 0;
-    for (let i = 0; i < this.offerProductsArray.length; i++) {
-      total += this.getProductPrice(i);
-    }
-    return total;
+    return this.offerProducts.reduce((total, product) => total + product.price, 0);
   }
 
   getTotalDiscountedPrice(): number {
-    let total = 0;
-    for (let i = 0; i < this.offerProductsArray.length; i++) {
-      total += this.calculateDiscountedPrice(this.getProductPrice(i), this.getProductDiscount(i));
-    }
-    return total;
+    return this.offerProducts.reduce((total, product) => {
+      return total + this.calculateDiscountedPrice(product.price, product.discount_percentage);
+    }, 0);
   }
 
   getTotalSavings(): number {
     return this.getTotalOriginalPrice() - this.getTotalDiscountedPrice();
-  }
-
-  addProduct(): void {
-    this.offerProductsArray.push(this.createProductFormGroup());
-    this.checkForChanges();
-  }
-
-  removeProduct(index: number): void {
-    if (confirm('Are you sure you want to remove this product from the offer?')) {
-      this.offerProductsArray.removeAt(index);
-      this.checkForChanges();
-    }
-  }
-
-  private checkForChanges(): void {
-    const currentProducts = this.offerProductsForm.value.products;
-    const productsChanged = JSON.stringify(currentProducts) !== JSON.stringify(this.originalOfferProducts.map(product => ({
-      id: product.id,
-      name: product.name,
-      sku: product.sku,
-      category: product.category,
-      price: product.price,
-      discount_percentage: product.discount_percentage
-    })));
-
-    this.hasChanges = productsChanged;
-  }
-
-  async saveChanges(): Promise<void> {
-    if (!this.hasChanges) return;
-
-    try {
-      // For now, just simulate saving changes
-      // In a real implementation, you would save to an offer_products table
-      this.originalOfferProducts = JSON.parse(JSON.stringify(this.offerProductsForm.value.products));
-      this.hasChanges = false;
-
-      alert('Offer changes saved successfully!');
-    } catch (error) {
-      console.error('Error saving offer changes:', error);
-      alert('Error saving changes. Please try again.');
-    }
   }
 
   editOffer(): void {
@@ -468,5 +341,27 @@ export class OfferDetailsComponent implements OnInit {
 
   goBack(): void {
     this.router.navigate(['/admin/offers']);
+  }
+
+  private async loadOfferCategory(): Promise<void> {
+    if (!this.offer?.applicable_category_ids || this.offer.applicable_category_ids.length === 0) {
+      this.offerCategory = null;
+      return;
+    }
+
+    try {
+      const categoryId = this.offer.applicable_category_ids[0];
+      const { data, error } = await this.supabaseService.client
+        .from('categories')
+        .select('*')
+        .eq('id', categoryId)
+        .single();
+
+      if (error) throw error;
+      this.offerCategory = data;
+    } catch (error) {
+      console.error('Error loading offer category:', error);
+      this.offerCategory = null;
+    }
   }
 } 

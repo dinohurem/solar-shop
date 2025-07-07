@@ -298,7 +298,7 @@ export interface TableConfig {
               class="w-4 h-4 mr-2"
               [img]="PlusIcon">
             </lucide-angular>
-            {{ 'common.addNew' | translate }} {{ title.toLowerCase().slice(0, -1) }}
+            {{ 'common.add' | translate }}
           </button>
         </div>
       </div>

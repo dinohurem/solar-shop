@@ -145,7 +145,7 @@ import { Offer } from '../../../../shared/models/offer.model';
                 <div class="flex-1">
                   <div class="flex items-center mb-3">
                     <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800 mr-3">
-                      {{ offer.type === 'bundle_deal' ? ('productDetails.bundle' | translate) : ('productDetails.specialOffer' | translate) }}
+                      {{ 'productDetails.specialOffer' | translate }}
                     </span>
                     <span *ngIf="offer.discountPercentage > 0" class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800">
                       {{ 'productDetails.save' | translate }} {{ offer.discountPercentage }}%
@@ -232,10 +232,10 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
   isLoading$: Observable<boolean>;
   error$: Observable<string | null>;
   isCompanyPricing = false;
-  
+
   // Collapsible sections - collapsed by default
   bundlesOffersOpen = false;
-  
+
   // Offers data
   productOffers: Offer[] = [];
   offersLoading = false;
