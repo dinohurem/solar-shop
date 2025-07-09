@@ -157,7 +157,7 @@ interface ProductWithCustomPrice extends Product {
                   <div class="space-y-2">
                     <!-- Tier 1 (Base Price) -->
                     <div class="flex items-center space-x-2">
-                      <span class="text-xs text-gray-500 w-16">Qty ≥</span>
+                      <span class="text-xs text-gray-500 w-16">Kol ≥</span>
                       <input
                         type="number"
                         step="1"
@@ -177,7 +177,7 @@ interface ProductWithCustomPrice extends Product {
                     </div>
                     <!-- Tier 2 -->
                     <div class="flex items-center space-x-2">
-                      <span class="text-xs text-gray-500 w-16">Qty ≥</span>
+                      <span class="text-xs text-gray-500 w-16">Kol ≥</span>
                       <input
                         type="number"
                         step="1"
@@ -199,7 +199,7 @@ interface ProductWithCustomPrice extends Product {
                     </div>
                     <!-- Tier 3 -->
                     <div class="flex items-center space-x-2">
-                      <span class="text-xs text-gray-500 w-16">Qty ≥</span>
+                      <span class="text-xs text-gray-500 w-16">Kol ≥</span>
                       <input
                         type="number"
                         step="1"
@@ -273,17 +273,17 @@ interface ProductWithCustomPrice extends Product {
               <div class="text-sm text-gray-500">
                 <div *ngIf="product.hasCustomPrice">
                   <div *ngIf="product.priceTier1 && product.priceTier1 !== product.price" class="mb-1">
-                    <span class="text-xs">Qty ≥{{ product.quantityTier1 }}:</span> €{{ product.price | number:'1.2-2' }} → <span class="font-medium text-green-600">€{{ product.priceTier1 | number:'1.2-2' }}</span>
+                    <span class="text-xs">Kol ≥{{ product.quantityTier1 }}:</span> €{{ product.price | number:'1.2-2' }} → <span class="font-medium text-green-600">€{{ product.priceTier1 | number:'1.2-2' }}</span>
                   </div>
                   <div *ngIf="product.priceTier2" class="mb-1">
-                    <span class="text-xs">Qty ≥{{ product.quantityTier2 }}:</span> <span class="font-medium text-green-600">€{{ product.priceTier2 | number:'1.2-2' }}</span>
+                    <span class="text-xs">Kol ≥{{ product.quantityTier2 }}:</span> <span class="font-medium text-green-600">€{{ product.priceTier2 | number:'1.2-2' }}</span>
                   </div>
                   <div *ngIf="product.priceTier3" class="mb-1">
-                    <span class="text-xs">Qty ≥{{ product.quantityTier3 }}:</span> <span class="font-medium text-green-600">€{{ product.priceTier3 | number:'1.2-2' }}</span>
+                    <span class="text-xs">Kol ≥{{ product.quantityTier3 }}:</span> <span class="font-medium text-green-600">€{{ product.priceTier3 | number:'1.2-2' }}</span>
                   </div>
                 </div>
                 <div *ngIf="product.minimumOrder !== 1" class="text-xs text-blue-600 mt-1">
-                  Min. Order: {{ product.minimumOrder }}
+                  Min. Kol. : {{ product.minimumOrder }}
                 </div>
               </div>
             </div>
@@ -332,15 +332,22 @@ export class CompanyPricingFormComponent implements OnInit, OnDestroy {
     this.companies$.pipe(takeUntil(this.destroy$)).subscribe(companies => {
       console.log('Company Pricing Form: Companies received:', companies);
       this.companies = companies;
+      // Check edit mode after companies are loaded
+      if (companies.length > 0) {
+        this.checkEditMode();
+      }
     });
 
     this.products$.pipe(takeUntil(this.destroy$)).subscribe(products => {
       console.log('Company Pricing Form: Products received:', products);
       this.products = products;
       this.updateFilteredProducts();
+      // If we have a selected company but products weren't loaded yet, trigger the selection again
+      if (this.selectedCompanyId && this.selectedCompany && products.length > 0) {
+        this.loadExistingPricing();
+        this.updateFilteredProducts();
+      }
     });
-
-    this.checkEditMode();
     this.title.setTitle('Company Pricing - Solar Shop Admin');
   }
 
@@ -358,7 +365,10 @@ export class CompanyPricingFormComponent implements OnInit, OnDestroy {
   }
 
   onCompanySelected(companyId: string): void {
+    console.log('Company Pricing Form: onCompanySelected called with:', companyId);
     this.selectedCompany = this.companies.find(c => c.id === companyId) || null;
+    console.log('Company Pricing Form: Selected company:', this.selectedCompany);
+
     if (this.selectedCompany) {
       this.loadExistingPricing();
     }
@@ -366,7 +376,12 @@ export class CompanyPricingFormComponent implements OnInit, OnDestroy {
   }
 
   private async loadExistingPricing(): Promise<void> {
-    if (!this.selectedCompany) return;
+    if (!this.selectedCompany) {
+      console.log('Company Pricing Form: loadExistingPricing - no selected company');
+      return;
+    }
+
+    console.log('Company Pricing Form: Loading existing pricing for company:', this.selectedCompany.id);
 
     try {
       const { data, error } = await this.supabase.client
@@ -380,6 +395,7 @@ export class CompanyPricingFormComponent implements OnInit, OnDestroy {
       }
 
       this.existingPricing = data || [];
+      console.log('Company Pricing Form: Loaded existing pricing:', this.existingPricing);
       this.updateFilteredProducts();
     } catch (error) {
       console.error('Error loading existing pricing:', error);
@@ -387,12 +403,16 @@ export class CompanyPricingFormComponent implements OnInit, OnDestroy {
   }
 
   private updateFilteredProducts(): void {
-    if (!this.products.length) return;
+    console.log('Company Pricing Form: updateFilteredProducts called, products count:', this.products.length);
+    if (!this.products.length) {
+      console.log('Company Pricing Form: No products available, skipping update');
+      return;
+    }
 
     let filtered = this.products.map(product => {
       const existingPrice = this.existingPricing.find(p => p.product_id === product.id);
       const minimumOrder = existingPrice ? (existingPrice.minimum_order || 1) : 1;
-      
+
       // Handle quantity-based pricing tiers
       const quantityTier1 = existingPrice?.quantity_tier_1 || 1;
       const priceTier1 = existingPrice ? parseFloat(existingPrice.price_tier_1) : product.price;
@@ -400,7 +420,7 @@ export class CompanyPricingFormComponent implements OnInit, OnDestroy {
       const priceTier2 = existingPrice?.price_tier_2 ? parseFloat(existingPrice.price_tier_2) : undefined;
       const quantityTier3 = existingPrice?.quantity_tier_3;
       const priceTier3 = existingPrice?.price_tier_3 ? parseFloat(existingPrice.price_tier_3) : undefined;
-      
+
       return {
         ...product,
         customPrice: priceTier1, // For backward compatibility
@@ -469,7 +489,7 @@ export class CompanyPricingFormComponent implements OnInit, OnDestroy {
         product.priceTier3 = undefined;
       }
     }
-    
+
     this.updateHasCustomPrice(product);
   }
 
@@ -498,14 +518,14 @@ export class CompanyPricingFormComponent implements OnInit, OnDestroy {
         product.priceTier3 = undefined;
       }
     }
-    
+
     this.updateHasCustomPrice(product);
   }
 
   private updateHasCustomPrice(product: ProductWithCustomPrice): void {
-    product.hasCustomPrice = 
-      product.priceTier1 !== product.price || 
-      !!product.priceTier2 || 
+    product.hasCustomPrice =
+      product.priceTier1 !== product.price ||
+      !!product.priceTier2 ||
       !!product.priceTier3;
   }
 
@@ -534,8 +554,8 @@ export class CompanyPricingFormComponent implements OnInit, OnDestroy {
   }
 
   getProductsWithCustomPricing(): ProductWithCustomPrice[] {
-    return this.filteredProducts.filter(p => 
-      p.hasCustomPrice || 
+    return this.filteredProducts.filter(p =>
+      p.hasCustomPrice ||
       p.minimumOrder !== 1
     );
   }
@@ -569,7 +589,7 @@ export class CompanyPricingFormComponent implements OnInit, OnDestroy {
               minimum_order: product.minimumOrder
             })
             .eq('id', existingPricing.id);
-          
+
           if (error) throw error;
         } else {
           // Create new - only create if there's a custom price or minimum order different from default
@@ -587,7 +607,7 @@ export class CompanyPricingFormComponent implements OnInit, OnDestroy {
                 quantity_tier_3: product.quantityTier3 || null,
                 minimum_order: product.minimumOrder
               });
-            
+
             if (error) throw error;
           }
         }
@@ -604,7 +624,7 @@ export class CompanyPricingFormComponent implements OnInit, OnDestroy {
           .from('company_pricing')
           .delete()
           .eq('id', pricing.id);
-        
+
         if (error) throw error;
       }
 
