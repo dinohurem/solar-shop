@@ -1,14 +1,16 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable, Subject, combineLatest } from 'rxjs';
-import { takeUntil, switchMap, map } from 'rxjs/operators';
+import { Observable, Subject, combineLatest, from, of } from 'rxjs';
+import { takeUntil, switchMap, map, catchError } from 'rxjs/operators';
+import { Store } from '@ngrx/store';
 import { OffersService } from './services/offers.service';
 import { AddToCartButtonComponent } from '../cart/components/add-to-cart-button/add-to-cart-button.component';
 import { SupabaseService } from '../../../services/supabase.service';
 import { Offer } from '../../../shared/models/offer.model';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
-import { CartService } from '../cart/services/cart.service';
+import { addToCart } from '../cart/store/cart.actions';
+import { ToastService } from '../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-offer-details',
@@ -282,7 +284,8 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
     private router: Router,
     private offersService: OffersService,
     private supabaseService: SupabaseService,
-    private cartService: CartService
+    private store: Store,
+    private toastService: ToastService
   ) {
     this.offer$ = this.route.params.pipe(
       switchMap(params => this.offersService.getOfferById(params['id'])),
@@ -313,32 +316,35 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
   }
 
   private getRelatedProducts(offer: Offer): Observable<any[]> {
-    return new Observable(observer => {
-      // First, check if this offer has specific products linked via offer_products table
-      Promise.resolve(
-        this.supabaseService.client
-          .from('offer_products')
-          .select(`
-            *,
-            products (
-              id,
-              name,
-              description,
-              price,
-              sku,
-              availability,
-              images,
-              category_id,
-              categories (
-                name
-              )
+    return from(
+      this.supabaseService.client
+        .from('offer_products')
+        .select(`
+          *,
+          products (
+            id,
+            name,
+            description,
+            price,
+            sku,
+            availability,
+            images,
+            category_id,
+            categories (
+              name
             )
-          `)
-          .eq('offer_id', offer.id)
-          .eq('is_active', true)
-          .order('sort_order')
-      ).then(({ data: offerProducts, error }) => {
-        if (error) throw error;
+          )
+        `)
+        .eq('offer_id', offer.id)
+        .eq('is_active', true)
+        .order('sort_order')
+    ).pipe(
+      switchMap(({ data: offerProducts, error }) => {
+        if (error) {
+          console.error('Error fetching related products:', error);
+          // Fallback to featured products on error
+          return from(this.supabaseService.getProducts({ featured: true, limit: 3 }));
+        }
         
         if (offerProducts && offerProducts.length > 0) {
           // Map offer products to the expected format
@@ -351,32 +357,18 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
             images: op.products.images || [],
             category: op.products.categories?.name
           }));
-          observer.next(products);
-          observer.complete();
+          return of(products);
         } else {
-          // If no specific products, check if offer applies to categories
-          // For now, fallback to featured products
-          this.supabaseService.getProducts({ featured: true, limit: 6 })
-            .then(products => {
-              observer.next(products || []);
-              observer.complete();
-            });
+          // If no specific products, fallback to featured products
+          return from(this.supabaseService.getProducts({ featured: true, limit: 6 }));
         }
-      }).catch((error: any) => {
-        console.error('Error fetching related products:', error);
-        // Fallback to featured products on error
-        this.supabaseService.getProducts({ featured: true, limit: 3 })
-          .then(products => {
-            observer.next(products || []);
-            observer.complete();
-          })
-          .catch((fallbackError: any) => {
-            console.error('Error fetching fallback products:', fallbackError);
-            observer.next([]);
-            observer.complete();
-          });
-      });
-    });
+      }),
+      map(products => products || []),
+      catchError((error: any) => {
+        console.error('Error fetching fallback products:', error);
+        return of([]);
+      })
+    );
   }
 
 
@@ -426,7 +418,10 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
 
       for (const product of this.currentProducts) {
         try {
-          await this.cartService.addToCartAsync(product.id, 1);
+          this.store.dispatch(addToCart({
+            productId: product.id,
+            quantity: 1
+          }));
           successCount++;
         } catch (error) {
           console.error(`Error adding product ${product.name} to cart:`, error);
@@ -436,15 +431,15 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
 
       if (successCount > 0) {
         const message = errorCount > 0 
-          ? `Added ${successCount} products to cart. ${errorCount} failed.`
+          ? `Adding ${successCount} products to cart. ${errorCount} failed.`
           : `Added ${successCount} products to cart successfully!`;
-        alert(message);
+        this.toastService.showSuccess(message);
       } else {
-        alert('Failed to add products to cart. Please try again.');
+        this.toastService.showError('Failed to add products to cart. Please try again.');
       }
     } catch (error) {
       console.error('Error adding all products to cart:', error);
-      alert('Error adding products to cart. Please try again.');
+      this.toastService.showError('Error adding products to cart. Please try again.');
     }
   }
 } 

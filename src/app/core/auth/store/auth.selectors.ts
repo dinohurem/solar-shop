@@ -99,3 +99,14 @@ export const selectAuthToken = createSelector(
     authSelector,
     auth => auth.token
 );
+
+// Company-related selectors
+export const selectUserCompanyId = createSelector(
+    selectCurrentUser,
+    (user) => user?.companyId || null
+);
+
+export const selectIsPartner = createSelector(
+    selectCurrentUser,
+    (user) => !!user?.companyId && (user?.role?.name === 'company_admin' || user?.role?.name === 'admin')
+);

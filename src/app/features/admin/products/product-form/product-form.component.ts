@@ -8,29 +8,6 @@ import { SupabaseService } from '../../../../services/supabase.service';
 import { TranslationService } from '../../../../shared/services/translation.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
-interface Product {
-  id?: string;
-  name: string;
-  slug: string;
-  description?: string;
-  price: number;
-  compare_at_price?: number;
-  sku: string;
-  brand: string;
-  model: string;
-  category_id?: string;
-  images?: string[];
-  specifications?: { [key: string]: string };
-  features?: string[];
-  is_active: boolean;
-  is_featured: boolean;
-  is_on_sale: boolean;
-  stock_quantity: number;
-  weight?: number;
-  dimensions?: string;
-  created_at?: string;
-  updated_at?: string;
-}
 
 interface ProductRelationship {
   id?: string;
@@ -70,7 +47,7 @@ interface ProductRelationship {
           <div *ngIf="isEditMode && productId" class="mb-6">
             <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
               <label class="block text-sm font-medium text-gray-700 mb-2">
-                {{ 'admin.productUUID' | translate }}
+                ID (UUID)
               </label>
               <div class="flex items-center">
                 <input
@@ -927,9 +904,9 @@ export class ProductFormComponent implements OnInit {
     const relatedProductIds = this.relationships
       .filter(r => r.related_product_id)
       .map(r => r.related_product_id);
-    
-    this.availableProducts = this.products.filter(product => 
-      product.id !== this.productId && 
+
+    this.availableProducts = this.products.filter(product =>
+      product.id !== this.productId &&
       !relatedProductIds.includes(product.id)
     );
   }
@@ -947,7 +924,7 @@ export class ProductFormComponent implements OnInit {
   }
 
   canAddRelationship(): boolean {
-    return !!(this.newRelationship.relationship_type && 
+    return !!(this.newRelationship.relationship_type &&
       (this.newRelationship.related_product_id || this.newRelationship.related_category_id));
   }
 

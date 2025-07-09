@@ -882,6 +882,7 @@ export class TranslationService {
                     companyApplicationsDescription: 'Upravljajte zahtjevima za partnerstvo',
                     noDataFoundInCsvFile: 'Nema podataka u CSV datoteci',
                     errorImportingCompanies: 'Greška prilikom učitavanja tvrtki. Molimo provjerite format CSV datoteke.',
+                    editCompanySubtitle: 'Uredi informacije o partneru',
                 },
                 companyPricingForm: {
                     title: 'Cjenik za partnere',
@@ -1614,7 +1615,7 @@ export class TranslationService {
                 accessories: 'Pribor',
                 offersAvailable: '{{count}} ponuda dostupno',
                 sale: 'RASPRODAJA',
-                youSave: 'Štedite {{amount}}',
+                youSave: 'Štedite',
                 addToCart: 'Dodaj u košaricu',
                 viewDetails: 'Pogledaj detalje',
                 noOffers: 'Nema dostupnih ponuda',
@@ -1625,7 +1626,17 @@ export class TranslationService {
                 enterEmail: 'Unesite vaš email',
                 subscribe: 'Pretplati se',
                 viewAll: 'Pogledaj sve',
-                productsIncluded: 'Proizvodi uključeni u ovu ponudu'
+                productsIncluded: 'Proizvodi uključeni u ovu ponudu',
+                couponCode: 'Kod kupona',
+                copy: 'Kopiraj',
+                copied: 'Kopirano!',
+                expires: 'Ističe',
+                addAllToCart: 'Dodaj sve u košaricu',
+                specialOffer: 'Posebna ponuda',
+                aboutThisOffer: 'O ovoj ponudi',
+                defaultDescription: 'Ova ponuda uključuje odabrane proizvode po sniženim cijenama. Iskoristite priliku i uštedite na vašem sljedećem solar projektu.',
+                highlights: 'Istaknuto',
+                addedSuccessfully: 'Proizvodi su uspješno dodani u vašu košaricu!',
             },
             // Mission/Sustainability
             mission: {
@@ -3119,6 +3130,7 @@ export class TranslationService {
                     companyApplicationsDescription: 'Manage company applications',
                     noDataFoundInCsvFile: 'No data found in CSV file',
                     errorImportingCompanies: 'Error importing companies. Please check the CSV format.',
+                    editCompanySubtitle: 'Edit company information',
                 },
                 companyPricingForm: {
                     title: 'Company Pricing',
@@ -3834,7 +3846,7 @@ export class TranslationService {
                 accessories: 'Accessories',
                 offersAvailable: '{{count}} offers available',
                 sale: 'SALE',
-                youSave: 'You save {{amount}}',
+                youSave: 'You save ',
                 addToCart: 'Add to Cart',
                 viewDetails: 'View Details',
                 noOffers: 'No offers available',
@@ -3845,7 +3857,17 @@ export class TranslationService {
                 enterEmail: 'Enter your email',
                 subscribe: 'Subscribe',
                 viewAll: 'View All',
-                productsIncluded: 'Products included in this offer'
+                productsIncluded: 'Products included in this offer',
+                couponCode: 'Coupon Code',
+                copy: 'Copy',
+                copied: 'Copied!',
+                expires: 'Expires',
+                addAllToCart: 'Add All to Cart',
+                specialOffer: 'Special Offer',
+                aboutThisOffer: 'About This Offer',
+                defaultDescription: 'This is a special offer for selected products. Take advantage of the discount and save on your purchase.',
+                highlights: 'Highlights',
+                addedSuccessfully: 'Products added to cart successfully!',
             },
             // Mission/Sustainability
             mission: {

@@ -71,6 +71,32 @@ import {
               {{ 'admin.companiesForm.basicInformation' | translate }}
             </h3>
             
+            <!-- Company UUID (only shown in edit mode) -->
+            <div *ngIf="isEditMode && companyId" class="mb-6">
+              <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Company ID (UUID)
+                </label>
+                <div class="flex items-center">
+                  <input
+                    type="text"
+                    [value]="companyId"
+                    readonly
+                    class="flex-1 px-3 py-2 bg-gray-100 border border-gray-300 rounded-md text-sm text-gray-600 cursor-not-allowed"
+                  >
+                  <button
+                    type="button"
+                    (click)="copyToClipboard(companyId)"
+                    class="ml-2 px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm transition-colors"
+                    title="Copy UUID">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+            
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <!-- Company Name -->
               <div>
@@ -444,5 +470,14 @@ export class AdminCompanyEditComponent implements OnInit, OnDestroy {
 
   goBack(): void {
     this.router.navigate(['/admin/companies']);
+  }
+
+  copyToClipboard(text: string): void {
+    navigator.clipboard.writeText(text).then(() => {
+      // You could show a toast notification here if you have one
+      console.log('Company UUID copied to clipboard');
+    }).catch(err => {
+      console.error('Failed to copy Company UUID: ', err);
+    });
   }
 }

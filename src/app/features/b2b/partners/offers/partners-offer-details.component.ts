@@ -1,11 +1,15 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { Subject, Observable, from, of } from 'rxjs';
+import { takeUntil, switchMap, map, catchError } from 'rxjs/operators';
+import { Store } from '@ngrx/store';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { SupabaseService } from '../../../../services/supabase.service';
 import { B2BCartService } from '../../cart/services/b2b-cart.service';
+import { selectUserCompanyId } from '../../../../core/auth/store/auth.selectors';
+import { addToB2BCart } from '../../cart/store/b2b-cart.actions';
+import { ToastService } from '../../../../shared/services/toast.service';
 
 interface PartnerOffer {
   id: string;
@@ -158,7 +162,7 @@ interface PartnerProduct {
         </h2>
 
         <!-- Add All to Cart Button -->
-        <div *ngIf="relatedProducts.length > 0" class="mb-8">
+        <div *ngIf="(relatedProducts$ | async)?.length" class="mb-8">
           <button 
             (click)="addAllToCart()"
             class="w-full md:w-auto px-8 py-3 bg-solar-600 text-white font-semibold rounded-lg hover:bg-solar-700 transition-colors font-['DM_Sans'] mb-6"
@@ -168,7 +172,7 @@ interface PartnerProduct {
         </div>
 
         <!-- Product Cards with Partner Pricing -->
-        <div *ngIf="relatedProducts.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div *ngIf="relatedProducts$ | async as relatedProducts" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <div 
             *ngFor="let product of relatedProducts; trackBy: trackByProductId"
             class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2"
@@ -229,7 +233,7 @@ interface PartnerProduct {
               <!-- Add to Cart -->
               <div class="space-y-3">
                 <button 
-                  (click)="addToCart(product, offer)"
+                  (click)="addToCart(product)"
                   class="w-full px-4 py-3 bg-solar-600 text-white rounded-lg hover:bg-solar-700 transition-colors font-semibold font-['DM_Sans']"
                 >
                   {{ 'b2b.offers.addToCartPartnerPrice' | translate }}
@@ -247,7 +251,7 @@ interface PartnerProduct {
         </div>
         
         <!-- No Products Message -->
-        <div *ngIf="relatedProducts.length === 0" class="text-center py-12">
+        <div *ngIf="!(relatedProducts$ | async) || (relatedProducts$ | async)?.length === 0" class="text-center py-12">
           <div class="bg-white rounded-2xl p-12 shadow-lg">
             <div class="text-gray-400 mb-4">
               <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -310,16 +314,29 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private supabaseService = inject(SupabaseService);
   private b2bCartService = inject(B2BCartService);
+  private store = inject(Store);
+  private toastService = inject(ToastService);
 
   offer: PartnerOffer | null = null;
-  relatedProducts: PartnerProduct[] = [];
+  relatedProducts$: Observable<PartnerProduct[]> = of([]);
   copiedCoupon = false;
   private destroy$ = new Subject<void>();
 
   // Partner discount percentage (additional discount on top of offer discount)
   readonly PARTNER_DISCOUNT_PERCENTAGE = 15;
 
+  // Observables
+  userCompanyId$ = this.store.select(selectUserCompanyId);
+
   ngOnInit(): void {
+    this.relatedProducts$ = this.route.params.pipe(
+      switchMap(params => {
+        const offerId = params['id'];
+        return this.loadOfferProducts(offerId);
+      }),
+      takeUntil(this.destroy$)
+    );
+
     this.route.params.pipe(
       takeUntil(this.destroy$)
     ).subscribe(async params => {
@@ -371,9 +388,9 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
     }
   }
 
-  private async loadOfferProducts(offerId: string): Promise<void> {
-    try {
-      const { data, error } = await this.supabaseService.client
+  private loadOfferProducts(offerId: string): Observable<PartnerProduct[]> {
+    return from(
+      this.supabaseService.client
         .from('offer_products')
         .select(`
           *,
@@ -383,6 +400,7 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
             description,
             price,
             sku,
+            images,
             category_id,
             categories (
               name
@@ -391,27 +409,32 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
         `)
         .eq('offer_id', offerId)
         .eq('is_active', true)
-        .order('sort_order');
+        .order('sort_order')
+    ).pipe(
+      map(({ data, error }) => {
+        if (error) {
+          console.error('Error loading offer products:', error);
+          return [];
+        }
 
-      if (error) throw error;
-
-      if (data && data.length > 0) {
-        this.relatedProducts = data.map((offerProduct: any) => ({
-          id: offerProduct.products.id,
-          name: offerProduct.products.name,
-          description: offerProduct.products.description,
-          imageUrl: offerProduct.products.images?.[0]?.url || 'assets/images/product-placeholder.svg',
-          price: offerProduct.products.price || 0,
-          category: offerProduct.products.categories?.name || 'Solar Equipment',
-          sku: offerProduct.products.sku || ''
-        }));
-      } else {
-        this.relatedProducts = [];
-      }
-    } catch (error) {
-      console.error('Error loading offer products:', error);
-      this.relatedProducts = [];
-    }
+        if (data && data.length > 0) {
+          return data.map((offerProduct: any) => ({
+            id: offerProduct.products.id,
+            name: offerProduct.products.name,
+            description: offerProduct.products.description,
+            imageUrl: offerProduct.products.images?.[0]?.url || 'assets/images/product-placeholder.svg',
+            price: offerProduct.products.price || 0,
+            category: offerProduct.products.categories?.name || 'Solar Equipment',
+            sku: offerProduct.products.sku || ''
+          }));
+        }
+        return [];
+      }),
+      catchError(error => {
+        console.error('Error loading offer products:', error);
+        return of([]);
+      })
+    );
   }
 
   calculateDiscountedPrice(originalPrice: number, discountPercentage: number): number {
@@ -458,51 +481,69 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
     alert(`Partner offer "${offer.title}" has been claimed!`);
   }
 
-  addToCart(product: PartnerProduct, offer: PartnerOffer): void {
-    // For now, just show an alert since proper company ID integration requires auth service
-    const partnerPrice = this.getProductPartnerPrice(product, offer);
-    alert(`Added "${product.name}" to cart at partner price: €${partnerPrice.toFixed(2)}`);
+  addToCart(product: PartnerProduct): void {
+    this.userCompanyId$.pipe(takeUntil(this.destroy$)).subscribe(companyId => {
+      if (!companyId) {
+        this.toastService.showError('Please log in as a partner to add items to cart.');
+        return;
+      }
+      
+      this.store.dispatch(addToB2BCart({
+        companyId,
+        productId: product.id,
+        quantity: 1
+      }));
+      
+      this.toastService.showSuccess(`Added ${product.name} to your B2B cart!`);
+    });
   }
 
   async addAllToCart(): Promise<void> {
-    if (!this.relatedProducts || this.relatedProducts.length === 0) {
-      return;
-    }
-
     if (!this.offer) {
-      alert('Offer not found');
+      this.toastService.showError('Offer not found');
       return;
     }
 
-    try {
-      let successCount = 0;
-      let errorCount = 0;
+    this.userCompanyId$.pipe(takeUntil(this.destroy$)).subscribe(companyId => {
+      if (!companyId) {
+        this.toastService.showError('Please log in as a partner to add items to cart.');
+        return;
+      }
 
-      for (const product of this.relatedProducts) {
-        try {
-          // For now, just simulate adding to cart
-          // In a real implementation, this would use the B2B cart service with proper company ID
-          const partnerPrice = this.getProductPartnerPrice(product, this.offer);
-          console.log(`Added ${product.name} to cart at partner price: €${partnerPrice.toFixed(2)}`);
-          successCount++;
-        } catch (error) {
-          console.error(`Error adding product ${product.name} to cart:`, error);
-          errorCount++;
+      this.relatedProducts$.pipe(takeUntil(this.destroy$)).subscribe(products => {
+        if (!products || products.length === 0) {
+          this.toastService.showWarning('No products available to add to cart.');
+          return;
         }
-      }
 
-      if (successCount > 0) {
-        const message = errorCount > 0 
-          ? `Added ${successCount} products to cart. ${errorCount} failed.`
-          : `Added ${successCount} products to cart successfully!`;
-        alert(message);
-      } else {
-        alert('Failed to add products to cart. Please try again.');
-      }
-    } catch (error) {
-      console.error('Error adding all products to cart:', error);
-      alert('Error adding products to cart. Please try again.');
-    }
+        let successCount = 0;
+        let errorCount = 0;
+
+        for (const product of products) {
+          try {
+            this.store.dispatch(addToB2BCart({
+              companyId,
+              productId: product.id,
+              quantity: 1
+            }));
+            
+            successCount++;
+          } catch (error) {
+            console.error(`Error adding product ${product.name} to cart:`, error);
+            errorCount++;
+          }
+        }
+
+        if (successCount > 0) {
+          const message = errorCount > 0 
+            ? `Added ${successCount} products to cart. ${errorCount} failed.`
+            : `Added ${successCount} products to your B2B cart successfully!`;
+          this.toastService.showSuccess(message);
+        } else {
+          this.toastService.showError('Failed to add products to cart. Please try again.');
+        }
+      });
+    });
   }
 
   isOfferExpired(endDate?: string): boolean {
