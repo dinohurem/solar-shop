@@ -157,7 +157,7 @@ interface PartnerProduct {
         </h2>
 
         <!-- Product Cards with Partner Pricing -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div *ngIf="relatedProducts.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <div 
             *ngFor="let product of relatedProducts; trackBy: trackByProductId"
             class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2"
@@ -234,6 +234,25 @@ interface PartnerProduct {
             </div>
           </div>
         </div>
+        
+        <!-- No Products Message -->
+        <div *ngIf="relatedProducts.length === 0" class="text-center py-12">
+          <div class="bg-white rounded-2xl p-12 shadow-lg">
+            <div class="text-gray-400 mb-4">
+              <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m13-8V4a1 1 0 00-1-1H7a1 1 0 00-1 1v1m8 0V4.5"/>
+              </svg>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-2 font-['Poppins']">{{ 'b2b.offers.generalOffer' | translate }}</h3>
+            <p class="text-gray-600 font-['DM_Sans']">{{ 'b2b.offers.generalOfferDescription' | translate }}</p>
+            <button 
+              (click)="navigateToProducts()"
+              class="mt-6 px-6 py-3 bg-solar-600 text-white font-semibold rounded-lg hover:bg-solar-700 transition-colors font-['DM_Sans']"
+            >
+              {{ 'b2b.offers.browseProducts' | translate }}
+            </button>
+          </div>
+        </div>
       </div>
 
       <!-- Offer Details Section -->
@@ -261,7 +280,7 @@ interface PartnerProduct {
       <div class="min-h-screen bg-gray-50 flex items-center justify-center">
         <div class="text-center">
           <div class="animate-spin rounded-full h-12 w-12 border-4 border-solar-600 border-t-transparent mx-auto mb-4"></div>
-          <p class="text-gray-600 font-['DM_Sans']">Loading partner offer details...</p>
+          <p class="text-gray-600 font-['DM_Sans']">Loading...</p>
         </div>
       </div>
     </ng-template>
@@ -437,14 +456,16 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
     return new Date(endDate) < new Date();
   }
 
-  trackByProductId(index: number, product: PartnerProduct): string {
+  trackByProductId(_index: number, product: PartnerProduct): string {
     return product.id;
   }
 
   navigateToProduct(productId: string): void {
-    this.router.navigate(['/products', productId], {
-      queryParams: { companyPricing: true }
-    });
+    this.router.navigate(['/partners/products', productId]);
+  }
+
+  navigateToProducts(): void {
+    this.router.navigate(['/partners/products']);
   }
 
   formatDate(dateString: string): string {

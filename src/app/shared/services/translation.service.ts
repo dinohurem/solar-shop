@@ -320,7 +320,7 @@ export class TranslationService {
                     viewingAs: 'Prikazuje se kao',
                     approvedPartner: 'Odobreni partner',
                     partnerExclusive: 'Ekskluzivno za partnere',
-                    pricing: 'Cijene',
+                    pricing: 'Cijena',
                     signInToViewPricing: 'Prijavite se za pregled posebnih partnerskih cijena',
                     yourCompanyPrice: 'Partnerska cijena',
                     yourSavings: 'Vaše uštede',
@@ -328,9 +328,29 @@ export class TranslationService {
                     contactForQuote: 'Kontaktirajte nas za personaliziranu ponudu',
                     orderInformation: 'Informacije o narudžbi',
                     specifications: 'Specifikacije',
+                    productDetails: 'Detalji proizvoda',
+                    description: 'Opis',
+                    suggestedProducts: 'Preporučeni proizvodi',
+                    quantityPricing: 'Cijena prema količini',
+                    lowestPrice: 'najniža cijena',
+                    from: 'od',
                     // Status labels
                     pendingApproval: 'Čeka odobrenje',
                     rejected: 'Odbačeno'
+                },
+                orders: {
+                    pending: 'Na čekanju',
+                    processing: 'Obrađuje se',
+                    confirmed: 'Potvrđeno',
+                    shipped: 'Poslano',
+                    delivered: 'Isporučeno',
+                    cancelled: 'Otkazano',
+                    paid: 'Plaćeno',
+                    failed: 'Neuspješno',
+                    paymentUponCollection: 'Plaćanje po preuzimanju',
+                    bankTransfer: 'Bankovni transfer',
+                    cashOnDelivery: 'Plaćanje po dostavi',
+                    creditTerms30Days: 'Kredit (30 dana)'
                 },
                 offers: {
                     title: 'Pogledajte naše ponude',
@@ -423,7 +443,13 @@ export class TranslationService {
                     customPricing: 'Prilagođene cijene',
                     viewCustomPrices: 'Pregledajte vaše prilagođene cijene',
                     noPricingInfo: 'Nema informacija o cijenama',
-                    contactSalesTeam: 'Kontaktirajte naš prodajni tim za prilagođene cijene'
+                    contactSalesTeam: 'Kontaktirajte naš prodajni tim za prilagođene cijene',
+                    pendingApproval: 'Čeka odobrenje',
+                    approvedPartner: 'Odobreni partner',
+                    applicationRejected: 'Zahtjev odbačen',
+                    pendingApprovalDescription: 'Vaš zahtjev za partnerstvo je u obradi',
+                    approvedPartnerDescription: 'Imate puni pristup partnerskim pogodnostima',
+                    applicationRejectedDescription: 'Kontaktirajte podršku za više informacija'
                 },
             },
             // B2B Cart translations
@@ -2314,7 +2340,7 @@ export class TranslationService {
                 backToB2C: 'Nazad na korisnički portal',
                 becomePartner: 'Postani partner',
                 readyToPartner: 'Spremni ste da postanete naš partner?',
-                joinThousands: 'Pridružite se tisućama partnera širom svijeta i povećajte svoj solarnu efikasnost sa IBC SOLAR-om',
+                joinThousands: 'Pridružite se tisućama partnera širom svijeta i povećajte svoj solarnu efikasnost.',
                 contactSales: 'Kontaktirajte prodaju'
             }
         },
@@ -2634,9 +2660,29 @@ export class TranslationService {
                     contactForQuote: 'Contact us for a personalized quote',
                     orderInformation: 'Order Information',
                     specifications: 'Specifications',
+                    productDetails: 'Product Details',
+                    description: 'Description',
+                    suggestedProducts: 'Suggested Products',
+                    quantityPricing: 'Quantity Pricing',
+                    lowestPrice: 'lowest price',
+                    from: 'from',
                     // Status labels
                     pendingApproval: 'Pending Approval',
                     rejected: 'Rejected'
+                },
+                orders: {
+                    pending: 'Pending',
+                    processing: 'Processing',
+                    confirmed: 'Confirmed',
+                    shipped: 'Shipped',
+                    delivered: 'Delivered',
+                    cancelled: 'Cancelled',
+                    paid: 'Paid',
+                    failed: 'Failed',
+                    paymentUponCollection: 'Payment upon collection',
+                    bankTransfer: 'Bank Transfer',
+                    cashOnDelivery: 'Cash on Delivery',
+                    creditTerms30Days: 'Credit Terms (30 days)'
                 },
                 offers: {
                     title: 'Offers for Partners',
@@ -2729,10 +2775,14 @@ export class TranslationService {
                     customPricing: 'Custom Pricing',
                     viewCustomPrices: 'View your custom pricing',
                     noPricingInfo: 'No pricing information',
-                    contactSalesTeam: 'Contact our sales team for custom pricing'
+                    contactSalesTeam: 'Contact our sales team for custom pricing',
+                    pendingApproval: 'Pending Approval',
+                    approvedPartner: 'Approved Partner',
+                    applicationRejected: 'Application Rejected',
+                    pendingApprovalDescription: 'Your partnership application is under review',
+                    approvedPartnerDescription: 'You have full access to partner benefits',
+                    applicationRejectedDescription: 'Contact support for more information',
                 },
-                // B2B Cart translations
-
             },
             b2bCart: {
                 title: 'B2B Cart',

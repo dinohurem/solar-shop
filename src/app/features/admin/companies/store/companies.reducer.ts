@@ -133,6 +133,56 @@ export const companiesReducer = createReducer(
         ...state,
         filters: {},
         filteredCompanies: state.companies
+    })),
+
+    // Create company
+    on(CompaniesActions.createCompany, (state) => ({
+        ...state,
+        loading: true,
+        error: null
+    })),
+
+    on(CompaniesActions.createCompanySuccess, (state, { company }) => {
+        const updatedCompanies = [...state.companies, company];
+        return {
+            ...state,
+            companies: updatedCompanies,
+            filteredCompanies: filterCompanies(updatedCompanies, state.filters),
+            loading: false,
+            error: null
+        };
+    }),
+
+    on(CompaniesActions.createCompanyFailure, (state, { error }) => ({
+        ...state,
+        loading: false,
+        error
+    })),
+
+    // Update company
+    on(CompaniesActions.updateCompany, (state) => ({
+        ...state,
+        loading: true,
+        error: null
+    })),
+
+    on(CompaniesActions.updateCompanySuccess, (state, { company }) => {
+        const updatedCompanies = state.companies.map(c =>
+            c.id === company.id ? company : c
+        );
+        return {
+            ...state,
+            companies: updatedCompanies,
+            filteredCompanies: filterCompanies(updatedCompanies, state.filters),
+            loading: false,
+            error: null
+        };
+    }),
+
+    on(CompaniesActions.updateCompanyFailure, (state, { error }) => ({
+        ...state,
+        loading: false,
+        error
     }))
 );
 

@@ -46,10 +46,41 @@ export const selectProductsWithPricing = createSelector(
     (products, companyPricing): ProductWithPricing[] => {
         return products.map(product => {
             const customPricing = companyPricing.find(p => p.product_id === product.id);
-            const company_price = customPricing ? customPricing.price : undefined;
+            
+            // Build pricing tiers array
+            let company_pricing_tiers: { quantity: number; price: number; }[] = [];
+            let company_price: number | undefined;
+            
+            if (customPricing) {
+                // Always add tier 1
+                company_pricing_tiers.push({
+                    quantity: customPricing.quantity_tier_1 || 1,
+                    price: customPricing.price_tier_1 || customPricing.price
+                });
+                
+                // Add tier 2 if exists
+                if (customPricing.quantity_tier_2 && customPricing.price_tier_2) {
+                    company_pricing_tiers.push({
+                        quantity: customPricing.quantity_tier_2,
+                        price: customPricing.price_tier_2
+                    });
+                }
+                
+                // Add tier 3 if exists
+                if (customPricing.quantity_tier_3 && customPricing.price_tier_3) {
+                    company_pricing_tiers.push({
+                        quantity: customPricing.quantity_tier_3,
+                        price: customPricing.price_tier_3
+                    });
+                }
+                
+                // Company price is the lowest price (usually the highest quantity tier)
+                company_price = Math.min(...company_pricing_tiers.map(t => t.price));
+            }
+            
             const company_minimum_order = customPricing ? customPricing.minimum_order : undefined;
 
-            // Calculate savings if there's a company price
+            // Calculate savings based on the lowest company price
             const savings = company_price ? product.price - company_price : undefined;
 
             return {
@@ -60,7 +91,8 @@ export const selectProductsWithPricing = createSelector(
                 in_stock: (product.stock_quantity || 0) > 0,
                 partner_only: false, // TODO: Add partner only logic
                 has_pending_price: !company_price,
-                company_minimum_order
+                company_minimum_order,
+                company_pricing_tiers: company_pricing_tiers.length > 0 ? company_pricing_tiers : undefined
             };
         });
     }

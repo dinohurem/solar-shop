@@ -34,14 +34,21 @@ export interface CompanyPricing {
     id: string;
     company_id: string;
     product_id: string;
-    price: number;
+    price: number; // Backward compatibility - will map to price_tier_1
     minimum_order: number;
+    // Quantity-based pricing tiers
+    quantity_tier_1: number;
+    price_tier_1: number;
+    quantity_tier_2?: number;
+    price_tier_2?: number;
+    quantity_tier_3?: number;
+    price_tier_3?: number;
     created_at: string;
     updated_at: string;
 }
 
 export interface ProductWithPricing extends Product {
-    company_price?: number;
+    company_price?: number; // Lowest company price based on quantity tiers
     partner_price?: number;
     savings?: number;
     in_stock: boolean;
@@ -49,6 +56,11 @@ export interface ProductWithPricing extends Product {
     has_pending_price?: boolean;
     image_url?: string; // computed from images array for easier template access
     company_minimum_order?: number; // company-specific minimum order from company_pricing table
+    // Company pricing tiers
+    company_pricing_tiers?: {
+        quantity: number;
+        price: number;
+    }[];
 }
 
 // Load products

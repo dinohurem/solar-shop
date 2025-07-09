@@ -129,8 +129,8 @@ import { SupabaseService } from '../../../../services/supabase.service';
                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                   </svg>
                   <div>
-                    <div class="font-medium">{{ 'b2b.profile.companyStatus' | translate }}: {{ getStatusLabel(company.status) }}</div>
-                    <div class="text-sm opacity-75">{{ getStatusDescription(company.status) }}</div>
+                    <div class="font-medium">{{ 'b2b.profile.companyStatus' | translate }}: {{ getStatusLabel(company.status) | translate }}</div>
+                    <div class="text-sm opacity-75">{{ getStatusDescription(company.status) | translate }}</div>
                   </div>
                 </div>
               </div>
@@ -307,7 +307,7 @@ import { SupabaseService } from '../../../../services/supabase.service';
                     <div class="text-right">
                       <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
                             [class]="getOrderStatusClass(order.status)">
-                        {{ getOrderStatusLabel(order.status) }}
+                        {{ getOrderStatusLabel(order.status) | translate }}
                       </span>
                       <p class="text-lg font-semibold text-gray-900 mt-1">{{ order.subtotal | currency:'EUR':'symbol':'1.2-2' }}</p>
                     </div>
@@ -333,7 +333,7 @@ import { SupabaseService } from '../../../../services/supabase.service';
                       <span *ngIf="order.paymentStatus">
                         {{ 'b2b.profile.payment' | translate }}: 
                         <span [class]="order.paymentStatus === 'paid' ? 'text-green-600' : 'text-yellow-600'">
-                          {{ getPaymentStatusLabel(order.paymentStatus) }}
+                          {{ getPaymentStatusLabel(order.paymentStatus) | translate }}
                         </span>
                       </span>
                       <span *ngIf="order.items.length">
@@ -697,29 +697,21 @@ export class PartnerProfileComponent implements OnInit, OnDestroy {
   }
 
   getStatusLabel(status: string): string {
-    switch (status) {
-      case 'pending':
-        return 'Pending Approval';
-      case 'approved':
-        return 'Approved Partner';
-      case 'rejected':
-        return 'Application Rejected';
-      default:
-        return status;
-    }
+    const statusMap: { [key: string]: string } = {
+      'pending': 'b2b.profile.pendingApproval',
+      'approved': 'b2b.profile.approvedPartner',
+      'rejected': 'b2b.profile.applicationRejected'
+    };
+    return statusMap[status] || status;
   }
 
   getStatusDescription(status: string): string {
-    switch (status) {
-      case 'pending':
-        return 'Your partnership application is under review';
-      case 'approved':
-        return 'You have full access to partner benefits';
-      case 'rejected':
-        return 'Contact support for more information';
-      default:
-        return '';
-    }
+    const statusMap: { [key: string]: string } = {
+      'pending': 'b2b.profile.pendingApprovalDescription',
+      'approved': 'b2b.profile.approvedPartnerDescription',
+      'rejected': 'b2b.profile.applicationRejectedDescription'
+    };
+    return statusMap[status] || '';
   }
 
   getOrderStatusClass(status: string): string {
@@ -740,33 +732,23 @@ export class PartnerProfileComponent implements OnInit, OnDestroy {
   }
 
   getOrderStatusLabel(status: string): string {
-    switch (status) {
-      case 'pending':
-        return 'Pending';
-      case 'processing':
-        return 'Processing';
-      case 'shipped':
-        return 'Shipped';
-      case 'delivered':
-        return 'Delivered';
-      case 'cancelled':
-        return 'Cancelled';
-      default:
-        return status;
-    }
+    const statusMap: { [key: string]: string } = {
+      'pending': 'b2b.orders.pending',
+      'processing': 'b2b.orders.processing',
+      'shipped': 'b2b.orders.shipped',
+      'delivered': 'b2b.orders.delivered',
+      'cancelled': 'b2b.orders.cancelled'
+    };
+    return statusMap[status] || status;
   }
 
   getPaymentStatusLabel(status: string): string {
-    switch (status) {
-      case 'paid':
-        return 'Paid';
-      case 'pending':
-        return 'Pending';
-      case 'failed':
-        return 'Failed';
-      default:
-        return status;
-    }
+    const statusMap: { [key: string]: string } = {
+      'paid': 'b2b.orders.paid',
+      'pending': 'b2b.orders.pending',
+      'failed': 'b2b.orders.failed'
+    };
+    return statusMap[status] || status;
   }
 
   getTotalSpent(): number {

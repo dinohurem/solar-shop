@@ -98,4 +98,40 @@ export class CompaniesEffects {
             )
         )
     );
+
+    createCompany$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(CompaniesActions.createCompany),
+            mergeMap(action =>
+                this.companiesService.createCompany(action.company).pipe(
+                    map(company => {
+                        this.toastService.showSuccess('Company created successfully');
+                        return CompaniesActions.createCompanySuccess({ company });
+                    }),
+                    catchError(error => {
+                        this.toastService.showError('Failed to create company');
+                        return of(CompaniesActions.createCompanyFailure({ error: error.message }));
+                    })
+                )
+            )
+        )
+    );
+
+    updateCompany$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(CompaniesActions.updateCompany),
+            mergeMap(action =>
+                this.companiesService.updateCompany(action.companyId, action.company).pipe(
+                    map(company => {
+                        this.toastService.showSuccess('Company updated successfully');
+                        return CompaniesActions.updateCompanySuccess({ company });
+                    }),
+                    catchError(error => {
+                        this.toastService.showError('Failed to update company');
+                        return of(CompaniesActions.updateCompanyFailure({ error: error.message }));
+                    })
+                )
+            )
+        )
+    );
 } 

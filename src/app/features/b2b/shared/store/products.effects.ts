@@ -74,14 +74,32 @@ export class ProductsEffects {
                 from(
                     this.supabaseService.client
                         .from('company_pricing')
-                        .select('id, company_id, product_id, price, minimum_order, created_at, updated_at')
+                        .select('*')
                         .eq('company_id', companyId)
                 ).pipe(
                     map(({ data, error }) => {
                         if (error) {
                             return ProductsActions.loadCompanyPricingFailure({ error: error.message });
                         }
-                        return ProductsActions.loadCompanyPricingSuccess({ pricing: data || [] });
+                        
+                        // Map the data to include all fields, with backward compatibility
+                        const mappedPricing = (data || []).map((item: any) => ({
+                            id: item.id,
+                            company_id: item.company_id,
+                            product_id: item.product_id,
+                            price: item.price || item.price_tier_1, // Backward compatibility
+                            minimum_order: item.minimum_order || 1,
+                            quantity_tier_1: item.quantity_tier_1 || 1,
+                            price_tier_1: item.price_tier_1 || item.price,
+                            quantity_tier_2: item.quantity_tier_2,
+                            price_tier_2: item.price_tier_2,
+                            quantity_tier_3: item.quantity_tier_3,
+                            price_tier_3: item.price_tier_3,
+                            created_at: item.created_at,
+                            updated_at: item.updated_at
+                        }));
+                        
+                        return ProductsActions.loadCompanyPricingSuccess({ pricing: mappedPricing });
                     }),
                     catchError((error: any) =>
                         of(ProductsActions.loadCompanyPricingFailure({ error: error.message || 'Failed to load company pricing' }))

@@ -97,8 +97,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
           {{ 'offers.productsIncluded' | translate }}
         </h2>
 
-        <!-- Product Cards --> 
-        <!-- TODO: Only show products that are in the offer or the category if full category is in the offer --> 
+        <!-- Product Cards -->
         <div *ngIf="relatedProducts$ | async as products" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <div 
             *ngFor="let product of products; trackBy: trackByProductId"
@@ -297,19 +296,69 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
   }
 
   private getRelatedProducts(offer: Offer): Observable<any[]> {
-    // For now, we'll get a few featured products as related products
-    // In a real app, you might have specific product mappings for offers
     return new Observable(observer => {
-      this.supabaseService.getProducts({ featured: true, limit: 3 })
-        .then(products => {
-          observer.next(products || []);
+      // First, check if this offer has specific products linked via offer_products table
+      Promise.resolve(
+        this.supabaseService.client
+          .from('offer_products')
+          .select(`
+            *,
+            products (
+              id,
+              name,
+              description,
+              price,
+              sku,
+              availability,
+              images,
+              category_id,
+              categories (
+                name
+              )
+            )
+          `)
+          .eq('offer_id', offer.id)
+          .eq('is_active', true)
+          .order('sort_order')
+      ).then(({ data: offerProducts, error }) => {
+        if (error) throw error;
+        
+        if (offerProducts && offerProducts.length > 0) {
+          // Map offer products to the expected format
+          const products = offerProducts.map((op: any) => ({
+            id: op.products.id,
+            name: op.products.name,
+            description: op.products.description,
+            price: op.products.price,
+            availability: op.products.availability || 'in_stock',
+            images: op.products.images || [],
+            category: op.products.categories?.name
+          }));
+          observer.next(products);
           observer.complete();
-        })
-        .catch(error => {
-          console.error('Error fetching related products:', error);
-          observer.next([]);
-          observer.complete();
-        });
+        } else {
+          // If no specific products, check if offer applies to categories
+          // For now, fallback to featured products
+          this.supabaseService.getProducts({ featured: true, limit: 6 })
+            .then(products => {
+              observer.next(products || []);
+              observer.complete();
+            });
+        }
+      }).catch((error: any) => {
+        console.error('Error fetching related products:', error);
+        // Fallback to featured products on error
+        this.supabaseService.getProducts({ featured: true, limit: 3 })
+          .then(products => {
+            observer.next(products || []);
+            observer.complete();
+          })
+          .catch((fallbackError: any) => {
+            console.error('Error fetching fallback products:', fallbackError);
+            observer.next([]);
+            observer.complete();
+          });
+      });
     });
   }
 
@@ -337,7 +386,7 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
     });
   }
 
-  trackByProductId(index: number, product: any): string {
+  trackByProductId(_index: number, product: any): string {
     return product.id;
   }
 

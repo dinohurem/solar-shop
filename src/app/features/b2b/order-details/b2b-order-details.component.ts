@@ -70,7 +70,7 @@ import { Order } from '../../../shared/models/order.model';
                         'bg-green-100 text-green-800': order.status === 'delivered',
                         'bg-red-100 text-red-800': order.status === 'cancelled'
                       }">
-                  {{ getStatusLabel(order.status) }}
+                  {{ getStatusLabel(order.status) | translate }}
                 </span>
               </div>
 
@@ -83,7 +83,7 @@ import { Order } from '../../../shared/models/order.model';
                         'bg-green-100 text-green-800': order.paymentStatus === 'paid',
                         'bg-red-100 text-red-800': order.paymentStatus === 'failed'
                       }">
-                  {{ getPaymentStatusLabel(order.paymentStatus) }}
+                  {{ getPaymentStatusLabel(order.paymentStatus) | translate }}
                 </span>
               </div>
 
@@ -121,7 +121,8 @@ import { Order } from '../../../shared/models/order.model';
                   <img *ngIf="item.productImageUrl" 
                        [src]="item.productImageUrl" 
                        [alt]="item.productName"
-                       class="w-full h-full object-cover rounded-lg">
+                       class="w-full h-full object-cover rounded-lg"
+                       (error)="onImageError($event)">
                   <svg *ngIf="!item.productImageUrl" class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                   </svg>
@@ -190,7 +191,7 @@ import { Order } from '../../../shared/models/order.model';
               
               <div class="mt-4">
                 <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide font-['DM_Sans']">{{ 'orderDetails.paymentMethod' | translate }}</h3>
-                <p class="mt-1 text-sm text-gray-900 font-['DM_Sans']">{{ getPaymentMethodLabel(order.paymentMethod || '') }}</p>
+                <p class="mt-1 text-sm text-gray-900 font-['DM_Sans']">{{ getPaymentMethodLabel(order.paymentMethod || '') | translate }}</p>
               </div>
             </div>
 
@@ -324,31 +325,31 @@ export class B2bOrderDetailsComponent implements OnInit {
 
   getStatusLabel(status: string): string {
     const statusMap: { [key: string]: string } = {
-      'pending': 'Pending',
-      'confirmed': 'Confirmed',
-      'processing': 'Processing',
-      'shipped': 'Shipped',
-      'delivered': 'Delivered',
-      'cancelled': 'Cancelled'
+      'pending': 'b2b.orders.pending',
+      'confirmed': 'b2b.orders.confirmed',
+      'processing': 'b2b.orders.processing',
+      'shipped': 'b2b.orders.shipped',
+      'delivered': 'b2b.orders.delivered',
+      'cancelled': 'b2b.orders.cancelled'
     };
     return statusMap[status] || status;
   }
 
   getPaymentStatusLabel(paymentStatus: string): string {
     const statusMap: { [key: string]: string } = {
-      'pending': 'Pending',
-      'paid': 'Paid',
-      'failed': 'Failed'
+      'pending': 'b2b.orders.pending',
+      'paid': 'b2b.orders.paid',
+      'failed': 'b2b.orders.failed'
     };
     return statusMap[paymentStatus] || paymentStatus;
   }
 
   getPaymentMethodLabel(paymentMethod: string): string {
     const methodMap: { [key: string]: string } = {
-      'payment_upon_collection': 'Payment upon collection',
-      'bank_transfer': 'Bank Transfer',
-      'cash_on_delivery': 'Cash on Delivery',
-      'credit_30_days': 'Credit Terms (30 days)'
+      'payment_upon_collection': 'b2b.orders.paymentUponCollection',
+      'bank_transfer': 'b2b.orders.bankTransfer',
+      'cash_on_delivery': 'b2b.orders.cashOnDelivery',
+      'credit_30_days': 'b2b.orders.creditTerms30Days'
     };
     return methodMap[paymentMethod] || paymentMethod;
   }
@@ -365,5 +366,13 @@ export class B2bOrderDetailsComponent implements OnInit {
     // Type assertion to handle dynamic B2B address fields
     const address = this.order.billingAddress as any;
     return address[field] || null;
+  }
+
+  onImageError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    if (img) {
+      // Hide the broken image and let the fallback icon show
+      img.style.display = 'none';
+    }
   }
 }

@@ -16,6 +16,13 @@ interface ProductWithCustomPrice extends Product {
   customPrice: number;
   hasCustomPrice: boolean;
   minimumOrder: number;
+  // Quantity-based pricing tiers
+  quantityTier1: number;
+  priceTier1: number;
+  quantityTier2?: number;
+  priceTier2?: number;
+  quantityTier3?: number;
+  priceTier3?: number;
 }
 
 @Component({
@@ -125,7 +132,7 @@ interface ProductWithCustomPrice extends Product {
                   {{ 'admin.companyPricingForm.currentPrice' | translate }}
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {{ 'admin.companyPricingForm.customPriceEuro' | translate }}
+                  {{ 'admin.companyPricingForm.pricingTiers' | translate }}
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   {{ 'admin.companyPricingForm.minimumOrder' | translate }}
@@ -146,15 +153,74 @@ interface ProductWithCustomPrice extends Product {
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm text-gray-900">€{{ product.price | number:'1.2-2' }}</div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    [value]="product.customPrice || ''"
-                    (input)="updateCustomPrice(product, $event)"
-                    [placeholder]="'€' + (product.price | number:'1.2-2')"
-                    class="w-32 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <td class="px-6 py-4">
+                  <div class="space-y-2">
+                    <!-- Tier 1 (Base Price) -->
+                    <div class="flex items-center space-x-2">
+                      <span class="text-xs text-gray-500 w-16">Qty ≥</span>
+                      <input
+                        type="number"
+                        step="1"
+                        min="1"
+                        [value]="product.quantityTier1"
+                        (input)="updateQuantityTier(product, 1, $event)"
+                        class="w-16 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                      <span class="text-xs text-gray-500">→</span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        [value]="product.priceTier1 || ''"
+                        (input)="updatePriceTier(product, 1, $event)"
+                        [placeholder]="'€' + (product.price | number:'1.2-2')"
+                        class="w-24 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <!-- Tier 2 -->
+                    <div class="flex items-center space-x-2">
+                      <span class="text-xs text-gray-500 w-16">Qty ≥</span>
+                      <input
+                        type="number"
+                        step="1"
+                        min="1"
+                        [value]="product.quantityTier2 || ''"
+                        (input)="updateQuantityTier(product, 2, $event)"
+                        placeholder="10"
+                        class="w-16 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                      <span class="text-xs text-gray-500">→</span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        [value]="product.priceTier2 || ''"
+                        (input)="updatePriceTier(product, 2, $event)"
+                        [disabled]="!product.quantityTier2"
+                        placeholder="€"
+                        class="w-24 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100">
+                    </div>
+                    <!-- Tier 3 -->
+                    <div class="flex items-center space-x-2">
+                      <span class="text-xs text-gray-500 w-16">Qty ≥</span>
+                      <input
+                        type="number"
+                        step="1"
+                        min="1"
+                        [value]="product.quantityTier3 || ''"
+                        (input)="updateQuantityTier(product, 3, $event)"
+                        [disabled]="!product.quantityTier2"
+                        placeholder="50"
+                        class="w-16 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100">
+                      <span class="text-xs text-gray-500">→</span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        [value]="product.priceTier3 || ''"
+                        (input)="updatePriceTier(product, 3, $event)"
+                        [disabled]="!product.quantityTier3"
+                        placeholder="€"
+                        class="w-24 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100">
+                    </div>
+                  </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <input
@@ -205,8 +271,16 @@ interface ProductWithCustomPrice extends Product {
             </div>
             <div class="text-right">
               <div class="text-sm text-gray-500">
-                <div *ngIf="product.hasCustomPrice && product.customPrice !== product.price">
-                  €{{ product.price | number:'1.2-2' }} → <span class="font-medium text-green-600">€{{ product.customPrice | number:'1.2-2' }}</span>
+                <div *ngIf="product.hasCustomPrice">
+                  <div *ngIf="product.priceTier1 && product.priceTier1 !== product.price" class="mb-1">
+                    <span class="text-xs">Qty ≥{{ product.quantityTier1 }}:</span> €{{ product.price | number:'1.2-2' }} → <span class="font-medium text-green-600">€{{ product.priceTier1 | number:'1.2-2' }}</span>
+                  </div>
+                  <div *ngIf="product.priceTier2" class="mb-1">
+                    <span class="text-xs">Qty ≥{{ product.quantityTier2 }}:</span> <span class="font-medium text-green-600">€{{ product.priceTier2 | number:'1.2-2' }}</span>
+                  </div>
+                  <div *ngIf="product.priceTier3" class="mb-1">
+                    <span class="text-xs">Qty ≥{{ product.quantityTier3 }}:</span> <span class="font-medium text-green-600">€{{ product.priceTier3 | number:'1.2-2' }}</span>
+                  </div>
                 </div>
                 <div *ngIf="product.minimumOrder !== 1" class="text-xs text-blue-600 mt-1">
                   Min. Order: {{ product.minimumOrder }}
@@ -317,13 +391,27 @@ export class CompanyPricingFormComponent implements OnInit, OnDestroy {
 
     let filtered = this.products.map(product => {
       const existingPrice = this.existingPricing.find(p => p.product_id === product.id);
-      const customPrice = existingPrice ? parseFloat(existingPrice.price) : product.price;
       const minimumOrder = existingPrice ? (existingPrice.minimum_order || 1) : 1;
+      
+      // Handle quantity-based pricing tiers
+      const quantityTier1 = existingPrice?.quantity_tier_1 || 1;
+      const priceTier1 = existingPrice ? parseFloat(existingPrice.price_tier_1) : product.price;
+      const quantityTier2 = existingPrice?.quantity_tier_2;
+      const priceTier2 = existingPrice?.price_tier_2 ? parseFloat(existingPrice.price_tier_2) : undefined;
+      const quantityTier3 = existingPrice?.quantity_tier_3;
+      const priceTier3 = existingPrice?.price_tier_3 ? parseFloat(existingPrice.price_tier_3) : undefined;
+      
       return {
         ...product,
-        customPrice: customPrice,
-        hasCustomPrice: !!existingPrice && customPrice !== product.price,
-        minimumOrder: minimumOrder
+        customPrice: priceTier1, // For backward compatibility
+        hasCustomPrice: !!existingPrice && (priceTier1 !== product.price || !!priceTier2 || !!priceTier3),
+        minimumOrder: minimumOrder,
+        quantityTier1,
+        priceTier1,
+        quantityTier2,
+        priceTier2,
+        quantityTier3,
+        priceTier3
       };
     });
 
@@ -348,11 +436,77 @@ export class CompanyPricingFormComponent implements OnInit, OnDestroy {
 
     if (!isNaN(value) && value > 0) {
       product.customPrice = value;
+      product.priceTier1 = value;
       product.hasCustomPrice = value !== product.price;
     } else {
       product.customPrice = product.price;
+      product.priceTier1 = product.price;
       product.hasCustomPrice = false;
     }
+  }
+
+  updateQuantityTier(product: ProductWithCustomPrice, tier: number, event: Event): void {
+    const target = event.target as HTMLInputElement;
+    const value = parseInt(target.value);
+
+    if (tier === 1) {
+      product.quantityTier1 = !isNaN(value) && value > 0 ? value : 1;
+    } else if (tier === 2) {
+      if (!isNaN(value) && value > product.quantityTier1) {
+        product.quantityTier2 = value;
+      } else {
+        product.quantityTier2 = undefined;
+        product.priceTier2 = undefined;
+        // Also clear tier 3 if tier 2 is cleared
+        product.quantityTier3 = undefined;
+        product.priceTier3 = undefined;
+      }
+    } else if (tier === 3) {
+      if (!isNaN(value) && product.quantityTier2 && value > product.quantityTier2) {
+        product.quantityTier3 = value;
+      } else {
+        product.quantityTier3 = undefined;
+        product.priceTier3 = undefined;
+      }
+    }
+    
+    this.updateHasCustomPrice(product);
+  }
+
+  updatePriceTier(product: ProductWithCustomPrice, tier: number, event: Event): void {
+    const target = event.target as HTMLInputElement;
+    const value = parseFloat(target.value);
+
+    if (tier === 1) {
+      if (!isNaN(value) && value > 0) {
+        product.priceTier1 = value;
+        product.customPrice = value; // For backward compatibility
+      } else {
+        product.priceTier1 = product.price;
+        product.customPrice = product.price;
+      }
+    } else if (tier === 2) {
+      if (!isNaN(value) && value > 0 && product.quantityTier2) {
+        product.priceTier2 = value;
+      } else {
+        product.priceTier2 = undefined;
+      }
+    } else if (tier === 3) {
+      if (!isNaN(value) && value > 0 && product.quantityTier3) {
+        product.priceTier3 = value;
+      } else {
+        product.priceTier3 = undefined;
+      }
+    }
+    
+    this.updateHasCustomPrice(product);
+  }
+
+  private updateHasCustomPrice(product: ProductWithCustomPrice): void {
+    product.hasCustomPrice = 
+      product.priceTier1 !== product.price || 
+      !!product.priceTier2 || 
+      !!product.priceTier3;
   }
 
   updateMinimumOrder(product: ProductWithCustomPrice, event: Event): void {
@@ -369,12 +523,19 @@ export class CompanyPricingFormComponent implements OnInit, OnDestroy {
   removeCustomPrice(product: ProductWithCustomPrice): void {
     product.customPrice = product.price;
     product.hasCustomPrice = false;
-    product.minimumOrder = 1; // Reset minimum order to default when removing custom pricing
+    product.minimumOrder = 1;
+    // Reset all pricing tiers
+    product.quantityTier1 = 1;
+    product.priceTier1 = product.price;
+    product.quantityTier2 = undefined;
+    product.priceTier2 = undefined;
+    product.quantityTier3 = undefined;
+    product.priceTier3 = undefined;
   }
 
   getProductsWithCustomPricing(): ProductWithCustomPrice[] {
     return this.filteredProducts.filter(p => 
-      (p.hasCustomPrice && p.customPrice !== p.price) || 
+      p.hasCustomPrice || 
       p.minimumOrder !== 1
     );
   }
@@ -396,19 +557,38 @@ export class CompanyPricingFormComponent implements OnInit, OnDestroy {
 
         if (existingPricing) {
           // Update existing
-          await this.supabase.updateRecord('company_pricing', existingPricing.id, {
-            price: product.customPrice,
-            minimum_order: product.minimumOrder
-          });
+          const { error } = await this.supabase.client
+            .from('company_pricing')
+            .update({
+              price_tier_1: product.priceTier1,
+              quantity_tier_1: product.quantityTier1,
+              price_tier_2: product.priceTier2 || null,
+              quantity_tier_2: product.quantityTier2 || null,
+              price_tier_3: product.priceTier3 || null,
+              quantity_tier_3: product.quantityTier3 || null,
+              minimum_order: product.minimumOrder
+            })
+            .eq('id', existingPricing.id);
+          
+          if (error) throw error;
         } else {
           // Create new - only create if there's a custom price or minimum order different from default
           if (product.hasCustomPrice || product.minimumOrder !== 1) {
-            await this.supabase.createRecord('company_pricing', {
-              company_id: this.selectedCompany.id,
-              product_id: product.id,
-              price: product.customPrice,
-              minimum_order: product.minimumOrder
-            });
+            const { error } = await this.supabase.client
+              .from('company_pricing')
+              .insert({
+                company_id: this.selectedCompany.id,
+                product_id: product.id,
+                price_tier_1: product.priceTier1,
+                quantity_tier_1: product.quantityTier1,
+                price_tier_2: product.priceTier2 || null,
+                quantity_tier_2: product.quantityTier2 || null,
+                price_tier_3: product.priceTier3 || null,
+                quantity_tier_3: product.quantityTier3 || null,
+                minimum_order: product.minimumOrder
+              });
+            
+            if (error) throw error;
           }
         }
       }
@@ -420,7 +600,12 @@ export class CompanyPricingFormComponent implements OnInit, OnDestroy {
       );
 
       for (const pricing of toRemove) {
-        await this.supabase.deleteRecord('company_pricing', pricing.id);
+        const { error } = await this.supabase.client
+          .from('company_pricing')
+          .delete()
+          .eq('id', pricing.id);
+        
+        if (error) throw error;
       }
 
       // Navigate back

@@ -70,7 +70,7 @@ import { Subject, takeUntil, switchMap, from, catchError, of } from 'rxjs';
               </a>
               <div class="h-6 w-px bg-gray-300 mx-2"></div>
               <a routerLink="/" 
-                 class="text-gray-700 hover:text-solar-600 px-3 py-2 text-sm font-medium transition-colors flex items-center space-x-1">
+                 class="hidden md:flex text-gray-700 hover:text-solar-600 px-3 py-2 text-sm font-medium transition-colors items-center space-x-1">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                 </svg>
@@ -80,21 +80,8 @@ import { Subject, takeUntil, switchMap, from, catchError, of } from 'rxjs';
 
             <!-- User Dropdown (when authenticated and is company contact) -->
             <div *ngIf="isAuthenticated && isCompanyContact" class="flex items-center space-x-4">
-              <!-- Cart Button -->
-              <button (click)="toggleCart()" 
-                      class="relative p-2 text-gray-600 hover:text-solar-600 transition-all duration-300 hover:scale-110 hover:bg-solar-50 rounded-full"
-                      [title]="'cart.cart' | translate">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.1 5H19M7 13v6a2 2 0 002 2h6a2 2 0 002-2v-6"/>
-                </svg>
-                <!-- Cart Items Count Badge -->
-                <span *ngIf="(cartItemsCount$ | async) && (cartItemsCount$ | async)! > 0" 
-                      class="absolute -top-1 -right-1 bg-solar-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium min-w-[1.25rem]">
-                  {{ cartItemsCount$ | async }}
-                </span>
-              </button>
-              
-              <div class="relative">
+
+            <div class="relative">
                 <button (click)="toggleUserMenu()" 
                         class="p-2 text-gray-600 hover:text-solar-600 transition-all duration-300 hover:scale-110 hover:bg-solar-50 rounded-full">
                   <div class="w-8 h-8 bg-solar-100 rounded-full flex items-center justify-center">
@@ -132,10 +119,26 @@ import { Subject, takeUntil, switchMap, from, catchError, of } from 'rxjs';
                   </button>
                 </div>
               </div>
+
+              <!-- Cart Button -->
+              <button (click)="toggleCart()" 
+                      class="relative p-2 text-gray-600 hover:text-solar-600 transition-all duration-300 hover:scale-110 hover:bg-solar-50 rounded-full"
+                      [title]="'cart.cart' | translate">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.1 5H19M7 13v6a2 2 0 002 2h6a2 2 0 002-2v-6"/>
+                </svg>
+                <!-- Cart Items Count Badge -->
+                <span *ngIf="(cartItemsCount$ | async) && (cartItemsCount$ | async)! > 0" 
+                      class="absolute -top-1 -right-1 bg-solar-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium min-w-[1.25rem]">
+                  {{ cartItemsCount$ | async }}
+                </span>
+              </button>
+              
+              
               
               <div class="h-6 w-px bg-gray-300"></div>
               <a routerLink="/" 
-                 class="text-gray-700 hover:text-solar-600 px-3 py-2 text-sm font-medium transition-colors flex items-center space-x-1">
+                 class="hidden md:flex text-gray-700 hover:text-solar-600 px-3 py-2 text-sm font-medium transition-colors items-center space-x-1">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                 </svg>
@@ -191,7 +194,7 @@ import { Subject, takeUntil, switchMap, from, catchError, of } from 'rxjs';
                   {{ 'b2bNav.getStarted' | translate }}
                 </a>
                 <a routerLink="/" 
-                   class="flex items-center space-x-2 px-3 py-2 text-base font-medium text-gray-700 hover:text-solar-600 hover:bg-gray-50 rounded-md">
+                   class="hidden flex items-center space-x-2 px-3 py-2 text-base font-medium text-gray-700 hover:text-solar-600 hover:bg-gray-50 rounded-md">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                   </svg>

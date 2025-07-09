@@ -105,6 +105,82 @@ export class CompaniesService {
         );
     }
 
+    createCompany(company: Omit<Company, 'id' | 'createdAt' | 'updatedAt'>): Observable<Company> {
+        return from(
+            this.supabaseService.getSession().then(session => {
+                const currentUserId = session?.user?.id;
+                return this.supabaseService.client
+                    .from('companies')
+                    .insert({
+                        contact_person_id: currentUserId, // Will be updated if needed
+                        company_name: company.companyName,
+                        tax_number: company.taxNumber,
+                        company_address: company.companyAddress,
+                        company_phone: company.companyPhone,
+                        company_email: company.companyEmail,
+                        website: company.website,
+                        business_type: company.businessType,
+                        years_in_business: company.yearsInBusiness,
+                        annual_revenue: company.annualRevenue,
+                        number_of_employees: company.numberOfEmployees,
+                        description: company.description,
+                        status: company.status || 'pending',
+                        approved: company.status === 'approved',
+                        created_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString()
+                    })
+                    .select(`
+                        *,
+                        contact_person:profiles!companies_contact_person_id_fkey(
+                            full_name
+                        )
+                    `)
+                    .single();
+            })
+        ).pipe(
+            map(({ data, error }) => {
+                if (error) throw error;
+                return this.mapDatabaseToModel(data);
+            })
+        );
+    }
+
+    updateCompany(companyId: string, company: Partial<Company>): Observable<Company> {
+        return from(
+            this.supabaseService.client
+                .from('companies')
+                .update({
+                    ...(company.companyName && { company_name: company.companyName }),
+                    ...(company.taxNumber && { tax_number: company.taxNumber }),
+                    ...(company.companyAddress && { company_address: company.companyAddress }),
+                    ...(company.companyPhone && { company_phone: company.companyPhone }),
+                    ...(company.companyEmail && { company_email: company.companyEmail }),
+                    ...(company.website !== undefined && { website: company.website }),
+                    ...(company.businessType && { business_type: company.businessType }),
+                    ...(company.yearsInBusiness !== undefined && { years_in_business: company.yearsInBusiness }),
+                    ...(company.annualRevenue !== undefined && { annual_revenue: company.annualRevenue }),
+                    ...(company.numberOfEmployees !== undefined && { number_of_employees: company.numberOfEmployees }),
+                    ...(company.description !== undefined && { description: company.description }),
+                    ...(company.status && { status: company.status }),
+                    ...(company.status && { approved: company.status === 'approved' }),
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', companyId)
+                .select(`
+                    *,
+                    contact_person:profiles!companies_contact_person_id_fkey(
+                        full_name
+                    )
+                `)
+                .single()
+        ).pipe(
+            map(({ data, error }) => {
+                if (error) throw error;
+                return this.mapDatabaseToModel(data);
+            })
+        );
+    }
+
     private mapDatabaseToModel(dbCompany: any): Company {
         return {
             id: dbCompany.id,

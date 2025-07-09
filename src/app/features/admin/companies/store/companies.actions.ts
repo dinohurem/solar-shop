@@ -73,4 +73,36 @@ export const setFilters = createAction(
     }>()
 );
 
-export const clearFilters = createAction('[Admin Companies] Clear Filters'); 
+export const clearFilters = createAction('[Admin Companies] Clear Filters');
+
+// Create company actions
+export const createCompany = createAction(
+    '[Admin Companies] Create Company',
+    props<{ company: Omit<Company, 'id' | 'createdAt' | 'updatedAt'> }>()
+);
+
+export const createCompanySuccess = createAction(
+    '[Admin Companies] Create Company Success',
+    props<{ company: Company }>()
+);
+
+export const createCompanyFailure = createAction(
+    '[Admin Companies] Create Company Failure',
+    props<{ error: string }>()
+);
+
+// Update company actions
+export const updateCompany = createAction(
+    '[Admin Companies] Update Company',
+    props<{ companyId: string; company: Partial<Company> }>()
+);
+
+export const updateCompanySuccess = createAction(
+    '[Admin Companies] Update Company Success',
+    props<{ company: Company }>()
+);
+
+export const updateCompanyFailure = createAction(
+    '[Admin Companies] Update Company Failure',
+    props<{ error: string }>()
+); 

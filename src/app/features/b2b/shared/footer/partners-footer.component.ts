@@ -85,7 +85,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
         <div class="border-t border-gray-800 mt-12 pt-8">
           <div class="flex flex-col md:flex-row justify-between items-center">
             <div class="text-sm text-gray-400 font-['DM_Sans']">
-              {{ 'footer.copyright' | translate }} {{ currentYear }} SolarShop B2B. {{ 'footer.allRightsReserved' | translate }}
+              {{ 'footer.copyright' | translate }} {{ currentYear }} SolarShop. {{ 'footer.allRightsReserved' | translate }}
             </div>
           </div>
         </div>

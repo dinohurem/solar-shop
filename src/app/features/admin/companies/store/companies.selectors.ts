@@ -62,4 +62,10 @@ export const selectApprovedCompanies = createSelector(
 export const selectRejectedCompanies = createSelector(
     selectAllCompanies,
     (companies) => companies.filter(c => c.status === 'rejected').length
+);
+
+// Individual company selector
+export const selectCompanyById = (id: string) => createSelector(
+    selectAllCompanies,
+    (companies) => companies.find(company => company.id === id)
 ); 
