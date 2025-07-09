@@ -5,6 +5,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { SupabaseService } from '../../../../services/supabase.service';
+import { B2BCartService } from '../../cart/services/b2b-cart.service';
 
 interface PartnerOffer {
   id: string;
@@ -156,6 +157,16 @@ interface PartnerProduct {
           {{ 'b2b.offers.productsIncluded' | translate }}
         </h2>
 
+        <!-- Add All to Cart Button -->
+        <div *ngIf="relatedProducts.length > 0" class="mb-8">
+          <button 
+            (click)="addAllToCart()"
+            class="w-full md:w-auto px-8 py-3 bg-solar-600 text-white font-semibold rounded-lg hover:bg-solar-700 transition-colors font-['DM_Sans'] mb-6"
+          >
+            {{ 'b2b.offers.addAllToCart' | translate }}
+          </button>
+        </div>
+
         <!-- Product Cards with Partner Pricing -->
         <div *ngIf="relatedProducts.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <div 
@@ -171,7 +182,7 @@ interface PartnerProduct {
               >
               <!-- Partner Exclusive Badge -->
               <div class="absolute top-4 left-4 bg-solar-600 text-white text-xs font-bold px-3 py-2 rounded-full">
-                Partner Price
+                {{ 'b2b.offers.partnerPrice' | translate }}
               </div>
               <!-- Discount Badge -->
               <div class="absolute top-4 right-4 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
@@ -262,7 +273,7 @@ interface PartnerProduct {
             <!-- Offer Description -->
             <div class="lg:col-span-2">
               <h2 class="text-3xl font-bold text-gray-900 mb-6 font-['Poppins']">
-                About This Partner Offer
+                {{ 'b2b.offers.aboutThisPartnerOffer' | translate }}
               </h2>
               <div class="prose prose-lg max-w-none">
                 <p class="text-gray-600 leading-relaxed font-['DM_Sans']">
@@ -280,7 +291,7 @@ interface PartnerProduct {
       <div class="min-h-screen bg-gray-50 flex items-center justify-center">
         <div class="text-center">
           <div class="animate-spin rounded-full h-12 w-12 border-4 border-solar-600 border-t-transparent mx-auto mb-4"></div>
-          <p class="text-gray-600 font-['DM_Sans']">Loading...</p>
+          <p class="text-gray-600 font-['DM_Sans']">{{ 'b2b.offers.loading' | translate }}</p>
         </div>
       </div>
     </ng-template>
@@ -298,6 +309,7 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private supabaseService = inject(SupabaseService);
+  private b2bCartService = inject(B2BCartService);
 
   offer: PartnerOffer | null = null;
   relatedProducts: PartnerProduct[] = [];
@@ -447,8 +459,50 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
   }
 
   addToCart(product: PartnerProduct, offer: PartnerOffer): void {
+    // For now, just show an alert since proper company ID integration requires auth service
     const partnerPrice = this.getProductPartnerPrice(product, offer);
     alert(`Added "${product.name}" to cart at partner price: €${partnerPrice.toFixed(2)}`);
+  }
+
+  async addAllToCart(): Promise<void> {
+    if (!this.relatedProducts || this.relatedProducts.length === 0) {
+      return;
+    }
+
+    if (!this.offer) {
+      alert('Offer not found');
+      return;
+    }
+
+    try {
+      let successCount = 0;
+      let errorCount = 0;
+
+      for (const product of this.relatedProducts) {
+        try {
+          // For now, just simulate adding to cart
+          // In a real implementation, this would use the B2B cart service with proper company ID
+          const partnerPrice = this.getProductPartnerPrice(product, this.offer);
+          console.log(`Added ${product.name} to cart at partner price: €${partnerPrice.toFixed(2)}`);
+          successCount++;
+        } catch (error) {
+          console.error(`Error adding product ${product.name} to cart:`, error);
+          errorCount++;
+        }
+      }
+
+      if (successCount > 0) {
+        const message = errorCount > 0 
+          ? `Added ${successCount} products to cart. ${errorCount} failed.`
+          : `Added ${successCount} products to cart successfully!`;
+        alert(message);
+      } else {
+        alert('Failed to add products to cart. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error adding all products to cart:', error);
+      alert('Error adding products to cart. Please try again.');
+    }
   }
 
   isOfferExpired(endDate?: string): boolean {

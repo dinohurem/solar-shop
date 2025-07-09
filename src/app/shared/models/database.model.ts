@@ -177,7 +177,7 @@ export interface Database {
                     sku: string;
                     brand: string;
                     model?: string;
-                    category_id: string;
+                    category_id?: string;
                     images?: ProductImage[];
                     specifications?: { [key: string]: string };
                     features?: string[];
@@ -462,12 +462,66 @@ export interface Database {
                     updated_at?: string;
                 };
             };
+            companies: {
+                Row: {
+                    id: string;
+                    company_name: string;
+                    email: string;
+                    phone?: string;
+                    address?: string;
+                    city?: string;
+                    postal_code?: string;
+                    country?: string;
+                    tax_number?: string;
+                    contact_person?: string;
+                    website?: string;
+                    status: 'pending' | 'approved' | 'rejected';
+                    created_at: string;
+                    updated_at: string;
+                };
+                Insert: {
+                    id?: string;
+                    company_name: string;
+                    email: string;
+                    phone?: string;
+                    address?: string;
+                    city?: string;
+                    postal_code?: string;
+                    country?: string;
+                    tax_number?: string;
+                    contact_person?: string;
+                    website?: string;
+                    status?: 'pending' | 'approved' | 'rejected';
+                    created_at?: string;
+                    updated_at?: string;
+                };
+                Update: {
+                    id?: string;
+                    company_name?: string;
+                    email?: string;
+                    phone?: string;
+                    address?: string;
+                    city?: string;
+                    postal_code?: string;
+                    country?: string;
+                    tax_number?: string;
+                    contact_person?: string;
+                    website?: string;
+                    status?: 'pending' | 'approved' | 'rejected';
+                    updated_at?: string;
+                };
+            };
             company_pricing: {
                 Row: {
                     id: string;
                     company_id: string;
                     product_id: string;
-                    price: number;
+                    price_tier_1: number;
+                    quantity_tier_1: number;
+                    price_tier_2?: number;
+                    quantity_tier_2?: number;
+                    price_tier_3?: number;
+                    quantity_tier_3?: number;
                     minimum_order: number;
                     created_at: string;
                     updated_at: string;
@@ -476,7 +530,12 @@ export interface Database {
                     id?: string;
                     company_id: string;
                     product_id: string;
-                    price: number;
+                    price_tier_1: number;
+                    quantity_tier_1?: number;
+                    price_tier_2?: number;
+                    quantity_tier_2?: number;
+                    price_tier_3?: number;
+                    quantity_tier_3?: number;
                     minimum_order?: number;
                     created_at?: string;
                     updated_at?: string;
@@ -485,7 +544,12 @@ export interface Database {
                     id?: string;
                     company_id?: string;
                     product_id?: string;
-                    price?: number;
+                    price_tier_1?: number;
+                    quantity_tier_1?: number;
+                    price_tier_2?: number;
+                    quantity_tier_2?: number;
+                    price_tier_3?: number;
+                    quantity_tier_3?: number;
                     minimum_order?: number;
                     updated_at?: string;
                 };

@@ -146,7 +146,14 @@ export class AdminProductsComponent implements OnInit {
         pageSize: 20,
         allowCsvImport: true,
         allowExport: true,
-        rowClickable: true
+        rowClickable: true,
+        csvTemplate: [
+            'name', 'sku', 'description', 'short_description', 'price', 'original_price', 'currency',
+            'brand', 'model', 'category_name', 'weight', 'dimensions', 'stock_quantity',
+            'is_active', 'is_featured', 'is_on_sale', 'tags', 'images', 'specifications', 'features',
+            'certifications', 'estimated_delivery_days', 'installation_required', 'free_shipping',
+            'related_product_sku', 'related_category_name', 'relationship_type', 'sort_order', 'relationship_active'
+        ]
     };
 
     ngOnInit(): void {
@@ -184,77 +191,182 @@ export class AdminProductsComponent implements OnInit {
         this.loadingSubject.next(true);
 
         try {
-            // Map CSV data to product format
-            const products = await Promise.all(csvData.map(async row => {
+            let successCount = 0;
+            let errorCount = 0;
+            const errors: string[] = [];
+            const createdProducts: { [key: string]: string } = {}; // Map of product name/sku to ID
 
-                // find the category id from the category name from the csv file
-                let category_id = '';
-                const category = await this.supabaseService.getTable('categories', { name: row.category_name || row.Category || '' });
-                // if category is not found, create a new category
-                if (category.length === 0) {
-                    // Create a category slug from the category name
-                    const categorySlug = row.category_name || row.Category || ''.toLowerCase().replace(/ /g, '-');
-                    const newCategory = await this.supabaseService.createRecord('categories', { name: row.category_name, slug: categorySlug });
-
-                    // If the new category is not created, throw an error
-                    if (!newCategory) {
-                        throw new Error('Failed to create category from the product csv file.');
+            // First pass: Create products
+            for (const row of csvData) {
+                try {
+                    // Skip relationship-only rows (rows without product name/sku)
+                    if (!row.name && !row.Name && !row.sku && !row.SKU) {
+                        continue;
                     }
 
-                    // wait for the new category to be created
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-
-                    category_id = newCategory?.id || '';
-
-                    // if category_id is not found, throw an error
-                    if (!category_id) {
-                        throw new Error('Failed to get category id from the product csv file. Category not found.');
+                    // Find or create category
+                    let category_id = '';
+                    const categoryName = row.category_name || row.Category || '';
+                    if (categoryName) {
+                        const category = await this.supabaseService.getTable('categories', { name: categoryName });
+                        if (category.length === 0) {
+                            const categorySlug = categoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+                            const newCategory = await this.supabaseService.createRecord('categories', { 
+                                name: categoryName, 
+                                slug: categorySlug,
+                                is_active: true,
+                                sort_order: 0
+                            });
+                            if (newCategory) {
+                                category_id = newCategory.id;
+                            }
+                        } else {
+                            category_id = category[0].id;
+                        }
                     }
-                } else {
-                    category_id = category[0].id;
-                }
 
-                return {
-                    name: row.name || row.Name || '',
-                    slug: row.slug || row.Slug || '',
-                    description: row.description || row.Description || '',
-                    short_description: row.short_description || row['Short Description'] || '',
-                    price: parseFloat(row.price || row.Price || '0'),
-                    original_price: row.original_price ? parseFloat(row.original_price) : undefined,
-                    currency: row.currency || row.Currency || 'USD',
-                    sku: row.sku || row.SKU || '',
-                    brand: row.brand || row.Brand || '',
-                    model: row.model || row.Model || '',
-                    category_id: category_id,
-                    weight: row.weight ? parseFloat(row.weight) : undefined,
-                    stock_quantity: parseInt(row.stock_quantity || row['Stock Quantity'] || '0'),
-                    is_active: (row.is_active || row['Is Active'] || 'true').toLowerCase() === 'true',
-                    is_featured: (row.is_featured || row['Is Featured'] || 'false').toLowerCase() === 'true',
-                    tags: row.tags ? row.tags.split(',').map((t: string) => t.trim()) : [],
-                    is_on_sale: (row.is_on_sale || row['Is On Sale'] || 'false').toLowerCase() === 'true',
-                    images: row.images ? row.images.split(',').map((u: string) => u.trim()) : [],
-                }
-            }));
+                    const productData = {
+                        name: row.name || row.Name || '',
+                        slug: row.slug || row.Slug || (row.name || row.Name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+                        description: row.description || row.Description || '',
+                        short_description: row.short_description || row['Short Description'] || row.description || row.Description || '',
+                        price: parseFloat(row.price || row.Price || '0'),
+                        original_price: row.original_price ? parseFloat(row.original_price) : undefined,
+                        currency: row.currency || row.Currency || 'EUR',
+                        sku: row.sku || row.SKU || '',
+                        brand: row.brand || row.Brand || '',
+                        model: row.model || row.Model || '',
+                        category_id: category_id || undefined,
+                        weight: row.weight ? parseFloat(row.weight) : undefined,
+                        dimensions: row.dimensions || undefined,
+                        stock_quantity: parseInt(row.stock_quantity || row['Stock Quantity'] || '0'),
+                        stock_status: parseInt(row.stock_quantity || row['Stock Quantity'] || '0') > 0 ? 'in_stock' as const : 'out_of_stock' as const,
+                        is_active: (row.is_active || row['Is Active'] || 'true').toLowerCase() === 'true',
+                        is_featured: (row.is_featured || row['Is Featured'] || 'false').toLowerCase() === 'true',
+                        is_on_sale: (row.is_on_sale || row['Is On Sale'] || 'false').toLowerCase() === 'true',
+                        tags: row.tags ? row.tags.split(',').map((t: string) => t.trim()) : [],
+                        images: row.images ? row.images.split(',').map((url: string, index: number) => ({
+                            url: url.trim(),
+                            alt: `${row.name || row.Name} - Image ${index + 1}`,
+                            is_primary: index === 0,
+                            order: index,
+                            type: index === 0 ? 'main' : 'gallery'
+                        })) : [],
+                        specifications: this.parseJsonField(row.specifications),
+                        features: row.features ? row.features.split('\n').map((f: string) => f.trim()).filter((f: string) => f.length > 0) : [],
+                        certifications: row.certifications ? row.certifications.split(',').map((c: string) => c.trim()) : [],
+                        estimated_delivery_days: parseInt(row.estimated_delivery_days || '7'),
+                        installation_required: (row.installation_required || 'false').toLowerCase() === 'true',
+                        free_shipping: (row.free_shipping || 'false').toLowerCase() === 'true',
+                        rating_average: 0,
+                        rating_count: 0,
+                        created_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString()
+                    };
 
-            // Import products one by one
-            for (const product of products) {
-                // Check if product already exists based on the name
-                const existingProduct = await this.supabaseService.getTable('products', { name: product.name });
-                if (existingProduct.length > 0) {
-                    alert(this.translationService.translate('admin.productAlreadyExists', { name: product.name }));
-                    continue;
-                }
+                    // Check if product already exists
+                    const existingProduct = await this.supabaseService.getTable('products', { sku: productData.sku });
+                    if (existingProduct.length > 0) {
+                        createdProducts[productData.sku] = existingProduct[0].id;
+                        continue; // Skip creating, but remember the ID for relationships
+                    }
 
-                await this.supabaseService.createRecord('products', product);
+                    const newProduct = await this.supabaseService.createRecord('products', productData);
+                    if (newProduct) {
+                        createdProducts[productData.sku] = newProduct.id;
+                        successCount++;
+                    }
+                } catch (error) {
+                    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+                    errors.push(`Error creating product: ${JSON.stringify(row)} - ${errorMessage}`);
+                    errorCount++;
+                }
             }
 
-            alert(`${this.translationService.translate('common.importSuccess')} ${products.length} ${this.translationService.translate('admin.products')}`);
+            // Second pass: Create relationships
+            for (const row of csvData) {
+                try {
+                    const productSku = row.sku || row.SKU;
+                    const relatedProductSku = row.related_product_sku;
+                    const relatedCategoryName = row.related_category_name;
+                    const relationshipType = row.relationship_type;
+
+                    // Skip if no relationship data
+                    if (!productSku || !relationshipType || (!relatedProductSku && !relatedCategoryName)) {
+                        continue;
+                    }
+
+                    const productId = createdProducts[productSku];
+                    if (!productId) {
+                        continue; // Product doesn't exist, skip relationship
+                    }
+
+                    let relatedProductId = null;
+                    let relatedCategoryId = null;
+
+                    if (relatedProductSku) {
+                        relatedProductId = createdProducts[relatedProductSku];
+                        if (!relatedProductId) {
+                            // Try to find existing product
+                            const existingRelatedProduct = await this.supabaseService.getTable('products', { sku: relatedProductSku });
+                            if (existingRelatedProduct.length > 0) {
+                                relatedProductId = existingRelatedProduct[0].id;
+                            }
+                        }
+                    }
+
+                    if (relatedCategoryName) {
+                        const relatedCategory = await this.supabaseService.getTable('categories', { name: relatedCategoryName });
+                        if (relatedCategory.length > 0) {
+                            relatedCategoryId = relatedCategory[0].id;
+                        }
+                    }
+
+                    if (relatedProductId || relatedCategoryId) {
+                        const relationshipData = {
+                            product_id: productId,
+                            related_product_id: relatedProductId,
+                            related_category_id: relatedCategoryId,
+                            relationship_type: relationshipType,
+                            sort_order: parseInt(row.sort_order || '0'),
+                            is_active: (row.relationship_active || 'true').toLowerCase() === 'true'
+                        };
+
+                        await this.supabaseService.client
+                            .from('product_relationships')
+                            .insert(relationshipData);
+                    }
+                } catch (error) {
+                    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+                    errors.push(`Error creating relationship: ${JSON.stringify(row)} - ${errorMessage}`);
+                }
+            }
+
+            // Show results
+            let message = `CSV Import Results:\n✓ Successfully processed: ${successCount} products`;
+            if (errorCount > 0) {
+                message += `\n✗ Errors: ${errorCount} records`;
+                if (errors.length > 0) {
+                    message += `\n\nFirst 5 errors:\n${errors.slice(0, 5).join('\n')}`;
+                }
+            }
+
+            alert(message);
             this.loadProducts();
         } catch (error) {
             console.error('Error importing products:', error);
             alert(this.translationService.translate('admin.productImportError'));
         } finally {
             this.loadingSubject.next(false);
+        }
+    }
+
+    private parseJsonField(value: string): any {
+        if (!value) return {};
+        try {
+            return JSON.parse(value);
+        } catch {
+            return {};
         }
     }
 

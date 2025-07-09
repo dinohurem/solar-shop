@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { AdminFormComponent } from '../../shared/admin-form/admin-form.component';
@@ -32,10 +32,20 @@ interface Product {
   updated_at?: string;
 }
 
+interface ProductRelationship {
+  id?: string;
+  product_id: string;
+  related_product_id?: string;
+  related_category_id?: string;
+  relationship_type: string;
+  sort_order: number;
+  is_active: boolean;
+}
+
 @Component({
   selector: 'app-product-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, AdminFormComponent, TranslatePipe],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, AdminFormComponent, TranslatePipe],
   template: `
     <app-admin-form
       [title]="isEditMode ? translationService.translate('admin.editProduct') : translationService.translate('admin.createProduct')"
@@ -55,6 +65,32 @@ interface Product {
             </svg>
             {{ 'admin.basicInformation' | translate }}
           </h3>
+          
+          <!-- Product UUID (only shown in edit mode) -->
+          <div *ngIf="isEditMode && productId" class="mb-6">
+            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                {{ 'admin.productUUID' | translate }}
+              </label>
+              <div class="flex items-center">
+                <input
+                  type="text"
+                  [value]="productId"
+                  readonly
+                  class="flex-1 px-3 py-2 bg-gray-100 border border-gray-300 rounded-md text-sm text-gray-600 cursor-not-allowed"
+                >
+                <button
+                  type="button"
+                  (click)="copyToClipboard(productId)"
+                  class="ml-2 px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm transition-colors"
+                  title="Copy UUID">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
           
           <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <div class="relative">
@@ -447,6 +483,148 @@ interface Product {
             </p>
           </div>
         </div>
+
+        <!-- Product Relationships -->
+        <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+            </svg>
+            {{ 'admin.productRelationships.title' | translate }}
+          </h3>
+          
+          <!-- Add Relationship Form -->
+          <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+            <h4 class="text-sm font-medium text-gray-900 mb-4">{{ 'admin.productRelationships.addRelationship' | translate }}</h4>
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'admin.productRelationships.relationshipType' | translate }}</label>
+                <select
+                  [(ngModel)]="newRelationship.relationship_type"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="suggested">{{ 'admin.productRelationships.suggested' | translate }}</option>
+                  <option value="complementary">{{ 'admin.productRelationships.complementary' | translate }}</option>
+                  <option value="alternative">{{ 'admin.productRelationships.alternative' | translate }}</option>
+                  <option value="bundle">{{ 'admin.productRelationships.bundle' | translate }}</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'admin.productRelationships.relatedProduct' | translate }}</label>
+                <select
+                  [(ngModel)]="newRelationship.related_product_id"
+                  (ngModelChange)="onRelatedProductChange($event)"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">{{ 'admin.selectProduct' | translate }}</option>
+                  <option *ngFor="let product of availableProducts" [value]="product.id">
+                    {{ product.name }} ({{ product.sku }})
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'admin.productRelationships.relatedCategory' | translate }}</label>
+                <select
+                  [(ngModel)]="newRelationship.related_category_id"
+                  (ngModelChange)="onRelatedCategoryChange($event)"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">{{ 'admin.selectCategory' | translate }}</option>
+                  <option *ngFor="let category of categories" [value]="category.id">
+                    {{ category.name }}
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'admin.productRelationships.sortOrder' | translate }}</label>
+                <input
+                  type="number"
+                  [(ngModel)]="newRelationship.sort_order"
+                  min="0"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="0"
+                >
+              </div>
+            </div>
+            <div class="mt-4 flex justify-end">
+              <button
+                type="button"
+                (click)="addRelationship()"
+                [disabled]="!canAddRelationship()"
+                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {{ 'admin.productRelationships.addRelationship' | translate }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Existing Relationships -->
+          <div *ngIf="relationships.length > 0">
+            <h4 class="text-sm font-medium text-gray-900 mb-4">{{ 'admin.productRelationships.existingRelationships' | translate }}</h4>
+            <div class="space-y-3">
+              <div 
+                *ngFor="let relationship of relationships; trackBy: trackByRelationshipId"
+                class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+              >
+                <div class="flex items-center space-x-3">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                        [class.bg-blue-100]="relationship.relationship_type === 'suggested'"
+                        [class.text-blue-800]="relationship.relationship_type === 'suggested'"
+                        [class.bg-green-100]="relationship.relationship_type === 'complementary'"
+                        [class.text-green-800]="relationship.relationship_type === 'complementary'"
+                        [class.bg-yellow-100]="relationship.relationship_type === 'alternative'"
+                        [class.text-yellow-800]="relationship.relationship_type === 'alternative'"
+                        [class.bg-purple-100]="relationship.relationship_type === 'bundle'"
+                        [class.text-purple-800]="relationship.relationship_type === 'bundle'">
+                    {{ getRelationshipTypeLabel(relationship.relationship_type) }}
+                  </span>
+                  <div class="text-sm text-gray-900">
+                    <span *ngIf="relationship.related_product_id">
+                      {{ 'admin.productRelationships.product' | translate }}: {{ getProductName(relationship.related_product_id) }}
+                    </span>
+                    <span *ngIf="relationship.related_category_id">
+                      {{ 'admin.productRelationships.category' | translate }}: {{ getCategoryName(relationship.related_category_id) }}
+                    </span>
+                  </div>
+                  <div class="text-xs text-gray-500">
+                    {{ 'admin.productRelationships.order' | translate }}: {{ relationship.sort_order }}
+                  </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                  <button
+                    type="button"
+                    (click)="toggleRelationshipStatus(relationship)"
+                    [class.bg-green-100]="relationship.is_active"
+                    [class.text-green-800]="relationship.is_active"
+                    [class.bg-red-100]="!relationship.is_active"
+                    [class.text-red-800]="!relationship.is_active"
+                    class="px-2 py-1 text-xs font-medium rounded-md transition-colors"
+                  >
+                    {{ relationship.is_active ? ('admin.active' | translate) : ('admin.inactive' | translate) }}
+                  </button>
+                  <button
+                    type="button"
+                    (click)="removeRelationship(relationship)"
+                    class="text-red-600 hover:text-red-800 transition-colors"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- No Relationships Message -->
+          <div *ngIf="relationships.length === 0" class="text-center py-8">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">{{ 'admin.productRelationships.noRelationships' | translate }}</h3>
+            <p class="mt-1 text-sm text-gray-500">{{ 'admin.productRelationships.noRelationshipsDescription' | translate }}</p>
+          </div>
+        </div>
       </div>
     </app-admin-form>
   `
@@ -464,6 +642,14 @@ export class ProductFormComponent implements OnInit {
   isSubmitting = false;
   productId: string | null = null;
   categories: any[] = [];
+  products: any[] = [];
+  relationships: ProductRelationship[] = [];
+  availableProducts: any[] = [];
+  newRelationship: Partial<ProductRelationship> = {
+    relationship_type: 'suggested',
+    sort_order: 0,
+    is_active: true
+  };
 
   constructor() {
     this.initForm();
@@ -471,6 +657,7 @@ export class ProductFormComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadCategories();
+    this.loadProducts();
     this.checkEditMode();
   }
 
@@ -505,11 +692,21 @@ export class ProductFormComponent implements OnInit {
     }
   }
 
+  private async loadProducts(): Promise<void> {
+    try {
+      this.products = await this.supabaseService.getTable('products') || [];
+      this.updateAvailableProducts();
+    } catch (error) {
+      console.error('Error loading products:', error);
+    }
+  }
+
   private checkEditMode(): void {
     this.productId = this.route.snapshot.paramMap.get('id');
     if (this.productId) {
       this.isEditMode = true;
       this.loadProduct();
+      this.loadProductRelationships();
     }
     // Set title after determining edit mode
     this.title.setTitle(this.isEditMode ? 'Edit Product - Solar Shop Admin' : 'Create Product - Solar Shop Admin');
@@ -546,6 +743,7 @@ export class ProductFormComponent implements OnInit {
         };
 
         this.productForm.patchValue(formData);
+        this.updateAvailableProducts();
       }
     } catch (error) {
       console.error('Error loading product:', error);
@@ -703,5 +901,157 @@ export class ProductFormComponent implements OnInit {
     } finally {
       this.isSubmitting = false;
     }
+  }
+
+  // Product Relationships Methods
+  private async loadProductRelationships(): Promise<void> {
+    if (!this.productId) return;
+
+    try {
+      const { data, error } = await this.supabaseService.client
+        .from('product_relationships')
+        .select('*')
+        .eq('product_id', this.productId)
+        .order('sort_order');
+
+      if (error) throw error;
+
+      this.relationships = data || [];
+    } catch (error) {
+      console.error('Error loading product relationships:', error);
+    }
+  }
+
+  private updateAvailableProducts(): void {
+    // Filter out the current product and already related products
+    const relatedProductIds = this.relationships
+      .filter(r => r.related_product_id)
+      .map(r => r.related_product_id);
+    
+    this.availableProducts = this.products.filter(product => 
+      product.id !== this.productId && 
+      !relatedProductIds.includes(product.id)
+    );
+  }
+
+  onRelatedProductChange(productId: string): void {
+    if (productId) {
+      this.newRelationship.related_category_id = undefined;
+    }
+  }
+
+  onRelatedCategoryChange(categoryId: string): void {
+    if (categoryId) {
+      this.newRelationship.related_product_id = undefined;
+    }
+  }
+
+  canAddRelationship(): boolean {
+    return !!(this.newRelationship.relationship_type && 
+      (this.newRelationship.related_product_id || this.newRelationship.related_category_id));
+  }
+
+  async addRelationship(): Promise<void> {
+    if (!this.canAddRelationship() || !this.productId) return;
+
+    try {
+      const relationshipData = {
+        product_id: this.productId,
+        related_product_id: this.newRelationship.related_product_id || null,
+        related_category_id: this.newRelationship.related_category_id || null,
+        relationship_type: this.newRelationship.relationship_type || 'suggested',
+        sort_order: this.newRelationship.sort_order || 0,
+        is_active: true
+      };
+
+      const { error } = await this.supabaseService.client
+        .from('product_relationships')
+        .insert(relationshipData);
+
+      if (error) throw error;
+
+      // Reset form and reload relationships
+      this.newRelationship = {
+        relationship_type: 'suggested',
+        sort_order: 0,
+        is_active: true
+      };
+
+      await this.loadProductRelationships();
+      this.updateAvailableProducts();
+    } catch (error) {
+      console.error('Error adding relationship:', error);
+      alert('Error adding relationship. Please try again.');
+    }
+  }
+
+  async removeRelationship(relationship: ProductRelationship): Promise<void> {
+    if (!relationship.id) return;
+
+    try {
+      const { error } = await this.supabaseService.client
+        .from('product_relationships')
+        .delete()
+        .eq('id', relationship.id);
+
+      if (error) throw error;
+
+      await this.loadProductRelationships();
+      this.updateAvailableProducts();
+    } catch (error) {
+      console.error('Error removing relationship:', error);
+      alert('Error removing relationship. Please try again.');
+    }
+  }
+
+  async toggleRelationshipStatus(relationship: ProductRelationship): Promise<void> {
+    if (!relationship.id) return;
+
+    try {
+      const { error } = await this.supabaseService.client
+        .from('product_relationships')
+        .update({ is_active: !relationship.is_active })
+        .eq('id', relationship.id);
+
+      if (error) throw error;
+
+      await this.loadProductRelationships();
+    } catch (error) {
+      console.error('Error toggling relationship status:', error);
+      alert('Error updating relationship status. Please try again.');
+    }
+  }
+
+  getRelationshipTypeLabel(type: string): string {
+    const labels: { [key: string]: string } = {
+      suggested: this.translationService.translate('admin.productRelationships.suggested'),
+      complementary: this.translationService.translate('admin.productRelationships.complementary'),
+      alternative: this.translationService.translate('admin.productRelationships.alternative'),
+      bundle: this.translationService.translate('admin.productRelationships.bundle')
+    };
+    return labels[type] || type;
+  }
+
+  getProductName(productId: string): string {
+    const product = this.products.find(p => p.id === productId);
+    return product ? product.name : 'Unknown Product';
+  }
+
+  getCategoryName(categoryId: string): string {
+    const category = this.categories.find(c => c.id === categoryId);
+    return category ? category.name : 'Unknown Category';
+  }
+
+  trackByRelationshipId(index: number, relationship: ProductRelationship): string {
+    return relationship.id || index.toString();
+  }
+
+  copyToClipboard(text: string): void {
+    navigator.clipboard.writeText(text).then(() => {
+      // You could show a toast notification here if you have one
+      console.log('UUID copied to clipboard');
+    }).catch(err => {
+      console.error('Failed to copy UUID: ', err);
+    });
   }
 } 

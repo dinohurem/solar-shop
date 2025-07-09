@@ -34,6 +34,8 @@ export interface TableConfig {
   allowCsvImport?: boolean;
   allowExport?: boolean;
   rowClickable?: boolean;
+  customExportHandler?: boolean;
+  csvTemplate?: string[];
 }
 
 @Component({
@@ -104,7 +106,7 @@ export interface TableConfig {
             <!-- Export -->
             <button
               *ngIf="config.allowExport"
-              (click)="exportToCsv()"
+              (click)="onExport()"
               class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
               <lucide-angular 
                 name="download" 
@@ -328,6 +330,7 @@ export class DataTableComponent implements OnInit, OnChanges {
   @Output() addClicked = new EventEmitter<void>();
   @Output() csvImported = new EventEmitter<any[]>();
   @Output() rowClicked = new EventEmitter<any>();
+  @Output() exportClicked = new EventEmitter<void>();
   translationService = inject(TranslationService);
   private router = inject(Router);
 
@@ -435,6 +438,14 @@ export class DataTableComponent implements OnInit, OnChanges {
       this.csvImported.emit(data);
     };
     reader.readAsText(file);
+  }
+
+  onExport(): void {
+    if (this.config.customExportHandler) {
+      this.exportClicked.emit();
+    } else {
+      this.exportToCsv();
+    }
   }
 
   exportToCsv(): void {
@@ -694,8 +705,8 @@ export class DataTableComponent implements OnInit, OnChanges {
       headers = ['title', 'image_url', 'description', 'short_description', 'type', 'status', 'featured', 'discount_type', 'discount_value', 'start_date', 'end_date', 'min_order_amount', 'max_order_amount', 'is_active'];
       sampleData = ['Solar Panel 100W', 'https://example.com/solar-panel-100w.jpg', 'High efficiency solar panel', 'High efficiency solar panel', 'bundle_deal', 'active', 'true', 'percentage', '10', '2025-01-01', '2025-05-01', '100', 'null', 'true'];
     } else if (entityType.includes('company-pricing')) {
-      headers = ['company_id', 'price', 'is_active'];
-      sampleData = ['1', '299.99', 'true'];
+      headers = ['company_id', 'product_id', 'price_tier_1', 'quantity_tier_1', 'price_tier_2', 'quantity_tier_2', 'price_tier_3', 'quantity_tier_3', 'minimum_order'];
+      sampleData = ['company-uuid-here', 'product-uuid-here', '299.99', '1', '289.99', '10', '279.99', '50', '1'];
     } else {
       // Generic template based on table columns
       alert(this.translationService.translate('admin.common.noTemplateAvailable'));

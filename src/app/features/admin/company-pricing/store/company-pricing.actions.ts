@@ -4,7 +4,12 @@ export interface CompanyPricing {
     id: string;
     company_id: string;
     product_id: string;
-    price: number;
+    price_tier_1: number;
+    quantity_tier_1: number;
+    price_tier_2?: number;
+    quantity_tier_2?: number;
+    price_tier_3?: number;
+    quantity_tier_3?: number;
     minimum_order: number;
     created_at: string;
     updated_at: string;
