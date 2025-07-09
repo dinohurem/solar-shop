@@ -368,7 +368,7 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
     if (product.images && Array.isArray(product.images) && product.images.length > 0) {
       return product.images[0].url || product.images[0];
     }
-    return 'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=500&h=500&fit=crop';
+    return 'assets/images/product-placeholder.svg';
   }
 
   calculateDiscountedPrice(originalPrice: number, discountPercentage: number): number {

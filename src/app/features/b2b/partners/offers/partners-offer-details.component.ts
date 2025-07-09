@@ -340,7 +340,7 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
         originalPrice: offer.original_price || 0,
         discountedPrice: offer.discounted_price || 0,
         discountPercentage: offer.discount_type === 'percentage' ? offer.discount_value : 0,
-        imageUrl: offer.image_url || 'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=800&h=600&fit=crop',
+        imageUrl: offer.image_url || 'assets/images/product-placeholder.svg',
         description: offer.description || '',
         shortDescription: offer.short_description || '',
         type: 'partner-exclusive', // Default type for B2B offers
@@ -388,7 +388,7 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
           id: offerProduct.products.id,
           name: offerProduct.products.name,
           description: offerProduct.products.description,
-          imageUrl: offerProduct.products.images?.[0]?.url || 'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=500&h=500&fit=crop',
+          imageUrl: offerProduct.products.images?.[0]?.url || 'assets/images/product-placeholder.svg',
           price: offerProduct.products.price || 0,
           category: offerProduct.products.categories?.name || 'Solar Equipment',
           sku: offerProduct.products.sku || ''

@@ -313,7 +313,7 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
   public onImageError(event: Event): void {
     const target = event.target as HTMLImageElement;
     if (target) {
-      target.src = 'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=500&h=500&fit=crop';
+      target.src = 'assets/images/product-placeholder.svg';
     }
   }
 } 

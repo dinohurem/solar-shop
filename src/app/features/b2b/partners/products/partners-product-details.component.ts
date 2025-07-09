@@ -85,7 +85,7 @@ import * as B2BCartActions from '../../cart/store/b2b-cart.actions';
       <div *ngIf="product && !(loading$ | async)" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
           <!-- Product Images -->
-          <div class="lg:sticky lg:top-8">
+          <div class="lg:sticky lg:top-8 space-y-6">
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
               <div class="aspect-w-1 aspect-h-1 bg-gray-50 flex items-center justify-center min-h-[400px]">
                 <img *ngIf="hasProductImage(product)" 
@@ -93,14 +93,11 @@ import * as B2BCartActions from '../../cart/store/b2b-cart.actions';
                      [alt]="product.name" 
                      class="w-full h-96 object-cover"
                      (error)="onImageError($event)">
-                <!-- Fallback Icon -->
-                <div *ngIf="!hasProductImage(product)" class="text-gray-500 text-center py-12">
-                  <svg class="w-32 h-32 mx-auto mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="0.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                  </svg>
-                  <p class="text-xl font-medium text-gray-600 mb-2">{{ product.category || ('b2b.products.product' | translate) }}</p>
-                  <p class="text-sm text-gray-500">{{ 'b2b.products.noImageAvailable' | translate }}</p>
-                </div>
+                <!-- Fallback placeholder -->
+                <img *ngIf="!hasProductImage(product)" 
+                     src="assets/images/product-placeholder.jpg" 
+                     [alt]="product.name" 
+                     class="w-full h-96 object-cover">
               </div>
               <!-- Additional Images (if available) -->
               <div *ngIf="product.images && product.images.length > 1" class="p-4">
@@ -113,10 +110,28 @@ import * as B2BCartActions from '../../cart/store/b2b-cart.actions';
                          class="w-full h-full object-cover rounded"
                          (error)="onImageError($event)">
                     <!-- Fallback for gallery images -->
-                    <svg *ngIf="!image.url" class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                    </svg>
+                    <img *ngIf="!image.url" 
+                         src="assets/images/product-placeholder.svg" 
+                         [alt]="product.name"
+                         class="w-full h-full object-cover rounded">
                   </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Order Information -->
+            <div class="bg-white rounded-lg border border-gray-200 p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ 'b2b.products.orderInformation' | translate }}</h3>
+              <div class="space-y-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-gray-600">{{ 'b2b.products.minimumOrder' | translate }}:</span>
+                  <span class="font-medium">{{ getMinimumOrder(product) }} {{ 'b2b.products.pieces' | translate }}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-gray-600">{{ 'b2b.products.availability' | translate }}:</span>
+                  <span class="font-medium" [class]="product.in_stock ? 'text-green-600' : 'text-red-600'">
+                    {{ product.in_stock ? ('b2b.products.inStock' | translate) : ('b2b.products.outOfStock' | translate) }}
+                  </span>
                 </div>
               </div>
             </div>
@@ -316,22 +331,7 @@ import * as B2BCartActions from '../../cart/store/b2b-cart.actions';
               </div>
             </div>
 
-            <!-- Order Information -->
-            <div class="bg-white rounded-lg border border-gray-200 p-6">
-              <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ 'b2b.products.orderInformation' | translate }}</h3>
-              <div class="space-y-3">
-                <div class="flex items-center justify-between">
-                  <span class="text-gray-600">{{ 'b2b.products.minimumOrder' | translate }}:</span>
-                  <span class="font-medium">{{ getMinimumOrder(product) }} {{ 'b2b.products.pieces' | translate }}</span>
-                </div>
-                <div class="flex items-center justify-between">
-                  <span class="text-gray-600">{{ 'b2b.products.availability' | translate }}:</span>
-                  <span class="font-medium" [class]="product.in_stock ? 'text-green-600' : 'text-red-600'">
-                    {{ product.in_stock ? ('b2b.products.inStock' | translate) : ('b2b.products.outOfStock' | translate) }}
-                  </span>
-                </div>
-              </div>
-            </div>
+            
 
             <!-- Actions -->
             <div class="space-y-3">
@@ -386,11 +386,10 @@ import * as B2BCartActions from '../../cart/store/b2b-cart.actions';
                      [src]="getProductImageUrl(suggested)" 
                      [alt]="suggested.name" 
                      class="w-full h-48 object-cover">
-                <div *ngIf="!hasProductImage(suggested)" class="flex items-center justify-center h-48 bg-gray-100">
-                  <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                  </svg>
-                </div>
+                <img *ngIf="!hasProductImage(suggested)" 
+                     src="assets/images/product-placeholder.svg" 
+                     [alt]="suggested.name" 
+                     class="w-full h-48 object-cover">
               </div>
               
               <!-- Product Info -->
@@ -636,8 +635,7 @@ export class PartnersProductDetailsComponent implements OnInit, OnDestroy {
   onImageError(event: Event): void {
     const img = event.target as HTMLImageElement;
     if (img) {
-      // Hide the broken image and let the fallback icon show
-      img.style.display = 'none';
+      img.src = 'assets/images/product-placeholder.svg';
     }
   }
 

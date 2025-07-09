@@ -937,7 +937,8 @@ export class TranslationService {
                     noteFutureOrders: 'Promjene će utjecati na sve buduće narudžbe za ovu tvrtku',
                     noteExistingOrders: 'Postojeće narudžbe neće biti pogođene promjenama cijena',
                     productName: 'Naziv proizvoda',
-                    customPricingSummary: 'Sažetak prilagođenih cijena'
+                    customPricingSummary: 'Sažetak prilagođenih cijena',
+                    pricingTiers: 'Cijene za količine',
                 },
                 companyPricingDetails: {
                     backToCompanies: 'Povratak na tvrtke',
@@ -1284,7 +1285,7 @@ export class TranslationService {
                 productsInOffer: 'Proizvodi u ponudi',
                 addProduct: 'Dodaj proizvod',
                 category: 'Kategorija',
-                originalPrice: 'Originalna cijena',
+                originalPrice: 'Cijena',
                 finalPrice: 'Konačna cijena',
                 savings: 'Ušteda',
                 noProductsAssigned: 'Nema dodijeljenih proizvoda',
@@ -3172,7 +3173,8 @@ export class TranslationService {
                     noteFutureOrders: 'Changes will affect all future orders for this company',
                     noteExistingOrders: 'Existing orders will not be affected by price changes',
                     productName: 'Product Name',
-                    customPricingSummary: 'Custom Pricing Summary'
+                    customPricingSummary: 'Custom Pricing Summary',
+                    pricingTiers: 'Pricing Tiers',
                 },
                 companyPricingDetails: {
                     backToCompanies: 'Back to Companies',
