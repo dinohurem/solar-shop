@@ -1,12 +1,19 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Title } from '@angular/platform-browser';
+import { Store } from '@ngrx/store';
+import { Observable, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { AdminFormComponent } from '../../shared/admin-form/admin-form.component';
 import { SupabaseService } from '../../../../services/supabase.service';
 import { TranslationService } from '../../../../shared/services/translation.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { ToastService } from '../../../../shared/services/toast.service';
+import { loadProducts, loadCategories } from '../../../b2b/shared/store/products.actions';
+import { selectProducts, selectCategories, selectProductsLoading } from '../../../b2b/shared/store/products.selectors';
+import { Product, Category } from '../../../b2b/shared/store/products.actions';
 
 
 interface ProductRelationship {
@@ -467,42 +474,46 @@ interface ProductRelationship {
             <svg class="w-5 h-5 mr-2 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
             </svg>
-            {{ 'admin.productRelationships.title' | translate }}
+            {{ 'admin.productRelationshipsTitle' | translate }}
           </h3>
           
           <!-- Add Relationship Form -->
           <div class="mb-6 p-4 bg-gray-50 rounded-lg">
-            <h4 class="text-sm font-medium text-gray-900 mb-4">{{ 'admin.productRelationships.addRelationship' | translate }}</h4>
+            <h4 class="text-sm font-medium text-gray-900 mb-4">{{ 'admin.productRelationshipsAddNew' | translate }}</h4>
             <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'admin.productRelationships.relationshipType' | translate }}</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'admin.productRelationshipsType' | translate }}</label>
                 <select
                   [(ngModel)]="newRelationship.relationship_type"
+                  [ngModelOptions]="{standalone: true}"
+                  (ngModelChange)="onRelationshipTypeChange($event)"
                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="suggested">{{ 'admin.productRelationships.suggested' | translate }}</option>
-                  <option value="complementary">{{ 'admin.productRelationships.complementary' | translate }}</option>
-                  <option value="alternative">{{ 'admin.productRelationships.alternative' | translate }}</option>
-                  <option value="bundle">{{ 'admin.productRelationships.bundle' | translate }}</option>
+                  <option value="suggested">{{ 'admin.productRelationshipsSuggested' | translate }}</option>
+                  <option value="complementary">{{ 'admin.productRelationshipsComplementary' | translate }}</option>
+                  <option value="alternative">{{ 'admin.productRelationshipsAlternative' | translate }}</option>
+                  <option value="bundle">{{ 'admin.productRelationshipsBundle' | translate }}</option>
                 </select>
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'admin.productRelationships.relatedProduct' | translate }}</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'admin.productRelationshipsRelatedProduct' | translate }}</label>
                 <select
                   [(ngModel)]="newRelationship.related_product_id"
+                  [ngModelOptions]="{standalone: true}"
                   (ngModelChange)="onRelatedProductChange($event)"
                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="">{{ 'admin.selectProduct' | translate }}</option>
+                  <option value="">{{ 'admin.offersForm.selectProduct' | translate }}</option>
                   <option *ngFor="let product of availableProducts" [value]="product.id">
                     {{ product.name }} ({{ product.sku }})
                   </option>
                 </select>
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'admin.productRelationships.relatedCategory' | translate }}</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'admin.productRelationshipsRelatedCategory' | translate }}</label>
                 <select
                   [(ngModel)]="newRelationship.related_category_id"
+                  [ngModelOptions]="{standalone: true}"
                   (ngModelChange)="onRelatedCategoryChange($event)"
                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
@@ -513,10 +524,11 @@ interface ProductRelationship {
                 </select>
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'admin.productRelationships.sortOrder' | translate }}</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'admin.productRelationshipsSortOrder' | translate }}</label>
                 <input
                   type="number"
                   [(ngModel)]="newRelationship.sort_order"
+                  [ngModelOptions]="{standalone: true}"
                   min="0"
                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="0"
@@ -529,15 +541,16 @@ interface ProductRelationship {
                 (click)="addRelationship()"
                 [disabled]="!canAddRelationship()"
                 class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                [title]="!canAddRelationship() ? 'Please select a relationship type and either a product or category' : ''"
               >
-                {{ 'admin.productRelationships.addRelationship' | translate }}
+                {{ 'admin.productRelationshipsAddNew' | translate }}
               </button>
             </div>
           </div>
 
           <!-- Existing Relationships -->
           <div *ngIf="relationships.length > 0">
-            <h4 class="text-sm font-medium text-gray-900 mb-4">{{ 'admin.productRelationships.existingRelationships' | translate }}</h4>
+            <h4 class="text-sm font-medium text-gray-900 mb-4">{{ 'admin.productRelationshipsExistingRelationships' | translate }}</h4>
             <div class="space-y-3">
               <div 
                 *ngFor="let relationship of relationships; trackBy: trackByRelationshipId"
@@ -557,14 +570,14 @@ interface ProductRelationship {
                   </span>
                   <div class="text-sm text-gray-900">
                     <span *ngIf="relationship.related_product_id">
-                      {{ 'admin.productRelationships.product' | translate }}: {{ getProductName(relationship.related_product_id) }}
+                      {{ 'admin.reviewsForm.reviewProduct' | translate }}: {{ getProductName(relationship.related_product_id) }}
                     </span>
                     <span *ngIf="relationship.related_category_id">
-                      {{ 'admin.productRelationships.category' | translate }}: {{ getCategoryName(relationship.related_category_id) }}
+                      {{ 'admin.category' | translate }}: {{ getCategoryName(relationship.related_category_id) }}
                     </span>
                   </div>
                   <div class="text-xs text-gray-500">
-                    {{ 'admin.productRelationships.order' | translate }}: {{ relationship.sort_order }}
+                    {{ 'admin.productRelationshipsSortOrder' | translate }}: {{ relationship.sort_order }}
                   </div>
                 </div>
                 <div class="flex items-center space-x-2">
@@ -598,44 +611,60 @@ interface ProductRelationship {
             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
             </svg>
-            <h3 class="mt-2 text-sm font-medium text-gray-900">{{ 'admin.productRelationships.noRelationships' | translate }}</h3>
-            <p class="mt-1 text-sm text-gray-500">{{ 'admin.productRelationships.noRelationshipsDescription' | translate }}</p>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">{{ 'admin.productRelationshipsNoRelationships' | translate }}</h3>
+            <p class="mt-1 text-sm text-gray-500">{{ 'admin.productRelationshipsNoRelationshipsDescription' | translate }}</p>
           </div>
         </div>
       </div>
     </app-admin-form>
   `
 })
-export class ProductFormComponent implements OnInit {
+export class ProductFormComponent implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private supabaseService = inject(SupabaseService);
   private title = inject(Title);
+  private store = inject(Store);
+  private toastService = inject(ToastService);
+  private destroy$ = new Subject<void>();
   translationService = inject(TranslationService);
 
   productForm!: FormGroup;
   isEditMode = false;
   isSubmitting = false;
   productId: string | null = null;
-  categories: any[] = [];
-  products: any[] = [];
+  categories$: Observable<Category[]>;
+  products$: Observable<Product[]>;
+  loading$: Observable<boolean>;
+  categories: Category[] = [];
+  products: Product[] = [];
   relationships: ProductRelationship[] = [];
-  availableProducts: any[] = [];
+  availableProducts: Product[] = [];
   newRelationship: Partial<ProductRelationship> = {
     relationship_type: 'suggested',
+    related_product_id: undefined,
+    related_category_id: undefined,
     sort_order: 0,
     is_active: true
   };
 
   constructor() {
     this.initForm();
+    this.categories$ = this.store.select(selectCategories);
+    this.products$ = this.store.select(selectProducts);
+    this.loading$ = this.store.select(selectProductsLoading);
   }
 
   ngOnInit(): void {
-    this.loadCategories();
-    this.loadProducts();
+    this.loadCategoriesAndProducts();
     this.checkEditMode();
+    this.subscribeToStoreData();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private initForm(): void {
@@ -661,21 +690,20 @@ export class ProductFormComponent implements OnInit {
     });
   }
 
-  private async loadCategories(): Promise<void> {
-    try {
-      this.categories = await this.supabaseService.getCategories(false);
-    } catch (error) {
-      console.error('Error loading categories:', error);
-    }
+  private loadCategoriesAndProducts(): void {
+    this.store.dispatch(loadCategories());
+    this.store.dispatch(loadProducts());
   }
 
-  private async loadProducts(): Promise<void> {
-    try {
-      this.products = await this.supabaseService.getTable('products') || [];
+  private subscribeToStoreData(): void {
+    this.categories$.pipe(takeUntil(this.destroy$)).subscribe(categories => {
+      this.categories = categories;
+    });
+
+    this.products$.pipe(takeUntil(this.destroy$)).subscribe(products => {
+      this.products = products;
       this.updateAvailableProducts();
-    } catch (error) {
-      console.error('Error loading products:', error);
-    }
+    });
   }
 
   private checkEditMode(): void {
@@ -891,11 +919,16 @@ export class ProductFormComponent implements OnInit {
         .eq('product_id', this.productId)
         .order('sort_order');
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error loading product relationships:', error);
+        this.relationships = [];
+        return;
+      }
 
       this.relationships = data || [];
     } catch (error) {
       console.error('Error loading product relationships:', error);
+      this.relationships = [];
     }
   }
 
@@ -911,21 +944,35 @@ export class ProductFormComponent implements OnInit {
     );
   }
 
+  onRelationshipTypeChange(type: string): void {
+    this.newRelationship.relationship_type = type;
+  }
+
   onRelatedProductChange(productId: string): void {
+    // Convert empty string to undefined
+    this.newRelationship.related_product_id = productId || undefined;
+    // Clear the other selection if this one has a value
     if (productId) {
       this.newRelationship.related_category_id = undefined;
     }
   }
 
   onRelatedCategoryChange(categoryId: string): void {
+    // Convert empty string to undefined
+    this.newRelationship.related_category_id = categoryId || undefined;
+    // Clear the other selection if this one has a value
     if (categoryId) {
       this.newRelationship.related_product_id = undefined;
     }
   }
 
   canAddRelationship(): boolean {
-    return !!(this.newRelationship.relationship_type &&
-      (this.newRelationship.related_product_id || this.newRelationship.related_category_id));
+    const hasType = !!this.newRelationship.relationship_type;
+    const hasRelatedProduct = !!this.newRelationship.related_product_id;
+    const hasRelatedCategory = !!this.newRelationship.related_category_id;
+    const hasRelation = hasRelatedProduct || hasRelatedCategory;
+
+    return hasType && hasRelation;
   }
 
   async addRelationship(): Promise<void> {
@@ -945,20 +992,55 @@ export class ProductFormComponent implements OnInit {
         .from('product_relationships')
         .insert(relationshipData);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Database error:', error);
+        throw new Error(`Failed to create relationship: ${error.message}`);
+      }
+
+      // Create bidirectional relationship if it's a product relationship
+      if (this.newRelationship.related_product_id) {
+        const reverseRelationshipData = {
+          product_id: this.newRelationship.related_product_id,
+          related_product_id: this.productId,
+          related_category_id: null,
+          relationship_type: this.newRelationship.relationship_type || 'suggested',
+          sort_order: this.newRelationship.sort_order || 0,
+          is_active: true
+        };
+
+        const { error: reverseError } = await this.supabaseService.client
+          .from('product_relationships')
+          .insert(reverseRelationshipData);
+
+        if (reverseError) {
+          console.error('Database error creating reverse relationship:', reverseError);
+          // Don't throw here, the main relationship was already created successfully
+        }
+      }
 
       // Reset form and reload relationships
       this.newRelationship = {
         relationship_type: 'suggested',
+        related_product_id: undefined,
+        related_category_id: undefined,
         sort_order: 0,
         is_active: true
       };
 
       await this.loadProductRelationships();
       this.updateAvailableProducts();
-    } catch (error) {
+
+      // Show success message
+      this.toastService.showSuccess('Product relationship added successfully!');
+    } catch (error: any) {
       console.error('Error adding relationship:', error);
-      alert('Error adding relationship. Please try again.');
+
+      // Check if it's an RLS policy error
+      if (error.message && error.message.includes('row-level security policy')) {
+        this.toastService.showError('Permission denied: You may not have sufficient privileges to add product relationships. Please contact your administrator.');
+      } else {
+        this.toastService.showError(`Error adding relationship: ${error.message || 'Please try again.'}`);
+      }
     }
   }
 
@@ -971,13 +1053,19 @@ export class ProductFormComponent implements OnInit {
         .delete()
         .eq('id', relationship.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Database error:', error);
+        throw new Error(`Failed to delete relationship: ${error.message}`);
+      }
 
       await this.loadProductRelationships();
       this.updateAvailableProducts();
-    } catch (error) {
+
+      // Show success message
+      this.toastService.showSuccess('Product relationship removed successfully!');
+    } catch (error: any) {
       console.error('Error removing relationship:', error);
-      alert('Error removing relationship. Please try again.');
+      this.toastService.showError(`Error removing relationship: ${error.message || 'Please try again.'}`);
     }
   }
 
@@ -990,21 +1078,28 @@ export class ProductFormComponent implements OnInit {
         .update({ is_active: !relationship.is_active })
         .eq('id', relationship.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Database error:', error);
+        throw new Error(`Failed to update relationship: ${error.message}`);
+      }
 
       await this.loadProductRelationships();
-    } catch (error) {
+
+      // Show success message
+      const statusText = relationship.is_active ? 'deactivated' : 'activated';
+      this.toastService.showSuccess(`Product relationship ${statusText} successfully!`);
+    } catch (error: any) {
       console.error('Error toggling relationship status:', error);
-      alert('Error updating relationship status. Please try again.');
+      this.toastService.showError(`Error updating relationship status: ${error.message || 'Please try again.'}`);
     }
   }
 
   getRelationshipTypeLabel(type: string): string {
     const labels: { [key: string]: string } = {
-      suggested: this.translationService.translate('admin.productRelationships.suggested'),
-      complementary: this.translationService.translate('admin.productRelationships.complementary'),
-      alternative: this.translationService.translate('admin.productRelationships.alternative'),
-      bundle: this.translationService.translate('admin.productRelationships.bundle')
+      suggested: this.translationService.translate('admin.productRelationshipsSuggested'),
+      complementary: this.translationService.translate('admin.productRelationshipsComplementary'),
+      alternative: this.translationService.translate('admin.productRelationshipsAlternative'),
+      bundle: this.translationService.translate('admin.productRelationshipsBundle')
     };
     return labels[type] || type;
   }

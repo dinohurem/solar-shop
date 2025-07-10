@@ -191,7 +191,7 @@ import { FormsModule } from '@angular/forms';
               class="flex items-center p-2 rounded-xl hover:bg-solar-50 transition-all duration-300 group"
             >
               <img 
-                src="assets/images/logo.svg" 
+                src="assets/images/logo.png" 
                 alt="SolarShop" 
                 class="h-8 w-auto sm:h-10 lg:h-10 object-contain group-hover:scale-105 transition-transform duration-300 filter drop-shadow-sm"
                 onerror="console.error('Logo failed to load:', this.src); this.src='assets/images/logo.png'"
