@@ -15,6 +15,15 @@ export interface B2BCartItem {
     category: string;
     inStock: boolean;
     addedAt: Date;
+    // Partner offer pricing fields
+    partnerOfferId?: string;
+    partnerOfferName?: string;
+    partnerOfferType?: 'percentage' | 'fixed_amount' | 'tier_based' | 'bundle';
+    partnerOfferDiscount?: number;
+    partnerOfferOriginalPrice?: number;
+    partnerOfferValidUntil?: string;
+    partnerOfferAppliedAt?: Date;
+    additionalSavings?: number;
 }
 
 export interface B2BCartState {

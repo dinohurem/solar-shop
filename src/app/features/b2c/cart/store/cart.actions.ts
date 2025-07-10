@@ -134,6 +134,58 @@ export const setCartStep = createAction(
 export const nextStep = createAction('[Cart] Next Step');
 export const previousStep = createAction('[Cart] Previous Step');
 
+// Offer Actions
+export const addToCartFromOffer = createAction(
+    '[Cart] Add To Cart From Offer',
+    props<{ 
+        productId: string; 
+        quantity: number; 
+        variantId?: string; 
+        offerId: string;
+        offerName: string;
+        offerType: 'percentage' | 'fixed_amount' | 'buy_x_get_y' | 'bundle';
+        offerDiscount: number;
+        offerOriginalPrice: number;
+        offerValidUntil?: string;
+    }>()
+);
+
+export const addToCartFromOfferSuccess = createAction(
+    '[Cart] Add To Cart From Offer Success',
+    props<{ cart: Cart }>()
+);
+
+export const addToCartFromOfferFailure = createAction(
+    '[Cart] Add To Cart From Offer Failure',
+    props<{ error: string }>()
+);
+
+export const addAllToCartFromOffer = createAction(
+    '[Cart] Add All To Cart From Offer',
+    props<{ 
+        products: Array<{
+            productId: string; 
+            quantity: number; 
+            variantId?: string;
+        }>;
+        offerId: string;
+        offerName: string;
+        offerType: 'percentage' | 'fixed_amount' | 'buy_x_get_y' | 'bundle';
+        offerDiscount: number;
+        offerValidUntil?: string;
+    }>()
+);
+
+export const addAllToCartFromOfferSuccess = createAction(
+    '[Cart] Add All To Cart From Offer Success',
+    props<{ cart: Cart; addedCount: number; skippedCount: number }>()
+);
+
+export const addAllToCartFromOfferFailure = createAction(
+    '[Cart] Add All To Cart From Offer Failure',
+    props<{ error: string }>()
+);
+
 // Reset Actions
 export const resetCartError = createAction('[Cart] Reset Cart Error');
 export const resetCouponError = createAction('[Cart] Reset Coupon Error'); 

@@ -112,17 +112,40 @@ import { TranslationService } from '../../../../../shared/services/translation.s
                     <!-- Price -->
                     <div class="flex items-center space-x-2 mt-2">
                       <span class="text-sm font-semibold text-gray-900">
-                        €{{ item.unitPrice }}
+                        {{ item.unitPrice | currency:'EUR':'symbol':'1.2-2' }}
                       </span>
                       <span 
-                        *ngIf="item.retailPrice && item.retailPrice > item.unitPrice"
+                        *ngIf="item.partnerOfferOriginalPrice && item.partnerOfferOriginalPrice > item.unitPrice"
                         class="text-xs text-gray-500 line-through"
                       >
-                        €{{ item.retailPrice }}
+                        {{ item.partnerOfferOriginalPrice | currency:'EUR':'symbol':'1.2-2' }}
+                      </span>
+                      <span 
+                        *ngIf="!item.partnerOfferOriginalPrice && item.retailPrice && item.retailPrice > item.unitPrice"
+                        class="text-xs text-gray-500 line-through"
+                      >
+                        {{ item.retailPrice | currency:'EUR':'symbol':'1.2-2' }}
                       </span>
                       <span *ngIf="item.savings && item.savings > 0" 
                             class="text-xs text-green-600 font-medium">
-                        {{ 'b2bCart.save' | translate }} €{{ (item.savings / item.quantity).toFixed(2) }}
+                        {{ 'b2bCart.save' | translate }} {{ (item.savings / item.quantity) | currency:'EUR':'symbol':'1.2-2' }}
+                      </span>
+                    </div>
+
+                    <!-- Partner Offer Badge -->
+                    <div *ngIf="item.partnerOfferId" class="mt-1">
+                      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        {{ item.partnerOfferName }}
+                      </span>
+                    </div>
+                    
+                    <!-- Additional Partner Offer Savings -->
+                    <div *ngIf="item.additionalSavings && item.additionalSavings > 0" class="mt-1">
+                      <span class="text-xs text-blue-600 font-medium">
+                        {{ 'b2bCart.additionalOfferSavings' | translate }}: {{ (item.additionalSavings / item.quantity) | currency:'EUR':'symbol':'1.2-2' }}
                       </span>
                     </div>
 
@@ -179,25 +202,25 @@ import { TranslationService } from '../../../../../shared/services/translation.s
               <div class="space-y-2 text-sm">
                 <div class="flex justify-between">
                   <span class="text-gray-600">{{ 'cart.subtotal' | translate }}</span>
-                  <span>€{{ (cartSummary$ | async)?.subtotal }}</span>
+                  <span>{{ (cartSummary$ | async)?.subtotal | currency:'EUR':'symbol':'1.2-2' }}</span>
                 </div>
                 <div 
                   *ngIf="(cartSummary$ | async)?.totalSavings && (cartSummary$ | async)!.totalSavings > 0"
                   class="flex justify-between text-green-600"
                 >
                   <span>{{ 'b2bCart.totalSavings' | translate }}</span>
-                  <span>-€{{ (cartSummary$ | async)?.totalSavings }}</span>
+                  <span>-{{ (cartSummary$ | async)?.totalSavings | currency:'EUR':'symbol':'1.2-2' }}</span>
                 </div>
                 <div 
                   *ngIf="(cartSummary$ | async)?.couponDiscount && (cartSummary$ | async)!.couponDiscount > 0"
                   class="flex justify-between text-blue-600"
                 >
                   <span>{{ 'cart.couponDiscount' | translate }}</span>
-                  <span>-€{{ (cartSummary$ | async)?.couponDiscount }}</span>
+                  <span>-{{ (cartSummary$ | async)?.couponDiscount | currency:'EUR':'symbol':'1.2-2' }}</span>
                 </div>
                 <div class="flex justify-between font-semibold text-lg border-t pt-2">
                   <span>{{ 'cart.total' | translate }}</span>
-                  <span>€{{ (cartSummary$ | async)?.total }}</span>
+                  <span>{{ (cartSummary$ | async)?.total | currency:'EUR':'symbol':'1.2-2' }}</span>
                 </div>
               </div>
 

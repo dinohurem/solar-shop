@@ -9,7 +9,7 @@ import { AddToCartButtonComponent } from '../cart/components/add-to-cart-button/
 import { SupabaseService } from '../../../services/supabase.service';
 import { Offer } from '../../../shared/models/offer.model';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
-import { addToCart } from '../cart/store/cart.actions';
+import { addToCart, addAllToCartFromOffer } from '../cart/store/cart.actions';
 import { ToastService } from '../../../shared/services/toast.service';
 import { TranslationService } from '../../../shared/services/translation.service';
 
@@ -389,52 +389,52 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
       return;
     }
 
-    try {
-      let successCount = 0;
-      let errorCount = 0;
-      let outOfStockCount = 0;
-
-      for (const product of this.currentProducts) {
-        try {
-          // Check product availability before adding to cart
-          if (product.availability === 'out_of_stock' || product.stock_quantity === 0) {
-            console.warn(`Product ${product.name} is out of stock`);
-            outOfStockCount++;
-            continue;
-          }
-
-          this.store.dispatch(addToCart({
-            productId: product.id,
-            quantity: 1
-          }));
-          successCount++;
-        } catch (error) {
-          console.error(`Error adding product ${product.name} to cart:`, error);
-          errorCount++;
-        }
+    // Get current offer to pass offer information
+    this.offer$.pipe(takeUntil(this.destroy$)).subscribe(offer => {
+      if (!offer) {
+        this.toastService.showError(this.translationService.translate('offers.offerNotFound'));
+        return;
       }
 
-      // Provide detailed feedback to user
-      if (successCount > 0) {
-        let message = this.translationService.translate('offers.addedProductsToCart', { count: successCount });
-        
-        if (outOfStockCount > 0) {
-          message += ' ' + this.translationService.translate('offers.productsOutOfStock', { count: outOfStockCount });
-        }
-        
-        if (errorCount > 0) {
-          message += ' ' + this.translationService.translate('offers.productsFailedToAdd', { count: errorCount });
-        }
-        
-        this.toastService.showSuccess(message);
-      } else if (outOfStockCount > 0 && errorCount === 0) {
+      // Filter out out-of-stock products
+      const availableProducts = this.currentProducts.filter(product => 
+        product.availability !== 'out_of_stock' && product.stock_quantity > 0
+      );
+
+      if (availableProducts.length === 0) {
         this.toastService.showWarning(this.translationService.translate('offers.allProductsOutOfStock'));
-      } else {
-        this.toastService.showError(this.translationService.translate('offers.failedToAddProducts'));
+        return;
       }
-    } catch (error) {
-      console.error('Error adding all products to cart:', error);
-      this.toastService.showError(this.translationService.translate('offers.errorAddingProducts'));
-    }
+
+      // Prepare products for the action
+      const products = availableProducts.map(product => ({
+        productId: product.id,
+        quantity: 1,
+        variantId: undefined
+      }));
+
+      // Dispatch the offer-based add all to cart action
+      this.store.dispatch(addAllToCartFromOffer({
+        products,
+        offerId: offer.id,
+        offerName: offer.title,
+        offerType: offer.discount_type as 'percentage' | 'fixed_amount' | 'buy_x_get_y' | 'bundle',
+        offerDiscount: offer.discountPercentage || 0,
+        offerValidUntil: offer.endDate
+      }));
+
+      // Show success message
+      this.toastService.showSuccess(
+        this.translationService.translate('offers.addedProductsToCart', { count: availableProducts.length })
+      );
+
+      // Show warning for out-of-stock products if any
+      const outOfStockCount = this.currentProducts.length - availableProducts.length;
+      if (outOfStockCount > 0) {
+        this.toastService.showWarning(
+          this.translationService.translate('offers.productsOutOfStock', { count: outOfStockCount })
+        );
+      }
+    });
   }
 } 

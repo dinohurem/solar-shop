@@ -45,6 +45,15 @@ export interface CartItem {
     availability: ItemAvailability;
     shippingInfo: ItemShippingInfo;
     taxInfo: ItemTaxInfo;
+    // Offer pricing fields
+    offerId?: string;
+    offerName?: string;
+    offerType?: 'percentage' | 'fixed_amount' | 'buy_x_get_y' | 'bundle';
+    offerDiscount?: number;
+    offerOriginalPrice?: number;
+    offerValidUntil?: string;
+    offerAppliedAt?: string;
+    offerSavings?: number;
 }
 
 export interface ProductCustomization {

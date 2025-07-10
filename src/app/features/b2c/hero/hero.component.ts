@@ -207,11 +207,6 @@ import { Offer } from '../../../shared/models/offer.model';
                   ></button>
                 </div>
               </div>
-
-              <!-- No Offers State -->
-              <div *ngIf="!offersLoading && featuredOffers.length === 0" class="text-center py-8">
-                <p class="text-white/80 text-lg font-['DM_Sans']">{{ 'hero.noOffersAvailable' | translate }}</p>
-              </div>
             </div>
           </div>
           

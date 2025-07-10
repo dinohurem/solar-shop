@@ -6,7 +6,7 @@ import { takeUntil, switchMap, map, catchError } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { SupabaseService } from '../../../../services/supabase.service';
-import { addToB2BCart, applyB2BCoupon } from '../../cart/store/b2b-cart.actions';
+import { addToB2BCart, applyB2BCoupon, addAllToB2BCartFromOffer } from '../../cart/store/b2b-cart.actions';
 import { selectB2BCartHasCompanyId, selectB2BCartCompanyId } from '../../cart/store/b2b-cart.selectors';
 import { ToastService } from '../../../../shared/services/toast.service';
 import { TranslationService } from '../../../../shared/services/translation.service';
@@ -86,17 +86,17 @@ interface PartnerProduct {
                 </div>
                 <div class="flex items-center gap-4 mb-4">
                   <span class="text-2xl text-white/70 line-through font-medium">
-                    €{{ offer.originalPrice.toLocaleString() }}
+                    {{ offer.originalPrice | currency:'EUR':'symbol':'1.2-2' }}
                   </span>
                   <span class="text-4xl font-bold text-white">
-                    €{{ offer.discountedPrice.toLocaleString() }}
+                    {{ offer.discountedPrice | currency:'EUR':'symbol':'1.2-2' }}
                   </span>
                 </div>
                 <div class="grid grid-cols-2 gap-4 text-sm">
                   <div class="text-center">
                     <div class="text-white/70">{{ 'b2b.offers.savings' | translate }}</div>
                     <div class="text-lg font-bold text-accent-200">
-                      €{{ (offer.originalPrice - offer.discountedPrice).toLocaleString() }}
+                      {{ (offer.originalPrice - offer.discountedPrice) | currency:'EUR':'symbol':'1.2-2' }}
                     </div>
                   </div>
                   <div class="text-center">
@@ -210,7 +210,7 @@ interface PartnerProduct {
                 <div class="flex items-center justify-between">
                   <span class="text-sm text-gray-500">{{ 'b2b.products.retailPrice' | translate }}:</span>
                   <span class="text-lg text-gray-500 line-through">
-                    €{{ product.price.toLocaleString() }}
+                    {{ product.price | currency:'EUR':'symbol':'1.2-2' }}
                   </span>
                 </div>
                 
@@ -218,7 +218,7 @@ interface PartnerProduct {
                 <div class="flex items-center justify-between bg-solar-50 p-2 rounded-lg">
                   <span class="text-sm font-medium text-solar-700">{{ 'b2b.products.partnerPrice' | translate }}:</span>
                   <span class="text-xl font-bold text-solar-600">
-                    €{{ getProductPartnerPrice(product, offer).toLocaleString() }}
+                    {{ getProductPartnerPrice(product, offer) | currency:'EUR':'symbol':'1.2-2' }}
                   </span>
                 </div>
                 
@@ -226,7 +226,7 @@ interface PartnerProduct {
                 <div class="flex items-center justify-between border-t pt-2">
                   <span class="text-sm font-medium text-green-700">{{ 'b2b.products.savings' | translate }}:</span>
                   <span class="text-lg font-bold text-green-600">
-                    €{{ getProductTotalSavings(product, offer).toLocaleString() }}
+                    {{ getProductTotalSavings(product, offer) | currency:'EUR':'symbol':'1.2-2' }}
                   </span>
                 </div>
               </div>
@@ -623,49 +623,42 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
           return;
         }
 
-        let successCount = 0;
-        let errorCount = 0;
-        let outOfStockCount = 0;
+        // Filter out out-of-stock products
+        const availableProducts = products.filter(product => (product.stock_quantity || 0) > 0);
 
-        for (const product of products) {
-          try {
-            // Check product availability before adding to cart
-            if (product.stock_quantity === 0) {
-              console.warn(`Product ${product.name} is out of stock`);
-              outOfStockCount++;
-              continue;
-            }
-
-            this.store.dispatch(addToB2BCart({
-              companyId,
-              productId: product.id,
-              quantity: 1
-            }));
-
-            successCount++;
-          } catch (error) {
-            console.error(`Error adding product ${product.name} to cart:`, error);
-            errorCount++;
-          }
+        if (availableProducts.length === 0) {
+          this.toastService.showWarning(this.translationService.translate('b2b.offers.allProductsOutOfStock'));
+          return;
         }
 
-        // Provide detailed feedback to user
-        if (successCount > 0) {
-          let message = this.translationService.translate('offers.addedSuccessfully', { count: successCount });
+        // Prepare products for the action
+        const productsToAdd = availableProducts.map(product => ({
+          productId: product.id,
+          quantity: 1
+        }));
 
-          if (outOfStockCount > 0) {
-            message += ' ' + this.translationService.translate('b2b.offers.productsOutOfStock', { count: outOfStockCount });
-          }
+        // Dispatch the partner offer-based add all to cart action
+        this.store.dispatch(addAllToB2BCartFromOffer({
+          products: productsToAdd,
+          companyId,
+          partnerOfferId: this.offer!.id,
+          partnerOfferName: this.offer!.title,
+          partnerOfferType: 'percentage', // Based on the discount type
+          partnerOfferDiscount: this.offer!.discountPercentage,
+          partnerOfferValidUntil: this.offer!.endDate
+        }));
 
-          if (errorCount > 0) {
-            message += ' ' + this.translationService.translate('b2b.offers.productsFailedToAdd', { count: errorCount });
-          }
+        // Show success message
+        this.toastService.showSuccess(
+          this.translationService.translate('offers.addedSuccessfully', { count: availableProducts.length })
+        );
 
-          this.toastService.showSuccess(message);
-        } else if (outOfStockCount > 0 && errorCount === 0) {
-          this.toastService.showWarning(this.translationService.translate('b2b.offers.allProductsOutOfStock'));
-        } else {
-          this.toastService.showError(this.translationService.translate('b2b.offers.failedToAddProducts'));
+        // Show warning for out-of-stock products if any
+        const outOfStockCount = products.length - availableProducts.length;
+        if (outOfStockCount > 0) {
+          this.toastService.showWarning(
+            this.translationService.translate('b2b.offers.productsOutOfStock', { count: outOfStockCount })
+          );
         }
       });
     });
