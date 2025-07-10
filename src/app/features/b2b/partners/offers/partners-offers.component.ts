@@ -1,9 +1,18 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { Observable, Subject, from } from 'rxjs';
+import { takeUntil, switchMap } from 'rxjs/operators';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { Offer } from '../../../../shared/models/offer.model';
 import { SupabaseService } from '../../../../services/supabase.service';
+import { ToastService } from '../../../../shared/services/toast.service';
+import { selectCurrentUser, selectIsAuthenticated } from '../../../../core/auth/store/auth.selectors';
+import { addToB2BCart } from '../../cart/store/b2b-cart.actions';
+import { selectB2BCartHasCompanyId, selectB2BCartCompanyId } from '../../cart/store/b2b-cart.selectors';
+import { TranslationService } from '../../../../shared/services/translation.service';
+import { User } from '../../../../shared/models/user.model';
 
 @Component({
   selector: 'app-partners-offers',
@@ -34,7 +43,7 @@ import { SupabaseService } from '../../../../services/supabase.service';
               <div>
                 <p class="text-sm font-medium text-solar-800">
                   <span *ngIf="!isAuthenticated">{{ 'b2b.offers.loginRequired' | translate }}</span>
-                  <span *ngIf="isAuthenticated && !hasCompanyId">Partner verification required to view exclusive offers</span>
+                  <span *ngIf="isAuthenticated && !hasCompanyId">{{ 'b2b.auth.partnerVerificationRequired' | translate }}</span>
                 </p>
               </div>
             </div>
@@ -46,7 +55,7 @@ import { SupabaseService } from '../../../../services/supabase.service';
             <button *ngIf="isAuthenticated && !hasCompanyId" 
                     (click)="navigateToPartnerRegistration()" 
                     class="bg-solar-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-solar-700 transition-colors">
-              Become a Partner
+              {{ 'b2b.auth.becomePartner' | translate }}
             </button>
           </div>
         </div>
@@ -57,7 +66,7 @@ import { SupabaseService } from '../../../../services/supabase.service';
         <!-- Loading State -->
         <div *ngIf="loading" class="flex items-center justify-center py-12">
           <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-solar-600"></div>
-          <span class="ml-3 text-lg text-gray-600">Loading partner offers...</span>
+          <span class="ml-3 text-lg text-gray-600">{{ 'b2b.offers.loadingOffers' | translate }}</span>
         </div>
 
         <!-- Offers Grid -->
@@ -131,7 +140,7 @@ import { SupabaseService } from '../../../../services/supabase.service';
                 </svg>
                 <p class="text-sm text-gray-500 font-medium">
                   <span *ngIf="!isAuthenticated">{{ 'b2b.offers.loginToViewPrices' | translate }}</span>
-                  <span *ngIf="isAuthenticated && !hasCompanyId">Partner verification required to view pricing</span>
+                  <span *ngIf="isAuthenticated && !hasCompanyId">{{ 'b2b.auth.partnerVerificationRequiredPricing' | translate }}</span>
                 </p>
               </div>
 
@@ -172,7 +181,7 @@ import { SupabaseService } from '../../../../services/supabase.service';
                 <button *ngIf="isAuthenticated && !hasCompanyId" 
                         (click)="navigateToPartnerRegistration()"
                         class="w-full bg-solar-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-solar-700 transition-colors">
-                  Become a Partner to Claim
+                  {{ 'b2b.offers.claimOffer' | translate }}
                 </button>
                 
                 <button (click)="viewOfferDetails(offer)" 
@@ -196,34 +205,57 @@ import { SupabaseService } from '../../../../services/supabase.service';
     </div>
   `,
 })
-export class PartnersOffersComponent implements OnInit {
+export class PartnersOffersComponent implements OnInit, OnDestroy {
   private supabaseService = inject(SupabaseService);
+  private store = inject(Store);
+  private toastService = inject(ToastService);
+  private translationService = inject(TranslationService);
+  private destroy$ = new Subject<void>();
 
-  isAuthenticated = false; // This should be connected to your auth service
-  hasCompanyId = false; // Check if user has company association
-  isPartner = false; // Check if user is verified partner
+  // Observables
+  currentUser$: Observable<User | null> = this.store.select(selectCurrentUser);
+  isAuthenticated$: Observable<boolean> = this.store.select(selectIsAuthenticated);
+  userCompanyId$: Observable<string | null> = this.store.select(selectB2BCartCompanyId);
+  hasCompanyId$: Observable<boolean> = this.store.select(selectB2BCartHasCompanyId);
+
+  isAuthenticated = false;
+  hasCompanyId = false;
+  isPartner = false;
   loading = false;
+  currentUser: User | null = null;
+  userCompanyId: string | null = null;
 
   // B2B offers loaded from database
   b2bOffers: Offer[] = [];
 
-  constructor(private router: Router) {
-    // TODO: Connect to auth service and check user status
-    // this.authService.isAuthenticated$.subscribe(isAuth => this.isAuthenticated = isAuth);
-    // this.authService.user$.subscribe(user => {
-    //   this.hasCompanyId = !!user?.companyId;
-    //   this.isPartner = user?.role === 'partner' || user?.isVerifiedPartner;
-    // });
-
-    // For demo purposes, simulate authenticated partner
-    this.isAuthenticated = true;
-    this.hasCompanyId = true;
-    this.isPartner = true;
-  }
+  constructor(private router: Router) { }
 
   ngOnInit(): void {
+    // Subscribe to auth state
+    this.isAuthenticated$.pipe(takeUntil(this.destroy$)).subscribe(isAuth => {
+      this.isAuthenticated = isAuth;
+    });
+
+    this.currentUser$.pipe(takeUntil(this.destroy$)).subscribe(user => {
+      this.currentUser = user;
+      this.isPartner = !!user?.companyId && (user?.role?.name === 'company_admin' || user?.role?.name === 'admin');
+    });
+
+    this.hasCompanyId$.pipe(takeUntil(this.destroy$)).subscribe(hasCompanyId => {
+      this.hasCompanyId = hasCompanyId;
+    });
+
+    this.userCompanyId$.pipe(takeUntil(this.destroy$)).subscribe(companyId => {
+      this.userCompanyId = companyId;
+    });
+
     // Load B2B offers from database
     this.loadB2BOffers();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   async loadB2BOffers(): Promise<void> {
@@ -237,23 +269,33 @@ export class PartnersOffersComponent implements OnInit {
       });
 
       // Transform database offers to Offer model
-      this.b2bOffers = offers.map(offer => ({
-        id: offer.id,
-        title: offer.title,
-        originalPrice: offer.original_price || 0,
-        discountedPrice: offer.discounted_price || 0,
-        discountPercentage: offer.discount_type === 'percentage' ? offer.discount_value : 0,
-        imageUrl: offer.image_url || 'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=800&h=600&fit=crop',
-        description: offer.description,
-        shortDescription: offer.short_description || '',
+      this.b2bOffers = offers.map(offer => {
+        const originalPrice = offer.original_price || 0;
+        const discountPercentage = offer.discount_type === 'percentage' ? offer.discount_value : 0;
+        let discountedPrice = offer.discounted_price || 0;
 
-        status: offer.status,
-        couponCode: offer.code || '',
-        startDate: offer.start_date,
-        endDate: offer.end_date,
-        featured: offer.featured || false,
-        isB2B: offer.is_b2b || false
-      }));
+        // Calculate discounted price for percentage-only offers if not provided
+        if (discountedPrice === 0 && discountPercentage > 0 && originalPrice > 0) {
+          discountedPrice = originalPrice * (1 - discountPercentage / 100);
+        }
+
+        return {
+          id: offer.id,
+          title: offer.title,
+          originalPrice: originalPrice,
+          discountedPrice: discountedPrice,
+          discountPercentage: discountPercentage,
+          imageUrl: offer.image_url || 'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=800&h=600&fit=crop',
+          description: offer.description,
+          shortDescription: offer.short_description || '',
+          status: offer.status,
+          couponCode: offer.code || '',
+          startDate: offer.start_date,
+          endDate: offer.end_date,
+          featured: offer.featured || false,
+          isB2B: offer.is_b2b || false
+        };
+      });
     } catch (error) {
       console.error('Error loading B2B offers:', error);
     } finally {
@@ -272,8 +314,129 @@ export class PartnersOffersComponent implements OnInit {
   }
 
   claimOffer(offer: Offer): void {
-    // TODO: Implement offer claiming logic
-    alert(`Offer "${offer.title}" has been added to your account!`);
+    // Check if user is authenticated and has company ID
+    if (!this.isAuthenticated || !this.userCompanyId) {
+      this.toastService.showError(this.translationService.translate('b2b.auth.pleaseLoginAsPartner'));
+      return;
+    }
+
+    // Check if offer is expired
+    if (this.isOfferExpired(offer.endDate)) {
+      this.toastService.showError(this.translationService.translate('b2b.offers.offerExpired'));
+      return;
+    }
+
+    // Load offer products and add them to cart
+    this.loadOfferProducts(offer.id).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(products => {
+      if (!products || products.length === 0) {
+        // If no products, just show success message (general offer)
+        let message = this.translationService.translate('b2b.offers.offerClaimed', { title: offer.title });
+        if (offer.couponCode) {
+          message += ' ' + this.translationService.translate('b2b.offers.useCouponCode', { code: offer.couponCode });
+        }
+        this.toastService.showSuccess(message);
+        return;
+      }
+
+      // Add products to B2B cart
+      this.addOfferProductsToCart(products, offer);
+    });
+  }
+
+  private loadOfferProducts(offerId: string): Observable<any[]> {
+    return from(
+      this.supabaseService.client
+        .from('offer_products')
+        .select(`
+          *,
+          products (
+            id,
+            name,
+            description,
+            price,
+            sku,
+            stock_quantity,
+            images
+          )
+        `)
+        .eq('offer_id', offerId)
+        .eq('is_active', true)
+        .order('sort_order')
+    ).pipe(
+      switchMap(({ data, error }) => {
+        if (error) {
+          console.error('Error loading offer products:', error);
+          return [];
+        }
+        return [data || []];
+      })
+    );
+  }
+
+  private addOfferProductsToCart(offerProducts: any[], offer: Offer): void {
+    if (!this.userCompanyId) {
+      this.toastService.showError(this.translationService.translate('b2b.auth.companyIdNotFound'));
+      return;
+    }
+
+    let successCount = 0;
+    let errorCount = 0;
+    let outOfStockCount = 0;
+
+    for (const offerProduct of offerProducts) {
+      const product = offerProduct.products;
+
+      if (!product) {
+        console.warn('Product not found for offer product:', offerProduct);
+        errorCount++;
+        continue;
+      }
+
+      try {
+        // Check stock availability
+        if (product.stock_quantity <= 0) {
+          console.warn(`Product ${product.name} is out of stock`);
+          outOfStockCount++;
+          continue;
+        }
+
+        // Add to cart
+        this.store.dispatch(addToB2BCart({
+          companyId: this.userCompanyId,
+          productId: product.id,
+          quantity: 1
+        }));
+
+        successCount++;
+      } catch (error) {
+        console.error(`Error adding product ${product.name} to cart:`, error);
+        errorCount++;
+      }
+    }
+
+    // Provide detailed feedback
+    if (successCount > 0) {
+      let message = this.translationService.translate('b2b.offers.offerClaimedWithProducts', {
+        title: offer.title,
+        count: successCount
+      });
+
+      if (offer.couponCode) {
+        message += ' ' + this.translationService.translate('b2b.offers.useCouponCode', { code: offer.couponCode });
+      }
+
+      if (outOfStockCount > 0) {
+        message += ' ' + this.translationService.translate('b2b.offers.itemsOutOfStock', { count: outOfStockCount });
+      }
+
+      this.toastService.showSuccess(message);
+    } else if (outOfStockCount > 0) {
+      this.toastService.showWarning(this.translationService.translate('b2b.offers.offerClaimedButOutOfStock', { title: offer.title }));
+    } else {
+      this.toastService.showError(this.translationService.translate('b2b.offers.failedToAddProducts'));
+    }
   }
 
   viewOfferDetails(offer: Offer): void {
@@ -282,8 +445,10 @@ export class PartnersOffersComponent implements OnInit {
 
   copyCouponCode(couponCode: string): void {
     navigator.clipboard.writeText(couponCode).then(() => {
-      // TODO: Show toast notification
-      alert('Coupon code copied to clipboard!');
+      this.toastService.showSuccess(this.translationService.translate('b2b.offers.couponCopied'));
+    }).catch(err => {
+      console.error('Failed to copy coupon code:', err);
+      this.toastService.showError(this.translationService.translate('b2b.offers.failedToCopyCoupon'));
     });
   }
 

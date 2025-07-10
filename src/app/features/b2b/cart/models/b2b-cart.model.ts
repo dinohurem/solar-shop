@@ -28,12 +28,18 @@ export interface B2BCartState {
     companyName: string | null;
     lastUpdated: Date | null;
     sidebarOpen: boolean; // Sidebar visibility state
+    // Coupon state
+    appliedCoupons: any[]; // Applied coupons
+    couponDiscount: number; // Total discount from coupons
+    couponError: string | null;
+    isCouponLoading: boolean;
 }
 
 export interface B2BCartSummary {
     itemCount: number;
     subtotal: number;
     totalSavings: number;
+    couponDiscount: number; // Discount from applied coupons
     estimatedTax: number;
     estimatedShipping: number;
     total: number;

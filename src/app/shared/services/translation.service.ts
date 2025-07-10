@@ -352,6 +352,13 @@ export class TranslationService {
                     cashOnDelivery: 'Plaćanje po dostavi',
                     creditTerms30Days: 'Kredit (30 dana)'
                 },
+                auth: {
+                    pleaseLoginAsPartner: 'Molimo prijavite se kao partner',
+                    partnerVerificationRequired: 'Potrebna je provjera partnera za pregled ekskluzivnih ponuda',
+                    becomePartner: 'Postanite partner',
+                    partnerVerificationRequiredPricing: 'Potrebna je provjera partnera za pregled cijena',
+                    companyIdNotFound: 'ID tvrtke nije pronađen'
+                },
                 offers: {
                     title: 'Pogledajte naše ponude',
                     subtitle: 'Ekskluzivne ponude i popusti za naše partnere',
@@ -364,7 +371,7 @@ export class TranslationService {
                     savings: 'Ušteda',
                     couponCode: 'Kod kupona',
                     copy: 'Kopiraj',
-                    claimOffer: 'Zatražite ponudu',
+                    claimOffer: 'Prihvati ponudu',
                     expired: 'Isteklo',
                     signInToClaim: 'Prijavite se za zahtjev',
                     viewDetails: 'Pogledaj detalje',
@@ -376,7 +383,27 @@ export class TranslationService {
                     productsIncluded: 'Proizvodi uključeni u ovu ponudu',
                     featured: 'Istaknuto',
                     endingSoon: 'Uskoro završava!',
-                    addToCartPartnerPrice: 'Dodaj u košaricu - Partnerska cijena'
+                    addToCartPartnerPrice: 'Dodaj u košaricu - Partnerska cijena',
+                    offerNotFound: 'Ponuda nije pronađena',
+                    noProductsToAdd: 'Nema proizvoda za dodavanje u košaricu.',
+                    addedProductsToCart: 'Dodano {{count}} proizvod u košaricu uspješno!',
+                    productsOutOfStock: 'Proizvoida nema na stanju.',
+                    productsFailedToAdd: 'Proizvod se nije mogao dodati.',
+                    allProductsOutOfStock: 'Svi proizvodi su trenutno rasprodani.',
+                    failedToAddProducts: 'Neuspješno dodavanje proizvoda u košaricu. Molimo pokušajte ponovno.',
+                    offerExpired: 'Ova ponuda je istekla.',
+                    offerClaimed: 'Ponuda "{{title}}" je prihvaćena!',
+                    couponAppliedAutomatically: 'Kupon "{{code}}" primijenjen automatski.',
+                    offerClaimedWithProducts: 'Ponuda "{{title}}" prihvaćena! Proizvodi uspješno dodani u Vašu košaricu.',
+                    itemsOutOfStock: 'Proizvoda nema na stanju.',
+                    offerClaimedButOutOfStock: 'Ponuda prihvaćena, ali svi proizvodi su trenutno rasprodani.',
+                    useCouponCode: 'Koristite kupon kod: {{code}}',
+                    couponCopied: 'Kupon kod kopiran u međuspremnik!',
+                    failedToCopyCoupon: 'Neuspješno kopiranje kupon koda',
+                    loadingOffers: 'Učitavam partnerske ponude...',
+                    generalOffer: 'Opća ponuda',
+                    generalOfferDescription: 'Ova ponuda se odnosi na cijeli katalog proizvoda',
+                    browseProducts: 'Pregledaj proizvode'
                 },
                 profile: {
                     title: 'Partner profil',
@@ -469,12 +496,13 @@ export class TranslationService {
                 total: 'Ukupno',
                 proceedToCheckout: 'Idi na naplatu',
                 clearCart: 'Očisti košaricu',
-                addedToCart: 'dodano u košaricu',
+                addedToCart: 'dodan u košaricu',
                 unknownCompany: 'Nepoznata tvrtka',
                 clearCartConfirm: 'Jeste li sigurni da želite obrisati košaricu?',
                 minimumOrder: 'Min. narudžba',
                 minimumOrderViolation: 'Neki proizvodi ne ispunjavaju minimalne uvjete narudžbe',
-                minimumOrderRequired: 'Minimalna narudžba: {{minimum}} komada (trenutno: {{current}})'
+                minimumOrderRequired: 'Minimalna narudžba: {{minimum}} komada (trenutno: {{current}})',
+                productAdded: 'Dodan {{name}} u vašu košaricu!'
             },
             // B2B Shipping translations
             b2bShipping: {
@@ -1649,7 +1677,14 @@ export class TranslationService {
                 aboutThisOffer: 'O ovoj ponudi',
                 defaultDescription: 'Ova ponuda uključuje odabrane proizvode po sniženim cijenama. Iskoristite priliku i uštedite na vašem sljedećem solar projektu.',
                 highlights: 'Istaknuto',
-                addedSuccessfully: 'Proizvodi su uspješno dodani u vašu košaricu!',
+                addedSuccessfully: 'Dodano u košaricu uspješno!',
+                noProductsToAdd: 'Nema proizvoda za dodavanje u košaricu.',
+                addedProductsToCart: 'Dodano u košaricu uspješno!',
+                productsOutOfStock: 'Proizvoda nema na stanju.',
+                productsFailedToAdd: 'Proizvod se nije mogao dodati.',
+                allProductsOutOfStock: 'Svi proizvodi su trenutno rasprodani.',
+                failedToAddProducts: 'Neuspješno dodavanje proizvoda u košaricu. Molimo pokušajte ponovno.',
+                errorAddingProducts: 'Greška prilikom dodavanja proizvoda u košaricu. Molimo pokušajte ponovno.',
             },
             // Mission/Sustainability
             mission: {
@@ -2709,6 +2744,13 @@ export class TranslationService {
                     cashOnDelivery: 'Cash on Delivery',
                     creditTerms30Days: 'Credit Terms (30 days)'
                 },
+                auth: {
+                    pleaseLoginAsPartner: 'Please log in as a partner',
+                    partnerVerificationRequired: 'Partner verification required to view exclusive offers',
+                    becomePartner: 'Become a Partner',
+                    partnerVerificationRequiredPricing: 'Partner verification required to view pricing',
+                    companyIdNotFound: 'Company ID not found'
+                },
                 offers: {
                     title: 'Offers for Partners',
                     subtitle: 'Exclusive offers and discounts for our partners',
@@ -2733,7 +2775,27 @@ export class TranslationService {
                     productsIncluded: 'Products included in this offer',
                     featured: 'Featured',
                     endingSoon: 'Ending soon!',
-                    addToCartPartnerPrice: 'Add to Cart - Partner Price'
+                    addToCartPartnerPrice: 'Add to Cart - Partner Price',
+                    offerNotFound: 'Offer not found',
+                    noProductsToAdd: 'No products available to add to cart.',
+                    addedProductsToCart: 'Added {{count}} product{{count > 1 ? "s" : ""}} to your B2B cart successfully!',
+                    productsOutOfStock: '{{count}} product{{count > 1 ? "s were" : " was"}} out of stock.',
+                    productsFailedToAdd: '{{count}} product{{count > 1 ? "s" : ""}} failed to add.',
+                    allProductsOutOfStock: 'All products are currently out of stock.',
+                    failedToAddProducts: 'Failed to add products to cart. Please try again.',
+                    offerExpired: 'This offer has expired.',
+                    offerClaimed: 'Offer "{{title}}" has been claimed!',
+                    couponAppliedAutomatically: 'Coupon "{{code}}" applied automatically.',
+                    offerClaimedWithProducts: 'Offer "{{title}}" claimed! Added {{count}} product{{count > 1 ? "s" : ""}} to your cart.',
+                    itemsOutOfStock: '({{count}} item{{count > 1 ? "s" : ""}} out of stock)',
+                    offerClaimedButOutOfStock: 'Offer "{{title}}" claimed, but all products are currently out of stock.',
+                    useCouponCode: 'Use coupon code: {{code}}',
+                    couponCopied: 'Coupon code copied to clipboard!',
+                    failedToCopyCoupon: 'Failed to copy coupon code',
+                    loadingOffers: 'Loading partner offers...',
+                    generalOffer: 'General offer',
+                    generalOfferDescription: 'This offer applies to the entire product catalog',
+                    browseProducts: 'Browse products'
                 },
                 profile: {
                     title: 'Partner Profile',
@@ -2827,7 +2889,8 @@ export class TranslationService {
                 clearCart: 'Clear Cart',
                 addedToCart: 'added to cart',
                 unknownCompany: 'Unknown Company',
-                clearCartConfirm: 'Are you sure you want to clear your cart?'
+                clearCartConfirm: 'Are you sure you want to clear your cart?',
+                productAdded: 'Added {{name}} to your cart!'
             },
             // B2B Shipping translations
             b2bShipping: {
@@ -3893,7 +3956,14 @@ export class TranslationService {
                 aboutThisOffer: 'About This Offer',
                 defaultDescription: 'This is a special offer for selected products. Take advantage of the discount and save on your purchase.',
                 highlights: 'Highlights',
-                addedSuccessfully: 'Products added to cart successfully!',
+                addedSuccessfully: 'Added {{count}} product{{count > 1 ? "s" : ""}} to cart successfully!',
+                noProductsToAdd: 'No products available to add to cart.',
+                addedProductsToCart: 'Added {{count}} product{{count > 1 ? "s" : ""}} to cart successfully!',
+                productsOutOfStock: '{{count}} product{{count > 1 ? "s were" : " was"}} out of stock.',
+                productsFailedToAdd: '{{count}} product{{count > 1 ? "s" : ""}} failed to add.',
+                allProductsOutOfStock: 'All products are currently out of stock.',
+                failedToAddProducts: 'Failed to add products to cart. Please try again.',
+                errorAddingProducts: 'Error adding products to cart. Please try again.',
             },
             // Mission/Sustainability
             mission: {

@@ -188,6 +188,13 @@ import { TranslationService } from '../../../../../shared/services/translation.s
                   <span>{{ 'b2bCart.totalSavings' | translate }}</span>
                   <span>-€{{ (cartSummary$ | async)?.totalSavings }}</span>
                 </div>
+                <div 
+                  *ngIf="(cartSummary$ | async)?.couponDiscount && (cartSummary$ | async)!.couponDiscount > 0"
+                  class="flex justify-between text-blue-600"
+                >
+                  <span>{{ 'cart.couponDiscount' | translate }}</span>
+                  <span>-€{{ (cartSummary$ | async)?.couponDiscount }}</span>
+                </div>
                 <div class="flex justify-between font-semibold text-lg border-t pt-2">
                   <span>{{ 'cart.total' | translate }}</span>
                   <span>€{{ (cartSummary$ | async)?.total }}</span>

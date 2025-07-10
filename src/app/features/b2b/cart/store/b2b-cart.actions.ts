@@ -6,6 +6,7 @@ import {
     RemoveFromB2BCartPayload,
     B2BShippingInfo
 } from '../models/b2b-cart.model';
+import { Coupon } from '../../../../shared/models/coupon.model';
 
 // Load cart
 export const loadB2BCart = createAction(
@@ -132,4 +133,39 @@ export const openB2BCartSidebar = createAction(
 
 export const closeB2BCartSidebar = createAction(
     '[B2B Cart] Close Sidebar'
+);
+
+// Coupon Actions
+export const applyB2BCoupon = createAction(
+    '[B2B Cart] Apply Coupon',
+    props<{ code: string; companyId: string }>()
+);
+
+export const applyB2BCouponSuccess = createAction(
+    '[B2B Cart] Apply Coupon Success',
+    props<{ coupon: Coupon; discount: number }>()
+);
+
+export const applyB2BCouponFailure = createAction(
+    '[B2B Cart] Apply Coupon Failure',
+    props<{ error: string }>()
+);
+
+export const removeB2BCoupon = createAction(
+    '[B2B Cart] Remove Coupon',
+    props<{ couponId: string }>()
+);
+
+export const removeB2BCouponSuccess = createAction(
+    '[B2B Cart] Remove Coupon Success',
+    props<{ couponId: string }>()
+);
+
+export const removeB2BCouponFailure = createAction(
+    '[B2B Cart] Remove Coupon Failure',
+    props<{ error: string }>()
+);
+
+export const clearB2BCouponError = createAction(
+    '[B2B Cart] Clear Coupon Error'
 ); 

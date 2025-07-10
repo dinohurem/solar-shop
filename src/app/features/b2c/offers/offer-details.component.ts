@@ -11,6 +11,7 @@ import { Offer } from '../../../shared/models/offer.model';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { addToCart } from '../cart/store/cart.actions';
 import { ToastService } from '../../../shared/services/toast.service';
+import { TranslationService } from '../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-offer-details',
@@ -205,39 +206,6 @@ import { ToastService } from '../../../shared/services/toast.service';
                 </p>
               </div>
             </div>
-
-            <!-- Offer Highlights -->
-            <div class="bg-gray-50 rounded-2xl p-6">
-              <h3 class="text-xl font-bold text-gray-900 mb-4 font-['Poppins']">
-                {{ 'offers.highlights' | translate }}
-              </h3>
-              <ul class="space-y-3">
-                <li class="flex items-center gap-3">
-                  <svg class="w-5 h-5 text-solar-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/>
-                  </svg>
-                  <span class="text-gray-700 font-['DM_Sans']">{{ offer.discountPercentage }}% {{ 'offers.discount' | translate }}</span>
-                </li>
-                <li class="flex items-center gap-3">
-                  <svg class="w-5 h-5 text-solar-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/>
-                  </svg>
-                  <span class="text-gray-700 font-['DM_Sans']">{{ 'offers.limitedTimeOnly' | translate }}</span>
-                </li>
-                <li class="flex items-center gap-3">
-                  <svg class="w-5 h-5 text-solar-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/>
-                  </svg>
-                  <span class="text-gray-700 font-['DM_Sans']">{{ 'offers.premiumQuality' | translate }}</span>
-                </li>
-                <li class="flex items-center gap-3">
-                  <svg class="w-5 h-5 text-solar-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/>
-                  </svg>
-                  <span class="text-gray-700 font-['DM_Sans']">{{ 'offers.freeShipping' | translate }}</span>
-                </li>
-              </ul>
-            </div>
           </div>
         </div>
       </div>
@@ -285,7 +253,8 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
     private offersService: OffersService,
     private supabaseService: SupabaseService,
     private store: Store,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private translationService: TranslationService
   ) {
     this.offer$ = this.route.params.pipe(
       switchMap(params => this.offersService.getOfferById(params['id'])),
@@ -327,7 +296,7 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
             description,
             price,
             sku,
-            availability,
+            stock_quantity,
             images,
             category_id,
             categories (
@@ -345,7 +314,7 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
           // Fallback to featured products on error
           return from(this.supabaseService.getProducts({ featured: true, limit: 3 }));
         }
-        
+
         if (offerProducts && offerProducts.length > 0) {
           // Map offer products to the expected format
           const products = offerProducts.map((op: any) => ({
@@ -353,9 +322,10 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
             name: op.products.name,
             description: op.products.description,
             price: op.products.price,
-            availability: op.products.availability || 'in_stock',
+            availability: this.getProductAvailability(op.products.stock_quantity),
             images: op.products.images || [],
-            category: op.products.categories?.name
+            category: op.products.categories?.name,
+            stock_quantity: op.products.stock_quantity || 0
           }));
           return of(products);
         } else {
@@ -369,6 +339,12 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
         return of([]);
       })
     );
+  }
+
+  private getProductAvailability(stockQuantity: number): string {
+    if (stockQuantity > 10) return 'in_stock';
+    if (stockQuantity > 0) return 'low_stock';
+    return 'out_of_stock';
   }
 
 
@@ -409,15 +385,24 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
 
   async addAllToCart(): Promise<void> {
     if (!this.currentProducts || this.currentProducts.length === 0) {
+      this.toastService.showWarning(this.translationService.translate('offers.noProductsToAdd'));
       return;
     }
 
     try {
       let successCount = 0;
       let errorCount = 0;
+      let outOfStockCount = 0;
 
       for (const product of this.currentProducts) {
         try {
+          // Check product availability before adding to cart
+          if (product.availability === 'out_of_stock' || product.stock_quantity === 0) {
+            console.warn(`Product ${product.name} is out of stock`);
+            outOfStockCount++;
+            continue;
+          }
+
           this.store.dispatch(addToCart({
             productId: product.id,
             quantity: 1
@@ -429,17 +414,27 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
         }
       }
 
+      // Provide detailed feedback to user
       if (successCount > 0) {
-        const message = errorCount > 0 
-          ? `Adding ${successCount} products to cart. ${errorCount} failed.`
-          : `Added ${successCount} products to cart successfully!`;
+        let message = this.translationService.translate('offers.addedProductsToCart', { count: successCount });
+        
+        if (outOfStockCount > 0) {
+          message += ' ' + this.translationService.translate('offers.productsOutOfStock', { count: outOfStockCount });
+        }
+        
+        if (errorCount > 0) {
+          message += ' ' + this.translationService.translate('offers.productsFailedToAdd', { count: errorCount });
+        }
+        
         this.toastService.showSuccess(message);
+      } else if (outOfStockCount > 0 && errorCount === 0) {
+        this.toastService.showWarning(this.translationService.translate('offers.allProductsOutOfStock'));
       } else {
-        this.toastService.showError('Failed to add products to cart. Please try again.');
+        this.toastService.showError(this.translationService.translate('offers.failedToAddProducts'));
       }
     } catch (error) {
       console.error('Error adding all products to cart:', error);
-      this.toastService.showError('Error adding products to cart. Please try again.');
+      this.toastService.showError(this.translationService.translate('offers.errorAddingProducts'));
     }
   }
 } 

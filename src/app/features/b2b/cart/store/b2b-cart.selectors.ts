@@ -78,14 +78,16 @@ export const selectB2BCartSummary = createSelector(
         const estimatedTax = 0;
         // B2B uses pickup at store - no shipping costs
         const estimatedShipping = 0;
+        const total = Math.max(0, state.subtotal - state.couponDiscount);
 
         return {
             itemCount: state.totalItems,
             subtotal: state.subtotal,
             totalSavings: state.totalSavings,
+            couponDiscount: state.couponDiscount,
             estimatedTax,
             estimatedShipping,
-            total: Math.round(state.subtotal * 100) / 100
+            total: Math.round(total * 100) / 100
         };
     }
 );
@@ -150,4 +152,46 @@ export const selectB2BCartProductPricing = (productId: string) => createSelector
 export const selectB2BCartSidebarOpen = createSelector(
     selectB2BCartState,
     (state: B2BCartState) => state.sidebarOpen
+);
+
+// Coupon selectors
+export const selectB2BCartAppliedCoupons = createSelector(
+    selectB2BCartState,
+    (state: B2BCartState) => state.appliedCoupons
+);
+
+export const selectB2BCartCouponDiscount = createSelector(
+    selectB2BCartState,
+    (state: B2BCartState) => state.couponDiscount
+);
+
+export const selectB2BCartCouponError = createSelector(
+    selectB2BCartState,
+    (state: B2BCartState) => state.couponError
+);
+
+export const selectB2BCartIsCouponLoading = createSelector(
+    selectB2BCartState,
+    (state: B2BCartState) => state.isCouponLoading
+);
+
+export const selectB2BCartHasCoupons = createSelector(
+    selectB2BCartAppliedCoupons,
+    (coupons) => coupons.length > 0
+);
+
+export const selectB2BCartCouponById = (couponId: string) => createSelector(
+    selectB2BCartAppliedCoupons,
+    (coupons) => coupons.find(coupon => coupon.id === couponId)
+);
+
+// Company verification selectors
+export const selectB2BCartCompanyId = createSelector(
+    selectB2BCartCompanyInfo,
+    (companyInfo) => companyInfo.companyId
+);
+
+export const selectB2BCartHasCompanyId = createSelector(
+    selectB2BCartCompanyInfo,
+    (companyInfo) => !!companyInfo.companyId
 ); 

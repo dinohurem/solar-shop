@@ -126,21 +126,32 @@ export class PartnersHighlightsComponent implements OnInit {
       console.log('B2B Offers loaded:', offers); // Debug log
 
       if (offers && offers.length > 0) {
-        this.highlights = offers.map((offer: any) => ({
-          id: offer.id,
-          title: offer.title,
-          description: offer.description || '',
-          shortDescription: offer.short_description || offer.description || '',
-          imageUrl: offer.image_url || 'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=800&h=600&fit=crop',
-          originalPrice: offer.original_price || 0,
-          discountedPrice: offer.discounted_price || 0,
-          discountPercentage: offer.discount_value || 0,
-          type: offer.type || 'general',
-          status: offer.status || 'active',
-          featured: offer.featured || false,
-          isB2B: offer.is_b2b || false,
-          endDate: offer.end_date
-        }));
+        this.highlights = offers.map((offer: any) => {
+          const originalPrice = offer.original_price || 0;
+          const discountPercentage = offer.discount_value || 0;
+          let discountedPrice = offer.discounted_price || 0;
+          
+          // Calculate discounted price for percentage-only offers if not provided
+          if (discountedPrice === 0 && discountPercentage > 0 && originalPrice > 0) {
+            discountedPrice = originalPrice * (1 - discountPercentage / 100);
+          }
+          
+          return {
+            id: offer.id,
+            title: offer.title,
+            description: offer.description || '',
+            shortDescription: offer.short_description || offer.description || '',
+            imageUrl: offer.image_url || 'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=800&h=600&fit=crop',
+            originalPrice: originalPrice,
+            discountedPrice: discountedPrice,
+            discountPercentage: discountPercentage,
+            type: offer.type || 'general',
+            status: offer.status || 'active',
+            featured: offer.featured || false,
+            isB2B: offer.is_b2b || false,
+            endDate: offer.end_date
+          };
+        });
 
         console.log('Mapped highlights:', this.highlights); // Debug log
       } else {

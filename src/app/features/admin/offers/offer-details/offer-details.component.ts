@@ -282,6 +282,7 @@ export class OfferDetailsComponent implements OnInit {
             name,
             sku,
             price,
+            stock_quantity,
             category_id,
             categories (
               name
@@ -302,6 +303,7 @@ export class OfferDetailsComponent implements OnInit {
           category: offerProduct.products.categories?.name || 'Solar Equipment',
           price: offerProduct.products.price || 0,
           discount_percentage: offerProduct.discount_percentage || 0,
+          stock_quantity: offerProduct.products.stock_quantity || 0,
           offer_product_id: offerProduct.id
         }));
 

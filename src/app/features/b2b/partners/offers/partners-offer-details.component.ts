@@ -6,10 +6,10 @@ import { takeUntil, switchMap, map, catchError } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { SupabaseService } from '../../../../services/supabase.service';
-import { B2BCartService } from '../../cart/services/b2b-cart.service';
-import { selectUserCompanyId } from '../../../../core/auth/store/auth.selectors';
-import { addToB2BCart } from '../../cart/store/b2b-cart.actions';
+import { addToB2BCart, applyB2BCoupon } from '../../cart/store/b2b-cart.actions';
+import { selectB2BCartHasCompanyId, selectB2BCartCompanyId } from '../../cart/store/b2b-cart.selectors';
 import { ToastService } from '../../../../shared/services/toast.service';
+import { TranslationService } from '../../../../shared/services/translation.service';
 
 interface PartnerOffer {
   id: string;
@@ -37,6 +37,7 @@ interface PartnerProduct {
   price: number;
   category: string;
   sku: string;
+  stock_quantity?: number;
 }
 
 @Component({
@@ -167,7 +168,7 @@ interface PartnerProduct {
             (click)="addAllToCart()"
             class="w-full md:w-auto px-8 py-3 bg-solar-600 text-white font-semibold rounded-lg hover:bg-solar-700 transition-colors font-['DM_Sans'] mb-6"
           >
-            {{ 'b2b.offers.addAllToCart' | translate }}
+            {{ 'offers.addAllToCart' | translate }}
           </button>
         </div>
 
@@ -186,7 +187,7 @@ interface PartnerProduct {
               >
               <!-- Partner Exclusive Badge -->
               <div class="absolute top-4 left-4 bg-solar-600 text-white text-xs font-bold px-3 py-2 rounded-full">
-                {{ 'b2b.offers.partnerPrice' | translate }}
+                {{ 'offers.specialOffer' | translate }}
               </div>
               <!-- Discount Badge -->
               <div class="absolute top-4 right-4 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
@@ -277,7 +278,7 @@ interface PartnerProduct {
             <!-- Offer Description -->
             <div class="lg:col-span-2">
               <h2 class="text-3xl font-bold text-gray-900 mb-6 font-['Poppins']">
-                {{ 'b2b.offers.aboutThisPartnerOffer' | translate }}
+                {{ 'offers.aboutThisOffer' | translate }}
               </h2>
               <div class="prose prose-lg max-w-none">
                 <p class="text-gray-600 leading-relaxed font-['DM_Sans']">
@@ -295,7 +296,7 @@ interface PartnerProduct {
       <div class="min-h-screen bg-gray-50 flex items-center justify-center">
         <div class="text-center">
           <div class="animate-spin rounded-full h-12 w-12 border-4 border-solar-600 border-t-transparent mx-auto mb-4"></div>
-          <p class="text-gray-600 font-['DM_Sans']">{{ 'b2b.offers.loading' | translate }}</p>
+          <p class="text-gray-600 font-['DM_Sans']">{{ 'common.loading' | translate }}</p>
         </div>
       </div>
     </ng-template>
@@ -313,9 +314,9 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private supabaseService = inject(SupabaseService);
-  private b2bCartService = inject(B2BCartService);
   private store = inject(Store);
   private toastService = inject(ToastService);
+  private translationService = inject(TranslationService);
 
   offer: PartnerOffer | null = null;
   relatedProducts$: Observable<PartnerProduct[]> = of([]);
@@ -326,7 +327,8 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
   readonly PARTNER_DISCOUNT_PERCENTAGE = 15;
 
   // Observables
-  userCompanyId$ = this.store.select(selectUserCompanyId);
+  userCompanyId$ = this.store.select(selectB2BCartCompanyId);
+  hasCompanyId$ = this.store.select(selectB2BCartHasCompanyId);
 
   ngOnInit(): void {
     this.relatedProducts$ = this.route.params.pipe(
@@ -363,12 +365,21 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
       }
 
       // Convert database offer to PartnerOffer interface
+      const originalPrice = offer.original_price || 0;
+      const discountPercentage = offer.discount_type === 'percentage' ? offer.discount_value : 0;
+      let discountedPrice = offer.discounted_price || 0;
+
+      // Calculate discounted price for percentage-only offers if not provided
+      if (discountedPrice === 0 && discountPercentage > 0 && originalPrice > 0) {
+        discountedPrice = originalPrice * (1 - discountPercentage / 100);
+      }
+
       this.offer = {
         id: offer.id,
         title: offer.title,
-        originalPrice: offer.original_price || 0,
-        discountedPrice: offer.discounted_price || 0,
-        discountPercentage: offer.discount_type === 'percentage' ? offer.discount_value : 0,
+        originalPrice: originalPrice,
+        discountedPrice: discountedPrice,
+        discountPercentage: discountPercentage,
         imageUrl: offer.image_url || 'assets/images/product-placeholder.svg',
         description: offer.description || '',
         shortDescription: offer.short_description || '',
@@ -382,7 +393,7 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
       };
 
       // Load related products for this offer
-      await this.loadOfferProducts(offerId);
+      this.loadOfferProducts(offerId);
     } catch (error) {
       console.error('Error loading offer:', error);
     }
@@ -400,6 +411,7 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
             description,
             price,
             sku,
+            stock_quantity,
             images,
             category_id,
             categories (
@@ -422,10 +434,11 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
             id: offerProduct.products.id,
             name: offerProduct.products.name,
             description: offerProduct.products.description,
-            imageUrl: offerProduct.products.images?.[0]?.url || 'assets/images/product-placeholder.svg',
+            imageUrl: this.getProductImageUrl(offerProduct.products.images),
             price: offerProduct.products.price || 0,
             category: offerProduct.products.categories?.name || 'Solar Equipment',
-            sku: offerProduct.products.sku || ''
+            sku: offerProduct.products.sku || '',
+            stock_quantity: offerProduct.products.stock_quantity || 0
           }));
         }
         return [];
@@ -435,6 +448,13 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
         return of([]);
       })
     );
+  }
+
+  private getProductImageUrl(images: any): string {
+    if (images && Array.isArray(images) && images.length > 0) {
+      return images[0].url || images[0];
+    }
+    return 'assets/images/product-placeholder.svg';
   }
 
   calculateDiscountedPrice(originalPrice: number, discountPercentage: number): number {
@@ -478,55 +498,150 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
   }
 
   claimOffer(offer: PartnerOffer): void {
-    alert(`Partner offer "${offer.title}" has been claimed!`);
+    // Check if user is authenticated and has company ID
+    this.userCompanyId$.pipe(takeUntil(this.destroy$)).subscribe(companyId => {
+      if (!companyId) {
+        this.toastService.showError(this.translationService.translate('b2b.auth.pleaseLoginAsPartner'));
+        return;
+      }
+
+      // Check if offer is expired
+      if (this.isOfferExpired(offer.endDate)) {
+        this.toastService.showError(this.translationService.translate('b2b.offers.offerExpired'));
+        return;
+      }
+
+      // Load offer products and add them to cart
+      this.loadOfferProducts(offer.id).pipe(
+        takeUntil(this.destroy$)
+      ).subscribe(products => {
+        if (!products || products.length === 0) {
+          // If no products, just show success message (general offer)
+          let message = this.translationService.translate('b2b.offers.offerClaimed', { title: offer.title });
+          if (offer.couponCode) {
+            message += ' ' + this.translationService.translate('b2b.offers.couponAppliedAutomatically', { code: offer.couponCode });
+            this.applyCouponCode(offer.couponCode, companyId);
+          }
+          this.toastService.showSuccess(message);
+          return;
+        }
+
+        // Add products to B2B cart
+        this.addOfferProductsToCart(products, offer, companyId);
+
+        // Apply coupon code if offer has one
+        if (offer.couponCode) {
+          this.applyCouponCode(offer.couponCode, companyId);
+        }
+      });
+    });
+  }
+
+  private addOfferProductsToCart(products: PartnerProduct[], offer: PartnerOffer, companyId: string): void {
+    let successCount = 0;
+    let errorCount = 0;
+    let outOfStockCount = 0;
+
+    for (const product of products) {
+      try {
+        // Check stock availability
+        if (product.stock_quantity !== undefined && product.stock_quantity <= 0) {
+          console.warn(`Product ${product.name} is out of stock`);
+          outOfStockCount++;
+          continue;
+        }
+
+        // Add to cart
+        this.store.dispatch(addToB2BCart({
+          companyId,
+          productId: product.id,
+          quantity: 1
+        }));
+
+        successCount++;
+      } catch (error) {
+        console.error(`Error adding product ${product.name} to cart:`, error);
+        errorCount++;
+      }
+    }
+
+    // Provide detailed feedback
+    if (successCount > 0) {
+      let message = this.translationService.translate('b2b.offers.offerClaimedWithProducts', {
+        title: offer.title,
+        count: successCount
+      });
+
+      if (offer.couponCode) {
+        message += ' ' + this.translationService.translate('b2b.offers.couponAppliedAutomatically', { code: offer.couponCode });
+      }
+
+      if (outOfStockCount > 0) {
+        message += ' ' + this.translationService.translate('b2b.offers.itemsOutOfStock', { count: outOfStockCount });
+      }
+
+      this.toastService.showSuccess(message);
+    } else if (outOfStockCount > 0) {
+      this.toastService.showWarning(this.translationService.translate('b2b.offers.offerClaimedButOutOfStock', { title: offer.title }));
+    } else {
+      this.toastService.showError(this.translationService.translate('b2b.offers.failedToAddProducts'));
+    }
   }
 
   addToCart(product: PartnerProduct): void {
     this.userCompanyId$.pipe(takeUntil(this.destroy$)).subscribe(companyId => {
       if (!companyId) {
-        this.toastService.showError('Please log in as a partner to add items to cart.');
+        this.toastService.showError(this.translationService.translate('b2b.auth.pleaseLoginAsPartner'));
         return;
       }
-      
+
       this.store.dispatch(addToB2BCart({
         companyId,
         productId: product.id,
         quantity: 1
       }));
-      
-      this.toastService.showSuccess(`Added ${product.name} to your B2B cart!`);
+
+      this.toastService.showSuccess(this.translationService.translate('cart.itemAddedToCart'));
     });
   }
 
   async addAllToCart(): Promise<void> {
     if (!this.offer) {
-      this.toastService.showError('Offer not found');
+      this.toastService.showError(this.translationService.translate('b2b.offers.offerNotFound'));
       return;
     }
 
     this.userCompanyId$.pipe(takeUntil(this.destroy$)).subscribe(companyId => {
       if (!companyId) {
-        this.toastService.showError('Please log in as a partner to add items to cart.');
+        this.toastService.showError(this.translationService.translate('b2b.auth.pleaseLoginAsPartner'));
         return;
       }
 
       this.relatedProducts$.pipe(takeUntil(this.destroy$)).subscribe(products => {
         if (!products || products.length === 0) {
-          this.toastService.showWarning('No products available to add to cart.');
+          this.toastService.showWarning(this.translationService.translate('b2b.offers.noProductsToAdd'));
           return;
         }
 
         let successCount = 0;
         let errorCount = 0;
+        let outOfStockCount = 0;
 
         for (const product of products) {
           try {
+            // Check product availability before adding to cart
+            if (product.stock_quantity === 0) {
+              console.warn(`Product ${product.name} is out of stock`);
+              outOfStockCount++;
+              continue;
+            }
+
             this.store.dispatch(addToB2BCart({
               companyId,
               productId: product.id,
               quantity: 1
             }));
-            
+
             successCount++;
           } catch (error) {
             console.error(`Error adding product ${product.name} to cart:`, error);
@@ -534,13 +649,23 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
           }
         }
 
+        // Provide detailed feedback to user
         if (successCount > 0) {
-          const message = errorCount > 0 
-            ? `Added ${successCount} products to cart. ${errorCount} failed.`
-            : `Added ${successCount} products to your B2B cart successfully!`;
+          let message = this.translationService.translate('offers.addedSuccessfully', { count: successCount });
+
+          if (outOfStockCount > 0) {
+            message += ' ' + this.translationService.translate('b2b.offers.productsOutOfStock', { count: outOfStockCount });
+          }
+
+          if (errorCount > 0) {
+            message += ' ' + this.translationService.translate('b2b.offers.productsFailedToAdd', { count: errorCount });
+          }
+
           this.toastService.showSuccess(message);
+        } else if (outOfStockCount > 0 && errorCount === 0) {
+          this.toastService.showWarning(this.translationService.translate('b2b.offers.allProductsOutOfStock'));
         } else {
-          this.toastService.showError('Failed to add products to cart. Please try again.');
+          this.toastService.showError(this.translationService.translate('b2b.offers.failedToAddProducts'));
         }
       });
     });
@@ -570,5 +695,12 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
       month: 'short',
       day: 'numeric'
     });
+  }
+
+  private applyCouponCode(couponCode: string, companyId: string): void {
+    this.store.dispatch(applyB2BCoupon({
+      code: couponCode,
+      companyId: companyId
+    }));
   }
 } 

@@ -12,7 +12,11 @@ export const initialB2BCartState: B2BCartState = {
     companyId: null,
     companyName: null,
     lastUpdated: null,
-    sidebarOpen: false
+    sidebarOpen: false,
+    appliedCoupons: [],
+    couponDiscount: 0,
+    couponError: null,
+    isCouponLoading: false
 };
 
 export const b2bCartReducer = createReducer(
@@ -162,6 +166,8 @@ export const b2bCartReducer = createReducer(
         totalItems: 0,
         subtotal: 0,
         totalSavings: 0,
+        appliedCoupons: [],
+        couponDiscount: 0,
         loading: false,
         error: null,
         lastUpdated: new Date()
@@ -202,6 +208,8 @@ export const b2bCartReducer = createReducer(
         totalItems: 0,
         subtotal: 0,
         totalSavings: 0,
+        appliedCoupons: [],
+        couponDiscount: 0,
         lastUpdated: new Date()
     })),
 
@@ -225,6 +233,60 @@ export const b2bCartReducer = createReducer(
     on(B2BCartActions.closeB2BCartSidebar, (state) => ({
         ...state,
         sidebarOpen: false
+    })),
+
+    // Coupon Actions
+    on(B2BCartActions.applyB2BCoupon, (state) => ({
+        ...state,
+        isCouponLoading: true,
+        couponError: null
+    })),
+
+    on(B2BCartActions.applyB2BCouponSuccess, (state, { coupon, discount }) => ({
+        ...state,
+        appliedCoupons: [...state.appliedCoupons, coupon],
+        couponDiscount: state.couponDiscount + discount,
+        isCouponLoading: false,
+        couponError: null
+    })),
+
+    on(B2BCartActions.applyB2BCouponFailure, (state, { error }) => ({
+        ...state,
+        isCouponLoading: false,
+        couponError: error
+    })),
+
+    on(B2BCartActions.removeB2BCoupon, (state) => ({
+        ...state,
+        isCouponLoading: true,
+        couponError: null
+    })),
+
+    on(B2BCartActions.removeB2BCouponSuccess, (state, { couponId }) => {
+        const removedCoupon = state.appliedCoupons.find(c => c.id === couponId);
+        const couponDiscount = removedCoupon ? 
+            (removedCoupon.discount_type === 'percentage' ? 
+                Math.round((state.subtotal * removedCoupon.discount_value / 100) * 100) / 100 : 
+                removedCoupon.discount_value) : 0;
+        
+        return {
+            ...state,
+            appliedCoupons: state.appliedCoupons.filter(c => c.id !== couponId),
+            couponDiscount: Math.max(0, state.couponDiscount - couponDiscount),
+            isCouponLoading: false,
+            couponError: null
+        };
+    }),
+
+    on(B2BCartActions.removeB2BCouponFailure, (state, { error }) => ({
+        ...state,
+        isCouponLoading: false,
+        couponError: error
+    })),
+
+    on(B2BCartActions.clearB2BCouponError, (state) => ({
+        ...state,
+        couponError: null
     }))
 );
 
