@@ -334,6 +334,55 @@ export class SupabaseService {
         console.log(`Successfully deleted ${tableName} record with id: ${id}`);
     }
 
+    // Admin-specific update method that provides more detailed error logging
+    async adminUpdateRecord<T extends keyof Database['public']['Tables']>(
+        tableName: T,
+        id: string,
+        record: Database['public']['Tables'][T]['Update']
+    ): Promise<Database['public']['Tables'][T]['Row'] | null> {
+        console.log(`Admin attempting to update ${tableName} record with id: ${id}`, record);
+
+        // First check if the record exists
+        const { data: existingRecord, error: fetchError } = await this.supabase
+            .from(tableName)
+            .select('id')
+            .eq('id', id)
+            .single();
+
+        if (fetchError) {
+            console.error(`Error fetching ${tableName} record for update:`, fetchError);
+            throw new Error(`Failed to find ${tableName} record: ${fetchError.message}`);
+        }
+
+        if (!existingRecord) {
+            console.error(`Record not found: ${tableName} with id ${id}`);
+            throw new Error(`Record not found: ${tableName} with id ${id}`);
+        }
+
+        console.log(`Record found, proceeding with update...`);
+
+        // Attempt the update
+        const { data, error } = await this.supabase
+            .from(tableName)
+            .update(record)
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) {
+            console.error(`Error updating ${tableName} record:`, error);
+            throw new Error(`Failed to update ${tableName}: ${error.message} (Code: ${error.code})`);
+        }
+
+        if (!data) {
+            console.error(`No data returned after updating ${tableName} with ID: ${id}`);
+            throw new Error(`Update operation completed but no data was returned for ${tableName} with ID: ${id}`);
+        }
+
+        console.log(`Successfully updated ${tableName} record:`, data);
+        return data as Database['public']['Tables'][T]['Row'];
+    }
+
     // Specific business logic methods
     async getProducts(filters?: {
         categoryId?: string;

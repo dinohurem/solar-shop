@@ -291,7 +291,7 @@ export class OrdersEffects {
         this.actions$.pipe(
             ofType(OrdersActions.updateOrderStatus),
             switchMap(({ orderId, status }) =>
-                this.supabaseService.updateRecord('orders', orderId, { status: status as any }).then(async () => {
+                this.supabaseService.adminUpdateRecord('orders', orderId, { status: status as any }).then(async () => {
                     // Handle stock restoration for cancelled orders
                     if (status === 'cancelled') {
                         try {
@@ -335,6 +335,17 @@ export class OrdersEffects {
                         return { success: false, error: 'Order not found' };
                     }
 
+                    // Get Croatian status translation directly
+                    const croatianStatusTranslations: { [key: string]: string } = {
+                        pending: 'Na čekanju',
+                        confirmed: 'Potvrđeno',
+                        processing: 'U obradi',
+                        shipped: 'Poslano',
+                        delivered: 'Dostavljeno',
+                        cancelled: 'Otkazano',
+                        refunded: 'Povraćeno'
+                    };
+
                     const emailData = {
                         to: order.customer_email,
                         orderNumber: order.order_number,
@@ -342,7 +353,7 @@ export class OrdersEffects {
                         orderDate: new Date(order.order_date).toLocaleDateString('hr-HR'),
                         customerName: order.customer_name || 'Kupac',
                         customerEmail: order.customer_email,
-                        newStatus: status
+                        newStatus: croatianStatusTranslations[status] || status
                     };
 
                     // Send email to customer
@@ -367,7 +378,7 @@ export class OrdersEffects {
         this.actions$.pipe(
             ofType(OrdersActions.updatePaymentStatus),
             switchMap(({ orderId, paymentStatus }) =>
-                this.supabaseService.updateRecord('orders', orderId, { payment_status: paymentStatus as any }).then(() =>
+                this.supabaseService.adminUpdateRecord('orders', orderId, { payment_status: paymentStatus as any }).then(() =>
                     OrdersActions.updatePaymentStatusSuccess({ orderId, paymentStatus })
                 ).catch((error: any) =>
                     OrdersActions.updatePaymentStatusFailure({ error: error.message })
@@ -376,11 +387,65 @@ export class OrdersEffects {
         )
     );
 
+    // Send payment status change emails when payment status is updated
+    sendPaymentStatusChangeEmails$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(OrdersActions.updatePaymentStatusSuccess),
+            switchMap(async ({ orderId, paymentStatus }) => {
+                try {
+                    console.log('Sending payment status change emails for order:', orderId, 'new payment status:', paymentStatus);
+
+                    // Get the updated order data
+                    const orderData = await this.supabaseService.getTable('orders', { id: orderId });
+                    const order = orderData && orderData.length > 0 ? orderData[0] : null;
+
+                    if (!order) {
+                        console.error('Order not found for payment status change email:', orderId);
+                        return { success: false, error: 'Order not found' };
+                    }
+
+                    // Get Croatian payment status translation directly
+                    const croatianPaymentStatusTranslations: { [key: string]: string } = {
+                        pending: 'Na čekanju',
+                        paid: 'Plaćeno',
+                        failed: 'Neuspješno',
+                        refunded: 'Povraćeno',
+                        partially_refunded: 'Djelomično povraćeno'
+                    };
+
+                    const emailData = {
+                        to: order.customer_email,
+                        orderNumber: order.order_number,
+                        orderId: order.id,
+                        orderDate: new Date(order.order_date).toLocaleDateString('hr-HR'),
+                        customerName: order.customer_name || 'Kupac',
+                        customerEmail: order.customer_email,
+                        newStatus: croatianPaymentStatusTranslations[paymentStatus] || paymentStatus
+                    };
+
+                    // Send email to customer
+                    const customerEmailSent = await this.emailService.sendOrderStatusChangeEmail(emailData);
+                    console.log('Customer payment status change email sent:', customerEmailSent);
+
+                    // Send email to admin
+                    const adminEmailSent = await this.emailService.sendOrderStatusChangeNotificationToAdmin(emailData);
+                    console.log('Admin payment status change notification email sent:', adminEmailSent);
+
+                    return { success: true };
+                } catch (error) {
+                    console.error('Error sending payment status change emails:', error);
+                    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+                }
+            })
+        ),
+        { dispatch: false }
+    );
+
     confirmPurchase$ = createEffect(() =>
         this.actions$.pipe(
             ofType(OrdersActions.confirmPurchase),
             switchMap(({ orderId }) =>
-                this.supabaseService.updateRecord('orders', orderId, { payment_status: 'paid' }).then(() =>
+                this.supabaseService.adminUpdateRecord('orders', orderId, { payment_status: 'paid' }).then(() =>
                     OrdersActions.confirmPurchaseSuccess({ orderId })
                 ).catch(error =>
                     OrdersActions.confirmPurchaseFailure({ error: error.message })

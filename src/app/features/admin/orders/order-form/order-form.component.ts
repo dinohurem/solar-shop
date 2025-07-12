@@ -885,11 +885,16 @@ export class OrderFormComponent implements OnInit {
       const data = await this.supabaseService.getTableById('orders', this.orderId);
       if (data) {
         console.log('Order loaded successfully:', data);
-        // Format dates for datetime-local inputs
+
+        // Format dates for datetime-local inputs and addresses for display
         const formData = {
           ...data,
-          order_date: data.order_date ? new Date(data.order_date).toISOString().slice(0, 16) : ''
+          order_date: data.order_date ? new Date(data.order_date).toISOString().slice(0, 16) : '',
+          shipping_address: this.formatAddressForDisplay(data.shipping_address),
+          billing_address: this.formatAddressForDisplay(data.billing_address)
         };
+
+        console.log('Formatted form data:', formData);
         this.orderForm.patchValue(formData);
 
         // Load order items
@@ -961,6 +966,15 @@ export class OrderFormComponent implements OnInit {
       // Convert datetime-local back to ISO string
       if (formData.order_date) {
         formData.order_date = new Date(formData.order_date).toISOString();
+      }
+
+      // Convert address strings back to JSONB objects
+      if (formData.shipping_address) {
+        formData.shipping_address = this.parseAddressForStorage(formData.shipping_address);
+      }
+
+      if (formData.billing_address) {
+        formData.billing_address = this.parseAddressForStorage(formData.billing_address);
       }
 
       // Calculate and set amounts from percentages
@@ -1120,5 +1134,96 @@ export class OrderFormComponent implements OnInit {
   onSuccessModalClose(): void {
     this.showSuccessModal = false;
     this.router.navigate(['/admin/orders']);
+  }
+
+  /**
+   * Formats a JSONB address object into a readable string for display
+   */
+  private formatAddressForDisplay(addressObj: any): string {
+    if (!addressObj || typeof addressObj !== 'object') {
+      return '';
+    }
+
+    const address = addressObj as {
+      firstName?: string;
+      lastName?: string;
+      addressLine1?: string;
+      addressLine2?: string;
+      city?: string;
+      state?: string;
+      postalCode?: string;
+      country?: string;
+      phone?: string;
+    };
+
+    const parts = [
+      address.firstName && address.lastName ? `${address.firstName} ${address.lastName}` : '',
+      address.addressLine1 || '',
+      address.addressLine2 || '',
+      [address.city, address.state, address.postalCode].filter(Boolean).join(', '),
+      address.country || '',
+      address.phone || ''
+    ].filter(Boolean);
+
+    return parts.join('\n');
+  }
+
+  /**
+   * Parses a formatted address string back into a JSONB object for storage
+   */
+  private parseAddressForStorage(addressString: string): any {
+    if (!addressString || typeof addressString !== 'string') {
+      return null;
+    }
+
+    const lines = addressString.split('\n').filter(line => line.trim());
+    if (lines.length === 0) {
+      return null;
+    }
+
+    // Try to parse the address structure
+    const address: any = {};
+
+    // First line might be name
+    if (lines[0] && lines[0].includes(' ')) {
+      const nameParts = lines[0].split(' ');
+      address.firstName = nameParts[0];
+      address.lastName = nameParts.slice(1).join(' ');
+      lines.shift(); // Remove the name line
+    }
+
+    // Next lines might be address lines
+    if (lines.length > 0) {
+      address.addressLine1 = lines[0];
+      lines.shift();
+    }
+
+    if (lines.length > 0) {
+      address.addressLine2 = lines[0];
+      lines.shift();
+    }
+
+    // Next line might be city, state, postal code
+    if (lines.length > 0) {
+      const cityStatePostal = lines[0];
+      const parts = cityStatePostal.split(',').map(part => part.trim());
+      if (parts.length >= 1) address.city = parts[0];
+      if (parts.length >= 2) address.state = parts[1];
+      if (parts.length >= 3) address.postalCode = parts[2];
+      lines.shift();
+    }
+
+    // Next line might be country
+    if (lines.length > 0) {
+      address.country = lines[0];
+      lines.shift();
+    }
+
+    // Last line might be phone
+    if (lines.length > 0) {
+      address.phone = lines[0];
+    }
+
+    return address;
   }
 } 

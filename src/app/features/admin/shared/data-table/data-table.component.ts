@@ -262,14 +262,14 @@ export interface TableConfig {
       <div *ngIf="config.paginated && totalPages > 1" 
            class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
         <div class="text-sm text-gray-700">
-          {{ 'common.showing' | translate }} {{ (currentPage - 1) * pageSize + 1 }} {{ 'common.to' | translate }} {{ Math.min(currentPage * pageSize, filteredData.length) }} 
-          {{ 'common.of' | translate }} {{ filteredData.length }} {{ 'common.results' | translate }}
+          {{ 'admin.common.showing' | translate }} {{ (currentPage - 1) * pageSize + 1 }} {{ 'admin.common.to' | translate }} {{ Math.min(currentPage * pageSize, filteredData.length) }} 
+          {{ 'admin.common.of' | translate }} {{ filteredData.length }} {{ 'admin.common.results' | translate }}
         </div>
         <div class="flex space-x-2">
           <button (click)="goToPage(currentPage - 1)"
                   [disabled]="currentPage === 1"
                   class="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50">
-            {{ 'common.previous' | translate }}
+            {{ 'admin.common.previous' | translate }}
           </button>
           <button *ngFor="let page of getPageNumbers()"
                   (click)="goToPage(page)"
@@ -282,7 +282,7 @@ export interface TableConfig {
           <button (click)="goToPage(currentPage + 1)"
                   [disabled]="currentPage === totalPages"
                   class="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50">
-            {{ 'common.next' | translate }}
+            {{ 'admin.common.next' | translate }}
           </button>
         </div>
       </div>      <!-- Empty State -->

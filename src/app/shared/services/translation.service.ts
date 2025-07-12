@@ -1392,7 +1392,13 @@ export class TranslationService {
                     errorSavingChanges: 'Greška prilikom spremanja promjena. Molimo pokušajte ponovno.',
                     orderStatusChangeMessage: 'Status narudžbe označen za promjenu sa "{{oldStatus}}" na "{{newStatus}}". Kliknite "Spremi promjene" za primjenu.',
                     paymentStatusChangeMessage: 'Status plaćanja označen za ažuriranje. Kliknite "Spremi promjene" za primjenu.',
-                    invoicePrintingInitiated: 'Ispis računa za narudžbu {{orderNumber}} uspješno pokrenut!'
+                    invoicePrintingInitiated: 'Ispis računa za narudžbu {{orderNumber}} uspješno pokrenut!',
+                    showing: 'Prikazano',
+                    to: 'do',
+                    of: 'od',
+                    results: 'rezultata',
+                    previous: 'Prethodna',
+                    next: 'Sljedeća'
                 },
             },
             // Admin Users
@@ -3671,7 +3677,13 @@ export class TranslationService {
                     errorSavingChanges: 'Error saving changes. Please try again.',
                     orderStatusChangeMessage: 'Order status marked to change from "{{oldStatus}}" to "{{newStatus}}". Click "Save Changes" to apply.',
                     paymentStatusChangeMessage: 'Payment status marked for update. Click "Save Changes" to apply.',
-                    invoicePrintingInitiated: 'Invoice printing for order {{orderNumber}} initiated successfully!'
+                    invoicePrintingInitiated: 'Invoice printing for order {{orderNumber}} initiated successfully!',
+                    showing: 'Showing',
+                    to: 'to',
+                    of: 'of',
+                    results: 'results',
+                    previous: 'Previous',
+                    next: 'Next'
                 },
             },
             // Admin Users
