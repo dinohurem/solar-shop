@@ -10,11 +10,12 @@ import { selectCurrentUser } from '../../../../core/auth/store/auth.selectors';
 import { selectB2BCartTotalItems } from '../../cart/store/b2b-cart.selectors';
 import * as B2BCartActions from '../../cart/store/b2b-cart.actions';
 import { Subject, takeUntil, switchMap, from, catchError, of } from 'rxjs';
+import { LucideAngularModule, ShoppingCart } from 'lucide-angular';
 
 @Component({
   selector: 'app-b2b-navbar',
   standalone: true,
-  imports: [CommonModule, RouterModule, TranslatePipe],
+  imports: [CommonModule, RouterModule, TranslatePipe, LucideAngularModule],
   template: `
     <nav class="bg-white shadow-lg border-b border-gray-200">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -48,6 +49,11 @@ import { Subject, takeUntil, switchMap, from, catchError, of } from 'rxjs';
                routerLinkActive="text-solar-600 border-b-2 border-solar-600"
                class="text-gray-700 hover:text-solar-600 px-3 py-2 text-sm font-medium transition-colors">
               {{ 'b2bNav.offers' | translate }}
+            </a>
+            <a routerLink="/partners/about" 
+               routerLinkActive="text-solar-600 border-b-2 border-solar-600"
+               class="text-gray-700 hover:text-solar-600 px-3 py-2 text-sm font-medium transition-colors">
+              {{ 'b2bNav.partners' | translate }}
             </a>
             <a routerLink="/partners/contact" 
                routerLinkActive="text-solar-600 border-b-2 border-solar-600"
@@ -124,9 +130,7 @@ import { Subject, takeUntil, switchMap, from, catchError, of } from 'rxjs';
               <button (click)="toggleCart()" 
                       class="relative p-2 text-gray-600 hover:text-solar-600 transition-all duration-300 hover:scale-110 hover:bg-solar-50 rounded-full"
                       [title]="'cart.cart' | translate">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.1 5H19M7 13v6a2 2 0 002 2h6a2 2 0 002-2v-6"/>
-                </svg>
+                <lucide-angular name="shopping-cart" class="w-6 h-6 text-black"></lucide-angular>
                 <!-- Cart Items Count Badge -->
                 <span *ngIf="(cartItemsCount$ | async) && (cartItemsCount$ | async)! > 0" 
                       class="absolute -top-1 -right-1 bg-solar-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium min-w-[1.25rem]">
@@ -175,6 +179,11 @@ import { Subject, takeUntil, switchMap, from, catchError, of } from 'rxjs';
                routerLinkActive="bg-solar-50 text-solar-600"
                class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-solar-600 hover:bg-gray-50 rounded-md">
               {{ 'b2bNav.offers' | translate }}
+            </a>
+            <a routerLink="/partners/about" 
+               routerLinkActive="bg-solar-50 text-solar-600"
+               class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-solar-600 hover:bg-gray-50 rounded-md">
+              {{ 'b2bNav.partners' | translate }}
             </a>
             <a routerLink="/partners/contact" 
                routerLinkActive="bg-solar-50 text-solar-600"

@@ -9,11 +9,12 @@ import * as B2BCartSelectors from '../../store/b2b-cart.selectors';
 import * as B2BCartActions from '../../store/b2b-cart.actions';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { TranslationService } from '../../../../../shared/services/translation.service';
+import { LucideAngularModule, ShoppingCart } from 'lucide-angular';
 
 @Component({
   selector: 'app-b2b-cart-sidebar',
   standalone: true,
-  imports: [CommonModule, RouterModule, TranslatePipe],
+  imports: [CommonModule, RouterModule, TranslatePipe, LucideAngularModule],
   template: `
     <!-- Cart Overlay -->
     <div 
@@ -59,9 +60,7 @@ import { TranslationService } from '../../../../../shared/services/translation.s
             class="flex-1 flex flex-col items-center justify-center p-8 text-center"
           >
             <div class="w-24 h-24 mb-6 text-gray-300">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 11-4 0v-6m4 0V9a2 2 0 10-4 0v4.01"/>
-              </svg>
+              <lucide-angular name="shopping-cart" class="w-full h-full text-black"></lucide-angular>
             </div>
             <h3 class="text-xl font-medium text-gray-900 mb-2">{{ 'cart.empty' | translate }}</h3>
             <p class="text-gray-500 mb-6">{{ 'cart.emptyText' | translate }}</p>

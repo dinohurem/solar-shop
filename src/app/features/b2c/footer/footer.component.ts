@@ -223,7 +223,7 @@ export interface FooterData {
             </div>
 
             <!-- Certifications/Badges -->
-            <div class="flex items-center gap-6">
+            <!-- <div class="flex items-center gap-6">
               <div class="flex items-center gap-2">
                 <svg class="w-6 h-6 text-solar-400" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
@@ -235,7 +235,7 @@ export interface FooterData {
                 </svg>
                 <span class="text-gray-300 text-sm">{{ 'footer.sustainable' | translate }}</span>
               </div>
-            </div>
+            </div> -->
           </div>
         </div>
       </div>

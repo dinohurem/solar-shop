@@ -6,6 +6,7 @@ import { BlogPost } from '../../../shared/models/blog.model';
 import { SupabaseService } from '../../../services/supabase.service';
 import { BlogDataMapperService, SupabaseBlogPost } from '../../../services/blog-data-mapper.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-blog-detail',
@@ -17,7 +18,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
       <div *ngIf="loading" class="flex justify-center items-center min-h-screen">
         <div class="flex flex-col items-center space-y-4">
           <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-solar-600"></div>
-          <p class="text-gray-600 font-['DM_Sans']">Loading article...</p>
+          <p class="text-gray-600 font-['DM_Sans']">{{ 'blog.loadingArticle' | translate }}</p>
         </div>
       </div>
 
@@ -42,9 +43,9 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
             <!-- Breadcrumb -->
             <nav class="mb-8">
               <ol class="flex items-center space-x-2 text-sm">
-                <li><a routerLink="/" class="hover:text-solar-200 transition-colors font-['DM_Sans']">Home</a></li>
+                <li><a routerLink="/" class="hover:text-solar-200 transition-colors font-['DM_Sans']">{{ 'blog.home' | translate }}</a></li>
                 <li class="text-solar-200 font-['DM_Sans']">/</li>
-                <li><a routerLink="/blog" class="hover:text-solar-200 transition-colors font-['DM_Sans']">Blog</a></li>
+                <li><a routerLink="/blog" class="hover:text-solar-200 transition-colors font-['DM_Sans']">{{ 'blog.blog' | translate }}</a></li>
                 <li class="text-solar-200 font-['DM_Sans']">/</li>
                 <li class="text-solar-100 font-['DM_Sans']">{{ blogPost.title }}</li>
               </ol>
@@ -55,8 +56,8 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
                 <span class="bg-solar-500 text-white px-3 py-1 rounded-full text-sm font-medium font-['DM_Sans']">
                   {{ blogPost.category.name }}
                 </span>
-                <span class="text-solar-100 font-['DM_Sans']">{{ blogPost.readTime }} min read</span>
-                <span class="text-solar-100 font-['DM_Sans']">{{ blogPost.publishedAt | date:'MMM dd, yyyy' }}</span>
+                <span class="text-solar-100 font-['DM_Sans']">{{ blogPost.readTime }} {{ 'blog.minutesRead' | translate }}</span>
+                <span class="text-solar-100 font-['DM_Sans']">{{ formatDate(blogPost.publishedAt) }}</span>
               </div>
               
               <h1 class="text-4xl md:text-5xl font-bold font-['Poppins'] mb-6 leading-tight">
@@ -89,7 +90,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
           <!-- Tags -->
           <div class="mt-12 pt-8 border-t border-gray-200">
-            <h3 class="text-lg font-semibold mb-4 font-['Poppins'] text-gray-900">Tags</h3>
+            <h3 class="text-lg font-semibold mb-4 font-['Poppins'] text-gray-900">{{ 'blog.tags' | translate }}</h3>
             <div class="flex flex-wrap gap-2">
               <span 
                 *ngFor="let tag of blogPost?.tags"
@@ -122,12 +123,12 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
                     <span class="bg-solar-100 text-solar-800 px-2 py-1 rounded text-sm font-medium font-['DM_Sans']">
                       {{ post.category.name }}
                     </span>
-                    <span class="text-gray-500 text-sm font-['DM_Sans']">{{ post.readTime }} min</span>
+                    <span class="text-gray-500 text-sm font-['DM_Sans']">{{ post.readTime }} {{ 'blog.minRead' | translate }}</span>
                   </div>
                   <h3 class="text-xl font-semibold text-gray-900 mb-3 line-clamp-2 font-['Poppins']">{{ post.title }}</h3>
                   <p class="text-gray-600 mb-4 line-clamp-3 font-['DM_Sans']">{{ post.excerpt }}</p>
                   <div class="flex items-center justify-between">
-                    <span class="text-sm text-gray-500 font-['DM_Sans']">{{ post.publishedAt | date:'MMM dd' }}</span>
+                    <span class="text-sm text-gray-500 font-['DM_Sans']">{{ formatDate(post.publishedAt, 'short') }}</span>
                   </div>
                 </div>
               </div>
@@ -184,6 +185,7 @@ export class BlogDetailComponent implements OnInit, OnDestroy {
   public router = inject(Router);
   private supabaseService = inject(SupabaseService);
   private blogMapper = inject(BlogDataMapperService);
+  private translationService = inject(TranslationService);
   private destroy$ = new Subject<void>();
 
   blogPost: BlogPost | null = null;
@@ -249,5 +251,16 @@ export class BlogDetailComponent implements OnInit, OnDestroy {
 
   navigateToPost(postId: string) {
     this.router.navigate(['/blog', postId]);
+  }
+
+  formatDate(date: string | Date, format: 'full' | 'short' = 'full'): string {
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    const currentLang = this.translationService.getCurrentLanguage();
+    
+    const options: Intl.DateTimeFormatOptions = format === 'short' 
+      ? { month: 'short', day: 'numeric' }
+      : { year: 'numeric', month: 'short', day: 'numeric' };
+    
+    return dateObj.toLocaleDateString(currentLang === 'hr' ? 'hr-HR' : 'en-US', options);
   }
 } 
