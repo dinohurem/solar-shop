@@ -1,5 +1,6 @@
 import { Component, inject, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
@@ -43,7 +44,7 @@ export interface FooterData {
 @Component({
   selector: 'app-footer',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe],
+  imports: [CommonModule, RouterModule, FormsModule, TranslatePipe],
   template: `
     <!-- Footer -->
     <footer class="bg-black text-white">
@@ -93,29 +94,80 @@ export interface FooterData {
             </div>
           </div>
 
-          <!-- Footer Links Sections -->
-          <ng-container *ngIf="footerData$ | async as footer">
-            <div *ngFor="let section of footer.sections" class="lg:col-span-1">
+          <!-- Products Column -->
+          <div class="lg:col-span-1">
             <h3 class="text-lg font-bold mb-6 font-['Poppins'] text-white">
-              {{ section.title }}
+              {{ 'nav.products' | translate }}
             </h3>
             <ul class="space-y-3">
-              <li *ngFor="let link of section.links">
+              <li>
                 <a 
-                  [href]="link.url" 
-                  [target]="link.external ? '_blank' : '_self'"
-                  [rel]="link.external ? 'noopener noreferrer' : ''"
-                  class="text-gray-300 hover:text-solar-400 transition-colors duration-300 text-sm font-['DM_Sans'] flex items-center gap-2 group"
+                  routerLink="/products"
+                  class="text-gray-300 hover:text-solar-400 transition-colors duration-300 text-sm font-['DM_Sans']"
                 >
-                  <span>{{ link.label }}</span>
-                  <svg *ngIf="link.external" class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/>
-                  </svg>
+                  {{ 'nav.products' | translate }}
+                </a>
+              </li>
+              <li>
+                <a 
+                  routerLink="/offers"
+                  class="text-gray-300 hover:text-solar-400 transition-colors duration-300 text-sm font-['DM_Sans']"
+                >
+                  {{ 'nav.offers' | translate }}
                 </a>
               </li>
             </ul>
-                      </div>
-          </ng-container>
+          </div>
+
+          <!-- Blog Column -->
+          <div class="lg:col-span-1">
+            <h3 class="text-lg font-bold mb-6 font-['Poppins'] text-white">
+              {{ 'nav.blog' | translate }}
+            </h3>
+            <ul class="space-y-3">
+              <li>
+                <a 
+                  routerLink="/blog"
+                  class="text-gray-300 hover:text-solar-400 transition-colors duration-300 text-sm font-['DM_Sans']"
+                >
+                  {{ 'nav.blog' | translate }}
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Company Column -->
+          <div class="lg:col-span-1">
+            <h3 class="text-lg font-bold mb-6 font-['Poppins'] text-white">
+              {{ 'nav.company' | translate }}
+            </h3>
+            <ul class="space-y-3">
+              <li>
+                <a 
+                  routerLink="/company"
+                  class="text-gray-300 hover:text-solar-400 transition-colors duration-300 text-sm font-['DM_Sans']"
+                >
+                  {{ 'nav.company' | translate }}
+                </a>
+              </li>
+              <li>
+                <a 
+                  routerLink="/contact"
+                  class="text-gray-300 hover:text-solar-400 transition-colors duration-300 text-sm font-['DM_Sans']"
+                >
+                  {{ 'nav.contact' | translate }}
+                </a>
+              </li>
+              <li>
+                <a 
+                  routerLink="/partners"
+                  class="text-gray-300 hover:text-solar-400 transition-colors duration-300 text-sm font-['DM_Sans']"
+                >
+                  {{ 'nav.partners' | translate }}
+                </a>
+              </li>
+            </ul>
+          </div>
 
           <!-- Newsletter Signup -->
           <div *ngIf="footerData$ | async as footer" class="lg:col-span-1">
