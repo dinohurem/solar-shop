@@ -77,7 +77,7 @@ import { selectNewsletterState } from '../footer/store/footer.selectors';
 
               <!-- Savings -->
               <div class="bg-solar-50 text-solar-800 text-sm font-semibold px-3 py-2 rounded-lg mb-4 text-center">
-                {{ 'offers.youSave' | translate:{ amount: getSavingsAmount(offer) } }}
+                {{ 'offers.youSave' | translate }} {{ ((offer.originalPrice || 0) - (offer.discountedPrice || 0)) | currency:'EUR':'symbol':'1.2-2' }}
               </div>
 
               <!-- Action Buttons -->
@@ -226,5 +226,37 @@ export class OffersPageComponent implements OnInit {
   getSavingsAmount(offer: Offer): string {
     const savingsAmount = (offer.originalPrice || 0) - (offer.discountedPrice || 0);
     return savingsAmount.toFixed(2);
+  }
+
+  getSavingsAmountFormatted(offer: Offer): string {
+    const originalPrice = Number(offer.originalPrice) || 0;
+    const discountedPrice = Number(offer.discountedPrice) || 0;
+    const savingsAmount = originalPrice - discountedPrice;
+    
+    console.log('Debug savings calculation:', {
+      offer: offer.title,
+      originalPrice,
+      discountedPrice,
+      savingsAmount
+    });
+    
+    if (savingsAmount <= 0) {
+      return '0,00 €';
+    }
+    
+    try {
+      const formatted = new Intl.NumberFormat('hr-HR', { 
+        style: 'currency', 
+        currency: 'EUR',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(savingsAmount);
+      console.log('Formatted result:', formatted);
+      return formatted;
+    } catch (error) {
+      // Fallback formatting if Intl fails
+      console.log('Intl formatting failed, using fallback');
+      return `${savingsAmount.toFixed(2)} €`;
+    }
   }
 } 

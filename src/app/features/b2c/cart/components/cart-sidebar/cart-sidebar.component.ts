@@ -52,8 +52,12 @@ import { LucideAngularModule, ShoppingCart } from 'lucide-angular';
             *ngIf="isCartEmpty$ | async" 
             class="flex-1 flex flex-col items-center justify-center p-8 text-center"
           >
-            <div class="w-24 h-24 mb-6 text-gray-300">
-              <lucide-angular name="shopping-cart" class="w-full h-full text-black"></lucide-angular>
+            <div class="w-24 h-24 mb-6 text-gray-300 flex items-center justify-center">
+              <lucide-angular 
+                name="shopping-cart" 
+                class="w-24 h-24 text-gray-300"
+                [img]="ShoppingCartIcon">
+              </lucide-angular>
             </div>
             <h3 class="text-xl font-medium text-gray-900 mb-2">{{ 'cart.empty' | translate }}</h3>
             <p class="text-gray-500 mb-6">{{ 'cart.emptyText' | translate }}</p>
@@ -332,6 +336,9 @@ export class CartSidebarComponent implements OnInit {
   // Component state
   couponCode = '';
   private imageErrors = new Set<string>();
+
+  // Lucide Icons
+  readonly ShoppingCartIcon = ShoppingCart;
 
   // Helper properties for template
   get isApplyButtonDisabled(): boolean {

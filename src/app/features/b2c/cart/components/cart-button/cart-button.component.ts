@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import * as CartActions from '../../store/cart.actions';
 import * as CartSelectors from '../../store/cart.selectors';
+import { LucideAngularModule, ShoppingCart } from 'lucide-angular';
 
 @Component({
   selector: 'app-cart-button',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, LucideAngularModule],
   template: `
     <button 
       (click)="openCart()"
@@ -15,19 +16,11 @@ import * as CartSelectors from '../../store/cart.selectors';
       aria-label="Open cart"
     >
       <!-- Cart Icon -->
-      <svg 
-        class="w-6 h-6" 
-        fill="none" 
-        stroke="currentColor" 
-        viewBox="0 0 24 24"
-      >
-        <path 
-          stroke-linecap="round" 
-          stroke-linejoin="round" 
-          stroke-width="2" 
-          d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.1 5H19M7 13v6a2 2 0 002 2h6a2 2 0 002-2v-6"
-        />
-      </svg>
+      <lucide-angular 
+        name="shopping-cart" 
+        class="w-6 h-6"
+        [img]="ShoppingCartIcon">
+      </lucide-angular>
       
       <!-- Item Count Badge -->
       <span 
@@ -48,6 +41,9 @@ export class CartButtonComponent {
   private store = inject(Store);
 
   cartItemCount$ = this.store.select(CartSelectors.selectCartItemCount);
+
+  // Lucide Icons
+  readonly ShoppingCartIcon = ShoppingCart;
 
   openCart() {
     this.store.dispatch(CartActions.openCart());

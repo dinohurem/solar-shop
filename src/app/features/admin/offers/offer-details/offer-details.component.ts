@@ -217,7 +217,10 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
     <!-- Loading State -->
     <div *ngIf="!offer && !error" class="flex items-center justify-center h-64">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div class="flex items-center space-x-3">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <span class="text-gray-600 text-lg">{{ 'common.loading' | translate }}</span>
+      </div>
     </div>
 
     <!-- Error State -->

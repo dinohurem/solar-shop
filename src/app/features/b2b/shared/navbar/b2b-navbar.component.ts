@@ -130,7 +130,11 @@ import { LucideAngularModule, ShoppingCart } from 'lucide-angular';
               <button (click)="toggleCart()" 
                       class="relative p-2 text-gray-600 hover:text-solar-600 transition-all duration-300 hover:scale-110 hover:bg-solar-50 rounded-full"
                       [title]="'cart.cart' | translate">
-                <lucide-angular name="shopping-cart" class="w-6 h-6 text-black"></lucide-angular>
+                <lucide-angular 
+                  name="shopping-cart" 
+                  class="w-6 h-6"
+                  [img]="ShoppingCartIcon">
+                </lucide-angular>
                 <!-- Cart Items Count Badge -->
                 <span *ngIf="(cartItemsCount$ | async) && (cartItemsCount$ | async)! > 0" 
                       class="absolute -top-1 -right-1 bg-solar-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium min-w-[1.25rem]">
@@ -253,6 +257,9 @@ export class B2bNavbarComponent implements OnInit, OnDestroy {
 
   currentUser$: Observable<any>;
   cartItemsCount$: Observable<number>;
+
+  // Lucide Icons
+  readonly ShoppingCartIcon = ShoppingCart;
 
   constructor() {
     this.currentUser$ = this.store.select(selectCurrentUser);

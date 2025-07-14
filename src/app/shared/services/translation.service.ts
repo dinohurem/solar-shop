@@ -1,4 +1,5 @@
 import { Injectable, signal } from '@angular/core';
+import { Save } from 'lucide-angular';
 import { BehaviorSubject, Observable, subscribeOn } from 'rxjs';
 
 export type SupportedLanguage = 'hr' | 'en';
@@ -1694,7 +1695,8 @@ export class TranslationService {
                 exploreOffers: 'Istražite ponude',
                 loading: 'Učitavanje...',
                 noOffersAvailable: 'Trenutno nema dostupnih ponuda',
-                primeDeal: 'Hit Ponuda'
+                primeDeal: 'Hit Ponuda',
+                off: 'SNIŽENJE'
             },
             // Products
             products: {
@@ -4063,7 +4065,8 @@ export class TranslationService {
                 exploreOffers: 'Explore Offers',
                 loading: 'Loading...',
                 noOffersAvailable: 'No offers available at the moment',
-                primeDeal: 'Prime Deal'
+                primeDeal: 'Prime Deal',
+                off: 'OFF'
             },
             // Products
             products: {

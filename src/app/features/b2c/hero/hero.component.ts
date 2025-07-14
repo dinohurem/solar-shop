@@ -136,7 +136,7 @@ import { Offer } from '../../../shared/models/offer.model';
                               </div>
                               <!-- Compact Discount Badge -->
                               <div class="absolute -top-2 -right-2 bg-accent-500 text-white text-sm font-bold px-3 py-1 rounded-xl shadow-lg transform rotate-3 hover:rotate-0 transition-transform duration-300">
-                                {{ offer.discountPercentage }}% OFF
+                                {{ offer.discountPercentage }}% {{ 'hero.off' | translate }}
                               </div>
                             </div>
                           </div>
@@ -146,7 +146,7 @@ import { Offer } from '../../../shared/models/offer.model';
                             <div class="space-y-3 lg:space-y-4">
                               <!-- Offer Type Badge -->
                               <div class="inline-block bg-white/20 text-white text-xs font-semibold px-3 py-1 rounded-full">
-                                Special Offer
+                                {{ 'productDetails.specialOffer' | translate }}
                               </div>
                               
                               <!-- Compact Title -->
@@ -176,7 +176,7 @@ import { Offer } from '../../../shared/models/offer.model';
                               <!-- Compact Savings Display -->
                               <div class="flex items-center justify-center lg:justify-start">
                                 <div class="inline-block bg-solar-400/20 text-white text-sm font-semibold px-4 py-2 rounded-lg">
-                                  Save {{ ((offer.originalPrice || 0) - (offer.discountedPrice || 0)) | currency:'EUR':'symbol':'1.2-2' }}!
+                                  {{ 'offers.youSave' | translate }} {{ ((offer.originalPrice || 0) - (offer.discountedPrice || 0)) | currency:'EUR':'symbol':'1.2-2' }}!
                                 </div>
                               </div>
                               

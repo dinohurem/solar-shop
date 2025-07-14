@@ -55,7 +55,11 @@ import { LucideAngularModule, Search, LogIn } from 'lucide-angular';
             <div class="relative">
               <!-- Search Icon -->
               <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <lucide-angular name="search" class="w-5 h-5 text-black"></lucide-angular>
+                <lucide-angular 
+                  name="search" 
+                  class="w-5 h-5 text-gray-400"
+                  [img]="SearchIcon">
+                </lucide-angular>
               </div>
               
               <!-- Search Input -->
@@ -90,7 +94,11 @@ import { LucideAngularModule, Search, LogIn } from 'lucide-angular';
                   [disabled]="!searchQuery.trim()"
                   class="p-2 text-white bg-solar-600 hover:bg-solar-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors rounded-lg"
                   [title]="'search.search' | translate">
-                  <lucide-angular name="search" class="w-4 h-4 text-white"></lucide-angular>
+                  <lucide-angular 
+                    name="search" 
+                    class="w-4 h-4 text-white"
+                    [img]="SearchIcon">
+                  </lucide-angular>
                 </button>
               </div>
             </div>
@@ -249,7 +257,11 @@ import { LucideAngularModule, Search, LogIn } from 'lucide-angular';
               (click)="openSearchOverlay()"
               class="p-2 text-gray-600 hover:text-solar-600 transition-all duration-300 hover:scale-110 hover:bg-solar-50 rounded-full" 
               [title]="'search.searchProducts' | translate">
-              <lucide-angular name="search" class="w-6 h-6 text-black"></lucide-angular>
+              <lucide-angular 
+                name="search" 
+                class="w-6 h-6"
+                [img]="SearchIcon">
+              </lucide-angular>
             </button>
             
             <!-- Authentication Icon -->
@@ -260,7 +272,11 @@ import { LucideAngularModule, Search, LogIn } from 'lucide-angular';
                 (click)="navigateToLogin()"
                 class="p-2 text-gray-600 hover:text-solar-600 transition-all duration-300 hover:scale-110 hover:bg-solar-50 rounded-full"
                 [title]="'auth.signIn' | translate">
-                <lucide-angular name="log-in" class="w-6 h-6 text-black"></lucide-angular>
+                <lucide-angular 
+                  name="log-in" 
+                  class="w-6 h-6"
+                  [img]="LogInIcon">
+                </lucide-angular>
               </button>
 
               <!-- Profile Icon (when authenticated) -->
@@ -335,7 +351,11 @@ import { LucideAngularModule, Search, LogIn } from 'lucide-angular';
               (click)="openSearchOverlay()"
               class="p-2 text-gray-600 hover:text-solar-600 transition-all duration-300 hover:scale-110 hover:bg-solar-50 rounded-full"
               [title]="'search.searchProducts' | translate">
-              <lucide-angular name="search" class="w-6 h-6 text-black"></lucide-angular>
+              <lucide-angular 
+                name="search" 
+                class="w-6 h-6"
+                [img]="SearchIcon">
+              </lucide-angular>
             </button>
             
             <!-- Mobile Authentication Icon -->
@@ -344,7 +364,11 @@ import { LucideAngularModule, Search, LogIn } from 'lucide-angular';
               (click)="navigateToLogin()"
               class="p-2 text-gray-600 hover:text-solar-600 transition-all duration-300 hover:scale-110 hover:bg-solar-50 rounded-full"
               [title]="'auth.signIn' | translate">
-              <lucide-angular name="log-in" class="w-6 h-6 text-black"></lucide-angular>
+              <lucide-angular 
+                name="log-in" 
+                class="w-6 h-6"
+                [img]="LogInIcon">
+              </lucide-angular>
             </button>
             
             <!-- Mobile Profile Menu -->
@@ -601,6 +625,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
   searchQuery = '';
   currentRoute = '';
   searchSuggestions: string[] = [];
+
+  // Lucide Icons
+  readonly SearchIcon = Search;
+  readonly LogInIcon = LogIn;
 
   constructor() {
     this.isMobileMenuOpen$ = this.store.select(selectIsMobileMenuOpen);
