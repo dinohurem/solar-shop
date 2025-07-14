@@ -68,10 +68,10 @@ import { selectNewsletterState } from '../footer/store/footer.selectors';
               <!-- Pricing -->
               <div class="flex items-center gap-3 mb-6">
                 <span class="text-lg text-gray-400 line-through font-medium font-['DM_Sans']">
-                  {{ offer.originalPrice | currency:'EUR':'symbol':'1.2-2' }}
+                  {{ (offer.originalPrice || 0) | currency:'EUR':'symbol':'1.2-2' }}
                 </span>
                 <span class="text-2xl font-bold text-[#324053] font-['DM_Sans']">
-                  {{ offer.discountedPrice | currency:'EUR':'symbol':'1.2-2' }}
+                  {{ (offer.discountedPrice || 0) | currency:'EUR':'symbol':'1.2-2' }}
                 </span>
               </div>
 
@@ -224,7 +224,7 @@ export class OffersPageComponent implements OnInit {
   }
 
   getSavingsAmount(offer: Offer): string {
-    const savingsAmount = offer.originalPrice - offer.discountedPrice;
+    const savingsAmount = (offer.originalPrice || 0) - (offer.discountedPrice || 0);
     return savingsAmount.toFixed(2);
   }
 } 

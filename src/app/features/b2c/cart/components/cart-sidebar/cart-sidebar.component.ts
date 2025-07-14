@@ -230,7 +230,7 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
                 </div>
                 <div class="flex justify-between font-semibold text-lg border-t pt-2">
                   <span>{{ 'cart.total' | translate }}</span>
-                  <span>{{ (cartSummary$ | async)?.subtotal | currency:'EUR':'symbol':'1.2-2' }}</span>
+                  <span>{{ (((cartSummary$ | async)?.subtotal || 0) - ((cartSummary$ | async)?.discount || 0)) | currency:'EUR':'symbol':'1.2-2' }}</span>
                 </div>
               </div>
 
@@ -368,6 +368,13 @@ export class CartSidebarComponent implements OnInit {
     // to avoid duplicate loadCart dispatches. Other components should not dispatch loadCart
     // as the cart sidebar handles this responsibility.
     this.store.dispatch(CartActions.loadCart());
+
+    // Reset coupon errors when cart opens
+    this.isCartOpen$.subscribe(isOpen => {
+      if (isOpen) {
+        this.store.dispatch(CartActions.resetCouponError());
+      }
+    });
   }
 
   @HostListener('document:keydown.escape', ['$event'])

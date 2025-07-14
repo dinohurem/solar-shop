@@ -167,9 +167,9 @@ async function prepareCompanyApprovalEmail(
                 companyName: request.dynamicTemplateData?.companyName || 'Company',
                 companyEmail: request.dynamicTemplateData?.companyEmail || request.to,
                 loginUrl: `${appUrl}/login`,
-                facebookUrl: 'https://facebook.com/solarshop',
-                instagramUrl: 'https://instagram.com/solarshop',
-                youtubeUrl: 'https://youtube.com/solarshop'
+                facebookUrl: 'https://www.facebook.com/solarno.hr',
+                instagramUrl: 'https://www.instagram.com/solarshophr',
+                youtubeUrl: 'https://www.youtube.com/@SolarShopHR'
             }
         }],
         from: {
@@ -202,9 +202,9 @@ async function prepareOrderConfirmationEmail(
                 shippingCost: request.dynamicTemplateData?.shippingCost || 0,
                 totalAmount: request.dynamicTemplateData?.totalAmount || 0,
                 orderTrackingUrl: request.dynamicTemplateData?.orderTrackingUrl || `${appUrl}/orders`,
-                facebookUrl: 'https://facebook.com/solarshop',
-                instagramUrl: 'https://instagram.com/solarshop',
-                youtubeUrl: 'https://youtube.com/solarshop'
+                facebookUrl: 'https://www.facebook.com/solarno.hr',
+                instagramUrl: 'https://www.instagram.com/solarshophr',
+                youtubeUrl: 'https://www.youtube.com/@SolarShopHR'
             }
         }],
         from: {
@@ -233,9 +233,9 @@ async function prepareOrderStatusChangeEmail(
                 customerEmail: request.dynamicTemplateData?.customerEmail || request.to,
                 newStatus: request.dynamicTemplateData?.newStatus || 'Shipped',
                 orderTrackingUrl: request.dynamicTemplateData?.orderTrackingUrl || `${appUrl}/orders`,
-                facebookUrl: 'https://facebook.com/solarshop',
-                instagramUrl: 'https://instagram.com/solarshop',
-                youtubeUrl: 'https://youtube.com/solarshop'
+                facebookUrl: 'https://www.facebook.com/solarno.hr',
+                instagramUrl: 'https://www.instagram.com/solarshophr',
+                youtubeUrl: 'https://www.youtube.com/@SolarShopHR'
             }
         }],
         from: {

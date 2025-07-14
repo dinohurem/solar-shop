@@ -790,8 +790,8 @@ export class OrderDetailsComponent implements OnInit {
           <div class="company-info">
             <h1>Solar Shop</h1>
             <p>${this.translationService.t('orderDetails.yourSolarEnergyPartner')}</p>
-            <p>${this.translationService.t('orderDetails.email')}: info@solarshop.hr</p>
-            <p>${this.translationService.t('orderDetails.phone')}: +385 1 234 5678</p>
+            <p>${this.translationService.t('orderDetails.email')}: info@solarni-paneli.hr</p>
+            <p>${this.translationService.t('orderDetails.phone')}: 01 6407 715</p>
           </div>
           <div class="invoice-title">
             <h2>${this.translationService.t('orderDetails.orderConfirmation')}</h2>
@@ -892,7 +892,7 @@ export class OrderDetailsComponent implements OnInit {
         <!-- Footer -->
         <div class="invoice-footer">
           <p>${this.translationService.t('orderDetails.thankYouForBusiness')}</p>
-          <p>${this.translationService.t('orderDetails.contactForQuestions')} info@solarshop.com</p>
+          <p>${this.translationService.t('orderDetails.contactForQuestions')} info@solarni-paneli.hr</p>
         </div>
       </div>
     `;

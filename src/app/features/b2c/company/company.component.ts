@@ -51,18 +51,24 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
       <div class="max-w-6xl mx-auto">
         <div class="flex flex-col lg:flex-row gap-12">
           <!-- Team Info -->
-          <div class="lg:w-1/2 space-y-6">
+          <div class="lg:w-full space-y-6">
             <h2 class="font-['Poppins'] font-semibold text-3xl md:text-4xl text-gray-800 text-center lg:text-left leading-tight">
               {{ 'company.ourTeam' | translate }}
             </h2>
-            <p class="font-['DM_Sans'] text-base text-gray-600 leading-relaxed text-right">
-              {{ 'company.teamText' | translate }}
+            <p class="font-['DM_Sans'] text-base text-gray-600 leading-relaxed">
+              {{ 'company.teamText1' | translate }}
+            </p>
+            <p class="font-['DM_Sans'] text-base text-gray-600 leading-relaxed">
+              {{ 'company.teamText2' | translate }}
+            </p>
+            <p class="font-['DM_Sans'] text-base text-gray-600 leading-relaxed">
+              {{ 'company.teamText3' | translate }}
             </p>
           </div>
           
           <!-- Team Grid -->
-          <div class="lg:w-1/2">
-            <!-- First Row -->
+          <!-- <div class="lg:w-1/2">
+            
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
               <div class="text-center space-y-3">
                 <div class="bg-gray-300 rounded-2xl h-32 w-full"></div>
@@ -94,7 +100,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
               </div>
             </div>
             
-            <!-- Second Row -->
+            
             <div class="grid grid-cols-2 gap-4 max-w-md mx-auto">
               <div class="text-center space-y-3">
                 <div class="bg-gray-300 rounded-2xl h-32 w-full"></div>
@@ -111,7 +117,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
                 </div>
               </div>
             </div>
-          </div>
+          </div> -->
         </div>
       </div>
     </section>
@@ -194,7 +200,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
     </section>
 
     <!-- Partners Section -->
-    <section class="py-16 px-4 md:px-8 lg:px-32 bg-white">
+    <!-- <section class="py-16 px-4 md:px-8 lg:px-32 bg-white">
       <div class="max-w-6xl mx-auto text-center">
         <h2 class="font-['Poppins'] font-semibold text-3xl md:text-4xl text-gray-800 mb-6 leading-tight">
           {{ 'company.suppliersPartners' | translate }}
@@ -203,7 +209,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
           {{ 'company.partnersText' | translate }}
         </p>
         
-        <!-- Partners Grid -->
+        
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
           <div class="bg-solar-50 rounded-2xl p-6 text-center">
             <div class="bg-gray-200 h-16 rounded-lg mb-4 flex items-center justify-center">
@@ -256,7 +262,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
           </div>
         </div>
       </div>
-    </section>
+    </section> -->
 
     <!-- Our Mission & Sustainability Section -->
     <section class="py-16 px-4 md:px-8 lg:px-32 bg-gray-50">

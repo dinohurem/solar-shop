@@ -166,17 +166,17 @@ import { Offer } from '../../../shared/models/offer.model';
                               <!-- Compact Price Section -->
                               <div class="flex items-center justify-center lg:justify-start space-x-3">
                                 <span class="text-white text-lg lg:text-xl font-bold font-['DM_Sans']">
-                                  {{ offer.discountedPrice | currency:'EUR':'symbol':'1.2-2' }}
+                                  {{ (offer.discountedPrice || 0) | currency:'EUR':'symbol':'1.2-2' }}
                                 </span>
                                 <span class="text-white/60 line-through text-sm lg:text-base font-['DM_Sans']">
-                                  {{ offer.originalPrice | currency:'EUR':'symbol':'1.2-2' }}
+                                  {{ (offer.originalPrice || 0) | currency:'EUR':'symbol':'1.2-2' }}
                                 </span>
                               </div>
                               
                               <!-- Compact Savings Display -->
                               <div class="flex items-center justify-center lg:justify-start">
                                 <div class="inline-block bg-solar-400/20 text-white text-sm font-semibold px-4 py-2 rounded-lg">
-                                  Save {{ (offer.originalPrice - offer.discountedPrice) | currency:'EUR':'symbol':'1.2-2' }}!
+                                  Save {{ ((offer.originalPrice || 0) - (offer.discountedPrice || 0)) | currency:'EUR':'symbol':'1.2-2' }}!
                                 </div>
                               </div>
                               
@@ -229,7 +229,7 @@ import { Offer } from '../../../shared/models/offer.model';
 
             <button 
               (click)="onExploreOffers()"
-              class="bg-white/20 backdrop-blur-sm text-white font-semibold text-second-fg px-8 py-3 rounded-xl hover:bg-white/30 transition-all duration-300 font-['DM_Sans'] border border-white/30 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+              class="bg-white/20 backdrop-blur-sm text-white font-semibold px-8 py-3 rounded-xl hover:bg-white/30 transition-all duration-300 font-['DM_Sans'] border border-white/30 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
             >
               {{ 'hero.exploreOffers' | translate }}
             </button>

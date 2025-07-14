@@ -59,7 +59,7 @@ export class OffersService {
                 filteredOffers = filteredOffers.slice(0, filters.limit);
             }
 
-            return this.convertSupabaseOffersToLocal(filteredOffers);
+            return await this.convertSupabaseOffersToLocal(filteredOffers);
         } catch (error) {
             console.error('Error in fetchOffersFromSupabase:', error);
             return [];
@@ -75,7 +75,7 @@ export class OffersService {
                 offers = offers.slice(0, limit);
             }
 
-            return this.convertSupabaseOffersToLocal(offers);
+            return await this.convertSupabaseOffersToLocal(offers);
         } catch (error) {
             console.error('Error in fetchActiveOffers:', error);
             return [];
@@ -91,7 +91,7 @@ export class OffersService {
                 offers = offers.slice(0, limit);
             }
 
-            return this.convertSupabaseOffersToLocal(offers);
+            return await this.convertSupabaseOffersToLocal(offers);
         } catch (error) {
             console.error('Error in fetchFeaturedOffers:', error);
             return [];
@@ -103,33 +103,32 @@ export class OffersService {
             const offer = await this.supabaseService.getTableById('offers', id);
             if (!offer || offer.is_b2b) return null; // Only return B2C offers
 
-            return this.convertSupabaseOfferToLocal(offer);
+            return await this.convertSupabaseOfferToLocal(offer);
         } catch (error) {
             console.error('Error in fetchOfferById:', error);
             return null;
         }
     }
 
-    private convertSupabaseOffersToLocal(offers: any[]): Offer[] {
-        return offers.map(offer => this.convertSupabaseOfferToLocal(offer)).filter(Boolean) as Offer[];
+    private async convertSupabaseOffersToLocal(offers: any[]): Promise<Offer[]> {
+        const offerPromises = offers.map(offer => this.convertSupabaseOfferToLocal(offer));
+        const convertedOffers = await Promise.all(offerPromises);
+        return convertedOffers.filter(Boolean) as Offer[];
     }
 
-    private convertSupabaseOfferToLocal(offer: any): Offer | null {
+    private async convertSupabaseOfferToLocal(offer: any): Promise<Offer | null> {
         try {
-            // Calculate discounted price based on discount type and value
-            let originalPrice = 100; // Default base price for percentage calculations
-            let discountedPrice = originalPrice;
+            // Get offer products to calculate real pricing
+            const { originalPrice, discountedPrice } = await this.calculateOfferPricing(offer);
             let discountPercentage = 0;
 
-            if (offer.discount_type === 'percentage') {
-                discountPercentage = offer.discount_value;
-                discountedPrice = originalPrice * (1 - discountPercentage / 100);
-            } else if (offer.discount_type === 'fixed_amount') {
-                discountedPrice = Math.max(0, originalPrice - offer.discount_value);
-                discountPercentage = Math.round(((originalPrice - discountedPrice) / originalPrice) * 100);
+            if (originalPrice > 0) {
+                if (offer.discount_type === 'percentage') {
+                    discountPercentage = offer.discount_value;
+                } else if (offer.discount_type === 'fixed_amount') {
+                    discountPercentage = Math.round(((originalPrice - discountedPrice) / originalPrice) * 100);
+                }
             }
-
-
 
             return {
                 id: offer.id,
@@ -149,6 +148,71 @@ export class OffersService {
         } catch (error) {
             console.error('Error converting offer:', error);
             return null;
+        }
+    }
+
+    private async calculateOfferPricing(offer: any): Promise<{ originalPrice: number; discountedPrice: number }> {
+        try {
+            // Get products associated with this offer
+            const { data: offerProducts, error } = await this.supabaseService.client
+                .from('offer_products')
+                .select(`
+                    *,
+                    products (
+                        id,
+                        name,
+                        price
+                    )
+                `)
+                .eq('offer_id', offer.id)
+                .eq('is_active', true);
+
+            if (error || !offerProducts || offerProducts.length === 0) {
+                // If no products, use placeholder values for general offers
+                const originalPrice = 100;
+                let discountedPrice = originalPrice;
+
+                if (offer.discount_type === 'percentage') {
+                    discountedPrice = originalPrice * (1 - offer.discount_value / 100);
+                } else if (offer.discount_type === 'fixed_amount') {
+                    discountedPrice = Math.max(0, originalPrice - offer.discount_value);
+                }
+
+                return { originalPrice, discountedPrice };
+            }
+
+            // Calculate total original price first
+            let totalOriginalPrice = 0;
+            for (const offerProduct of offerProducts) {
+                const productPrice = offerProduct.products?.price || 0;
+                totalOriginalPrice += productPrice;
+            }
+
+            // Calculate discounted price based on discount type
+            let totalDiscountedPrice = 0;
+            if (offer.discount_type === 'percentage') {
+                totalDiscountedPrice = totalOriginalPrice * (1 - offer.discount_value / 100);
+            } else if (offer.discount_type === 'fixed_amount') {
+                totalDiscountedPrice = Math.max(0, totalOriginalPrice - offer.discount_value);
+            } else {
+                totalDiscountedPrice = totalOriginalPrice;
+            }
+
+            return {
+                originalPrice: totalOriginalPrice,
+                discountedPrice: totalDiscountedPrice
+            };
+        } catch (error) {
+            console.error('Error calculating offer pricing:', error);
+            // Fallback to placeholder values
+            const originalPrice = 100;
+            let discountedPrice = originalPrice;
+
+            if (offer.discount_type === 'percentage') {
+                discountedPrice = originalPrice * (1 - offer.discount_value / 100);
+            }
+
+            return { originalPrice, discountedPrice };
         }
     }
 

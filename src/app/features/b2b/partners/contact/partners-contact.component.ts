@@ -51,7 +51,7 @@ import { SupabaseService } from '../../../../services/supabase.service';
                   </p>
                   <div class="space-y-1">
                     <p class="text-sm text-gray-600">
-                      <a href="tel:+385123456789" class="text-solar-600 hover:text-solar-700">{{ 'b2b.contact.phone' | translate }}</a>
+                      <a href="tel:01 6407 715" class="text-solar-600 hover:text-solar-700">{{ 'b2b.contact.phone' | translate }}</a>
                     </p>
                     <p class="text-sm text-gray-600">
                       <span class="font-medium">{{ 'b2b.contact.email' | translate }}: </span> 
@@ -79,7 +79,7 @@ import { SupabaseService } from '../../../../services/supabase.service';
                   </p>
                   <div class="space-y-1">
                     <p class="text-sm text-gray-600">
-                      <a href="tel:+385123456790" class="text-solar-600 hover:text-solar-700">{{ 'b2b.contact.salesTeamPhone' | translate }}</a>
+                      <a href="tel:01 6407 715" class="text-solar-600 hover:text-solar-700">{{ 'b2b.contact.salesTeamPhone' | translate }}</a>
                     </p>
                     <p class="text-sm text-gray-600">
                       <span class="font-medium">{{ 'b2b.contact.email' | translate }}: </span> 
@@ -108,11 +108,11 @@ import { SupabaseService } from '../../../../services/supabase.service';
                   </p>
                   <div class="space-y-1">
                     <p class="text-sm text-gray-600">
-                      <a href="tel:+385123456791" class="text-solar-600 hover:text-solar-700"> {{ 'b2b.contact.technicalSupportPhone' | translate }}</a>
+                      <a href="tel:01 6407 715" class="text-solar-600 hover:text-solar-700"> {{ 'b2b.contact.technicalSupportPhone' | translate }}</a>
                     </p>
                     <p class="text-sm text-gray-600">
                       <span class="font-medium">{{ 'b2b.contact.email' | translate }}: </span> 
-                      <a href="mailto:tech@solarshop.hr" class="text-solar-600 hover:text-solar-700">{{ 'b2b.contact.technicalSupportEmail' | translate }}</a>
+                      <a href="mailto:info@solarni-paneli.hr" class="text-solar-600 hover:text-solar-700">{{ 'b2b.contact.technicalSupportEmail' | translate }}</a>
                     </p>
                   </div>
                 </div>
@@ -139,7 +139,7 @@ import { SupabaseService } from '../../../../services/supabase.service';
               </div>
 
               <!-- Business Hours -->
-              <div class="flex items-start space-x-4">
+              <!-- <div class="flex items-start space-x-4">
                 <div class="flex-shrink-0">
                   <div class="w-12 h-12 bg-solar-100 rounded-lg flex items-center justify-center">
                     <svg class="w-6 h-6 text-solar-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -157,7 +157,7 @@ import { SupabaseService } from '../../../../services/supabase.service';
                     <p>{{ 'b2b.contact.sunday' | translate }}: {{ 'b2b.contact.closed' | translate }}</p>
                   </div>
                 </div>
-              </div>
+              </div> -->
             </div>
           </div>
 

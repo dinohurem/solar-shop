@@ -3,13 +3,17 @@ export interface Coupon {
     code: string;
     title: string;
     description: string;
-    discountType: 'percentage' | 'fixed_amount' | 'free_shipping';
+    discountType: 'percentage' | 'fixed_amount' | 'free_shipping' | 'buy_x_get_y';
     discountValue: number;
     maxDiscountAmount?: number;
     minOrderAmount?: number;
     maxOrderAmount?: number;
     applicableProductIds?: string[];
     excludedProductIds?: string[];
+    applicableOfferIds?: string[];
+    excludedOfferIds?: string[];
+    applicableCategories?: string[];
+    excludedCategories?: string[];
     maxUsage?: number;
     currentUsage: number;
     maxUsagePerCustomer?: number;

@@ -226,18 +226,18 @@ export class TranslationService {
                     enterCompany: 'Unesite naziv tvrtke',
                     enterMessage: 'Unesite svoju poruku',
                     partnerSupport: 'Podrška za partnere',
-                    phone: '+385 1 234 5678',
+                    phone: '01 6407 715',
                     salesTeam: 'Prodajni tim',
                     salesTeamText: 'Naš prodajni tim je dostupan da vam pomogne s bilo kojim pitanjima ili problemima.',
-                    salesTeamEmail: 'sales@solarshop.hr',
-                    salesTeamPhone: '+385 1 234 5679',
+                    salesTeamEmail: 'prodaja@solarni-paneli.hr',
+                    salesTeamPhone: '01 6407 715',
                     technicalSupport: 'Tehnička podrška',
                     technicalSupportText: 'Naš tehnički tim je dostupan da vam pomogne s bilo kojim pitanjima ili problemima.',
-                    technicalSupportEmail: 'tech@solarshop.hr',
-                    technicalSupportPhone: '+385 1 234 5680',
+                    technicalSupportEmail: 'info@solarni-paneli.hr',
+                    technicalSupportPhone: '01 6407 715',
                     supportEmail: 'partners@solarshop.hr',
-                    officeAddress: 'Ilica 1, 10000 Zagreb, Croatia',
-                    address: 'Ilica 1, 10000 Zagreb, Croatia',
+                    officeAddress: 'Bani ul. 73, 10010, Buzin, Hrvatska',
+                    address: 'Bani ul. 73, 10010, Buzin, Hrvatska',
                     businessHours: 'Radno vrijeme: Pon-Pet 8:00-17:00',
                     mondayFriday: 'Pon-Pet',
                     saturday: 'Sub',
@@ -1094,6 +1094,9 @@ export class TranslationService {
                     productAlreadyAdded: 'Ovaj proizvod je već dodan u ponudu.',
                     alreadyAdded: ' (Već dodano)',
                     totalDiscount: 'Ukupni popust',
+                    globalDiscount: 'Globalni popust',
+                    applyGlobalDiscountToAll: 'Primijeni globalni popust na sve',
+                    applyToAllProducts: 'Primijeni na sve proizvode',
                 },
                 reviewsForm: {
                     title: 'Recenzije',
@@ -1141,18 +1144,18 @@ export class TranslationService {
                     enterCompany: 'Unesite naziv tvrtke',
                     enterMessage: 'Unesite svoju poruku',
                     partnerSupport: 'Podrška za partnere',
-                    phone: '+385 1 234 5678',
+                    phone: '01 6407 715',
                     salesTeam: 'Prodajni tim',
                     salesTeamText: 'Naš prodajni tim je dostupan da vam pomogne s bilo kojim pitanjima ili problemima.',
-                    salesTeamEmail: 'sales@solarshop.hr',
+                    salesTeamEmail: 'prodaja@solarni-paneli.hr',
                     salesTeamPhone: '+385 1 234 5679',
                     technicalSupport: 'Tehnička podrška',
                     technicalSupportText: 'Naš tehnički tim je dostupan da vam pomogne s bilo kojim pitanjima ili problemima.',
-                    technicalSupportEmail: 'tech@solarshop.hr',
-                    technicalSupportPhone: '+385 1 234 5680',
+                    technicalSupportEmail: 'info@solarni-paneli.hr',
+                    technicalSupportPhone: '01 6407 715',
                     supportEmail: 'partners@solarshop.hr',
-                    officeAddress: 'Ilica 1, 10000 Zagreb, Croatia',
-                    address: 'Ilica 1, 10000 Zagreb, Croatia',
+                    officeAddress: 'Bani ul. 73, 10010, Buzin, Hrvatska',
+                    address: 'Bani ul. 73, 10010, Buzin, Hrvatska',
                     businessHours: 'Radno vrijeme: Pon-Pet 8:00-17:00',
                     mondayFriday: 'Pon-Pet',
                     saturday: 'Sub',
@@ -1622,8 +1625,8 @@ export class TranslationService {
             },
             // Contact Information
             contact: {
-                phone: '+385 1 234 5678',
-                email: 'info@solarshop.hr'
+                phone: '01 6407 715',
+                email: 'info@solarni-paneli.hr'
             },
             // Language
             language: {
@@ -1773,10 +1776,12 @@ export class TranslationService {
                 title: 'Naša kompanija',
                 subtitle: 'Dobrodošli u sekciju posvećenu našoj kompaniji. Ovdje možete saznati više o nama, našoj povijesti, vrijednostima i timu.',
                 whoWeAre: 'Tko smo mi',
-                whoWeAreText: 'SolarShop je nastao iz iskustva profesionalaca u građevinskom sektoru koji su, kombiniranjem svojih vještina, odlučili stvoriti portal.',
-                mission: 'Naša misija je jednostavna: učiniti dostupnim svima najnovija rješenja za održivu gradnju.',
-                ourTeam: 'Naš tim',
-                teamText: 'Iza SolarShop-a je grupa strastvenih i kompetentnih ljudi: inženjeri, arhitekti, energetski savjetnici i građevinski profesionalci.',
+                whoWeAreText: 'Tvrtka Hvaljen budi d.o.o. je osnovana 2011. godine u Zagrebu i od tada posluje pod brendom SolarShop. Od samog početka definirali smo i obilježili područje naše djelatnosti, potpuno se posvećujući solarnoj energiji, obnovljivim izvorima i zelenoj tranziciji. Pozicionirali smo se kao tržišni lideri i postali konkurentan pružatelj solarnih oprema, nudeći najširi asortiman svih potrebnih komponenti za fotonaponske elektrane.',
+                mission: 'Naša misija je jednostavna: učiniti dostupnim svima najnovija rješenja za proizvodnju el. energije iz obnovljivih izvora, s naglaskom na solarnu energiju. Naš cilj je omogućiti svakome da postane energetski neovisan i doprinese smanjenju emisije CO2.',
+                ourTeam: 'Cilj',
+                teamText1: 'Odlučniji smo nego ikad da održimo postavljene ciljeve, da tržištu predstavimo koncept solarne energije i da instaliramo solarne elektrane na što više krovova, kako za pojedince tako i za pravne subjekte, poput tvornica, skladišta, crkava i drugih javnih i društveno korisnih ustanova.',
+                teamText2: 'Sinergijom kvalitetnih proizvoda, uvijek birajući provjerene i renomirane proizvođače, i stalnim proširivanjem našeg asortimana komplementarnim proizvodima, zajedno s brzom, profesionalnom i efikasnom uslugom instalacije, postali smo neophodan i poželjan partner za svakoga tko želi proizvoditi električnu energiju. Kontinuiranim zapošljavanjem kvalificiranog osoblja i ulaganjem u postojeće, osiguravamo da smo u korak s tehnologijom i pružamo našim kupcima i korisnicima 24-satnu tehničku podršku i uslugu.',
+                teamText3: 'Danas, zbog svega navedenog, možemo ponuditi rješenja "ključ u ruke", bez obzira radi li se o jednostavnim kućnim solarnim elektranama, elektranama na proizvodnim objektima, trgovačkim centrima, tvornicama ili elektranama na tlu, poznatim i kao solarna polja. Naš tim preuzima cijeli proces: od razvoja projekta, isporuke komponenti, instalacije elektrane, upravljanja svom dokumentacijom, komunikacije s relevantnim tijelima, do, konačno, puštanja elektrane u pogon.',
                 missionValues: 'Misija i vrijednosti',
                 quality: 'Kvaliteta',
                 qualityText: 'Nudimo samo testirane i certificirane proizvode, odabrane od najpouzdanijih marki na tržištu.',
@@ -1814,7 +1819,23 @@ export class TranslationService {
                 freeShippingProgress: 'Dodajte još {{amount}} za besplatnu dostavu!',
                 freeShippingRemaining: 'Dodajte {{amount}} za besplatnu dostavu!',
                 yourCart: 'Vaša košarica',
-                checkout: 'Naplata'
+                checkout: 'Naplata',
+                saveFromOffer: 'Ušteda od ponude',
+                couponValidationError: 'Neuspješna provjera kupona. Molimo pokušajte ponovno.',
+                couponNotFound: 'Kod kupona nije pronađen',
+                couponInactive: 'Ovaj kupon više nije aktivan',
+                couponNotYetValid: 'Ovaj kupon još nije valjan',
+                couponExpired: 'Ovaj kupon je istekao',
+                couponUsageLimitReached: 'Ovaj kupon je dosegnuo svoj limit korištenja',
+                couponMinOrderNotMet: 'Potreban je minimalni iznos narudžbe od €{{amount}} za ovaj kupon',
+                couponMaxOrderExceeded: 'Prekoračen je maksimalni iznos narudžbe od €{{amount}} za ovaj kupon',
+                couponNotApplicableToOffers: 'Ovaj kupon se ne može primijeniti na ponude u vašoj košarici',
+                couponExcludedFromOffers: 'Ovaj kupon se ne može koristiti s ponudama u vašoj košarici',
+                couponNotApplicableToProducts: 'Ovaj kupon se ne može primijeniti na proizvode u vašoj košarici',
+                couponExcludedFromProducts: 'Ovaj kupon se ne može koristiti s nekim proizvodima u vašoj košarici',
+                couponNotApplicableToCategories: 'Ovaj kupon se ne može primijeniti na kategorije proizvoda u vašoj košarici',
+                couponExcludedFromCategories: 'Ovaj kupon se ne može koristiti s nekim kategorijama proizvoda u vašoj košarici',
+                couponDiscount: 'Popust kupona'
             },
             // Checkout
             checkout: {
@@ -1944,9 +1965,9 @@ export class TranslationService {
             // Footer
             footer: {
                 companyDescription: 'Vaša destinacija za održive građevinske materijale i rješenja energetske učinkovitosti. Izgradimo zeleniju budućnost zajedno.',
-                address: 'Ilica 1, 10000 Zagreb, Hrvatska',
-                phone: '+385 1 234 5678',
-                email: 'info@solarshop.hr',
+                address: 'Bani ul. 73, 10010, Buzin, Hrvatska',
+                phone: '01 6407 715',
+                email: 'info@solarni-paneli.hr',
                 hours: 'Pon-Pet: 8:00-17:00',
                 followUs: 'Pratite nas:',
                 newsletter: 'Newsletter',
@@ -2194,11 +2215,11 @@ export class TranslationService {
                     },
                     phone: {
                         label: 'Telefon',
-                        value: '+385 1 234 5678'
+                        value: '01 6407 715'
                     },
                     address: {
                         label: 'Adresa',
-                        value: 'Ilica 1, 10000 Zagreb, Hrvatska'
+                        value: 'Bani ul. 73, 10010, Buzin, Hrvatska'
                     }
                 },
                 changes: {
@@ -2284,11 +2305,11 @@ export class TranslationService {
                     },
                     phone: {
                         label: 'Telefon',
-                        value: '+385 1 234 5678'
+                        value: '01 6407 715'
                     },
                     address: {
                         label: 'Adresa',
-                        value: 'Ilica 1, 10000 Zagreb, Hrvatska'
+                        value: 'Bani ul. 73, 10010, Buzin, Hrvatska'
                     }
                 },
                 changes: {
@@ -2384,11 +2405,11 @@ export class TranslationService {
                     },
                     phone: {
                         label: 'Telefon',
-                        value: '+385 1 234 5678'
+                        value: '01 6407 715'
                     },
                     address: {
                         label: 'Adresa',
-                        value: 'Ilica 1, 10000 Zagreb, Hrvatska'
+                        value: 'Bani ul. 73, 10010, Buzin, Hrvatska'
                     }
                 }
             },
@@ -2623,18 +2644,18 @@ export class TranslationService {
                     enterCompany: 'Enter company name',
                     enterMessage: 'Enter your message',
                     partnerSupport: 'Partner Support',
-                    phone: '+385 1 234 5678',
+                    phone: '01 6407 715',
                     salesTeam: 'Sales Team',
                     salesTeamText: 'Our sales team is available to assist you with any questions or issues you may have.',
-                    salesTeamEmail: 'sales@solarshop.hr',
+                    salesTeamEmail: 'prodaja@solarni-paneli.hr',
                     salesTeamPhone: '+385 1 234 5679',
                     technicalSupport: 'Technical Support',
                     technicalSupportText: 'Our technical support team is available to assist you with any questions or issues you may have.',
-                    technicalSupportEmail: 'tech@solarshop.hr',
-                    technicalSupportPhone: '+385 1 234 5680',
+                    technicalSupportEmail: 'info@solarni-paneli.hr',
+                    technicalSupportPhone: '01 6407 715',
                     supportEmail: 'partners@solarshop.hr',
-                    officeAddress: 'Ilica 1, 10000 Zagreb, Croatia',
-                    address: 'Ilica 1, 10000 Zagreb, Croatia',
+                    officeAddress: 'Bani ul. 73, 10010, Buzin, Croatia',
+                    address: 'Bani ul. 73, 10010, Buzin, Croatia',
                     businessHours: 'Business Hours: Mon-Fri 8:00-17:00',
                     mondayFriday: 'Mon-Fri',
                     saturday: 'Sat',
@@ -3396,6 +3417,9 @@ export class TranslationService {
                     productAlreadyAdded: 'This product has already been added to the offer.',
                     alreadyAdded: ' (Already Added)',
                     totalDiscount: 'Total discount',
+                    globalDiscount: 'Global discount',
+                    applyGlobalDiscountToAll: 'Apply global discount to all',
+                    applyToAllProducts: 'Apply to all products',
                 },
                 reviewsForm: {
                     title: 'Reviews',
@@ -3443,18 +3467,18 @@ export class TranslationService {
                     enterCompany: 'Enter company name',
                     enterMessage: 'Enter your message',
                     partnerSupport: 'Partner Support',
-                    phone: '+385 1 234 5678',
+                    phone: '01 6407 715',
                     salesTeam: 'Sales Team',
                     salesTeamText: 'Our sales team is available to assist you with any questions or issues you may have.',
-                    salesTeamEmail: 'sales@solarshop.hr',
+                    salesTeamEmail: 'prodaja@solarni-paneli.hr',
                     salesTeamPhone: '+385 1 234 5679',
                     technicalSupport: 'Technical Support',
                     technicalSupportText: 'Our technical support team is available to assist you with any questions or issues you may have.',
-                    technicalSupportEmail: 'tech@solarshop.hr',
-                    technicalSupportPhone: '+385 1 234 5680',
+                    technicalSupportEmail: 'info@solarni-paneli.hr',
+                    technicalSupportPhone: '01 6407 715',
                     supportEmail: 'partners@solarshop.hr',
-                    officeAddress: 'Ilica 1, 10000 Zagreb, Croatia',
-                    address: 'Ilica 1, 10000 Zagreb, Croatia',
+                    officeAddress: 'Bani ul. 73, 10010, Buzin, Croatia',
+                    address: 'Bani ul. 73, 10010, Buzin, Croatia',
                     businessHours: 'Business Hours: Mon-Fri 8:00-17:00',
                     mondayFriday: 'Mon-Fri',
                     saturday: 'Sat',
@@ -3907,8 +3931,8 @@ export class TranslationService {
             },
             // Contact Information
             contact: {
-                phone: '+385 1 234 5678',
-                email: 'info@solarshop.hr'
+                phone: '01 6407 715',
+                email: 'info@solarni-paneli.hr'
             },
             // Language
             language: {
@@ -4060,8 +4084,10 @@ export class TranslationService {
                 whoWeAre: 'Who We Are',
                 whoWeAreText: 'SolarShop was born from the experience of professionals in the construction sector who, by combining their skills, decided to create a portal.',
                 mission: 'Our mission is simple: to make accessible to everyone the most innovative solutions for sustainable construction.',
-                ourTeam: 'Our Team',
-                teamText: 'Behind SolarShop is a group of passionate and competent people: engineers, architects, energy consultants and construction professionals.',
+                ourTeam: 'Our Goal',
+                teamText1: 'We are more determined than ever to uphold our set goals, to introduce the concept of solar energy to the market, and to install solar power plants on as many rooftops as possible — for both individuals and legal entities, such as factories, warehouses, churches, and other public and socially beneficial institutions.',
+                teamText2: 'Through the synergy of high-quality products—always selecting proven and renowned manufacturers—and by constantly expanding our range with complementary products, along with fast, professional, and efficient installation services, we have become an essential and desirable partner for anyone who wants to produce electricity. By continuously hiring qualified personnel and investing in our existing staff, we ensure that we stay up to date with technology and provide our customers and users with 24-hour technical support and service.',
+                teamText3: 'Today, because of all the above, we are able to offer turnkey solutions, whether it involves simple home solar power plants, installations on production facilities, shopping centers, factories, or ground-mounted power plants, also known as solar fields. Our team takes over the entire process: from project development, delivery of components, installation of the power plant, handling all documentation, and communication with relevant authorities, to finally commissioning the power plant.',
                 missionValues: 'Mission and Values',
                 quality: 'Quality',
                 qualityText: 'We offer only tested and certified products, selected from the most reliable brands on the market.',
@@ -4099,7 +4125,23 @@ export class TranslationService {
                 freeShippingProgress: 'Add {{amount}} more for free shipping!',
                 freeShippingRemaining: 'Add {{amount}} for free shipping!',
                 yourCart: 'Your cart',
-                checkout: 'Checkout'
+                checkout: 'Checkout',
+                saveFromOffer: 'Save from offer',
+                couponValidationError: 'Unable to validate coupon. Please try again.',
+                couponNotFound: 'Coupon code not found',
+                couponInactive: 'This coupon is no longer active',
+                couponNotYetValid: 'This coupon is not yet valid',
+                couponExpired: 'This coupon has expired',
+                couponUsageLimitReached: 'This coupon has reached its usage limit',
+                couponMinOrderNotMet: 'Minimum order amount of €{{amount}} required for this coupon',
+                couponMaxOrderExceeded: 'Maximum order amount of €{{amount}} exceeded for this coupon',
+                couponNotApplicableToOffers: 'This coupon is not applicable to the offers in your cart',
+                couponExcludedFromOffers: 'This coupon cannot be used with the offers in your cart',
+                couponNotApplicableToProducts: 'This coupon is not applicable to the products in your cart',
+                couponExcludedFromProducts: 'This coupon cannot be used with some products in your cart',
+                couponNotApplicableToCategories: 'This coupon is not applicable to the product categories in your cart',
+                couponExcludedFromCategories: 'This coupon cannot be used with some product categories in your cart',
+                couponDiscount: 'Coupon discount'
             },
             // Checkout
             checkout: {
@@ -4229,9 +4271,9 @@ export class TranslationService {
             // Footer
             footer: {
                 companyDescription: 'Your destination for sustainable building materials and energy efficiency solutions. Let\'s build a greener future together.',
-                address: 'Ilica 1, 10000 Zagreb, Croatia',
-                phone: '+385 1 234 5678',
-                email: 'info@solarshop.hr',
+                address: 'Bani ul. 73, 10010, Buzin, Croatia',
+                phone: '01 6407 715',
+                email: 'info@solarni-paneli.hr',
                 hours: 'Mon-Fri: 8:00-17:00',
                 followUs: 'Follow us:',
                 newsletter: 'Newsletter',
@@ -4480,11 +4522,11 @@ export class TranslationService {
                     },
                     phone: {
                         label: 'Phone',
-                        value: '+385 1 234 5678'
+                        value: '01 6407 715'
                     },
                     address: {
                         label: 'Address',
-                        value: 'Ilica 1, 10000 Zagreb, Croatia'
+                        value: 'Bani ul. 73, 10010, Buzin, Croatia'
                     }
                 },
                 changes: {
@@ -4570,11 +4612,11 @@ export class TranslationService {
                     },
                     phone: {
                         label: 'Phone',
-                        value: '+385 1 234 5678'
+                        value: '01 6407 715'
                     },
                     address: {
                         label: 'Address',
-                        value: 'Ilica 1, 10000 Zagreb, Croatia'
+                        value: 'Bani ul. 73, 10010, Buzin, Croatia'
                     }
                 },
                 changes: {
@@ -4670,11 +4712,11 @@ export class TranslationService {
                     },
                     phone: {
                         label: 'Phone',
-                        value: '+385 1 234 5678'
+                        value: '01 6407 715'
                     },
                     address: {
                         label: 'Address',
-                        value: 'Ilica 1, 10000 Zagreb, Croatia'
+                        value: 'Bani ul. 73, 10010, Buzin, Croatia'
                     }
                 }
             },

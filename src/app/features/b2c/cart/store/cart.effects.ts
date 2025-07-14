@@ -239,4 +239,47 @@ export class CartEffects {
             )
         )
     );
+
+    // Add to Cart from Offer Effect
+    addToCartFromOffer$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(CartActions.addToCartFromOffer),
+            switchMap(({ productId, quantity, variantId, offerId, offerName, offerType, offerDiscount, offerOriginalPrice, offerValidUntil }) =>
+                this.cartService.addToCartFromOffer(
+                    productId, 
+                    quantity, 
+                    variantId, 
+                    offerId, 
+                    offerName, 
+                    offerType, 
+                    offerDiscount, 
+                    offerOriginalPrice, 
+                    offerValidUntil
+                ).pipe(
+                    map(cart => CartActions.addToCartFromOfferSuccess({ cart })),
+                    catchError(error => of(CartActions.addToCartFromOfferFailure({ error: error.message })))
+                )
+            )
+        )
+    );
+
+    // Add All to Cart from Offer Effect
+    addAllToCartFromOffer$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(CartActions.addAllToCartFromOffer),
+            switchMap(({ products, offerId, offerName, offerType, offerDiscount, offerValidUntil }) =>
+                this.cartService.addAllToCartFromOffer(
+                    products, 
+                    offerId, 
+                    offerName, 
+                    offerType, 
+                    offerDiscount, 
+                    offerValidUntil
+                ).pipe(
+                    map(({ cart, addedCount, skippedCount }) => CartActions.addAllToCartFromOfferSuccess({ cart, addedCount, skippedCount })),
+                    catchError(error => of(CartActions.addAllToCartFromOfferFailure({ error: error.message })))
+                )
+            )
+        )
+    );
 } 

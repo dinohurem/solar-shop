@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable, Subject, combineLatest, from, of } from 'rxjs';
+import { Observable, Subject, from, of } from 'rxjs';
 import { takeUntil, switchMap, map, catchError } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import { OffersService } from './services/offers.service';
@@ -9,7 +9,7 @@ import { AddToCartButtonComponent } from '../cart/components/add-to-cart-button/
 import { SupabaseService } from '../../../services/supabase.service';
 import { Offer } from '../../../shared/models/offer.model';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
-import { addToCart, addAllToCartFromOffer } from '../cart/store/cart.actions';
+import { addAllToCartFromOffer } from '../cart/store/cart.actions';
 import { ToastService } from '../../../shared/services/toast.service';
 import { TranslationService } from '../../../shared/services/translation.service';
 
@@ -49,17 +49,17 @@ import { TranslationService } from '../../../shared/services/translation.service
               </div>
 
               <!-- Pricing -->
-              <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-8">
+              <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-8" *ngIf="(relatedProducts$ | async)?.length">
                 <div class="flex items-center gap-4 mb-4">
                   <span class="text-2xl text-white/70 line-through font-medium">
-                    {{ offer.originalPrice | currency:'EUR':'symbol':'1.2-2' }}
+                    {{ getTotalOriginalPrice() | currency:'EUR':'symbol':'1.2-2' }}
                   </span>
                   <span class="text-4xl font-bold text-white">
-                    {{ offer.discountedPrice | currency:'EUR':'symbol':'1.2-2' }}
+                    {{ getTotalDiscountedPrice(offer.discountPercentage) | currency:'EUR':'symbol':'1.2-2' }}
                   </span>
                 </div>
                 <div class="text-lg text-white/90">
-                  {{ 'offers.youSave' | translate }} {{ (offer.originalPrice - offer.discountedPrice) | currency:'EUR':'symbol':'1.2-2' }}
+                  {{ 'offers.youSave' | translate }} {{ getTotalSavings(offer.discountPercentage) | currency:'EUR':'symbol':'1.2-2' }}
                 </div>
               </div>
 
@@ -381,6 +381,20 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
 
   navigateToProducts(): void {
     this.router.navigate(['/products']);
+  }
+
+  getTotalOriginalPrice(): number {
+    return this.currentProducts.reduce((total, product) => total + product.price, 0);
+  }
+
+  getTotalDiscountedPrice(discountPercentage: number): number {
+    return this.currentProducts.reduce((total, product) => {
+      return total + this.calculateDiscountedPrice(product.price, discountPercentage);
+    }, 0);
+  }
+
+  getTotalSavings(discountPercentage: number): number {
+    return this.getTotalOriginalPrice() - this.getTotalDiscountedPrice(discountPercentage);
   }
 
   async addAllToCart(): Promise<void> {
