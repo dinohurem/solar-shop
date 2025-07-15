@@ -14,7 +14,7 @@ import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { CartButtonComponent } from '../cart/components/cart-button/cart-button.component';
 import * as AuthActions from '../../../core/auth/store/auth.actions';
 import { User } from '../../../shared/models/user.model';
-import { filter } from 'rxjs/operators';
+import { filter, take } from 'rxjs/operators';
 import { TranslationService } from '../../../shared/services/translation.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { Subject, takeUntil } from 'rxjs';
@@ -33,12 +33,12 @@ import { LucideAngularModule, Search, User as UserIcon, CircleUserRound, Mail, P
       (click)="cancelSearch()"
     >
       <div 
-        class="bg-white/95 backdrop-blur-md rounded-xl shadow-2xl w-full max-w-2xl border border-white/20 search-overlay-content"
+        class="bg-white/95 backdrop-blur-md rounded-xl shadow-2xl w-full max-w-2xl mx-4 border border-white/20 search-overlay-content"
         (click)="$event.stopPropagation()"
       >
-        <div class="p-6">
-          <div class="flex items-center justify-between mb-6">
-            <h3 class="text-xl font-semibold text-gray-900 font-['Poppins']">
+        <div class="p-4 sm:p-6">
+          <div class="flex items-center justify-between mb-4 sm:mb-6">
+            <h3 class="text-lg sm:text-xl font-semibold text-gray-900 font-['Poppins']">
               {{ 'search.searchProducts' | translate }}
             </h3>
             <button 
@@ -54,10 +54,10 @@ import { LucideAngularModule, Search, User as UserIcon, CircleUserRound, Mail, P
           <form (ngSubmit)="performSearch(); $event.preventDefault()" class="relative">
             <div class="relative">
               <!-- Search Icon -->
-              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <div class="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none">
                 <lucide-angular 
                   name="search" 
-                  class="w-5 h-5 text-gray-400"
+                  class="w-4 h-4 sm:w-5 sm:h-5 text-gray-400"
                   [img]="SearchIcon">
                 </lucide-angular>
               </div>
@@ -68,7 +68,7 @@ import { LucideAngularModule, Search, User as UserIcon, CircleUserRound, Mail, P
                 [(ngModel)]="searchQuery"
                 name="searchQuery"
                 [placeholder]="'search.placeholder' | translate"
-                class="w-full px-4 py-4 pl-12 pr-24 border border-gray-200 rounded-xl focus:ring-2 focus:ring-solar-500/50 focus:border-solar-500 text-lg font-['DM_Sans'] bg-white/80 backdrop-blur-sm placeholder-gray-400 search-input"
+                class="w-full px-3 sm:px-4 py-3 sm:py-4 pl-10 sm:pl-12 pr-16 sm:pr-24 border border-gray-200 rounded-xl focus:ring-2 focus:ring-solar-500/50 focus:border-solar-500 text-base sm:text-lg font-['DM_Sans'] bg-white/80 backdrop-blur-sm placeholder-gray-400 search-input"
                 #searchInput
                 autofocus
                 (keydown.escape)="cancelSearch()"
@@ -81,9 +81,9 @@ import { LucideAngularModule, Search, User as UserIcon, CircleUserRound, Mail, P
                   type="button"
                   *ngIf="searchQuery.length > 0"
                   (click)="clearSearch()"
-                  class="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100"
+                  class="p-1.5 sm:p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100"
                   [title]="'common.clear' | translate">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                   </svg>
                 </button>
@@ -92,11 +92,11 @@ import { LucideAngularModule, Search, User as UserIcon, CircleUserRound, Mail, P
                 <button 
                   type="submit"
                   [disabled]="!searchQuery.trim()"
-                  class="p-2 text-white bg-solar-600 hover:bg-solar-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors rounded-lg"
+                  class="p-1.5 sm:p-2 text-white bg-solar-600 hover:bg-solar-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors rounded-lg"
                   [title]="'search.search' | translate">
                   <lucide-angular 
                     name="search" 
-                    class="w-4 h-4 text-white"
+                    class="w-3 h-3 sm:w-4 sm:h-4 text-white"
                     [img]="SearchIcon">
                   </lucide-angular>
                 </button>
@@ -107,11 +107,11 @@ import { LucideAngularModule, Search, User as UserIcon, CircleUserRound, Mail, P
           <!-- Quick Search Suggestions (Optional) -->
           <div class="mt-4 text-sm text-gray-500">
             <p class="font-medium mb-2">{{ 'search.suggestions' | translate }}</p>
-            <div class="flex flex-wrap gap-2">
+            <div class="flex flex-wrap gap-1 sm:gap-2">
               <button 
                 *ngFor="let suggestion of searchSuggestions"
                 (click)="selectSearchSuggestion(suggestion)"
-                class="px-3 py-1 bg-gray-100 hover:bg-solar-100 text-gray-700 hover:text-solar-700 rounded-full transition-colors text-xs">
+                class="px-2 sm:px-3 py-1 bg-gray-100 hover:bg-solar-100 text-gray-700 hover:text-solar-700 rounded-full transition-colors text-xs">
                 {{ suggestion }}
               </button>
             </div>
@@ -126,7 +126,7 @@ import { LucideAngularModule, Search, User as UserIcon, CircleUserRound, Mail, P
         <div class="flex justify-between items-center py-2">
           <!-- Contact Info -->
           <div class="flex items-center space-x-6">
-            <a href="tel:01 6407 715" class="flex items-center space-x-2 hover:text-solar-200 transition-colors duration-200">
+            <a href="tel:+385 (1) 6407 715" class="flex items-center space-x-2 hover:text-solar-200 transition-colors duration-200">
               <lucide-angular 
                 name="phone" 
                 class="w-4 h-4 opacity-70"
@@ -166,11 +166,11 @@ import { LucideAngularModule, Search, User as UserIcon, CircleUserRound, Mail, P
     </div>
 
     <!-- Mobile Top Info Bar -->
-    <div class="lg:hidden bg-heyhome-medium-green text-white text-sm">
+    <div class="lg:hidden bg-black text-white text-sm">
       <div class="px-5 py-2">
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-5">
-            <a href="tel:01 6407 715" class="flex items-center space-x-2">
+            <a href="tel:+385 (1) 6407 715" class="flex items-center space-x-2">
               <svg class="w-4 h-4 opacity-50" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
               </svg>
@@ -465,18 +465,21 @@ import { LucideAngularModule, Search, User as UserIcon, CircleUserRound, Mail, P
         <div class="px-4 py-6 space-y-4">
           <a routerLink="/products" 
              routerLinkActive="text-solar-600 font-semibold bg-solar-50" 
+             (click)="closeMobileMenu()"
              class="block text-gray-900 hover:text-solar-600 font-medium transition-all duration-300 py-2 px-3 rounded-lg hover:bg-solar-50">
             {{ 'nav.products' | translate }}
           </a>
           
           <a routerLink="/offers" 
              routerLinkActive="text-solar-600 font-semibold bg-solar-50" 
+             (click)="closeMobileMenu()"
              class="block text-gray-900 hover:text-solar-600 font-medium transition-all duration-300 py-2 px-3 rounded-lg hover:bg-solar-50">
             {{ 'nav.offers' | translate }}
           </a>
 
           <a routerLink="/blog" 
              routerLinkActive="text-solar-600 font-semibold bg-solar-50" 
+             (click)="closeMobileMenu()"
              class="block text-gray-900 hover:text-solar-600 font-medium transition-all duration-300 py-2 px-3 rounded-lg hover:bg-solar-50">
             {{ 'nav.blog' | translate }}
           </a>
@@ -485,18 +488,21 @@ import { LucideAngularModule, Search, User as UserIcon, CircleUserRound, Mail, P
 
           <a routerLink="/company" 
              routerLinkActive="text-solar-600 font-semibold bg-solar-50" 
+             (click)="closeMobileMenu()"
              class="block text-gray-900 hover:text-solar-600 font-medium transition-all duration-300 py-2 px-3 rounded-lg hover:bg-solar-50">
             {{ 'nav.company' | translate }}
           </a>
           
           <a routerLink="/contact" 
              routerLinkActive="text-solar-600 font-semibold bg-solar-50" 
+             (click)="closeMobileMenu()"
              class="block text-gray-900 hover:text-solar-600 font-medium transition-all duration-300 py-2 px-3 rounded-lg hover:bg-solar-50">
             {{ 'nav.contact' | translate }}
           </a>
           
           <a routerLink="/partners" 
              routerLinkActive="text-solar-600 font-semibold bg-solar-50" 
+             (click)="closeMobileMenu()"
              class="block text-gray-900 hover:text-solar-600 font-medium transition-all duration-300 py-2 px-3 rounded-lg hover:bg-solar-50">
             {{ 'nav.partners' | translate }}
           </a>
@@ -505,17 +511,18 @@ import { LucideAngularModule, Search, User as UserIcon, CircleUserRound, Mail, P
           <div class="border-t border-gray-200 pt-4 mt-4" *ngIf="isAuthenticated$ | async">
             <a routerLink="/profile" 
                routerLinkActive="text-solar-600 font-semibold bg-solar-50" 
+               (click)="closeMobileMenu()"
                class="block text-gray-900 hover:text-solar-600 font-medium transition-all duration-300 py-2 px-3 rounded-lg hover:bg-solar-50 mb-2">
               {{ 'profile.profile' | translate }}
             </a>
             <a 
               *ngIf="isAdmin$ | async"
               routerLink="/admin" 
-              (click)="closeProfileMenu()"
+              (click)="closeProfileMenu(); closeMobileMenu()"
               class="block text-gray-900 hover:text-accent-600 font-medium transition-all duration-300 py-2 px-3 rounded-lg hover:bg-accent-50 mb-2">
               {{ 'profile.adminDashboard' | translate }}
             </a>
-            <button (click)="logout()" 
+            <button (click)="logout(); closeMobileMenu()" 
                     class="block w-full text-left text-gray-900 hover:text-accent-600 font-medium transition-all duration-300 py-2 px-3 rounded-lg hover:bg-accent-50">
               {{ 'profile.signOut' | translate }}
             </button>
@@ -718,8 +725,19 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.showProfileMenu = false;
   }
 
+  closeMobileMenu(): void {
+    this.store.dispatch(NavbarActions.toggleMobileMenu());
+  }
+
   openSearchOverlay(): void {
     this.showSearchOverlay = true;
+    // Close mobile menu if it's open - use take(1) to get current value only
+    this.isMobileMenuOpen$.pipe(
+      take(1),
+      filter(Boolean) // Only proceed if menu is open
+    ).subscribe(() => {
+      this.closeMobileMenu();
+    });
     // Don't reset searchQuery here to preserve any existing value
     // Focus the input after a short delay to ensure it's rendered
     setTimeout(() => {

@@ -281,15 +281,15 @@ export class TranslationService {
                     enterCompany: 'Unesite naziv tvrtke',
                     enterMessage: 'Unesite svoju poruku',
                     partnerSupport: 'Podrška za partnere',
-                    phone: '01 6407 715',
+                    phone: '+385 (1) 6407 715',
                     salesTeam: 'Prodajni tim',
                     salesTeamText: 'Naš prodajni tim je dostupan da vam pomogne s bilo kojim pitanjima ili problemima.',
                     salesTeamEmail: 'prodaja@solarni-paneli.hr',
-                    salesTeamPhone: '01 6407 715',
+                    salesTeamPhone: '+385 (1) 6407 715',
                     technicalSupport: 'Tehnička podrška',
                     technicalSupportText: 'Naš tehnički tim je dostupan da vam pomogne s bilo kojim pitanjima ili problemima.',
                     technicalSupportEmail: 'info@solarni-paneli.hr',
-                    technicalSupportPhone: '01 6407 715',
+                    technicalSupportPhone: '+385 (1) 6407 715',
                     supportEmail: 'partners@solarshop.hr',
                     officeAddress: 'Bani ul. 73, 10010, Buzin, Hrvatska',
                     address: 'Bani ul. 73, 10010, Buzin, Hrvatska',
@@ -1199,7 +1199,7 @@ export class TranslationService {
                     enterCompany: 'Unesite naziv tvrtke',
                     enterMessage: 'Unesite svoju poruku',
                     partnerSupport: 'Podrška za partnere',
-                    phone: '01 6407 715',
+                    phone: '+385 (1) 6407 715',
                     salesTeam: 'Prodajni tim',
                     salesTeamText: 'Naš prodajni tim je dostupan da vam pomogne s bilo kojim pitanjima ili problemima.',
                     salesTeamEmail: 'prodaja@solarni-paneli.hr',
@@ -1207,7 +1207,7 @@ export class TranslationService {
                     technicalSupport: 'Tehnička podrška',
                     technicalSupportText: 'Naš tehnički tim je dostupan da vam pomogne s bilo kojim pitanjima ili problemima.',
                     technicalSupportEmail: 'info@solarni-paneli.hr',
-                    technicalSupportPhone: '01 6407 715',
+                    technicalSupportPhone: '+385 (1) 6407 715',
                     supportEmail: 'partners@solarshop.hr',
                     officeAddress: 'Bani ul. 73, 10010, Buzin, Hrvatska',
                     address: 'Bani ul. 73, 10010, Buzin, Hrvatska',
@@ -1680,7 +1680,7 @@ export class TranslationService {
             },
             // Contact Information
             contact: {
-                phone: '01 6407 715',
+                phone: '+385 (1) 6407 715',
                 email: 'info@solarni-paneli.hr'
             },
             // Language
@@ -2031,7 +2031,7 @@ export class TranslationService {
             footer: {
                 companyDescription: 'Vaša destinacija za održive građevinske materijale i rješenja energetske učinkovitosti. Izgradimo zeleniju budućnost zajedno.',
                 address: 'Bani ul. 73, 10010, Buzin, Hrvatska',
-                phone: '01 6407 715',
+                phone: '+385 (1) 6407 715',
                 email: 'info@solarni-paneli.hr',
                 hours: 'Pon-Pet: 8:00-17:00',
                 followUs: 'Pratite nas:',
@@ -2096,8 +2096,8 @@ export class TranslationService {
             },
             // Contact & Support
             contactSupport: {
-                title: 'Kontakti i pomoć',
-                subtitle: 'Trebate pomoć ili želite više informacija? Mi smo tu za vas. Odjel Kontakti i pomoć SolarShop-a dizajniran je da vam pruži svu podršku koju trebate, od odabira proizvoda do postprodajne podrške, osiguravajući jednostavno, transparentno i sigurno iskustvo kupovine.',
+                title: 'Kontakt i pomoć',
+                subtitle: 'Trebate pomoć ili želite više informacija? Mi smo tu za vas. Kontakt i pomoć SolarShop-a dizajniran je da vam pruži svu podršku koju trebate, od odabira proizvoda do postprodajne podrške, osiguravajući jednostavno, transparentno i sigurno iskustvo kupovine.',
                 contactForm: 'Kontaktni obrazac',
                 contactFormText: 'Ispunite online obrazac na ovoj stranici, unesite svoje podatke i prirodu zahtjeva. Član našeg osoblja će vas uskoro kontaktirati.',
                 name: 'Ime',
@@ -2280,7 +2280,7 @@ export class TranslationService {
                     },
                     phone: {
                         label: 'Telefon',
-                        value: '01 6407 715'
+                        value: '+385 (1) 6407 715'
                     },
                     address: {
                         label: 'Adresa',
@@ -2370,7 +2370,7 @@ export class TranslationService {
                     },
                     phone: {
                         label: 'Telefon',
-                        value: '01 6407 715'
+                        value: '+385 (1) 6407 715'
                     },
                     address: {
                         label: 'Adresa',
@@ -2470,7 +2470,7 @@ export class TranslationService {
                     },
                     phone: {
                         label: 'Telefon',
-                        value: '01 6407 715'
+                        value: '+385 (1) 6407 715'
                     },
                     address: {
                         label: 'Adresa',
@@ -2763,7 +2763,7 @@ export class TranslationService {
                     enterCompany: 'Enter company name',
                     enterMessage: 'Enter your message',
                     partnerSupport: 'Partner Support',
-                    phone: '01 6407 715',
+                    phone: '+385 (1) 6407 715',
                     salesTeam: 'Sales Team',
                     salesTeamText: 'Our sales team is available to assist you with any questions or issues you may have.',
                     salesTeamEmail: 'prodaja@solarni-paneli.hr',
@@ -2771,7 +2771,7 @@ export class TranslationService {
                     technicalSupport: 'Technical Support',
                     technicalSupportText: 'Our technical support team is available to assist you with any questions or issues you may have.',
                     technicalSupportEmail: 'info@solarni-paneli.hr',
-                    technicalSupportPhone: '01 6407 715',
+                    technicalSupportPhone: '+385 (1) 6407 715',
                     supportEmail: 'partners@solarshop.hr',
                     officeAddress: 'Bani ul. 73, 10010, Buzin, Croatia',
                     address: 'Bani ul. 73, 10010, Buzin, Croatia',
@@ -3586,7 +3586,7 @@ export class TranslationService {
                     enterCompany: 'Enter company name',
                     enterMessage: 'Enter your message',
                     partnerSupport: 'Partner Support',
-                    phone: '01 6407 715',
+                    phone: '+385 (1) 6407 715',
                     salesTeam: 'Sales Team',
                     salesTeamText: 'Our sales team is available to assist you with any questions or issues you may have.',
                     salesTeamEmail: 'prodaja@solarni-paneli.hr',
@@ -3594,7 +3594,7 @@ export class TranslationService {
                     technicalSupport: 'Technical Support',
                     technicalSupportText: 'Our technical support team is available to assist you with any questions or issues you may have.',
                     technicalSupportEmail: 'info@solarni-paneli.hr',
-                    technicalSupportPhone: '01 6407 715',
+                    technicalSupportPhone: '+385 (1) 6407 715',
                     supportEmail: 'partners@solarshop.hr',
                     officeAddress: 'Bani ul. 73, 10010, Buzin, Croatia',
                     address: 'Bani ul. 73, 10010, Buzin, Croatia',
@@ -4050,7 +4050,7 @@ export class TranslationService {
             },
             // Contact Information
             contact: {
-                phone: '01 6407 715',
+                phone: '+385 (1) 6407 715',
                 email: 'info@solarni-paneli.hr'
             },
             // Language
@@ -4401,7 +4401,7 @@ export class TranslationService {
             footer: {
                 companyDescription: 'Your destination for sustainable building materials and energy efficiency solutions. Let\'s build a greener future together.',
                 address: 'Bani ul. 73, 10010, Buzin, Croatia',
-                phone: '01 6407 715',
+                phone: '+385 (1) 6407 715',
                 email: 'info@solarni-paneli.hr',
                 hours: 'Mon-Fri: 8:00-17:00',
                 followUs: 'Follow us:',
@@ -4651,7 +4651,7 @@ export class TranslationService {
                     },
                     phone: {
                         label: 'Phone',
-                        value: '01 6407 715'
+                        value: '+385 (1) 6407 715'
                     },
                     address: {
                         label: 'Address',
@@ -4741,7 +4741,7 @@ export class TranslationService {
                     },
                     phone: {
                         label: 'Phone',
-                        value: '01 6407 715'
+                        value: '+385 (1) 6407 715'
                     },
                     address: {
                         label: 'Address',
@@ -4841,7 +4841,7 @@ export class TranslationService {
                     },
                     phone: {
                         label: 'Phone',
-                        value: '01 6407 715'
+                        value: '+385 (1) 6407 715'
                     },
                     address: {
                         label: 'Address',

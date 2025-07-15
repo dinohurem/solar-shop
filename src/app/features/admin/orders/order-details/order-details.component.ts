@@ -791,7 +791,7 @@ export class OrderDetailsComponent implements OnInit {
             <h1>Solar Shop</h1>
             <p>${this.translationService.t('orderDetails.yourSolarEnergyPartner')}</p>
             <p>${this.translationService.t('orderDetails.email')}: info@solarni-paneli.hr</p>
-            <p>${this.translationService.t('orderDetails.phone')}: 01 6407 715</p>
+            <p>${this.translationService.t('orderDetails.phone')}: +385 (1) 6407 715</p>
           </div>
           <div class="invoice-title">
             <h2>${this.translationService.t('orderDetails.orderConfirmation')}</h2>

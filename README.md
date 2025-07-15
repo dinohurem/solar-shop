@@ -216,7 +216,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 For support and questions, please contact:
 - Email: info@solarni-paneli.hr
-- Phone: 01 6407 715
+- Phone: +385 (1) 6407 715
 
 ---
 

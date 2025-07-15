@@ -171,26 +171,31 @@ import { LucideAngularModule, ShoppingCart } from 'lucide-angular';
             <a routerLink="/partners" 
                routerLinkActive="bg-solar-50 text-solar-600"
                [routerLinkActiveOptions]="{exact: true}"
+               (click)="closeMobileMenu()"
                class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-solar-600 hover:bg-gray-50 rounded-md">
               {{ 'b2bNav.home' | translate }}
             </a>
             <a routerLink="/partners/products" 
                routerLinkActive="bg-solar-50 text-solar-600"
+               (click)="closeMobileMenu()"
                class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-solar-600 hover:bg-gray-50 rounded-md">
               {{ 'b2bNav.products' | translate }}
             </a>
             <a routerLink="/partners/offers" 
                routerLinkActive="bg-solar-50 text-solar-600"
+               (click)="closeMobileMenu()"
                class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-solar-600 hover:bg-gray-50 rounded-md">
               {{ 'b2bNav.offers' | translate }}
             </a>
             <a routerLink="/partners/about" 
                routerLinkActive="bg-solar-50 text-solar-600"
+               (click)="closeMobileMenu()"
                class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-solar-600 hover:bg-gray-50 rounded-md">
               {{ 'b2bNav.partners' | translate }}
             </a>
             <a routerLink="/partners/contact" 
                routerLinkActive="bg-solar-50 text-solar-600"
+               (click)="closeMobileMenu()"
                class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-solar-600 hover:bg-gray-50 rounded-md">
               {{ 'b2bNav.contact' | translate }}
             </a>
@@ -199,14 +204,17 @@ import { LucideAngularModule, ShoppingCart } from 'lucide-angular';
             <div class="border-t border-gray-200 pt-4 mt-4">
               <div *ngIf="!isAuthenticated || !isCompanyContact" class="space-y-2">
                 <a routerLink="/login" 
+                   (click)="closeMobileMenu()"
                    class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-solar-600 hover:bg-gray-50 rounded-md">
                   {{ 'b2bNav.signIn' | translate }}
                 </a>
                 <a routerLink="/partners/register" 
+                   (click)="closeMobileMenu()"
                    class="block px-3 py-2 text-base font-medium bg-solar-600 text-white rounded-md hover:bg-solar-700">
                   {{ 'b2bNav.getStarted' | translate }}
                 </a>
                 <a routerLink="/" 
+                   (click)="closeMobileMenu()"
                    class="flex items-center space-x-2 px-3 py-2 text-base font-medium text-gray-700 hover:text-solar-600 hover:bg-gray-50 rounded-md">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
@@ -229,7 +237,7 @@ import { LucideAngularModule, ShoppingCart } from 'lucide-angular';
                   </svg>
                   <span>{{ 'b2bFooter.backToB2C' | translate }}</span>
                 </a>
-                <button (click)="signOut()" 
+                <button (click)="signOut(); closeMobileMenu()" 
                         class="block w-full text-left px-3 py-2 text-base font-medium text-gray-700 hover:text-solar-600 hover:bg-gray-50 rounded-md">
                   {{ 'b2bNav.signOut' | translate }}
                 </button>

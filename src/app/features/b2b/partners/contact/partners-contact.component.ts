@@ -51,7 +51,7 @@ import { SupabaseService } from '../../../../services/supabase.service';
                   </p>
                   <div class="space-y-1">
                     <p class="text-sm text-gray-600">
-                      <a href="tel:01 6407 715" class="text-solar-600 hover:text-solar-700">{{ 'b2b.contact.phone' | translate }}</a>
+                      <a href="tel:+385 (1) 6407 715" class="text-solar-600 hover:text-solar-700">{{ 'b2b.contact.phone' | translate }}</a>
                     </p>
                     <p class="text-sm text-gray-600">
                       <span class="font-medium">{{ 'b2b.contact.email' | translate }}: </span> 
@@ -79,7 +79,7 @@ import { SupabaseService } from '../../../../services/supabase.service';
                   </p>
                   <div class="space-y-1">
                     <p class="text-sm text-gray-600">
-                      <a href="tel:01 6407 715" class="text-solar-600 hover:text-solar-700">{{ 'b2b.contact.salesTeamPhone' | translate }}</a>
+                      <a href="tel:+385 (1) 6407 715" class="text-solar-600 hover:text-solar-700">{{ 'b2b.contact.salesTeamPhone' | translate }}</a>
                     </p>
                     <p class="text-sm text-gray-600">
                       <span class="font-medium">{{ 'b2b.contact.email' | translate }}: </span> 
@@ -108,7 +108,7 @@ import { SupabaseService } from '../../../../services/supabase.service';
                   </p>
                   <div class="space-y-1">
                     <p class="text-sm text-gray-600">
-                      <a href="tel:01 6407 715" class="text-solar-600 hover:text-solar-700"> {{ 'b2b.contact.technicalSupportPhone' | translate }}</a>
+                      <a href="tel:+385 (1) 6407 715" class="text-solar-600 hover:text-solar-700"> {{ 'b2b.contact.technicalSupportPhone' | translate }}</a>
                     </p>
                     <p class="text-sm text-gray-600">
                       <span class="font-medium">{{ 'b2b.contact.email' | translate }}: </span> 

@@ -39,7 +39,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
           <!-- Image -->
           <div class="order-first lg:order-last">
             <div class="bg-gray-200 rounded-3xl h-96 flex items-center justify-center">
-              <span class="text-gray-500 font-['DM_Sans']">Company Image</span>
+              <img src="assets/images/logo.png" alt="Company Image" class="w-full h-auto object-fit">
             </div>
           </div>
         </div>
