@@ -4,11 +4,12 @@ import { Store } from '@ngrx/store';
 import * as CartActions from '../../store/cart.actions';
 import * as CartSelectors from '../../store/cart.selectors';
 import { TranslatePipe } from "../../../../../shared/pipes/translate.pipe";
+import { LucideAngularModule, ShoppingCart } from 'lucide-angular';
 
 @Component({
   selector: 'app-add-to-cart-button',
   standalone: true,
-  imports: [CommonModule, TranslatePipe],
+  imports: [CommonModule, TranslatePipe, LucideAngularModule],
   template: `
     <button 
       #addButton
@@ -17,9 +18,11 @@ import { TranslatePipe } from "../../../../../shared/pipes/translate.pipe";
       [class]="buttonClasses"
     >
       <span *ngIf="!(isLoading$ | async) && !isOutOfStock" class="flex items-center space-x-2">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.1 5H19M7 13v6a2 2 0 002 2h6a2 2 0 002-2v-6"/>
-        </svg>
+          <lucide-angular 
+            name="shopping-cart" 
+            class="w-6 h-6"
+            [img]="ShoppingCartIcon">
+          </lucide-angular>
         <span>{{ buttonText }}</span>
       </span>
       
@@ -97,6 +100,7 @@ import { TranslatePipe } from "../../../../../shared/pipes/translate.pipe";
   `]
 })
 export class AddToCartButtonComponent {
+  readonly ShoppingCartIcon = ShoppingCart;
   private store = inject(Store);
 
   @ViewChild('addButton', { static: true }) addButton!: ElementRef<HTMLButtonElement>;

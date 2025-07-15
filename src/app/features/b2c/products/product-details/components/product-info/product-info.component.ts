@@ -20,11 +20,12 @@ import {
   selectAverageRating,
   selectReviewCount
 } from '../../store/product-details.selectors';
+import { LucideAngularModule, Star, StarHalf, ShoppingCart } from 'lucide-angular';
 
 @Component({
   selector: 'app-product-info',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe],
+  imports: [CommonModule, FormsModule, TranslatePipe, LucideAngularModule],
   template: `
     <div class="space-y-6">
       <!-- Product Title and Rating -->
@@ -333,9 +334,11 @@ import {
             [disabled]="product.availability === 'out-of-stock'"
             class="w-full px-6 py-3 bg-solar-600 text-white font-semibold rounded-lg hover:bg-solar-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed font-['DM_Sans']"
           >
-            <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 11-4 0v-6m4 0V9a2 2 0 10-4 0v4.01"/>
-            </svg>
+            <lucide-angular 
+              name="shopping-cart" 
+              class="w-6 h-6 inline mr-2"
+              [img]="ShoppingCartIcon">
+            </lucide-angular>
             {{ product.availability === 'out-of-stock' ? ('productDetails.outOfStock' | translate) : ('productDetails.addToCart' | translate) }}
           </button>
           
@@ -420,6 +423,10 @@ export class ProductInfoComponent implements OnInit, OnDestroy {
 
   // Partner discount percentage (additional discount for company pricing)
   readonly COMPANY_DISCOUNT_PERCENTAGE = 15;
+
+  readonly StarIcon = Star;
+  readonly StarHalfIcon = StarHalf;
+  readonly ShoppingCartIcon = ShoppingCart;
 
   private store = inject(Store);
   private toastService = inject(ToastService);

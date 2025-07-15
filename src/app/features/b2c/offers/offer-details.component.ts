@@ -216,7 +216,7 @@ import { TranslationService } from '../../../shared/services/translation.service
       <div class="min-h-screen bg-gray-50 flex items-center justify-center">
         <div class="text-center">
           <div class="animate-spin rounded-full h-12 w-12 border-4 border-solar-600 border-t-transparent mx-auto mb-4"></div>
-          <p class="text-gray-600 font-['DM_Sans']">{{ 'offers.loadingDetails' | translate }}</p>
+          <p class="text-gray-600 font-['DM_Sans']">{{ 'hero.loading' | translate }}</p>
         </div>
       </div>
     </ng-template>
@@ -411,7 +411,7 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
       }
 
       // Filter out out-of-stock products
-      const availableProducts = this.currentProducts.filter(product => 
+      const availableProducts = this.currentProducts.filter(product =>
         product.availability !== 'out_of_stock' && product.stock_quantity > 0
       );
 
