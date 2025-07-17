@@ -248,7 +248,7 @@ export class ShippingComponent implements OnInit, OnDestroy {
     const checkoutItems = localStorage.getItem('checkoutItems');
     if (!checkoutItems) {
       console.error('No checkout items found. Redirecting to cart.');
-      this.router.navigate(['/checkout/order-review']);
+      this.router.navigate(['/blagajna/pregled-narudzbe']);
       return;
     }
 
@@ -256,10 +256,10 @@ export class ShippingComponent implements OnInit, OnDestroy {
     const shippingData = this.shippingForm.value;
     localStorage.setItem('shippingInfo', JSON.stringify(shippingData));
 
-    this.router.navigate(['/checkout/payment']);
+    this.router.navigate(['/blagajna/placanje']);
   }
 
   goBack() {
-    this.router.navigate(['/checkout/order-review']);
+    this.router.navigate(['/blagajna/pregled-narudzbe']);
   }
 } 

@@ -20,31 +20,31 @@ export class FooterEffects {
                         {
                             title: 'Products',
                             links: [
-                                { label: 'Building Materials', url: '/products/building-materials' },
-                                { label: 'Electrical Systems', url: '/products/electrical-systems' },
-                                { label: 'Energy Solutions', url: '/products/energy-solutions' },
-                                { label: 'Finishes & Coatings', url: '/products/finishes-coatings' },
-                                { label: 'Tools & Accessories', url: '/products/tools-accessories' },
+                                { label: 'Building Materials', url: '/proizvodi/building-materials' },
+                                { label: 'Electrical Systems', url: '/proizvodi/electrical-systems' },
+                                { label: 'Energy Solutions', url: '/proizvodi/energy-solutions' },
+                                { label: 'Finishes & Coatings', url: '/proizvodi/finishes-coatings' },
+                                { label: 'Tools & Accessories', url: '/proizvodi/tools-accessories' },
                             ]
                         },
                         {
                             title: 'Services',
                             links: [
-                                { label: 'Energy Consulting', url: '/services/energy-consulting' },
-                                { label: 'Installation', url: '/services/installation' },
-                                { label: 'Maintenance', url: '/services/maintenance' },
-                                { label: 'Certifications', url: '/services/certifications' },
-                                { label: 'Technical Support', url: '/services/technical-support' },
+                                { label: 'Energy Consulting', url: '/usluge/energy-consulting' },
+                                { label: 'Installation', url: '/usluge/installation' },
+                                { label: 'Maintenance', url: '/usluge/maintenance' },
+                                { label: 'Certifications', url: '/usluge/certifications' },
+                                { label: 'Technical Support', url: '/usluge/technical-support' },
                             ]
                         },
                         {
                             title: 'Company',
                             links: [
-                                { label: 'About Us', url: '/company' },
-                                { label: 'Our Mission', url: '/mission' },
-                                { label: 'Offers & Promotions', url: '/offers' },
+                                { label: 'About Us', url: '/tvrtka' },
+                                { label: 'Our Mission', url: '/misija' },
+                                { label: 'Offers & Promotions', url: '/ponude' },
                                 { label: 'Blog & Guides', url: '/blog' },
-                                { label: 'Contact', url: '/contact' },
+                                { label: 'Contact', url: '/kontakt' },
                             ]
                         }
                     ],

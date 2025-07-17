@@ -22,7 +22,7 @@ import { LucideAngularModule, ShoppingCart } from 'lucide-angular';
         <div class="flex justify-between h-16">
           <!-- Logo and Brand -->
           <div class="flex items-center">
-            <a routerLink="/partners" class="flex items-center space-x-3">
+            <a routerLink="/partneri" class="flex items-center space-x-3">
               <img 
                 src="assets/images/logo.png" 
                 alt="SolarShop" 
@@ -34,28 +34,28 @@ import { LucideAngularModule, ShoppingCart } from 'lucide-angular';
 
           <!-- Desktop Navigation -->
           <div class="hidden md:flex items-center space-x-8">
-            <a routerLink="/partners" 
+            <a routerLink="/partneri" 
                routerLinkActive="text-solar-600 border-b-2 border-solar-600"
                [routerLinkActiveOptions]="{exact: true}"
                class="text-gray-700 hover:text-solar-600 px-3 py-2 text-sm font-medium transition-colors">
               {{ 'b2bNav.home' | translate }}
             </a>
-            <a routerLink="/partners/products" 
+            <a routerLink="/partneri/proizvodi" 
                routerLinkActive="text-solar-600 border-b-2 border-solar-600"
                class="text-gray-700 hover:text-solar-600 px-3 py-2 text-sm font-medium transition-colors">
               {{ 'b2bNav.products' | translate }}
             </a>
-            <a routerLink="/partners/offers" 
+            <a routerLink="/partneri/ponude" 
                routerLinkActive="text-solar-600 border-b-2 border-solar-600"
                class="text-gray-700 hover:text-solar-600 px-3 py-2 text-sm font-medium transition-colors">
               {{ 'b2bNav.offers' | translate }}
             </a>
-            <a routerLink="/partners/about" 
+            <a routerLink="/partneri/o-nama" 
                routerLinkActive="text-solar-600 border-b-2 border-solar-600"
                class="text-gray-700 hover:text-solar-600 px-3 py-2 text-sm font-medium transition-colors">
               {{ 'b2bNav.partners' | translate }}
             </a>
-            <a routerLink="/partners/contact" 
+            <a routerLink="/partneri/kontakt" 
                routerLinkActive="text-solar-600 border-b-2 border-solar-600"
                class="text-gray-700 hover:text-solar-600 px-3 py-2 text-sm font-medium transition-colors">
               {{ 'b2bNav.contact' | translate }}
@@ -66,11 +66,11 @@ import { LucideAngularModule, ShoppingCart } from 'lucide-angular';
           <div class="flex items-center space-x-4">
             <!-- Authentication -->
             <div *ngIf="!isAuthenticated || !isCompanyContact" class="flex items-center space-x-2">
-              <a routerLink="/login" 
+              <a routerLink="/prijava" 
                  class="text-gray-700 hover:text-solar-600 px-3 py-2 text-sm font-medium">
                 {{ 'b2bNav.signIn' | translate }}
               </a>
-              <a routerLink="/partners/register" 
+              <a routerLink="/partneri/registracija" 
                  class="bg-solar-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-solar-700 transition-colors">
                 {{ 'b2bNav.getStarted' | translate }}
               </a>
@@ -104,7 +104,7 @@ import { LucideAngularModule, ShoppingCart } from 'lucide-angular';
                     <div class="font-semibold text-gray-900">{{ currentUser?.name || ('b2bNav.partner' | translate) }}</div>
                     <div class="text-gray-500 truncate">{{ currentUser?.email }}</div>
                   </div>
-                  <a routerLink="/partners/profile" 
+                  <a routerLink="/partneri/profil" 
                      (click)="closeUserMenu()"
                      class="block px-4 py-3 text-sm text-gray-700 hover:bg-solar-50 hover:text-solar-600 transition-all duration-200">
                     <div class="flex items-center space-x-3">
@@ -168,32 +168,32 @@ import { LucideAngularModule, ShoppingCart } from 'lucide-angular';
         <!-- Mobile Menu -->
         <div *ngIf="showMobileMenu" class="md:hidden border-t border-gray-200">
           <div class="px-2 pt-2 pb-3 space-y-1">
-            <a routerLink="/partners" 
+            <a routerLink="/partneri" 
                routerLinkActive="bg-solar-50 text-solar-600"
                [routerLinkActiveOptions]="{exact: true}"
                (click)="closeMobileMenu()"
                class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-solar-600 hover:bg-gray-50 rounded-md">
               {{ 'b2bNav.home' | translate }}
             </a>
-            <a routerLink="/partners/products" 
+            <a routerLink="/partneri/proizvodi" 
                routerLinkActive="bg-solar-50 text-solar-600"
                (click)="closeMobileMenu()"
                class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-solar-600 hover:bg-gray-50 rounded-md">
               {{ 'b2bNav.products' | translate }}
             </a>
-            <a routerLink="/partners/offers" 
+            <a routerLink="/partneri/ponude" 
                routerLinkActive="bg-solar-50 text-solar-600"
                (click)="closeMobileMenu()"
                class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-solar-600 hover:bg-gray-50 rounded-md">
               {{ 'b2bNav.offers' | translate }}
             </a>
-            <a routerLink="/partners/about" 
+            <a routerLink="/partneri/o-nama" 
                routerLinkActive="bg-solar-50 text-solar-600"
                (click)="closeMobileMenu()"
                class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-solar-600 hover:bg-gray-50 rounded-md">
               {{ 'b2bNav.partners' | translate }}
             </a>
-            <a routerLink="/partners/contact" 
+            <a routerLink="/partneri/kontakt" 
                routerLinkActive="bg-solar-50 text-solar-600"
                (click)="closeMobileMenu()"
                class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-solar-600 hover:bg-gray-50 rounded-md">
@@ -203,12 +203,12 @@ import { LucideAngularModule, ShoppingCart } from 'lucide-angular';
             <!-- Mobile Auth Section -->
             <div class="border-t border-gray-200 pt-4 mt-4">
               <div *ngIf="!isAuthenticated || !isCompanyContact" class="space-y-2">
-                <a routerLink="/login" 
+                <a routerLink="/prijava" 
                    (click)="closeMobileMenu()"
                    class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-solar-600 hover:bg-gray-50 rounded-md">
                   {{ 'b2bNav.signIn' | translate }}
                 </a>
-                <a routerLink="/partners/register" 
+                <a routerLink="/partneri/registracija" 
                    (click)="closeMobileMenu()"
                    class="block px-3 py-2 text-base font-medium bg-solar-600 text-white rounded-md hover:bg-solar-700">
                   {{ 'b2bNav.getStarted' | translate }}
@@ -224,7 +224,7 @@ import { LucideAngularModule, ShoppingCart } from 'lucide-angular';
               </div>
               
               <div *ngIf="isAuthenticated && isCompanyContact" class="space-y-2">
-                <a routerLink="/partners/profile" 
+                <a routerLink="/partneri/profil" 
                    (click)="closeMobileMenu()"
                    class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-solar-600 hover:bg-gray-50 rounded-md">
                   {{ 'b2bNav.profile' | translate }}
@@ -330,7 +330,7 @@ export class B2bNavbarComponent implements OnInit, OnDestroy {
       this.isAuthenticated = false;
       this.isCompanyContact = false;
       this.currentUser = null;
-      this.router.navigate(['/partners']);
+      this.router.navigate(['/partneri']);
     });
   }
 

@@ -52,10 +52,10 @@ export class PartnersCtaComponent implements OnInit, OnDestroy {
   }
 
   navigateToRegister() {
-    this.router.navigate(['/partners/register']);
+    this.router.navigate(['/partneri/register']);
   }
 
   navigateToContactSales() {
-    this.router.navigate(['/partners/contact']);
+    this.router.navigate(['/partneri/contact']);
   }
 }

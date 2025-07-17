@@ -305,12 +305,12 @@ export class PartnersOffersComponent implements OnInit, OnDestroy {
 
   navigateToLogin(): void {
     // Navigate to login page
-    window.location.href = '/login';
+    window.location.href = '/prijava';
   }
 
   navigateToPartnerRegistration(): void {
     // Navigate to partner registration page
-    this.router.navigate(['/partners/register']);
+    this.router.navigate(['/partneri/register']);
   }
 
   claimOffer(offer: Offer): void {
@@ -440,7 +440,7 @@ export class PartnersOffersComponent implements OnInit, OnDestroy {
   }
 
   viewOfferDetails(offer: Offer): void {
-    this.router.navigate(['/partners/offers', offer.id]);
+    this.router.navigate(['/partneri/offers', offer.id]);
   }
 
   copyCouponCode(couponCode: string): void {

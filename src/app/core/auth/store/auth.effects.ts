@@ -95,7 +95,7 @@ export class AuthEffects {
                 this.authPersistence.saveAuthState(token, user);
                 // If user is not email verified, navigate to confirmation page
                 if (user && !user.emailVerified) {
-                    this.router.navigate(['/confirmation'], {
+                    this.router.navigate(['/potvrda'], {
                         queryParams: { email: user.email }
                     });
                 }
@@ -114,13 +114,13 @@ export class AuthEffects {
                     tap(() => {
                         // Clear persisted auth state
                         this.authPersistence.clearAuthState();
-                        this.router.navigate(['/login']);
+                        this.router.navigate(['/prijava']);
                     }),
                     map(() => AuthActions.logoutSuccess()),
                     catchError(() => {
                         // Even if logout fails, clear the state and redirect
                         this.authPersistence.clearAuthState();
-                        this.router.navigate(['/login']);
+                        this.router.navigate(['/prijava']);
                         return of(AuthActions.logoutSuccess());
                     })
                 )
@@ -244,7 +244,7 @@ export class AuthEffects {
         this.actions$.pipe(
             ofType(AuthActions.resetPasswordSuccess),
             tap(() => {
-                this.router.navigate(['/login']);
+                this.router.navigate(['/prijava']);
             })
         ),
         { dispatch: false }

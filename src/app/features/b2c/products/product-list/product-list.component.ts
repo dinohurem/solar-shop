@@ -45,6 +45,7 @@ export interface Product {
   availability: 'available' | 'limited' | 'out-of-stock';
   featured: boolean;
   createdAt: Date;
+  sku?: string;
 }
 
 export interface ProductFilters {
@@ -193,7 +194,7 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
               <div 
                 *ngFor="let product of filteredProducts$ | async; trackBy: trackByProductId"
                 class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow duration-300 group cursor-pointer"
-                [routerLink]="['/products', product.id]"
+                [routerLink]="['/proizvodi', product.id]"
               >
                 <!-- Product Image -->
                 <div class="relative aspect-square overflow-hidden">

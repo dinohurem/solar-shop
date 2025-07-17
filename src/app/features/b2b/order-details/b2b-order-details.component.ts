@@ -22,7 +22,7 @@ import { Order } from '../../../shared/models/order.model';
               </p>
             </div>
             <button 
-              routerLink="/partners/profile"
+              routerLink="/partneri/profil"
               [queryParams]="{tab: 'company-orders'}"
               class="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium font-['DM_Sans'] flex items-center space-x-2">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

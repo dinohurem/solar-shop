@@ -373,11 +373,11 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
           </p>
           
           <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <a routerLink="/partners/register" 
+            <a routerLink="/partneri/registracija" 
                class="bg-white text-solar-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors inline-flex items-center justify-center font-['DM_Sans']">
               {{ 'b2b.about.applyNow' | translate }}
             </a>
-            <a routerLink="/partners/contact" 
+            <a routerLink="/partneri/kontakt" 
                class="bg-solar-500 text-white px-8 py-3 rounded-lg font-semibold hover:bg-solar-400 transition-colors inline-flex items-center justify-center font-['DM_Sans']">
               {{ 'b2b.about.contactUs' | translate }}
             </a>

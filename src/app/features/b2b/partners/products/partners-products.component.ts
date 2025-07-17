@@ -679,11 +679,11 @@ export class PartnersProductsComponent implements OnInit, OnDestroy {
   }
 
   navigateToLogin(): void {
-    this.router.navigate(['/login']);
+    this.router.navigate(['/prijava']);
   }
 
   navigateToRegister(): void {
-    this.router.navigate(['/partners/register']);
+    this.router.navigate(['/partneri/register']);
   }
 
   addToCart(product: ProductWithPricing, event?: Event): void {
@@ -704,7 +704,7 @@ export class PartnersProductsComponent implements OnInit, OnDestroy {
       event.stopPropagation();
     }
     // Navigate to partner contact page
-    this.router.navigate(['/partners/contact'], {
+    this.router.navigate(['/partneri/contact'], {
       queryParams: {
         subject: 'pricingInquiry',
         productId: product.id,
@@ -719,7 +719,7 @@ export class PartnersProductsComponent implements OnInit, OnDestroy {
       event.stopPropagation();
     }
     // Navigate to B2B product details
-    this.router.navigate(['/partners/products', product.id]);
+    this.router.navigate(['/partneri/products', product.id]);
   }
 
   toggleMobileFilters(): void {

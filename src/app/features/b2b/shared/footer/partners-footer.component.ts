@@ -30,12 +30,12 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
             </h3>
             <ul class="space-y-2 text-sm">
               <li>
-                <a routerLink="/partners/products" class="text-gray-300 hover:text-white transition-colors font-['DM_Sans']">
+                <a routerLink="/partneri/proizvodi" class="text-gray-300 hover:text-white transition-colors font-['DM_Sans']">
                   {{ 'b2bNav.products' | translate }}
                 </a>
               </li>
               <li>
-                <a routerLink="/partners/offers" class="text-gray-300 hover:text-white transition-colors font-['DM_Sans']">
+                <a routerLink="/partneri/ponude" class="text-gray-300 hover:text-white transition-colors font-['DM_Sans']">
                   {{ 'b2bNav.offers' | translate }}
                 </a>
               </li>
@@ -49,17 +49,17 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
             </h3>
             <ul class="space-y-2 text-sm">
             <li>
-                <a routerLink="/partners/about" class="text-gray-300 hover:text-white transition-colors font-['DM_Sans']">
+                <a routerLink="/partneri/o-nama" class="text-gray-300 hover:text-white transition-colors font-['DM_Sans']">
                   {{ 'b2bNav.partners' | translate }}
                 </a>
               </li>
               <li>
-                <a routerLink="/company" class="text-gray-300 hover:text-white transition-colors font-['DM_Sans']">
+                <a routerLink="/tvrtka" class="text-gray-300 hover:text-white transition-colors font-['DM_Sans']">
                   {{ 'b2bNav.about' | translate }}
                 </a>
               </li>
               <li>
-                <a routerLink="/partners/contact" class="text-gray-300 hover:text-white transition-colors font-['DM_Sans']">
+                <a routerLink="/partneri/kontakt" class="text-gray-300 hover:text-white transition-colors font-['DM_Sans']">
                   {{ 'b2bNav.contact' | translate }}
                 </a>
               </li>
@@ -78,7 +78,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
                 </a>
               </li>
               <li>
-                <a routerLink="/partners/register" class="text-gray-300 hover:text-white transition-colors font-['DM_Sans']">
+                <a routerLink="/partneri/registracija" class="text-gray-300 hover:text-white transition-colors font-['DM_Sans']">
                   {{ 'b2bFooter.becomePartner' | translate }}
                 </a>
               </li>

@@ -181,7 +181,7 @@ export class CheckoutComponent implements OnInit {
     // Check if cart is empty and redirect if needed
     this.store.select(CartSelectors.selectIsCartEmpty).subscribe(isEmpty => {
       if (isEmpty) {
-        this.router.navigate(['/products']);
+        this.router.navigate(['/proizvodi']);
       }
     });
 
@@ -198,11 +198,11 @@ export class CheckoutComponent implements OnInit {
 
   private updateCurrentStep() {
     const url = this.router.url;
-    if (url.includes('/checkout/order-review')) {
+    if (url.includes('/blagajna/pregled-narudzbe')) {
       this.currentStep = 1;
-    } else if (url.includes('/checkout/shipping')) {
+    } else if (url.includes('/blagajna/dostava')) {
       this.currentStep = 2;
-    } else if (url.includes('/checkout/payment')) {
+    } else if (url.includes('/blagajna/placanje')) {
       this.currentStep = 3;
     }
   }

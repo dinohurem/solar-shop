@@ -122,15 +122,13 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
   `]
 })
 export class ProductsComponent implements OnInit {
-  productCategories$: Observable<ProductCategory[]>;
+  productCategories$!: Observable<ProductCategory[]>;
   isLoading = false;
 
   constructor(
     private router: Router,
     private categoriesService: CategoriesService
-  ) {
-    this.productCategories$ = this.categoriesService.getTopLevelCategories();
-  }
+  ) {}
 
   ngOnInit(): void {
     this.loadCategories();
@@ -142,7 +140,7 @@ export class ProductsComponent implements OnInit {
 
     // Subscribe to handle loading state
     this.productCategories$.subscribe({
-      next: () => {
+      next: (categories) => {
         this.isLoading = false;
       },
       error: (error) => {
@@ -160,12 +158,12 @@ export class ProductsComponent implements OnInit {
     // Navigate to product list with category filter
     // Use slug first, then fallback to name (URL-friendly)
     const categoryParam = category.slug || category.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    this.router.navigate(['/products'], {
+    this.router.navigate(['/proizvodi'], {
       queryParams: { category: categoryParam }
     });
   }
 
   navigateToContact(): void {
-    this.router.navigate(['/contact']);
+    this.router.navigate(['/kontakt']);
   }
 } 

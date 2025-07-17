@@ -23,7 +23,7 @@ import { Order } from '../../../shared/models/order.model';
               </p>
             </div>
             <button 
-              routerLink="/profile"
+              routerLink="/profil"
               [queryParams]="{tab: 'my-orders'}"
               class="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium font-['DM_Sans'] flex items-center space-x-2">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -150,7 +150,7 @@ import { Order } from '../../../shared/models/order.model';
                   <div class="mt-2">
                     <a 
                       *ngIf="item.productId || item.productName; else disabledLink"
-                      [routerLink]="item.productId ? ['/products', item.productId] : ['/products']"
+                      [routerLink]="item.productId ? ['/proizvodi', item.productId] : ['/proizvodi']"
                       [queryParams]="!item.productId && item.productName ? { search: item.productName } : null"
                       class="inline-flex items-center text-xs text-blue-600 hover:text-blue-800 font-medium cursor-pointer transition-colors">
                       {{ item.productId ? ('orderDetails.viewDetails' | translate) : ('orderDetails.searchForProduct' | translate) }}

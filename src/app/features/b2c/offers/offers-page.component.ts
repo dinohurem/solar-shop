@@ -199,11 +199,11 @@ export class OffersPageComponent implements OnInit {
   }
 
   navigateToOfferDetails(offerId: string) {
-    this.router.navigate(['/offers', offerId]);
+    this.router.navigate(['/ponude', offerId]);
   }
 
   navigateToProducts(): void {
-    this.router.navigate(['/products']);
+    this.router.navigate(['/proizvodi']);
   }
 
   onNewsletterSubmit(event: Event, form: NgForm): void {

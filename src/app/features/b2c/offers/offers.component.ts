@@ -120,10 +120,10 @@ export class OffersComponent implements OnInit {
   }
 
   navigateToOffers() {
-    this.router.navigate(['/offers']);
+    this.router.navigate(['/ponude']);
   }
 
   navigateToOfferDetails(offerId: string) {
-    this.router.navigate(['/offers', offerId]);
+    this.router.navigate(['/ponude', offerId]);
   }
 } 

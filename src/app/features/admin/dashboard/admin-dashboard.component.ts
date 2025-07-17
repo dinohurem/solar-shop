@@ -4,8 +4,6 @@ import { RouterModule, Router } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { SupabaseService } from '../../../services/supabase.service';
 import { Observable, from } from 'rxjs';
-import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
-
 interface DashboardStats {
   totalProducts: number;
   totalCategories: number;
@@ -19,15 +17,15 @@ interface DashboardStats {
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, TranslatePipe],
+  imports: [CommonModule, RouterModule],
   template: `
     <div class="space-y-6">
       <div class="flex items-center justify-between">
-        <h1 class="text-3xl font-bold text-gray-900">{{ 'admin.dashboard' | translate }}</h1>
+        <h1 class="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
         <button 
           (click)="refreshStats()"
           class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-          {{ 'admin.refreshData' | translate }}
+          Refresh Data
         </button>
       </div>
 
@@ -35,7 +33,7 @@ interface DashboardStats {
         <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm font-medium text-gray-600">{{ 'admin.totalProducts' | translate }}</p>
+              <p class="text-sm font-medium text-gray-600">Total Products</p>
               <p class="text-3xl font-bold text-gray-900">{{ stats.totalProducts }}</p>
             </div>
             <div class="p-3 bg-blue-100 rounded-lg">
@@ -45,8 +43,8 @@ interface DashboardStats {
             </div>
           </div>
           <div class="mt-4">
-            <a routerLink="/admin/products" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
-              {{ 'admin.manageProducts' | translate }} →
+            <a routerLink="/admin/proizvodi" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+              Manage Products →
             </a>
           </div>
         </div>
@@ -54,7 +52,7 @@ interface DashboardStats {
         <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm font-medium text-gray-600">{{ 'admin.categories' | translate }}</p>
+              <p class="text-sm font-medium text-gray-600">Categories</p>
               <p class="text-3xl font-bold text-gray-900">{{ stats.totalCategories }}</p>
             </div>
             <div class="p-3 bg-green-100 rounded-lg">
@@ -64,8 +62,8 @@ interface DashboardStats {
             </div>
           </div>
           <div class="mt-4">
-            <a routerLink="/admin/categories" class="text-green-600 hover:text-green-800 text-sm font-medium">
-              {{ 'admin.manageCategories' | translate }} →
+            <a routerLink="/admin/kategorije" class="text-green-600 hover:text-green-800 text-sm font-medium">
+              Manage Categories →
             </a>
           </div>
         </div>
@@ -73,7 +71,7 @@ interface DashboardStats {
         <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm font-medium text-gray-600">{{ 'admin.blogPosts' | translate }}</p>
+              <p class="text-sm font-medium text-gray-600">Blog Posts</p>
               <p class="text-3xl font-bold text-gray-900">{{ stats.totalBlogPosts }}</p>
             </div>
             <div class="p-3 bg-purple-100 rounded-lg">
@@ -84,7 +82,7 @@ interface DashboardStats {
           </div>
           <div class="mt-4">
             <a routerLink="/admin/blog" class="text-purple-600 hover:text-purple-800 text-sm font-medium">
-              {{ 'admin.manageBlogPosts' | translate }} →
+              Manage Blog Posts →
             </a>
           </div>
         </div>
@@ -92,7 +90,7 @@ interface DashboardStats {
         <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm font-medium text-gray-600">{{ 'admin.activeOffers' | translate }}</p>
+              <p class="text-sm font-medium text-gray-600">Active Offers</p>
               <p class="text-3xl font-bold text-gray-900">{{ stats.totalOffers }}</p>
             </div>
             <div class="p-3 bg-yellow-100 rounded-lg">
@@ -102,8 +100,8 @@ interface DashboardStats {
             </div>
           </div>
           <div class="mt-4">
-            <a routerLink="/admin/offers" class="text-yellow-600 hover:text-yellow-800 text-sm font-medium">
-              {{ 'admin.manageOffers' | translate }} →
+            <a routerLink="/admin/ponude" class="text-yellow-600 hover:text-yellow-800 text-sm font-medium">
+              Manage Offers →
             </a>
           </div>
         </div>
@@ -111,7 +109,7 @@ interface DashboardStats {
         <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm font-medium text-gray-600">{{ 'admin.totalUsers' | translate }}</p>
+              <p class="text-sm font-medium text-gray-600">Total Users</p>
               <p class="text-3xl font-bold text-gray-900">{{ stats.totalUsers }}</p>
             </div>
             <div class="p-3 bg-indigo-100 rounded-lg">
@@ -121,8 +119,8 @@ interface DashboardStats {
             </div>
           </div>
           <div class="mt-4">
-            <a routerLink="/admin/users" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">
-              {{ 'admin.manageUsers' | translate }} →
+            <a routerLink="/admin/korisnici" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">
+              Manage Users →
             </a>
           </div>
         </div>
@@ -130,7 +128,7 @@ interface DashboardStats {
         <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm font-medium text-gray-600">{{ 'admin.totalOrders' | translate }}</p>
+              <p class="text-sm font-medium text-gray-600">Total Orders</p>
               <p class="text-3xl font-bold text-gray-900">{{ stats.totalOrders }}</p>
             </div>
             <div class="p-3 bg-orange-100 rounded-lg">
@@ -140,8 +138,8 @@ interface DashboardStats {
             </div>
           </div>
           <div class="mt-4">
-            <a routerLink="/admin/orders" class="text-orange-600 hover:text-orange-800 text-sm font-medium">
-              {{ 'admin.manageOrders' | translate }} →
+            <a routerLink="/admin/narudzbe" class="text-orange-600 hover:text-orange-800 text-sm font-medium">
+              Manage Orders →
             </a>
           </div>
         </div>
@@ -150,9 +148,9 @@ interface DashboardStats {
       <div *ngIf="stats$ | async as stats">
         <div *ngIf="stats.recentOrders && stats.recentOrders.length > 0" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div class="flex justify-between items-center mb-6">
-            <h2 class="text-lg font-semibold text-gray-900">{{ 'admin.recentOrders' | translate }}</h2>
-            <a routerLink="/admin/orders" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
-              {{ 'admin.viewAllOrders' | translate }} →
+            <h2 class="text-lg font-semibold text-gray-900">Recent Orders</h2>
+            <a routerLink="/admin/narudzbe" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+              View All Orders →
             </a>
           </div>
           
@@ -183,7 +181,7 @@ interface DashboardStats {
                         'bg-green-100 text-green-800': order.status === 'delivered',
                         'bg-red-100 text-red-800': order.status === 'cancelled'
                       }">
-                  {{ 'admin.orderStatus.' + order.status | translate }}
+                  {{ getOrderStatusLabel(order.status) }}
                 </span>
                 <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -225,7 +223,19 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   viewOrderDetails(orderId: string): void {
-    this.router.navigate(['/admin/orders/edit', orderId]);
+    this.router.navigate(['/admin/narudzbe/edit', orderId]);
+  }
+
+  getOrderStatusLabel(status: string): string {
+    const statusLabels: { [key: string]: string } = {
+      'pending': 'Pending',
+      'confirmed': 'Confirmed',
+      'processing': 'Processing',
+      'shipped': 'Shipped',
+      'delivered': 'Delivered',
+      'cancelled': 'Cancelled'
+    };
+    return statusLabels[status] || status;
   }
 
   private loadStats(): Observable<DashboardStats> {

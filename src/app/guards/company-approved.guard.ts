@@ -26,7 +26,7 @@ export class CompanyApprovedGuard implements CanActivate {
                         map(({ data, error }) => {
                             if (error) {
                                 // No company found, redirect to register
-                                return this.router.createUrlTree(['/partners/register']);
+                                return this.router.createUrlTree(['/partneri/register']);
                             }
 
                             if (data && data.status === 'approved') {
@@ -34,18 +34,18 @@ export class CompanyApprovedGuard implements CanActivate {
                             }
 
                             // Company exists but not approved
-                            return this.router.createUrlTree(['/partners/register']);
+                            return this.router.createUrlTree(['/partneri/register']);
                         }),
-                        catchError(() => of(this.router.createUrlTree(['/partners/register'])))
+                        catchError(() => of(this.router.createUrlTree(['/partneri/register'])))
                     );
                 } else {
                     // No session, redirect to login
-                    return of(this.router.createUrlTree(['/login']));
+                    return of(this.router.createUrlTree(['/prijava']));
                 }
             }),
             catchError(() => {
                 // Error getting session, redirect to login
-                return of(this.router.createUrlTree(['/login']));
+                return of(this.router.createUrlTree(['/prijava']));
             })
         );
     }

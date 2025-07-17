@@ -2,6 +2,7 @@ import { Component, Input, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
+import { Router } from '@angular/router';
 import { Observable, Subject, combineLatest } from 'rxjs';
 import { takeUntil, filter, map, take } from 'rxjs/operators';
 import { Product } from '../../../product-list/product-list.component';
@@ -196,10 +197,19 @@ import { LucideAngularModule, Star, StarHalf, ShoppingCart } from 'lucide-angula
         <dl class="grid grid-cols-1 gap-4">
           <div class="flex justify-between">
             <dt class="text-sm font-medium text-gray-500 font-['DM_Sans']">{{ 'productDetails.category' | translate }}:</dt>
-            <dd class="text-sm text-gray-900 font-['DM_Sans']">{{ product.category }}</dd>
+            <dd class="text-sm font-['DM_Sans']">
+              <button 
+                *ngIf="product.category"
+                (click)="navigateToCategory(product.category)"
+                class="text-solar-600 hover:text-solar-700 hover:underline transition-colors"
+              >
+                {{ product.category }}
+              </button>
+              <span *ngIf="!product.category" class="text-gray-500">-</span>
+            </dd>
           </div>
           <div class="flex justify-between">
-            <dt class="text-sm font-medium text-gray-500 font-['DM_Sans']">{{ 'productDetails.manufacturer' | translate }}:</dt>
+            <dt class="text-sm font-medium text-gray-500 font-['DM_Sans']">{{ 'productDetails.brand' | translate }}:</dt>
             <dd class="text-sm text-gray-900 font-['DM_Sans']">{{ product.manufacturer }}</dd>
           </div>
           <div class="flex justify-between">
@@ -208,7 +218,7 @@ import { LucideAngularModule, Star, StarHalf, ShoppingCart } from 'lucide-angula
           </div>
           <div class="flex justify-between">
             <dt class="text-sm font-medium text-gray-500 font-['DM_Sans']">{{ 'productDetails.sku' | translate }}:</dt>
-            <dd class="text-sm text-gray-900 font-['DM_Sans']">{{ product.id.toUpperCase() }}</dd>
+            <dd class="text-sm text-gray-900 font-['DM_Sans']">{{ product.sku }}</dd>
           </div>
           <div class="flex justify-between" *ngIf="product.weight">
             <dt class="text-sm font-medium text-gray-500 font-['DM_Sans']">{{ 'productDetails.weight' | translate }}:</dt>
@@ -429,6 +439,7 @@ export class ProductInfoComponent implements OnInit, OnDestroy {
   readonly ShoppingCartIcon = ShoppingCart;
 
   private store = inject(Store);
+  private router = inject(Router);
   private toastService = inject(ToastService);
   private translationService = inject(TranslationService);
 
@@ -606,5 +617,11 @@ export class ProductInfoComponent implements OnInit, OnDestroy {
         block: 'start'
       });
     }
+  }
+
+  navigateToCategory(categoryName: string) {
+    this.router.navigate(['/proizvodi'], {
+      queryParams: { category: categoryName }
+    });
   }
 } 

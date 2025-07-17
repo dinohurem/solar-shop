@@ -94,7 +94,7 @@ import { TranslationService } from '../../../shared/services/translation.service
             <div class="flex flex-wrap gap-2">
               <span 
                 *ngFor="let tag of blogPost?.tags"
-                class="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm hover:bg-gray-200 transition-colors cursor-pointer font-['DM_Sans']"
+                class="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-['DM_Sans']"
               >
                 {{ tag.name }}
               </span>

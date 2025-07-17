@@ -209,14 +209,14 @@ import { LucideAngularModule, Search, User as UserIcon, CircleUserRound, Mail, P
 
           <!-- Desktop Navigation -->
           <div class="hidden lg:flex items-center space-x-8">
-            <a routerLink="/products" 
+            <a routerLink="/proizvodi" 
                routerLinkActive="text-solar-600 font-semibold" 
                class="relative text-gray-900 hover:text-solar-600 font-medium transition-all duration-300 hover:scale-105 group">
               <span>{{ 'nav.products' | translate }}</span>
               <div class="absolute bottom-0 left-0 w-0 h-0.5 bg-solar-600 transition-all duration-300 group-hover:w-full"></div>
             </a>
             
-            <a routerLink="/offers" 
+            <a routerLink="/ponude" 
                routerLinkActive="text-solar-600 font-semibold" 
                class="relative text-gray-900 hover:text-solar-600 font-medium transition-all duration-300 hover:scale-105 group">
               <span>{{ 'nav.offers' | translate }}</span>
@@ -232,21 +232,21 @@ import { LucideAngularModule, Search, User as UserIcon, CircleUserRound, Mail, P
             
 
             
-            <a routerLink="/company" 
+            <a routerLink="/tvrtka" 
                routerLinkActive="text-solar-600 font-semibold" 
                class="relative text-gray-900 hover:text-solar-600 font-medium transition-all duration-300 hover:scale-105 group">
               <span>{{ 'nav.company' | translate }}</span>
               <div class="absolute bottom-0 left-0 w-0 h-0.5 bg-solar-600 transition-all duration-300 group-hover:w-full"></div>
             </a>
             
-            <a routerLink="/contact" 
+            <a routerLink="/kontakt" 
                routerLinkActive="text-solar-600 font-semibold" 
                class="relative text-gray-900 hover:text-solar-600 font-medium transition-all duration-300 hover:scale-105 group">
               <span>{{ 'nav.contact' | translate }}</span>
               <div class="absolute bottom-0 left-0 w-0 h-0.5 bg-solar-600 transition-all duration-300 group-hover:w-full"></div>
             </a>
             
-            <a routerLink="/partners" 
+            <a routerLink="/partneri" 
                routerLinkActive="text-solar-600 font-semibold" 
                class="relative text-gray-900 hover:text-solar-600 font-medium transition-all duration-300 hover:scale-105 group">
               <span>{{ 'nav.partners' | translate }}</span>
@@ -310,7 +310,7 @@ import { LucideAngularModule, Search, User as UserIcon, CircleUserRound, Mail, P
                     <div class="text-gray-500 truncate">{{ (currentUser$ | async)?.email }}</div>
                   </div>
                   <a 
-                    routerLink="/profile" 
+                    routerLink="/profil" 
                     (click)="closeProfileMenu()"
                     class="block px-4 py-3 text-sm text-gray-700 hover:bg-solar-50 hover:text-solar-600 transition-all duration-200">
                     <div class="flex items-center space-x-3">
@@ -404,7 +404,7 @@ import { LucideAngularModule, Search, User as UserIcon, CircleUserRound, Mail, P
                   <div class="text-gray-500 truncate">{{ (currentUser$ | async)?.email }}</div>
                 </div>
                 <a 
-                  routerLink="/profile" 
+                  routerLink="/profil" 
                   (click)="closeProfileMenu()"
                   class="block px-4 py-3 text-sm text-gray-700 hover:bg-solar-50 hover:text-solar-600 transition-all duration-200">
                   <div class="flex items-center space-x-3">
@@ -463,14 +463,14 @@ import { LucideAngularModule, Search, User as UserIcon, CircleUserRound, Mail, P
           'max-h-0 opacity-0': !(isMobileMenuOpen$ | async)
         }">
         <div class="px-4 py-6 space-y-4">
-          <a routerLink="/products" 
+          <a routerLink="/proizvodi" 
              routerLinkActive="text-solar-600 font-semibold bg-solar-50" 
              (click)="closeMobileMenu()"
              class="block text-gray-900 hover:text-solar-600 font-medium transition-all duration-300 py-2 px-3 rounded-lg hover:bg-solar-50">
             {{ 'nav.products' | translate }}
           </a>
           
-          <a routerLink="/offers" 
+          <a routerLink="/ponude" 
              routerLinkActive="text-solar-600 font-semibold bg-solar-50" 
              (click)="closeMobileMenu()"
              class="block text-gray-900 hover:text-solar-600 font-medium transition-all duration-300 py-2 px-3 rounded-lg hover:bg-solar-50">
@@ -486,21 +486,21 @@ import { LucideAngularModule, Search, User as UserIcon, CircleUserRound, Mail, P
           
 
 
-          <a routerLink="/company" 
+          <a routerLink="/tvrtka" 
              routerLinkActive="text-solar-600 font-semibold bg-solar-50" 
              (click)="closeMobileMenu()"
              class="block text-gray-900 hover:text-solar-600 font-medium transition-all duration-300 py-2 px-3 rounded-lg hover:bg-solar-50">
             {{ 'nav.company' | translate }}
           </a>
           
-          <a routerLink="/contact" 
+          <a routerLink="/kontakt" 
              routerLinkActive="text-solar-600 font-semibold bg-solar-50" 
              (click)="closeMobileMenu()"
              class="block text-gray-900 hover:text-solar-600 font-medium transition-all duration-300 py-2 px-3 rounded-lg hover:bg-solar-50">
             {{ 'nav.contact' | translate }}
           </a>
           
-          <a routerLink="/partners" 
+          <a routerLink="/partneri" 
              routerLinkActive="text-solar-600 font-semibold bg-solar-50" 
              (click)="closeMobileMenu()"
              class="block text-gray-900 hover:text-solar-600 font-medium transition-all duration-300 py-2 px-3 rounded-lg hover:bg-solar-50">
@@ -509,7 +509,7 @@ import { LucideAngularModule, Search, User as UserIcon, CircleUserRound, Mail, P
           
           <!-- Mobile Authentication Links -->
           <div class="border-t border-gray-200 pt-4 mt-4" *ngIf="isAuthenticated$ | async">
-            <a routerLink="/profile" 
+            <a routerLink="/profil" 
                routerLinkActive="text-solar-600 font-semibold bg-solar-50" 
                (click)="closeMobileMenu()"
                class="block text-gray-900 hover:text-solar-600 font-medium transition-all duration-300 py-2 px-3 rounded-lg hover:bg-solar-50 mb-2">
@@ -705,11 +705,11 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   navigateToLogin(): void {
-    this.router.navigate(['/login']);
+    this.router.navigate(['/prijava']);
   }
 
   navigateToProfile(): void {
-    this.router.navigate(['/profile']);
+    this.router.navigate(['/profil']);
   }
 
   navigateToAdmin(): void {
@@ -778,7 +778,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   performSearch(): void {
     if (this.searchQuery && this.searchQuery.trim()) {
       this.closeSearchOverlay();
-      this.router.navigate(['/products'], {
+      this.router.navigate(['/proizvodi'], {
         queryParams: { search: this.searchQuery.trim() },
         state: { fromNavbar: true, clearFilters: true }
       });

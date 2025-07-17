@@ -1,29 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, from, map, catchError, of } from 'rxjs';
 import { SupabaseService } from '../../../../../services/supabase.service';
-
-export interface Product {
-    id: string;
-    name: string;
-    description: string;
-    price: number;
-    originalPrice?: number;
-    discount?: number;
-    imageUrl: string;
-    category: string;
-    manufacturer: string;
-    model?: string;
-    weight?: number;
-    dimensions?: string;
-    certificates: string[];
-    rating: number;
-    reviewCount: number;
-    availability: 'available' | 'limited' | 'out-of-stock';
-    featured: boolean;
-    createdAt: Date;
-    specifications: { [key: string]: string };
-    features: string[];
-}
+import { Product } from '../product-list.component';
 
 export interface ProductFilters {
     category?: string;
@@ -239,7 +217,8 @@ export class ProductListService {
                 featured: product.is_featured || false,
                 createdAt: new Date(product.created_at),
                 specifications: product.specifications || {},
-                features: product.features || []
+                features: product.features || [],
+                sku: product.sku || ''
             };
         } catch (error) {
             console.error('Error converting product:', error);

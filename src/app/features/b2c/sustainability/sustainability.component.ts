@@ -144,10 +144,10 @@ export class SustainabilityComponent implements OnInit {
   }
 
   navigateToMission() {
-    this.router.navigate(['/mission']);
+    this.router.navigate(['/misija']);
   }
 
   navigateToSustainability() {
-    this.router.navigate(['/company']);
+    this.router.navigate(['/tvrtka']);
   }
 } 

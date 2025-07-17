@@ -511,6 +511,6 @@ export class PaymentComponent implements OnInit, OnDestroy {
   }
 
   goBack() {
-    this.router.navigate(['/checkout/shipping']);
+    this.router.navigate(['/blagajna/dostava']);
   }
 } 

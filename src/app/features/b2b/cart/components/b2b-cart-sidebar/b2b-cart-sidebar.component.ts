@@ -440,7 +440,7 @@ export class B2BCartSidebarComponent implements OnInit, OnDestroy {
 
   proceedToCheckout(): void {
     this.closeSidebar();
-    this.router.navigate(['/partners/checkout']);
+    this.router.navigate(['/partneri/blagajna']);
   }
 
   trackByProductId(_index: number, item: B2BCartItem): string {

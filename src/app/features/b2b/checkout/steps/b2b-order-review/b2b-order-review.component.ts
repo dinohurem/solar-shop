@@ -182,7 +182,7 @@ export class B2bOrderReviewComponent implements OnInit {
             localStorage.setItem('b2bCheckoutItems', JSON.stringify(cartItems));
         });
 
-        this.router.navigate(['/partners/checkout/shipping']);
+        this.router.navigate(['/partneri/blagajna/dostava']);
     }
 
     getProductImageUrl(item: B2BCartItem): string {

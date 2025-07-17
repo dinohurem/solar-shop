@@ -121,13 +121,15 @@ export class ProductPhotosComponent implements OnInit, OnDestroy {
   isZoomOpen: boolean = false;
 
   ngOnInit(): void {
-    // Generate multiple images for the product (in a real app, these would come from the product data)
-    this.productImages = [
-      this.product.imageUrl,
-      this.product.imageUrl.replace('w=500&h=500', 'w=500&h=500&sat=-100'), // B&W version
-      this.product.imageUrl.replace('w=500&h=500', 'w=500&h=500&sepia=100'), // Sepia version
-      this.product.imageUrl.replace('w=500&h=500', 'w=500&h=500&hue=180'), // Hue shifted version
-    ];
+    // Get images from product data
+    if (this.product.imageUrl) {
+      // For local Product interface, we just have a single imageUrl
+      this.productImages = [this.product.imageUrl];
+    } else {
+      // Fallback to placeholder if no images
+      this.productImages = ['assets/images/product-placeholder.jpg'];
+    }
+    
     this.selectedImage = this.productImages[0];
   }
 

@@ -166,7 +166,7 @@ export class AdminProductsComponent implements OnInit {
 
         switch (action) {
             case 'edit':
-                this.router.navigate(['/admin/products/edit', item.id]);
+                this.router.navigate(['/admin/proizvodi/uredi', item.id]);
                 break;
             case 'delete':
                 this.deleteProduct(item);
@@ -175,11 +175,11 @@ export class AdminProductsComponent implements OnInit {
     }
 
     onRowClick(item: any): void {
-        this.router.navigate(['/admin/products/edit', item.id]);
+        this.router.navigate(['/admin/proizvodi/uredi', item.id]);
     }
 
     onAddProduct(): void {
-        this.router.navigate(['/admin/products/create']);
+        this.router.navigate(['/admin/proizvodi/kreiraj']);
     }
 
     async onCsvImported(csvData: any[]): Promise<void> {
@@ -211,8 +211,8 @@ export class AdminProductsComponent implements OnInit {
                         const category = await this.supabaseService.getTable('categories', { name: categoryName });
                         if (category.length === 0) {
                             const categorySlug = categoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-                            const newCategory = await this.supabaseService.createRecord('categories', { 
-                                name: categoryName, 
+                            const newCategory = await this.supabaseService.createRecord('categories', {
+                                name: categoryName,
                                 slug: categorySlug,
                                 is_active: true,
                                 sort_order: 0

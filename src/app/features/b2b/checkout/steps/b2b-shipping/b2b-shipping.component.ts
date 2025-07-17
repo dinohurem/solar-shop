@@ -326,7 +326,7 @@ export class B2bShippingComponent implements OnInit, OnDestroy {
     const checkoutItems = localStorage.getItem('b2bCheckoutItems');
     if (!checkoutItems) {
       console.error('No B2B checkout items found. Redirecting to cart.');
-      this.router.navigate(['/partners/checkout/order-review']);
+      this.router.navigate(['/partneri/blagajna/pregled-narudzbe']);
       return;
     }
 
@@ -337,10 +337,10 @@ export class B2bShippingComponent implements OnInit, OnDestroy {
     };
     localStorage.setItem('b2bShippingInfo', JSON.stringify(shippingData));
 
-    this.router.navigate(['/partners/checkout/payment']);
+    this.router.navigate(['/partneri/blagajna/placanje']);
   }
 
   goBack() {
-    this.router.navigate(['/partners/checkout/order-review']);
+    this.router.navigate(['/partneri/blagajna/pregled-narudzbe']);
   }
 } 

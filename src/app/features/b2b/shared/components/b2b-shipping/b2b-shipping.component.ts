@@ -240,7 +240,7 @@ export class B2BShippingComponent implements OnInit, OnDestroy {
 
       // Navigate to payment step
       if (typeof window !== 'undefined') {
-        window.location.href = '/partners/checkout/payment';
+        window.location.href = '/partneri/checkout/payment';
       }
     } else {
       Object.keys(this.shippingForm.controls).forEach(key => {

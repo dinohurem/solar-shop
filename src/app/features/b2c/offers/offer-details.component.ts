@@ -376,11 +376,11 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
   }
 
   navigateToProduct(productId: string): void {
-    this.router.navigate(['/products', productId]);
+    this.router.navigate(['/proizvodi', productId]);
   }
 
   navigateToProducts(): void {
-    this.router.navigate(['/products']);
+    this.router.navigate(['/proizvodi']);
   }
 
   getTotalOriginalPrice(): number {

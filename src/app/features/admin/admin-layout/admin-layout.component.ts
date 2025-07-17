@@ -62,7 +62,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
               <div class="pt-4">
                 <h3 class="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{{ 'admin.contentManagement' | translate }}</h3>
                 
-                <a routerLink="/admin/products" 
+                <a routerLink="/admin/proizvodi" 
                    routerLinkActive="bg-blue-50 text-blue-700 border-blue-300"
                    class="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 transition-colors border border-transparent">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -71,7 +71,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
                   <span>{{ 'admin.products' | translate }}</span>
                 </a>
 
-                <a routerLink="/admin/categories" 
+                <a routerLink="/admin/kategorije" 
                    routerLinkActive="bg-blue-50 text-blue-700 border-blue-300"
                    class="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 transition-colors border border-transparent">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -89,7 +89,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
                   <span>{{ 'admin.blog' | translate }}</span>
                 </a>
 
-                <a routerLink="/admin/offers" 
+                <a routerLink="/admin/ponude" 
                    routerLinkActive="bg-blue-50 text-blue-700 border-blue-300"
                    class="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 transition-colors border border-transparent">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -103,7 +103,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
               <div class="pt-4">
                 <h3 class="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{{ 'admin.systemManagement' | translate }}</h3>
                 
-                <a routerLink="/admin/orders" 
+                <a routerLink="/admin/narudzbe" 
                    routerLinkActive="bg-blue-50 text-blue-700 border-blue-300"
                    class="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 transition-colors border border-transparent">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -112,7 +112,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
                   <span>{{ 'admin.orders' | translate }}</span>
                 </a>
 
-                <a routerLink="/admin/users" 
+                <a routerLink="/admin/korisnici" 
                    routerLinkActive="bg-blue-50 text-blue-700 border-blue-300"
                    class="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 transition-colors border border-transparent">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -121,7 +121,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
                   <span>{{ 'admin.users' | translate }}</span>
                 </a>
 
-                <a routerLink="/admin/reviews" 
+                <a routerLink="/admin/recenzije" 
                    routerLinkActive="bg-blue-50 text-blue-700 border-blue-300"
                    class="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 transition-colors border border-transparent">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -130,7 +130,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
                   <span>{{ 'admin.reviews' | translate }}</span>
                 </a>
 
-                <a routerLink="/admin/wishlist"
+                <a routerLink="/admin/lista-zelja"
                    routerLinkActive="bg-blue-50 text-blue-700 border-blue-300"
                    class="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 transition-colors border border-transparent">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -139,7 +139,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
                   <span>{{ 'admin.wishlist' | translate }}</span>
                 </a>
 
-                <a routerLink="/admin/contacts"
+                <a routerLink="/admin/kontakti"
                    routerLinkActive="bg-blue-50 text-blue-700 border-blue-300"
                    class="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 transition-colors border border-transparent">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -163,7 +163,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
               <div class="pt-4">
                 <h3 class="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{{ 'admin.companyManagement' | translate }}</h3>
                 
-                <a routerLink="/admin/orders-partners" 
+                <a routerLink="/admin/narudzbe-partneri" 
                    routerLinkActive="bg-blue-50 text-blue-700 border-blue-300"
                    class="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 transition-colors border border-transparent">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -172,7 +172,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
                   <span>{{ 'admin.partnerOrders' | translate }}</span>
                 </a>
 
-                <a routerLink="/admin/companies" 
+                <a routerLink="/admin/tvrtke" 
                    routerLinkActive="bg-blue-50 text-blue-700 border-blue-300"
                    class="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 transition-colors border border-transparent">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -181,7 +181,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
                   <span>{{ 'admin.companies' | translate }}</span>
                 </a>
 
-                <a routerLink="/admin/company-pricing"
+                <a routerLink="/admin/cijenik-tvrtka"
                    routerLinkActive="bg-blue-50 text-blue-700 border-blue-300"
                    class="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 transition-colors border border-transparent">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

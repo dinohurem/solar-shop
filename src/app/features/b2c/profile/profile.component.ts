@@ -490,7 +490,7 @@ import { WriteReviewModalComponent } from '../../../shared/components/modals/wri
                   <h3 class="text-lg font-medium text-gray-900 font-['Poppins'] mb-2">{{ 'profile.noOrdersFound' | translate }}</h3>
                   <p class="text-gray-600 font-['DM_Sans'] mb-6">{{ 'profile.startShopping' | translate }}</p>
                   <button
-                    (click)="router.navigate(['/products'])"
+                    (click)="router.navigate(['/proizvodi'])"
                     class="px-6 py-3 bg-solar-600 text-white rounded-lg font-['DM_Sans'] font-medium hover:bg-solar-700 transition-colors">
                     {{ 'profile.browseProducts' | translate }}
                   </button>
@@ -594,7 +594,7 @@ import { WriteReviewModalComponent } from '../../../shared/components/modals/wri
                   <h3 class="text-lg font-medium text-gray-900 font-['Poppins'] mb-2">{{ 'profile.noWishlistItems' | translate }}</h3>
                   <p class="text-gray-600 font-['DM_Sans'] mb-6">{{ 'profile.startAddingToWishlist' | translate }}</p>
                   <button
-                    (click)="router.navigate(['/products'])"
+                    (click)="router.navigate(['/proizvodi'])"
                     class="px-6 py-3 bg-solar-600 text-white rounded-lg font-['DM_Sans'] font-medium hover:bg-solar-700 transition-colors">
                     {{ 'profile.browseProducts' | translate }}
                   </button>
@@ -699,7 +699,7 @@ import { WriteReviewModalComponent } from '../../../shared/components/modals/wri
                   <h3 class="text-lg font-medium text-gray-900 font-['Poppins'] mb-2">{{ 'profile.noReviewsFound' | translate }}</h3>
                   <p class="text-gray-600 font-['DM_Sans'] mb-6">{{ 'profile.writeFirstReview' | translate }}</p>
                   <button
-                    (click)="router.navigate(['/products'])"
+                    (click)="router.navigate(['/proizvodi'])"
                     class="px-6 py-3 bg-solar-600 text-white rounded-lg font-['DM_Sans'] font-medium hover:bg-solar-700 transition-colors">
                     {{ 'profile.browseProducts' | translate }}
                   </button>
@@ -869,7 +869,7 @@ export class ProfileComponent implements OnInit {
   }
 
   viewOrderDetails(orderId: string): void {
-    this.router.navigate(['/order-details', orderId]);
+    this.router.navigate(['/detalji-narudzbe', orderId]);
   }
 
   removeFromWishlist(productId: string): void {
@@ -888,7 +888,7 @@ export class ProfileComponent implements OnInit {
 
   viewProductDetails(productId: string | undefined): void {
     if (productId) {
-      this.router.navigate(['/products', productId]);
+      this.router.navigate(['/proizvodi', productId]);
     }
   }
 

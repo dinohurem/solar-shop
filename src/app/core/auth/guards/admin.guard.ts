@@ -30,7 +30,7 @@ export class AdminGuard implements CanActivate {
                     map(([isAuthenticated, hasAdminPrivileges]) => {
                         if (!isAuthenticated) {
                             // Redirect to login if not authenticated
-                            this.router.navigate(['/login']);
+                            this.router.navigate(['/prijava']);
                             return false;
                         }
 
@@ -43,13 +43,13 @@ export class AdminGuard implements CanActivate {
                         return true;
                     }),
                     catchError(() => {
-                        this.router.navigate(['/login']);
+                        this.router.navigate(['/prijava']);
                         return of(false);
                     })
                 );
             }),
             catchError(() => {
-                this.router.navigate(['/login']);
+                this.router.navigate(['/prijava']);
                 return of(false);
             })
         );

@@ -34,7 +34,7 @@ import { Offer } from '../../../../shared/models/offer.model';
             <ol class="flex items-center space-x-4">
               <li>
                 <div>
-                  <a [routerLink]="['/home']" class="text-gray-400 hover:text-gray-500 font-['DM_Sans']">
+                  <a [routerLink]="['/']" class="text-gray-400 hover:text-gray-500 font-['DM_Sans']">
                     {{ 'productDetails.home' | translate }}
                   </a>
                 </div>
@@ -44,7 +44,7 @@ import { Offer } from '../../../../shared/models/offer.model';
                   <svg class="flex-shrink-0 h-5 w-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
                   </svg>
-                  <a [routerLink]="['/products']" class="ml-4 text-gray-400 hover:text-gray-500 font-['DM_Sans']">
+                  <a [routerLink]="['/proizvodi']" class="ml-4 text-gray-400 hover:text-gray-500 font-['DM_Sans']">
                     {{ 'productDetails.products' | translate }}
                   </a>
                 </div>
@@ -80,7 +80,7 @@ import { Offer } from '../../../../shared/models/offer.model';
           <h3 class="text-lg font-medium text-gray-900 mb-2 font-['Poppins']">{{ 'productDetails.productNotFound' | translate }}</h3>
           <p class="text-gray-600 mb-6 font-['DM_Sans']">{{ error }}</p>
           <button 
-            [routerLink]="['/products']"
+            [routerLink]="['/proizvodi']"
             class="px-6 py-3 bg-[#0ACF83] text-white font-semibold rounded-lg hover:bg-[#09b574] transition-colors font-['DM_Sans']"
           >
             {{ 'productDetails.backToProducts' | translate }}
@@ -262,7 +262,7 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
         this.store.dispatch(ProductDetailsActions.loadProduct({ productId }));
         this.loadProductOffers(productId);
       } else {
-        this.router.navigate(['/products']);
+        this.router.navigate(['/proizvodi']);
       }
     });
   }
@@ -299,11 +299,11 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
   }
 
   viewOffer(offerId: string): void {
-    this.router.navigate(['/offers', offerId]);
+    this.router.navigate(['/ponude', offerId]);
   }
 
   claimOffer(offerId: string): void {
-    this.router.navigate(['/offers', offerId]);
+    this.router.navigate(['/ponude', offerId]);
   }
 
   public trackByOfferId(_index: number, offer: Offer): string {

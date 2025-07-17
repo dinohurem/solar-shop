@@ -159,7 +159,7 @@ export class PartnersCategoriesComponent implements OnInit {
 
   navigateToProducts(categorySlug: string): void {
     // Navigate to products page with category filter applied
-    this.router.navigate(['/partners/products'], {
+    this.router.navigate(['/partneri/products'], {
       queryParams: { category: categorySlug }
     });
   }

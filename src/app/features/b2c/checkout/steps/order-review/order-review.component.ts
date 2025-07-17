@@ -150,6 +150,6 @@ export class OrderReviewComponent implements OnInit {
       localStorage.setItem('checkoutItems', JSON.stringify(cartItems));
     });
 
-    this.router.navigate(['/checkout/shipping']);
+    this.router.navigate(['/blagajna/dostava']);
   }
 } 

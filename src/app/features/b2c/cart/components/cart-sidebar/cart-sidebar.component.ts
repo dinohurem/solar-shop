@@ -433,7 +433,7 @@ export class CartSidebarComponent implements OnInit {
     this.store.dispatch(CartActions.setCartStep({ step: 'cart' }));
     this.store.dispatch(CartActions.closeCart());
     // Navigate to the first step of checkout
-    this.router.navigate(['/checkout/order-review']);
+    this.router.navigate(['/blagajna/pregled-narudzbe']);
   }
 
   trackByItemId(index: number, item: CartItem): string {

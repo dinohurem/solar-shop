@@ -429,7 +429,7 @@ export class PartnerProfileComponent implements OnInit, OnDestroy {
       } else {
         console.log('No user in NgRx store, redirecting to login');
         this.loading = false;
-        this.router.navigate(['/login']);
+        this.router.navigate(['/prijava']);
       }
     });
   }
@@ -774,7 +774,7 @@ export class PartnerProfileComponent implements OnInit, OnDestroy {
   }
 
   viewOrderDetails(order: Order): void {
-    this.router.navigate(['/partners/order-details', order.id]);
+    this.router.navigate(['/partneri/order-details', order.id]);
   }
 
   reorderItems(order: Order): void {
@@ -783,15 +783,15 @@ export class PartnerProfileComponent implements OnInit, OnDestroy {
   }
 
   contactSupport(): void {
-    this.router.navigate(['/partners/contact']);
+    this.router.navigate(['/partneri/contact']);
   }
 
   navigateToProducts(): void {
-    this.router.navigate(['/partners/products']);
+    this.router.navigate(['/partneri/products']);
   }
 
   navigateToOffers(): void {
-    this.router.navigate(['/partners/offers']);
+    this.router.navigate(['/partneri/offers']);
   }
 
   navigateToHome(): void {

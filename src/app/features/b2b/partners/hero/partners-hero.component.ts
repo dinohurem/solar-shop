@@ -82,18 +82,18 @@ export class PartnersHeroComponent implements OnInit {
   }
 
   navigateToRegister(): void {
-    this.router.navigate(['/partners/register']);
+    this.router.navigate(['/partneri/registracija']);
   }
 
   navigateToAbout(): void {
-    this.router.navigate(['/partners/about']);
+    this.router.navigate(['/partneri/o-nama']);
   }
 
   navigateToProducts(): void {
-    this.router.navigate(['/partners/products']);
+    this.router.navigate(['/partneri/proizvodi']);
   }
 
   navigateToOffers(): void {
-    this.router.navigate(['/partners/offers']);
+    this.router.navigate(['/partneri/ponude']);
   }
 }

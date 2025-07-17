@@ -75,9 +75,9 @@ import { B2BCartItem } from '../../../cart/models/b2b-cart.model';
                 >
                 <span class="text-sm text-gray-700 font-['DM_Sans']">
                   {{ 'b2bCheckout.acceptTermsText' | translate }}
-                  <a href="/terms" target="_blank" class="text-solar-600 hover:text-solar-700 underline">{{ 'b2bCheckout.termsAndConditions' | translate }}</a>
+                  <a href="/uvjeti" target="_blank" class="text-solar-600 hover:text-solar-700 underline">{{ 'b2bCheckout.termsAndConditions' | translate }}</a>
                   {{ 'b2bCheckout.and' | translate }}
-                  <a href="/privacy" target="_blank" class="text-solar-600 hover:text-solar-700 underline">{{ 'b2bCheckout.privacyPolicy' | translate }}</a>
+                  <a href="/privatnost" target="_blank" class="text-solar-600 hover:text-solar-700 underline">{{ 'b2bCheckout.privacyPolicy' | translate }}</a>
                 </span>
               </label>
             </div>
@@ -358,7 +358,7 @@ export class B2bPaymentComponent implements OnInit, OnDestroy {
 
       // Redirect to order confirmation or profile
       setTimeout(() => {
-        this.router.navigate(['/partners/profile'], {
+        this.router.navigate(['/partneri/profil'], {
           queryParams: { orderSuccess: true, orderNumber: orderNumber }
         });
       }, 2000);
@@ -400,6 +400,6 @@ export class B2bPaymentComponent implements OnInit, OnDestroy {
   }
 
   goBack(): void {
-    this.router.navigate(['/partners/checkout/shipping']);
+    this.router.navigate(['/partneri/blagajna/dostava']);
   }
 } 

@@ -106,7 +106,7 @@ export interface FooterData {
             <ul class="space-y-3">
               <li>
                 <a 
-                  routerLink="/products"
+                  routerLink="/proizvodi"
                   class="text-gray-300 hover:text-solar-400 transition-colors duration-300 text-sm font-['DM_Sans']"
                 >
                   {{ 'nav.products' | translate }}
@@ -114,7 +114,7 @@ export interface FooterData {
               </li>
               <li>
                 <a 
-                  routerLink="/offers"
+                  routerLink="/ponude"
                   class="text-gray-300 hover:text-solar-400 transition-colors duration-300 text-sm font-['DM_Sans']"
                 >
                   {{ 'nav.offers' | translate }}
@@ -148,7 +148,7 @@ export interface FooterData {
             <ul class="space-y-3">
               <li>
                 <a 
-                  routerLink="/company"
+                  routerLink="/tvrtka"
                   class="text-gray-300 hover:text-solar-400 transition-colors duration-300 text-sm font-['DM_Sans']"
                 >
                   {{ 'nav.company' | translate }}
@@ -156,7 +156,7 @@ export interface FooterData {
               </li>
               <li>
                 <a 
-                  routerLink="/contact"
+                  routerLink="/kontakt"
                   class="text-gray-300 hover:text-solar-400 transition-colors duration-300 text-sm font-['DM_Sans']"
                 >
                   {{ 'nav.contact' | translate }}
@@ -164,7 +164,7 @@ export interface FooterData {
               </li>
               <li>
                 <a 
-                  routerLink="/partners"
+                  routerLink="/partneri"
                   class="text-gray-300 hover:text-solar-400 transition-colors duration-300 text-sm font-['DM_Sans']"
                 >
                   {{ 'nav.partners' | translate }}
@@ -253,13 +253,13 @@ export interface FooterData {
             </p>
             
             <div class="flex items-center gap-6">
-              <a href="/privacy" class="text-gray-400 hover:text-solar-400 text-sm transition-colors duration-300">
+              <a href="/privatnost" class="text-gray-400 hover:text-solar-400 text-sm transition-colors duration-300">
                 {{ 'footer.privacyPolicy' | translate }}
               </a>
-              <a href="/terms" class="text-gray-400 hover:text-solar-400 text-sm transition-colors duration-300">
+              <a href="/uvjeti" class="text-gray-400 hover:text-solar-400 text-sm transition-colors duration-300">
                 {{ 'footer.termsOfService' | translate }}
               </a>
-              <a href="/cookies" class="text-gray-400 hover:text-solar-400 text-sm transition-colors duration-300">
+              <a href="/kolacici" class="text-gray-400 hover:text-solar-400 text-sm transition-colors duration-300">
                 {{ 'footer.cookiePolicy' | translate }}
               </a>
             </div>

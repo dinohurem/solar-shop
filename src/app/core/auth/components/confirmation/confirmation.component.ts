@@ -79,6 +79,6 @@ export class ConfirmationComponent implements OnInit, OnDestroy {
     }
 
     goToLogin(): void {
-        this.router.navigate(['/login']);
+        this.router.navigate(['/prijava']);
     }
 } 

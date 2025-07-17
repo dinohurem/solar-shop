@@ -27,7 +27,7 @@ import * as B2BCartActions from '../../cart/store/b2b-cart.actions';
             <ol class="flex items-center space-x-4">
               <li>
                 <div>
-                  <a [routerLink]="['/partners']" class="text-gray-400 hover:text-gray-500 font-['DM_Sans']">
+                  <a [routerLink]="['/partneri']" class="text-gray-400 hover:text-gray-500 font-['DM_Sans']">
                     {{ 'b2bNav.home' | translate }}
                   </a>
                 </div>
@@ -37,7 +37,7 @@ import * as B2BCartActions from '../../cart/store/b2b-cart.actions';
                   <svg class="flex-shrink-0 h-5 w-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
                   </svg>
-                  <a [routerLink]="['/partners/products']" class="ml-4 text-gray-400 hover:text-gray-500 font-['DM_Sans']">
+                  <a [routerLink]="['/partneri/proizvodi']" class="ml-4 text-gray-400 hover:text-gray-500 font-['DM_Sans']">
                     {{ 'b2bNav.products' | translate }}
                   </a>
                 </div>
@@ -73,7 +73,7 @@ import * as B2BCartActions from '../../cart/store/b2b-cart.actions';
           <h3 class="text-lg font-medium text-gray-900 mb-2 font-['Poppins']">{{ 'b2b.products.productNotFound' | translate }}</h3>
           <p class="text-gray-600 mb-6 font-['DM_Sans']">{{ error }}</p>
           <button 
-            [routerLink]="['/partners/products']"
+            [routerLink]="['/partneri/proizvodi']"
             class="px-6 py-3 bg-solar-600 text-white font-semibold rounded-lg hover:bg-solar-700 transition-colors font-['DM_Sans']"
           >
             {{ 'b2b.products.backToProducts' | translate }}
@@ -155,7 +155,19 @@ import * as B2BCartActions from '../../cart/store/b2b-cart.actions';
             <!-- Product Header -->
             <div>
               <div class="flex items-center space-x-2 mb-2">
-                <span class="text-sm font-medium text-gray-500 uppercase">{{ product.category || 'Product' }}</span>
+                <button 
+                  *ngIf="product.category"
+                  (click)="navigateToCategory(product.category)"
+                  class="text-sm font-medium text-solar-600 hover:text-solar-700 hover:underline uppercase transition-colors"
+                >
+                  {{ product.category }}
+                </button>
+                <span 
+                  *ngIf="!product.category"
+                  class="text-sm font-medium text-gray-500 uppercase"
+                >
+                  Product
+                </span>
                 <span class="text-sm text-gray-400">{{ product.sku }}</span>
               </div>
               <h1 class="text-3xl font-bold text-gray-900 font-['Poppins']">{{ product.name }}</h1>
@@ -596,7 +608,7 @@ export class PartnersProductDetailsComponent implements OnInit, OnDestroy {
   }
 
   requestQuote(product: ProductWithPricing): void {
-    this.router.navigate(['/partners/contact'], {
+    this.router.navigate(['/partneri/kontakt'], {
       queryParams: {
         subject: 'pricingInquiry',
         productId: product.id,
@@ -640,11 +652,11 @@ export class PartnersProductDetailsComponent implements OnInit, OnDestroy {
   }
 
   navigateToLogin(): void {
-    this.router.navigate(['/login']);
+    this.router.navigate(['/prijava']);
   }
 
   navigateToRegister(): void {
-    this.router.navigate(['/partners/register']);
+    this.router.navigate(['/partneri/registracija']);
   }
 
   toggleDescription(): void {
@@ -719,9 +731,15 @@ export class PartnersProductDetailsComponent implements OnInit, OnDestroy {
 
   navigateToProduct(productId: string): void {
     // Navigate to the new product and reload
-    this.router.navigate(['/partners/products', productId]).then(() => {
+    this.router.navigate(['/partneri/proizvodi', productId]).then(() => {
       // Force component reload by scrolling to top
       window.scrollTo(0, 0);
+    });
+  }
+
+  navigateToCategory(category: string): void {
+    this.router.navigate(['/partneri/proizvodi'], {
+      queryParams: { category: category }
     });
   }
 } 
