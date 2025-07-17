@@ -14,6 +14,7 @@ export interface ProductCategory {
     productCount?: number;
     createdAt: Date;
     updatedAt: Date;
+    subcategories?: ProductCategory[];
 }
 
 export interface CategoryFilters {
@@ -70,6 +71,15 @@ export class CategoriesService {
         return from(this.fetchTopLevelCategories()).pipe(
             catchError(error => {
                 console.error('Error fetching top level categories:', error);
+                return of([]);
+            })
+        );
+    }
+
+    getNestedCategories(): Observable<ProductCategory[]> {
+        return from(this.fetchNestedCategories()).pipe(
+            catchError(error => {
+                console.error('Error fetching nested categories:', error);
                 return of([]);
             })
         );
@@ -156,6 +166,32 @@ export class CategoriesService {
             return converted;
         } catch (error) {
             console.error('Error in fetchTopLevelCategories:', error);
+            return [];
+        }
+    }
+
+    private async fetchNestedCategories(): Promise<ProductCategory[]> {
+        try {
+            const supabaseCategories = await this.supabaseService.getCategories(true);
+            
+            // Get all categories and organize them in hierarchical structure
+            const allCategories = await this.convertSupabaseCategoriesToLocal(supabaseCategories);
+            
+            // Get top-level categories
+            const topLevelCategories = allCategories.filter(category => !category.parentId);
+            
+            // For each top-level category, find its subcategories
+            const nestedCategories = topLevelCategories.map(parent => {
+                const subcategories = allCategories.filter(category => category.parentId === parent.id);
+                return {
+                    ...parent,
+                    subcategories: subcategories.length > 0 ? subcategories : undefined
+                };
+            });
+            
+            return nestedCategories;
+        } catch (error) {
+            console.error('Error in fetchNestedCategories:', error);
             return [];
         }
     }

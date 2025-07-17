@@ -225,11 +225,11 @@ interface ProductRelationship {
                 id="specifications"
                 formControlName="specifications"
                 rows="6"
-                class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent resize-none font-mono text-sm"
-                placeholder='{"frequency": "50Hz", "ac_voltage": "230V", "efficiency": "97.6%"}'
+                class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent resize-none"
+                placeholder="Frequency: 50Hz&#10;AC Voltage: 230V&#10;Efficiency: 97.6%"
               ></textarea>
               <label for="specifications" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                {{ 'admin.productSpecifications' | translate }} (JSON)
+                {{ 'admin.productSpecifications' | translate }}
               </label>
             </div>
             <p class="mt-3 text-sm text-gray-500 flex items-center">
@@ -259,6 +259,28 @@ interface ProductRelationship {
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
               {{ 'admin.productFeaturesHelp' | translate }}
+            </p>
+          </div>
+
+          <!-- Certifications -->
+          <div class="mt-6">
+            <div class="relative">
+              <textarea
+                id="certifications"
+                formControlName="certifications"
+                rows="4"
+                class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent resize-none"
+                placeholder="CE Certification&#10;RoHS Compliance&#10;ISO 9001&#10;IEC 61215"
+              ></textarea>
+              <label for="certifications" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+                {{ 'admin.productCertifications' | translate }}
+              </label>
+            </div>
+            <p class="mt-3 text-sm text-gray-500 flex items-center">
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              {{ 'admin.productCertificationsHelp' | translate }}
             </p>
           </div>
         </div>
@@ -699,7 +721,8 @@ export class ProductFormComponent implements OnInit, OnDestroy {
       is_featured: [false],
       is_on_sale: [false],
       specifications: [''],
-      features: ['']
+      features: [''],
+      certifications: ['']
     });
   }
 
@@ -757,7 +780,8 @@ export class ProductFormComponent implements OnInit, OnDestroy {
           is_on_sale: data.is_on_sale !== undefined ? Boolean(data.is_on_sale) : false,
           images: this.formatImages(data),
           specifications: this.formatSpecifications(data.specifications),
-          features: this.formatFeatures(data.features)
+          features: this.formatFeatures(data.features),
+          certifications: this.formatCertifications(data.certifications)
         };
 
         this.productForm.patchValue(formData);
@@ -789,9 +813,11 @@ export class ProductFormComponent implements OnInit, OnDestroy {
         return specifications;
       }
 
-      // If it's an object, convert to JSON string
+      // If it's an object, convert to line-separated format
       if (typeof specifications === 'object') {
-        return JSON.stringify(specifications, null, 2);
+        return Object.entries(specifications)
+          .map(([key, value]) => `${key}: ${value}`)
+          .join('\n');
       }
 
       return '';
@@ -820,6 +846,29 @@ export class ProductFormComponent implements OnInit, OnDestroy {
       return '';
     } catch (error) {
       console.error('Error formatting features:', error);
+      return '';
+    }
+  }
+
+  private formatCertifications(certifications: any): string {
+    if (!certifications) {
+      return '';
+    }
+
+    try {
+      // If it's already a string, return it
+      if (typeof certifications === 'string') {
+        return certifications;
+      }
+
+      // If it's an array, join with newlines
+      if (Array.isArray(certifications)) {
+        return certifications.join('\n');
+      }
+
+      return '';
+    } catch (error) {
+      console.error('Error formatting certifications:', error);
       return '';
     }
   }
@@ -853,13 +902,22 @@ export class ProductFormComponent implements OnInit, OnDestroy {
         type: index === 0 ? 'main' : 'gallery'
       }));
 
-      // Parse specifications JSON string to object
-      let specificationsObj = {};
+      // Parse specifications line-separated format to object
+      let specificationsObj: { [key: string]: string } = {};
       if (formValue.specifications && formValue.specifications.trim()) {
         try {
-          specificationsObj = JSON.parse(formValue.specifications.trim());
+          const specs = formValue.specifications.trim().split('\n');
+          specs.forEach((spec: string) => {
+            const [key, ...valueParts] = spec.split(':');
+            if (key && valueParts.length > 0) {
+              const value = valueParts.join(':').trim();
+              if (value) {
+                specificationsObj[key.trim()] = value;
+              }
+            }
+          });
         } catch (error) {
-          console.error('Error parsing specifications JSON:', error);
+          console.error('Error parsing specifications:', error);
           // Continue with empty specifications if parsing fails
         }
       }
@@ -870,6 +928,14 @@ export class ProductFormComponent implements OnInit, OnDestroy {
         featuresArray = formValue.features.split('\n')
           .map((feature: string) => feature.trim())
           .filter((feature: string) => feature.length > 0);
+      }
+
+      // Parse certifications string to array
+      let certificationsArray: string[] = [];
+      if (formValue.certifications && formValue.certifications.trim()) {
+        certificationsArray = formValue.certifications.split('\n')
+          .map((certification: string) => certification.trim())
+          .filter((certification: string) => certification.length > 0);
       }
 
       // Map form fields to database fields
@@ -893,7 +959,7 @@ export class ProductFormComponent implements OnInit, OnDestroy {
         images: imagesArray, // Use JSONB array format
         specifications: specificationsObj,
         features: featuresArray,
-        certifications: [], // Default empty certifications
+        certifications: certificationsArray,
         tags: [], // Default empty tags
         stock_status: Number(formValue.stock_quantity) > 0 ? 'in_stock' as const : 'out_of_stock' as const,
         updated_at: new Date().toISOString()
@@ -913,7 +979,7 @@ export class ProductFormComponent implements OnInit, OnDestroy {
         await this.supabaseService.createRecord('products', productData);
       }
 
-      this.router.navigate(['/admin/products']);
+      this.router.navigate(['/admin/proizvodi']);
     } catch (error) {
       console.error('Error saving product:', error);
     } finally {

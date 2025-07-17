@@ -46,6 +46,7 @@ export interface Product {
   featured: boolean;
   createdAt: Date;
   sku?: string;
+  isOnSale?: boolean;
 }
 
 export interface ProductFilters {
@@ -210,13 +211,26 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
                   >
                     {{ 'productList.featured' | translate }}
                   </div>
+                  <!-- On Sale Badge -->
+                  <div 
+                    *ngIf="product.isOnSale" 
+                    class="absolute px-2 py-1 rounded-full text-xs font-semibold bg-red-500 text-white"
+                    [ngClass]="{
+                      'top-3 left-3': !product.featured,
+                      'top-12 left-3': product.featured
+                    }"
+                  >
+                    {{ 'productList.onSale' | translate }}
+                  </div>
                   <!-- Discount Badge -->
                   <div 
                     *ngIf="product.discount" 
                     class="absolute px-2 py-1 rounded-full text-xs font-semibold bg-solar-500 text-white"
                     [ngClass]="{
-                      'top-3 left-3': !product.featured,
-                      'top-12 left-3': product.featured
+                      'top-3 left-3': !product.featured && !product.isOnSale,
+                      'top-12 left-3': product.featured && !product.isOnSale,
+                      'top-3 right-3': product.isOnSale && !product.featured,
+                      'top-12 right-3': product.isOnSale && product.featured
                     }"
                   >
                     -{{ product.discount }}%

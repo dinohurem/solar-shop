@@ -27,48 +27,79 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <div 
             *ngFor="let category of productCategories$ | async; trackBy: trackByCategoryId"
-            class="relative h-[500px] rounded-3xl overflow-hidden group cursor-pointer shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2"
-            (click)="navigateToProductList(category)"
+            class="flex flex-col gap-4"
           >
-            <!-- Background Image -->
-            <div class="absolute inset-0">
-              <img 
-                [src]="category.imageUrl" 
-                [alt]="category.name"
-                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-              >
-              <!-- Gradient Overlay -->
-              <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+            <!-- Main Category Card -->
+            <div 
+              class="relative h-[500px] rounded-3xl overflow-hidden group cursor-pointer shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2"
+              (click)="navigateToProductList(category)"
+            >
+              <!-- Background Image -->
+              <div class="absolute inset-0">
+                <img 
+                  [src]="category.imageUrl" 
+                  [alt]="category.name"
+                  class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                >
+                <!-- Gradient Overlay -->
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+              </div>
+
+              <!-- Content -->
+              <div class="relative z-10 h-full flex flex-col justify-end p-8">
+                <div class="text-white">
+                  <h3 class="text-3xl font-bold mb-4 font-['Poppins'] group-hover:text-solar-300 transition-colors duration-300">
+                    {{ category.name }}
+                  </h3>
+                  
+                  <p class="text-base leading-relaxed mb-6 opacity-90 font-['DM_Sans'] line-clamp-3">
+                    {{ category.description || ('Explore our ' + category.name.toLowerCase() + ' collection') }}
+                  </p>
+
+                  <!-- Product Count Badge -->
+                  <div class="mb-4">
+                    <span class="inline-block bg-white/20 backdrop-blur-sm text-white text-sm font-medium px-3 py-1 rounded-full">
+                      {{ 'products.productsCount' | translate:{ count: (category.productCount || 0) } }}
+                    </span>
+                  </div>
+                  
+                  <!-- Learn More Button -->
+                  <button 
+                    class="inline-flex items-center gap-3 bg-white/20 backdrop-blur-sm text-white font-semibold px-6 py-3 rounded-xl hover:bg-solar-500 transition-all duration-300 group-hover:bg-solar-500 border border-white/30"
+                    (click)="navigateToProductList(category); $event.stopPropagation()"
+                  >
+                    <span>{{ 'products.exploreProducts' | translate }}</span>
+                    <svg class="w-5 h-5 transform group-hover:translate-x-1 transition-transform" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
             </div>
 
-            <!-- Content -->
-            <div class="relative z-10 h-full flex flex-col justify-end p-8">
-              <div class="text-white">
-                <h3 class="text-3xl font-bold mb-4 font-['Poppins'] group-hover:text-solar-300 transition-colors duration-300">
-                  {{ category.name }}
-                </h3>
-                
-                <p class="text-base leading-relaxed mb-6 opacity-90 font-['DM_Sans'] line-clamp-3">
-                  {{ category.description || ('Explore our ' + category.name.toLowerCase() + ' collection') }}
-                </p>
-
-                <!-- Product Count Badge -->
-                <div class="mb-4">
-                  <span class="inline-block bg-white/20 backdrop-blur-sm text-white text-sm font-medium px-3 py-1 rounded-full">
-                    {{ 'products.productsCount' | translate:{ count: (category.productCount || 0) } }}
-                  </span>
-                </div>
-                
-                <!-- Learn More Button -->
-                <button 
-                  class="inline-flex items-center gap-3 bg-white/20 backdrop-blur-sm text-white font-semibold px-6 py-3 rounded-xl hover:bg-solar-500 transition-all duration-300 group-hover:bg-solar-500 border border-white/30"
-                  (click)="navigateToProductList(category); $event.stopPropagation()"
-                >
-                  <span>{{ 'products.exploreProducts' | translate }}</span>
-                  <svg class="w-5 h-5 transform group-hover:translate-x-1 transition-transform" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+            <!-- Subcategories -->
+            <div 
+              *ngIf="category.subcategories && category.subcategories.length > 0"
+              class="grid grid-cols-1 gap-2"
+            >
+              <div 
+                *ngFor="let subcategory of category.subcategories; trackBy: trackByCategoryId"
+                class="bg-white rounded-xl p-4 border border-gray-200 hover:border-solar-300 hover:shadow-md transition-all duration-300 cursor-pointer group"
+                (click)="navigateToProductList(subcategory)"
+              >
+                <div class="flex items-center justify-between">
+                  <div class="flex-1">
+                    <h4 class="text-lg font-semibold text-gray-900 group-hover:text-solar-600 transition-colors font-['Poppins']">
+                      {{ subcategory.name }}
+                    </h4>
+                    <p class="text-sm text-gray-600 mt-1 font-['DM_Sans']">
+                      {{ subcategory.productCount || 0 }} products
+                    </p>
+                  </div>
+                  <svg class="w-5 h-5 text-gray-400 group-hover:text-solar-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                   </svg>
-                </button>
+                </div>
               </div>
             </div>
           </div>
@@ -136,7 +167,7 @@ export class ProductsComponent implements OnInit {
 
   private loadCategories(): void {
     this.isLoading = true;
-    this.productCategories$ = this.categoriesService.getTopLevelCategories();
+    this.productCategories$ = this.categoriesService.getNestedCategories();
 
     // Subscribe to handle loading state
     this.productCategories$.subscribe({

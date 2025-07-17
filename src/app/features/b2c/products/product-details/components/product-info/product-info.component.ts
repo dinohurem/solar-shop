@@ -31,9 +31,18 @@ import { LucideAngularModule, Star, StarHalf, ShoppingCart } from 'lucide-angula
     <div class="space-y-6">
       <!-- Product Title and Rating -->
       <div>
-        <h1 class="text-3xl font-bold text-gray-900 font-['Poppins'] mb-4">
-          {{ product.name }}
-        </h1>
+        <div class="flex items-center gap-3 mb-4">
+          <h1 class="text-3xl font-bold text-gray-900 font-['Poppins']">
+            {{ product.name }}
+          </h1>
+          <!-- On Sale Badge -->
+          <div 
+            *ngIf="product.isOnSale" 
+            class="px-3 py-1 bg-red-500 text-white text-sm font-semibold rounded-full"
+          >
+            {{ 'productDetails.onSale' | translate }}
+          </div>
+        </div>
         
         <!-- Rating and Reviews -->
         <div class="flex items-center mb-4">
