@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, filter } from 'rxjs/operators';
 import { Product } from '../product-list/product-list.component';
 import { ProductDetailsActions } from './store/product-details.actions';
 import { selectProduct, selectIsLoading, selectError } from './store/product-details.selectors';
@@ -13,6 +13,7 @@ import { ProductReviewsComponent } from './components/product-reviews/product-re
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { OffersService } from '../../offers/services/offers.service';
 import { Offer } from '../../../../shared/models/offer.model';
+import { ProductsService } from '../services/products.service';
 
 @Component({
   selector: 'app-product-details',
@@ -193,14 +194,122 @@ import { Offer } from '../../../../shared/models/offer.model';
         </div>
 
         <!-- Related Products -->
-        <!-- <div class="border-t border-gray-200 pt-12 mt-12">
+        <div class="border-t border-gray-200 pt-12 mt-12">
           <h3 class="text-2xl font-bold text-gray-900 mb-8 font-['Poppins']">{{ 'productDetails.relatedProducts' | translate }}</h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div class="text-center py-8 text-gray-500 font-['DM_Sans']">
-              {{ 'productDetails.relatedProductsComingSoon' | translate }}
+          
+          <!-- Loading State -->
+          <div *ngIf="relatedProductsLoading" class="flex justify-center py-8">
+            <div class="animate-spin rounded-full h-8 w-8 border-4 border-[#0ACF83] border-t-transparent"></div>
+          </div>
+          
+          <!-- Related Products Grid -->
+          <div *ngIf="!relatedProductsLoading && relatedProducts.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div 
+              *ngFor="let relatedProduct of relatedProducts; trackBy: trackByProductId"
+              class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow duration-300 group cursor-pointer"
+              [routerLink]="['/proizvodi', relatedProduct.id]"
+            >
+              <!-- Product Image -->
+              <div class="relative aspect-square overflow-hidden">
+                <img 
+                  [src]="getProductImageUrl(relatedProduct)" 
+                  [alt]="relatedProduct.name"
+                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  (error)="onRelatedProductImageError($event)"
+                >
+                <!-- Featured Badge - Top Left -->
+                <div 
+                  *ngIf="relatedProduct.featured" 
+                  class="absolute top-3 left-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg"
+                >
+                  {{ 'productList.featured' | translate }}
+                </div>
+                <!-- On Sale Badge - Bottom Left -->
+                <div 
+                  *ngIf="relatedProduct.isOnSale" 
+                  class="absolute bottom-3 left-3 px-2 py-1 rounded-full text-xs font-semibold bg-red-500 text-white"
+                >
+                  {{ 'productDetails.onSale' | translate }}
+                </div>
+                <!-- Discount Badge - Top Right -->
+                <div 
+                  *ngIf="relatedProduct.discount" 
+                  class="absolute top-3 right-3 px-2 py-1 rounded-full text-xs font-semibold bg-solar-500 text-white"
+                >
+                  -{{ relatedProduct.discount }}%
+                </div>
+                <!-- Availability Badge - Bottom Right -->
+                <div 
+                  class="absolute bottom-3 right-3 px-2 py-1 rounded-full text-xs font-semibold"
+                  [ngClass]="{
+                    'bg-green-100 text-green-800': relatedProduct.availability === 'available',
+                    'bg-yellow-100 text-yellow-800': relatedProduct.availability === 'limited',
+                    'bg-red-100 text-red-800': relatedProduct.availability === 'out-of-stock'
+                  }"
+                >
+                  {{ getAvailabilityText(relatedProduct.availability) | translate }}
+                </div>
+              </div>
+
+              <!-- Product Info -->
+              <div class="p-4">
+                <h4 class="text-lg font-semibold text-gray-900 mb-2 font-['Poppins'] line-clamp-2">
+                  {{ relatedProduct.name }}
+                </h4>
+                <p class="text-sm text-gray-600 mb-3 font-['DM_Sans'] line-clamp-2">
+                  {{ relatedProduct.description }}
+                </p>
+
+                <!-- Rating -->
+                <div class="flex items-center mb-3">
+                  <div class="flex items-center">
+                    <span class="text-sm font-medium text-gray-900 mr-1">{{ relatedProduct.rating }}</span>
+                    <div class="flex">
+                      <svg 
+                        *ngFor="let star of getStarArray(relatedProduct.rating); let i = index" 
+                        class="w-4 h-4"
+                        [class]="star === 1 ? 'text-yellow-400 fill-current' : star === 0.5 ? 'text-yellow-400' : 'text-gray-300'"
+                        viewBox="0 0 20 20"
+                      >
+                        <defs *ngIf="star === 0.5">
+                          <linearGradient id="related-half-star-{{relatedProduct.id}}-{{i}}">
+                            <stop offset="50%" stop-color="currentColor"/>
+                            <stop offset="50%" stop-color="transparent"/>
+                          </linearGradient>
+                        </defs>
+                        <path 
+                          [attr.fill]="star === 0.5 ? 'url(#related-half-star-' + relatedProduct.id + '-' + i + ')' : 'currentColor'"
+                          d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                      </svg>
+                    </div>
+                  </div>
+                  <span class="text-xs text-gray-500 ml-2 font-['DM_Sans']">({{ relatedProduct.reviewCount }})</span>
+                </div>
+
+                <!-- Price -->
+                <div class="flex items-center space-x-2">
+                  <span class="text-xl font-bold text-gray-900 font-['DM_Sans']">
+                    €{{ relatedProduct.price.toLocaleString() }}
+                  </span>
+                  <span 
+                    *ngIf="relatedProduct.originalPrice" 
+                    class="text-sm text-gray-500 line-through font-['DM_Sans']"
+                  >
+                    €{{ relatedProduct.originalPrice.toLocaleString() }}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
-        </div> -->
+          
+          <!-- No related products state -->
+          <div *ngIf="!relatedProductsLoading && relatedProducts.length === 0" class="text-center py-8">
+            <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+            </svg>
+            <p class="text-gray-500 font-['DM_Sans']">{{ 'productDetails.noRelatedProducts' | translate }}</p>
+          </div>
+        </div>
       </div>
     </div>
   `,
@@ -219,6 +328,13 @@ import { Offer } from '../../../../shared/models/offer.model';
     .rotate-0 { 
       transform: rotate(0deg); 
     }
+    
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
   `]
 })
 export class ProductDetailsComponent implements OnInit, OnDestroy {
@@ -226,6 +342,7 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private offersService = inject(OffersService);
+  private productsService = inject(ProductsService);
   private destroy$ = new Subject<void>();
 
   product$: Observable<Product | null>;
@@ -239,6 +356,10 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
   // Offers data
   productOffers: Offer[] = [];
   offersLoading = false;
+
+  // Related products data
+  relatedProducts: Product[] = [];
+  relatedProductsLoading = false;
 
   constructor() {
     this.product$ = this.store.select(selectProduct);
@@ -261,6 +382,7 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
       if (productId) {
         this.store.dispatch(ProductDetailsActions.loadProduct({ productId }));
         this.loadProductOffers(productId);
+        this.loadRelatedProducts(productId);
       } else {
         this.router.navigate(['/proizvodi']);
       }
@@ -315,5 +437,98 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
     if (target) {
       target.src = 'assets/images/product-placeholder.svg';
     }
+  }
+
+  public onRelatedProductImageError(event: Event): void {
+    const target = event.target as HTMLImageElement;
+    if (target) {
+      target.src = 'assets/images/product-placeholder.svg';
+    }
+  }
+
+  private loadRelatedProducts(productId: string): void {
+    this.relatedProductsLoading = true;
+    
+    this.product$.pipe(
+      takeUntil(this.destroy$),
+      filter(product => product !== null)
+    ).subscribe(product => {
+      if (product) {
+        // Get products from same categories
+        const categoryNames = product.categories?.map(cat => cat.name) || [product.category];
+        
+        this.productsService.getProductsByCategories(categoryNames, productId, 4).pipe(
+          takeUntil(this.destroy$)
+        ).subscribe({
+          next: (products) => {
+            this.relatedProducts = products;
+            this.relatedProductsLoading = false;
+          },
+          error: (error) => {
+            console.error('Error loading related products:', error);
+            this.relatedProducts = [];
+            this.relatedProductsLoading = false;
+          }
+        });
+      }
+    });
+  }
+
+  public getProductImageUrl(product: Product): string {
+    // First check if product has images array with valid URLs
+    if (product.images && product.images.length > 0) {
+      const firstImage = product.images[0];
+      // Check if it's a string URL or an object with url property
+      if (typeof firstImage === 'string' && firstImage.trim()) {
+        return firstImage;
+      } else if (typeof firstImage === 'object' && firstImage.url && firstImage.url.trim()) {
+        return firstImage.url;
+      }
+    }
+    
+    // Fallback to imageUrl if it exists and is not empty
+    if (product.imageUrl && product.imageUrl.trim()) {
+      return product.imageUrl;
+    }
+    
+    // Only return placeholder if no valid image found
+    return 'assets/images/product-placeholder.svg';
+  }
+
+  public trackByProductId(index: number, product: Product): string {
+    return product.id;
+  }
+
+  public getAvailabilityText(availability: string): string {
+    switch (availability) {
+      case 'available': return 'productDetails.inStock';
+      case 'limited': return 'productDetails.limitedStock';
+      case 'out-of-stock': return 'productDetails.outOfStock';
+      default: return '';
+    }
+  }
+
+  public getStarArray(rating: number): number[] {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+
+    // Add full stars
+    for (let i = 0; i < fullStars; i++) {
+      stars.push(1);
+    }
+
+    // Add half star if needed
+    if (hasHalfStar) {
+      stars.push(0.5);
+    }
+
+    // Add empty stars to complete 5 stars
+    const remainingStars = 5 - stars.length;
+    for (let i = 0; i < remainingStars; i++) {
+      stars.push(0);
+    }
+
+    return stars;
   }
 } 

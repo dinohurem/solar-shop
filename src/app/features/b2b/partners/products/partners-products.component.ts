@@ -745,32 +745,33 @@ export class PartnersProductsComponent implements OnInit, OnDestroy {
   onImageError(event: Event): void {
     const img = event.target as HTMLImageElement;
     if (img) {
-      // Replace with stock image URL
-      img.src = 'https://plus.unsplash.com/premium_photo-1716913071257-76d30af4f817?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
-      img.style.display = 'block';
+      img.src = 'assets/images/product-placeholder.svg';
     }
   }
 
   getProductImageUrl(product: ProductWithPricing): string {
-    // If image_url is already computed, use it
-    if (product.image_url) {
+    // If image_url is already computed and not empty, use it
+    if (product.image_url && product.image_url.trim()) {
       return product.image_url;
     }
 
-    // Extract from images array
+    // Extract from images array - use first image
     if (product.images && Array.isArray(product.images) && product.images.length > 0) {
       // Find primary image first
-      const primaryImage = product.images.find(img => img.is_primary);
+      const primaryImage = product.images.find(img => img.is_primary && img.url && img.url.trim());
       if (primaryImage) {
         return primaryImage.url;
       }
 
-      // Fallback to first image
-      return product.images[0].url;
+      // Fallback to first image with valid url
+      const firstImageWithUrl = product.images.find(img => img.url && img.url.trim());
+      if (firstImageWithUrl) {
+        return firstImageWithUrl.url;
+      }
     }
 
-    // Return stock image URL as fallback
-    return 'https://plus.unsplash.com/premium_photo-1716913071257-76d30af4f817?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
+    // Return placeholder SVG as fallback only if no valid images found
+    return 'assets/images/product-placeholder.svg';
   }
 
   hasProductImage(product: ProductWithPricing): boolean {

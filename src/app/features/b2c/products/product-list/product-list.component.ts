@@ -202,9 +202,10 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
                 <!-- Product Image -->
                 <div class="relative aspect-square overflow-hidden">
                   <img 
-                    [src]="product.imageUrl" 
+                    [src]="getProductImageUrl(product)" 
                     [alt]="product.name"
                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    (error)="onProductImageError($event)"
                   >
                   <!-- Featured Badge - Top Left -->
                   <div 
@@ -547,5 +548,33 @@ export class ProductListComponent implements OnInit, OnDestroy {
     }
 
     return stars;
+  }
+  
+  getProductImageUrl(product: Product): string {
+    // First check if product has images array with valid URLs
+    if (product.images && product.images.length > 0) {
+      const firstImage = product.images[0];
+      // Check if it's a string URL or an object with url property
+      if (typeof firstImage === 'string' && firstImage.trim()) {
+        return firstImage;
+      } else if (typeof firstImage === 'object' && firstImage.url && firstImage.url.trim()) {
+        return firstImage.url;
+      }
+    }
+    
+    // Fallback to imageUrl if it exists and is not empty
+    if (product.imageUrl && product.imageUrl.trim()) {
+      return product.imageUrl;
+    }
+    
+    // Only return placeholder if no valid image found
+    return 'assets/images/product-placeholder.svg';
+  }
+  
+  onProductImageError(event: Event): void {
+    const target = event.target as HTMLImageElement;
+    if (target) {
+      target.src = 'assets/images/product-placeholder.svg';
+    }
   }
 } 

@@ -87,33 +87,62 @@ import * as B2BCartActions from '../../cart/store/b2b-cart.actions';
           <!-- Product Images -->
           <div class="lg:sticky lg:top-8 space-y-6">
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-              <div class="aspect-w-1 aspect-h-1 bg-gray-50 flex items-center justify-center min-h-[400px]">
-                <img *ngIf="hasProductImage(product)" 
-                     [src]="getProductImageUrl(product)" 
+              <div class="aspect-w-1 aspect-h-1 bg-gray-50 flex items-center justify-center min-h-[400px] relative">
+                <!-- Show actual image if available -->
+                <img *ngIf="getProductImages().length > 0" 
+                     [src]="getCurrentImageUrl()" 
                      [alt]="product.name" 
                      class="w-full h-96 object-cover"
                      (error)="onImageError($event)">
-                <!-- Fallback placeholder -->
-                <img *ngIf="!hasProductImage(product)" 
-                     src="assets/images/product-placeholder.jpg" 
+                
+                <!-- Show placeholder if no images -->
+                <img *ngIf="getProductImages().length === 0" 
+                     src="assets/images/product-placeholder.svg" 
                      [alt]="product.name" 
                      class="w-full h-96 object-cover">
+                
+                <!-- Navigation arrows for multiple images -->
+                <div *ngIf="hasMultipleImages()" class="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-4">
+                  <button 
+                    (click)="previousImage()" 
+                    class="bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 transition-opacity"
+                    [disabled]="currentImageIndex === 0"
+                    [class.opacity-50]="currentImageIndex === 0"
+                  >
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                  </button>
+                  <button 
+                    (click)="nextImage()" 
+                    class="bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 transition-opacity"
+                    [disabled]="currentImageIndex === getImageCount() - 1"
+                    [class.opacity-50]="currentImageIndex === getImageCount() - 1"
+                  >
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                  </button>
+                </div>
+                
+                <!-- Image counter -->
+                <div *ngIf="hasMultipleImages()" class="absolute bottom-4 right-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm">
+                  {{ currentImageIndex + 1 }} / {{ getImageCount() }}
+                </div>
               </div>
-              <!-- Additional Images (if available) -->
-              <div *ngIf="product.images && product.images.length > 1" class="p-4">
+              <!-- Thumbnail Images (if available) -->
+              <div *ngIf="hasMultipleImages()" class="p-4">
                 <div class="flex space-x-2 overflow-x-auto">
-                  <div *ngFor="let image of product.images" 
-                       class="w-16 h-16 bg-gray-100 rounded border border-gray-200 cursor-pointer hover:opacity-75 flex items-center justify-center flex-shrink-0">
-                    <img *ngIf="image.url" 
-                         [src]="image.url" 
-                         [alt]="image.alt || product.name"
-                         class="w-full h-full object-cover rounded"
-                         (error)="onImageError($event)">
-                    <!-- Fallback for gallery images -->
-                    <img *ngIf="!image.url" 
-                         src="assets/images/product-placeholder.svg" 
+                  <div *ngFor="let image of getProductImages(); let i = index" 
+                       class="w-16 h-16 bg-gray-100 rounded border border-gray-200 cursor-pointer hover:opacity-75 flex items-center justify-center flex-shrink-0"
+                       [class.border-solar-500]="i === currentImageIndex"
+                       [class.border-2]="i === currentImageIndex"
+                       (click)="selectImage(i)">
+                    <img 
+                         [src]="image" 
                          [alt]="product.name"
-                         class="w-full h-full object-cover rounded">
+                         class="w-full h-full object-cover rounded"
+                         (error)="onThumbnailImageError($event, i)">
                   </div>
                 </div>
               </div>
@@ -407,14 +436,11 @@ import * as B2BCartActions from '../../cart/store/b2b-cart.actions';
                  (click)="navigateToProduct(suggested.id)">
               <!-- Product Image -->
               <div class="aspect-w-1 aspect-h-1 bg-gray-100">
-                <img *ngIf="hasProductImage(suggested)" 
-                     [src]="getProductImageUrl(suggested)" 
+                <img 
+                     [src]="getSuggestedProductImageUrl(suggested)" 
                      [alt]="suggested.name" 
-                     class="w-full h-48 object-cover">
-                <img *ngIf="!hasProductImage(suggested)" 
-                     src="assets/images/product-placeholder.svg" 
-                     [alt]="suggested.name" 
-                     class="w-full h-48 object-cover">
+                     class="w-full h-48 object-cover"
+                     (error)="onSuggestedImageError($event)">
               </div>
               
               <!-- Product Info -->
@@ -504,6 +530,9 @@ export class PartnersProductDetailsComponent implements OnInit, OnDestroy {
   // Collapsible state
   isDescriptionExpanded = true;
   isSpecificationsExpanded = false;
+  
+  // Image carousel state
+  currentImageIndex = 0;
 
   products$: Observable<ProductWithPricing[]>;
   loading$: Observable<boolean>;
@@ -673,6 +702,102 @@ export class PartnersProductDetailsComponent implements OnInit, OnDestroy {
       img.src = 'assets/images/product-placeholder.svg';
     }
   }
+  
+  onThumbnailImageError(event: Event, index: number): void {
+    const img = event.target as HTMLImageElement;
+    if (img) {
+      img.src = 'assets/images/product-placeholder.svg';
+    }
+  }
+  
+  onSuggestedImageError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    if (img) {
+      img.src = 'assets/images/product-placeholder.svg';
+    }
+  }
+  
+  getCurrentImageUrl(): string {
+    const images = this.getProductImages();
+    if (images.length > 0 && this.currentImageIndex < images.length) {
+      return images[this.currentImageIndex];
+    }
+    return 'assets/images/product-placeholder.svg';
+  }
+  
+  getProductImages(): string[] {
+    if (!this.product) return [];
+    
+    const images: string[] = [];
+    
+    // Add primary image from image_url if available and not empty
+    if (this.product.image_url && this.product.image_url.trim()) {
+      images.push(this.product.image_url);
+    }
+    
+    // Add images from images array
+    if (this.product.images && Array.isArray(this.product.images)) {
+      this.product.images.forEach(img => {
+        if (img.url && img.url.trim() && !images.includes(img.url)) {
+          images.push(img.url);
+        }
+      });
+    }
+    
+    // Only return images if we found valid ones, otherwise return empty array
+    return images;
+  }
+  
+  hasMultipleImages(): boolean {
+    const images = this.getProductImages();
+    return images.length > 1;
+  }
+  
+  getImageCount(): number {
+    return this.getProductImages().length;
+  }
+  
+  previousImage(): void {
+    if (this.currentImageIndex > 0) {
+      this.currentImageIndex--;
+    }
+  }
+  
+  nextImage(): void {
+    const imageCount = this.getImageCount();
+    if (this.currentImageIndex < imageCount - 1) {
+      this.currentImageIndex++;
+    }
+  }
+  
+  selectImage(index: number): void {
+    this.currentImageIndex = index;
+  }
+  
+  getSuggestedProductImageUrl(product: ProductWithPricing): string {
+    // If image_url is available and not empty, use it
+    if (product.image_url && product.image_url.trim()) {
+      return product.image_url;
+    }
+
+    // Extract from images array - use first image
+    if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+      // Find primary image first
+      const primaryImage = product.images.find(img => img.is_primary && img.url && img.url.trim());
+      if (primaryImage) {
+        return primaryImage.url;
+      }
+
+      // Fallback to first image with valid url
+      const firstImageWithUrl = product.images.find(img => img.url && img.url.trim());
+      if (firstImageWithUrl) {
+        return firstImageWithUrl.url;
+      }
+    }
+
+    // Return placeholder if no valid image available
+    return 'assets/images/product-placeholder.svg';
+  }
 
   navigateToLogin(): void {
     this.router.navigate(['/prijava']);
@@ -692,6 +817,9 @@ export class PartnersProductDetailsComponent implements OnInit, OnDestroy {
 
   private async loadSuggestedProducts(productId: string): Promise<void> {
     try {
+      // Reset image carousel when loading new product
+      this.currentImageIndex = 0;
+      
       // Load product relationships
       const { data: relationships, error } = await this.supabaseService.client
         .from('product_relationships')

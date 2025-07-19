@@ -205,7 +205,7 @@ import { LucideAngularModule, Star, StarHalf, ShoppingCart } from 'lucide-angula
         <div id="product-details-content" *ngIf="productDetailsOpen" class="mt-4">
         <dl class="grid grid-cols-1 gap-4">
           <div class="flex justify-between">
-            <dt class="text-sm font-medium text-gray-500 font-['DM_Sans']">{{ 'productDetails.categories' | translate }}:</dt>
+            <dt class="text-sm font-medium text-gray-500 font-['DM_Sans']">{{ 'productList.categories' | translate }}:</dt>
             <dd class="text-sm font-['DM_Sans']">
               <div *ngIf="product.categories && product.categories.length > 0" class="flex flex-wrap gap-1">
                 <button 
@@ -230,7 +230,7 @@ import { LucideAngularModule, Star, StarHalf, ShoppingCart } from 'lucide-angula
             </dd>
           </div>
           <div class="flex justify-between">
-            <dt class="text-sm font-medium text-gray-500 font-['DM_Sans']">{{ 'productDetails.brand' | translate }}:</dt>
+            <dt class="text-sm font-medium text-gray-500 font-['DM_Sans']">{{ 'productDetails.manufacturer' | translate }}:</dt>
             <dd class="text-sm text-gray-900 font-['DM_Sans']">{{ product.manufacturer }}</dd>
           </div>
           <div class="flex justify-between">
@@ -420,12 +420,6 @@ import { LucideAngularModule, Star, StarHalf, ShoppingCart } from 'lucide-angula
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
               </svg>
               <span class="font-['DM_Sans']">{{ 'productDetails.freeShipping' | translate }}</span>
-            </div>
-            <div class="flex items-center">
-              <svg class="w-4 h-4 mr-2 text-solar-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-              <span class="font-['DM_Sans']">{{ 'productDetails.twoYearWarranty' | translate }}</span>
             </div>
             <div class="flex items-center">
               <svg class="w-4 h-4 mr-2 text-solar-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

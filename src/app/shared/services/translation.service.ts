@@ -828,7 +828,7 @@ export class TranslationService {
                 productRelationshipsBundle: 'Paket',
                 productRelationshipsExistingRelationships: 'Postojeće veze',
                 featured: 'Istaknuto',
-                onSale: 'Na popustu',
+                onSale: 'Akcija',
                 productCreated: 'Kreirano',
                 productDeletedSuccessfully: 'Proizvod je uspješno obrisan',
                 productDeletedError: 'Greška prilikom brisanja proizvoda',
@@ -2170,6 +2170,7 @@ export class TranslationService {
                 productNotFound: 'Proizvod nije pronađen',
                 backToProducts: 'Natrag na proizvode',
                 relatedProducts: 'Povezani proizvodi',
+                noRelatedProducts: 'Nema povezanih proizvoda.',
                 relatedProductsComingSoon: 'Povezani proizvodi uskoro...',
                 // Product Info
                 availability: 'Dostupnost',
@@ -2187,7 +2188,7 @@ export class TranslationService {
                 weight: 'Težina',
                 dimensions: 'Dimenzije',
                 certifications: 'Certifikati',
-                onSale: 'Na popustu',
+                onSale: 'Akcija',
                 quantity: 'Količina',
                 addToCart: 'Dodaj u košaricu',
                 addToWishlist: 'Dodaj na listu želja',
@@ -4544,6 +4545,7 @@ export class TranslationService {
                 productNotFound: 'Product not found',
                 backToProducts: 'Back to Products',
                 relatedProducts: 'Related Products',
+                noRelatedProducts: 'No related products.',
                 relatedProductsComingSoon: 'Related products coming soon...',
                 // Product Info
                 availability: 'Availability',
