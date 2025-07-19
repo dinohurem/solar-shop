@@ -719,7 +719,7 @@ export class PartnersProductsComponent implements OnInit, OnDestroy {
       event.stopPropagation();
     }
     // Navigate to B2B product details
-    this.router.navigate(['/partneri/products', product.id]);
+    this.router.navigate(['/partneri/proizvodi', product.id]);
   }
 
   toggleMobileFilters(): void {

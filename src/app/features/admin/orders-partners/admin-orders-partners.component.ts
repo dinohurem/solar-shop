@@ -209,7 +209,7 @@ export class AdminOrdersPartnersComponent implements OnInit {
 
         switch (action) {
             case 'edit':
-                this.router.navigate(['/admin/orders/edit', item.id]);
+                this.router.navigate(['/admin/narudzbe/uredi', item.id]);
                 break;
             case 'delete':
                 // The delete confirmation is handled by the data-table component
@@ -219,7 +219,7 @@ export class AdminOrdersPartnersComponent implements OnInit {
     }
 
     onRowClick(item: any): void {
-        this.router.navigate(['/admin/orders/details', item.id]);
+        this.router.navigate(['/admin/narudzbe/detalji', item.id]);
     }
 
     async onCsvImported(csvData: any[]): Promise<void> {

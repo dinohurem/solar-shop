@@ -130,7 +130,7 @@ export class AdminBlogComponent implements OnInit {
 
         switch (action) {
             case 'edit':
-                this.router.navigate(['/admin/blog/edit', item.id]);
+                this.router.navigate(['/admin/blog/uredi', item.id]);
                 break;
             case 'delete':
                 this.deletePost(item);
@@ -139,11 +139,11 @@ export class AdminBlogComponent implements OnInit {
     }
 
     onRowClick(item: any): void {
-        this.router.navigate(['/admin/blog/edit', item.id]);
+        this.router.navigate(['/admin/blog/uredi', item.id]);
     }
 
     onAddPost(): void {
-        this.router.navigate(['/admin/blog/create']);
+        this.router.navigate(['/admin/blog/kreiraj']);
     }
 
     async onCsvImported(csvData: any[]): Promise<void> {

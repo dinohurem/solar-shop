@@ -629,7 +629,7 @@ export class CompanyPricingFormComponent implements OnInit, OnDestroy {
       }
 
       // Navigate back
-      this.router.navigate(['/admin/company-pricing']);
+      this.router.navigate(['/admin/cijene-tvrtki']);
     } catch (error) {
       console.error('Error saving company pricing:', error);
       alert('Error saving pricing changes. Please try again.');
@@ -637,6 +637,6 @@ export class CompanyPricingFormComponent implements OnInit, OnDestroy {
   }
 
   goBack(): void {
-    this.router.navigate(['/admin/company-pricing']);
+    this.router.navigate(['/admin/cijene-tvrtki']);
   }
 }

@@ -193,10 +193,10 @@ export const routes: Routes = [
             { path: 'narudzbe-partneri', component: AdminOrdersPartnersComponent },
 
             // Company Pricing
-            { path: 'cijenik-tvrtka', component: AdminCompanyPricingComponent },
-            { path: 'cijenik-tvrtka/kreiraj', component: CompanyPricingFormComponent },
-            { path: 'cijenik-tvrtka/uredi/:id', component: CompanyPricingFormComponent },
-            { path: 'cijenik-tvrtka/detalji/:id', component: CompanyPricingFormComponent },
+            { path: 'cijene-tvrtki', component: AdminCompanyPricingComponent },
+            { path: 'cijene-tvrtki/kreiraj', component: CompanyPricingFormComponent },
+            { path: 'cijene-tvrtki/uredi/:id', component: CompanyPricingFormComponent },
+            { path: 'cijene-tvrtki/detalji/:id', component: CompanyPricingFormComponent },
 
             // Companies
             { path: 'tvrtke', component: AdminCompaniesComponent },

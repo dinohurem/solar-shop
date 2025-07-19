@@ -153,10 +153,10 @@ export class AdminOffersComponent implements OnInit {
 
     switch (action) {
       case 'edit':
-        this.router.navigate(['/admin/offers/edit', item.id]);
+        this.router.navigate(['/admin/ponude/uredi', item.id]);
         break;
       case 'details':
-        this.router.navigate(['/admin/offers/details', item.id]);
+        this.router.navigate(['/admin/ponude/detalji', item.id]);
         break;
       case 'delete':
         this.deleteOffer(item);
@@ -165,11 +165,11 @@ export class AdminOffersComponent implements OnInit {
   }
 
   onRowClick(item: any): void {
-    this.router.navigate(['/admin/offers/details', item.id]);
+    this.router.navigate(['/admin/ponude/detalji', item.id]);
   }
 
   onAddOffer(): void {
-    this.router.navigate(['/admin/offers/create']);
+    this.router.navigate(['/admin/ponude/kreiraj']);
   }
 
   async onCsvImported(csvData: any[]): Promise<void> {

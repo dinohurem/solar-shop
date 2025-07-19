@@ -341,11 +341,11 @@ export class OfferDetailsComponent implements OnInit {
   }
 
   editOffer(): void {
-    this.router.navigate(['/admin/offers/edit', this.offer.id]);
+    this.router.navigate(['/admin/ponude/uredi', this.offer.id]);
   }
 
   goBack(): void {
-    this.router.navigate(['/admin/offers']);
+    this.router.navigate(['/admin/ponude']);
   }
 
   private async loadOfferCategory(): Promise<void> {

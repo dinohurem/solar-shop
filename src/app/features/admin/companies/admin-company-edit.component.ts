@@ -469,7 +469,7 @@ export class AdminCompanyEditComponent implements OnInit, OnDestroy {
   }
 
   goBack(): void {
-    this.router.navigate(['/admin/companies']);
+    this.router.navigate(['/admin/tvrtke']);
   }
 
   copyToClipboard(text: string): void {

@@ -90,13 +90,13 @@ export class AdminCompanyPricingComponent implements OnInit {
   }
 
   onRowClick(item: CompanyPricingSummary): void {
-    this.router.navigate(['/admin/company-pricing/create'], {
+    this.router.navigate(['/admin/cijene-tvrtki/kreiraj'], {
       queryParams: { companyId: item.company_id }
     });
   }
 
   onAdd(): void {
-    this.router.navigate(['/admin/company-pricing/create']);
+    this.router.navigate(['/admin/cijene-tvrtki/kreiraj']);
   }
 
   async onCsvImported(csvData: any[]): Promise<void> {
@@ -117,7 +117,7 @@ export class AdminCompanyPricingComponent implements OnInit {
           // Support flexible field names for company identification
           const companyIdentifier = row.company_id || row.company_name || row.company_email;
           const productIdentifier = row.product_id || row.product_sku || row.product_name;
-          
+
           // Validate required fields
           if (!companyIdentifier || !productIdentifier || !row.price_tier_1) {
             errors.push(`Row missing required fields (company_id/name/email, product_id/sku/name, price_tier_1): ${JSON.stringify(row)}`);
@@ -257,12 +257,12 @@ export class AdminCompanyPricingComponent implements OnInit {
 
           // Handle update mode
           const updateMode = row.update_mode || 'upsert'; // upsert, update_only, insert_only
-          
+
           if (existingPricing) {
             if (updateMode === 'insert_only') {
               continue; // Skip if exists and mode is insert_only
             }
-            
+
             const { error: updateError } = await this.supabase.client
               .from('company_pricing')
               .update(pricingData)
@@ -278,7 +278,7 @@ export class AdminCompanyPricingComponent implements OnInit {
             if (updateMode === 'update_only') {
               continue; // Skip if doesn't exist and mode is update_only
             }
-            
+
             pricingData.created_at = new Date().toISOString();
             const { error: insertError } = await this.supabase.client
               .from('company_pricing')
@@ -312,7 +312,7 @@ export class AdminCompanyPricingComponent implements OnInit {
           }
         }
       }
-      
+
       // Log all errors to console for debugging
       if (errors.length > 0) {
         console.error('All import errors:', errors);
@@ -340,21 +340,21 @@ export class AdminCompanyPricingComponent implements OnInit {
       // Define comprehensive CSV headers
       const headers = [
         'company_id', 'company_name', 'company_email', 'product_id', 'product_sku', 'product_name',
-        'price_tier_1', 'quantity_tier_1', 'price_tier_2', 'quantity_tier_2', 
+        'price_tier_1', 'quantity_tier_1', 'price_tier_2', 'quantity_tier_2',
         'price_tier_3', 'quantity_tier_3', 'minimum_order', 'update_mode'
       ];
-      
+
       // Get company and product details for enhanced export
       const companyIds = [...new Set(allPricing.map((p: any) => p.company_id))];
       const productIds = [...new Set(allPricing.map((p: any) => p.product_id))];
-      
+
       const companies = await Promise.all(
         companyIds.map(id => this.supabase.getTableById('companies', id))
       );
       const products = await Promise.all(
         productIds.map(id => this.supabase.getTableById('products', id))
       );
-      
+
       const companyMap = new Map(companies.filter(c => c).map(c => [c!.id, c]));
       const productMap = new Map(products.filter(p => p).map(p => [p!.id, p]));
 
@@ -362,7 +362,7 @@ export class AdminCompanyPricingComponent implements OnInit {
       const rows = allPricing.map((pricing: any) => {
         const company = companyMap.get(pricing.company_id);
         const product = productMap.get(pricing.product_id);
-        
+
         return [
           pricing.company_id || '',
           company?.company_name || '',

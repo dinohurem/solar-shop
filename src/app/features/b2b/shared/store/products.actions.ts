@@ -56,6 +56,7 @@ export interface ProductWithPricing extends Product {
     has_pending_price?: boolean;
     image_url?: string; // computed from images array for easier template access
     company_minimum_order?: number; // company-specific minimum order from company_pricing table
+    categories?: Array<{ name: string; isPrimary: boolean }>; // multiple categories with primary designation
     // Company pricing tiers
     company_pricing_tiers?: {
         quantity: number;

@@ -23,7 +23,7 @@ import { of, fromEvent, merge, EMPTY, from } from 'rxjs';
       [form]="orderForm"
       [isEditMode]="isEditMode"
       [isSubmitting]="loading"
-      backRoute="/admin/orders"
+      backRoute="/admin/narudzbe"
       (formSubmit)="onSave()">
       
       <div [formGroup]="orderForm" class="space-y-8">
@@ -902,12 +902,12 @@ export class OrderFormComponent implements OnInit {
       } else {
         console.error('Order not found with ID:', this.orderId);
         alert('Order not found. You will be redirected to the orders list.');
-        this.router.navigate(['/admin/orders']);
+        this.router.navigate(['/admin/narudzbe']);
       }
     } catch (error) {
       console.error('Error loading order:', error);
       alert('Error loading order: ' + (error as any).message);
-      this.router.navigate(['/admin/orders']);
+      this.router.navigate(['/admin/narudzbe']);
     } finally {
       this.loading = false;
     }
@@ -1133,7 +1133,7 @@ export class OrderFormComponent implements OnInit {
 
   onSuccessModalClose(): void {
     this.showSuccessModal = false;
-    this.router.navigate(['/admin/orders']);
+    this.router.navigate(['/admin/narudzbe']);
   }
 
   /**

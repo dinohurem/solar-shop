@@ -1123,11 +1123,11 @@ export class OrderDetailsComponent implements OnInit {
   }
 
   editOrder(): void {
-    this.router.navigate(['/admin/orders/edit', this.order.id]);
+    this.router.navigate(['/admin/narudzbe/uredi', this.order.id]);
   }
 
   goBack(): void {
-    this.router.navigate(['/admin/orders']);
+    this.router.navigate(['/admin/narudzbe']);
   }
 
   getStatusClass(status: string): string {

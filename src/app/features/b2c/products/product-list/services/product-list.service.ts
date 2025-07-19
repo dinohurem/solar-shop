@@ -177,9 +177,39 @@ export class ProductListService {
 
     private async convertSupabaseProductToLocal(product: any): Promise<Product | null> {
         try {
-            // Get category name
+            // Get category name (legacy single category)
             const category = await this.supabaseService.getTableById('categories', product.category_id);
             const categoryName = category?.name || 'Unknown Category';
+
+            // Get multiple categories from product_categories junction table
+            let categoriesArray: Array<{ name: string; isPrimary: boolean }> = [];
+            
+            try {
+                const { data: productCategories } = await this.supabaseService.client
+                    .from('product_categories')
+                    .select(`
+                        is_primary,
+                        categories!inner(name, slug)
+                    `)
+                    .eq('product_id', product.id);
+
+                if (productCategories && productCategories.length > 0) {
+                    categoriesArray = productCategories.map((pc: any) => ({
+                        name: pc.categories?.name || 'Unknown',
+                        isPrimary: pc.is_primary || false
+                    }));
+                }
+            } catch (categoryError) {
+                console.error('Error loading product categories:', categoryError);
+            }
+
+            // Fallback to single category if no product_categories data
+            if (categoriesArray.length === 0 && categoryName) {
+                categoriesArray = [{
+                    name: categoryName,
+                    isPrimary: true
+                }];
+            }
 
             // Get primary image
             const imageUrl = this.getProductImage(product.images);
@@ -205,7 +235,8 @@ export class ProductListService {
                 originalPrice: product.original_price || undefined,
                 discount,
                 imageUrl,
-                category: categoryName,
+                category: categoryName, // Legacy single category
+                categories: categoriesArray, // New multi-category array
                 manufacturer: product.brand,
                 model: product.model,
                 weight: product.weight,
@@ -218,7 +249,9 @@ export class ProductListService {
                 createdAt: new Date(product.created_at),
                 specifications: product.specifications || {},
                 features: product.features || [],
-                sku: product.sku || ''
+                sku: product.sku || '',
+                images: product.images || [],
+                isOnSale: product.is_on_sale || false
             };
         } catch (error) {
             console.error('Error converting product:', error);

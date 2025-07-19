@@ -181,7 +181,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
                   <span>{{ 'admin.companies' | translate }}</span>
                 </a>
 
-                <a routerLink="/admin/cijenik-tvrtka"
+                <a routerLink="/admin/cijene-tvrtki"
                    routerLinkActive="bg-blue-50 text-blue-700 border-blue-300"
                    class="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 transition-colors border border-transparent">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

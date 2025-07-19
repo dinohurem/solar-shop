@@ -197,7 +197,7 @@ export class PartnersHighlightsComponent implements OnInit {
   }
 
   navigateToOffer(offerId: string): void {
-    this.router.navigate(['/partneri/offers', offerId]);
+    this.router.navigate(['/partneri/ponude', offerId]);
   }
 
   isOfferEndingSoon(endDate: string): boolean {

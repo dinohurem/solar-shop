@@ -431,7 +431,7 @@ export class AdminCompaniesComponent implements OnInit, OnDestroy {
   }
 
   onAddCompany(): void {
-    this.router.navigate(['/admin/companies/create']);
+    this.router.navigate(['/admin/tvrtke/kreiraj']);
   }
 
   onRowClick(company: Company): void {
@@ -522,7 +522,7 @@ export class AdminCompaniesComponent implements OnInit, OnDestroy {
   }
 
   editCompany(company: Company): void {
-    this.router.navigate(['/admin/companies/edit', company.id]);
+    this.router.navigate(['/admin/tvrtke/uredi', company.id]);
   }
 
   deleteCompany(company: Company): void {

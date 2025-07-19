@@ -38,7 +38,12 @@ export class ProductsEffects {
                         .from('products')
                         .select(`
                             *,
-                            categories!inner(name, slug)
+                            categories!inner(name, slug),
+                            product_categories!left(
+                                category_id,
+                                is_primary,
+                                categories!inner(id, name, slug)
+                            )
                         `)
                         .eq('is_active', true)
                 ).pipe(
@@ -48,14 +53,35 @@ export class ProductsEffects {
                         }
 
                         // Transform the data to include category name and extract primary image
-                        const transformedProducts = (data || []).map(product => ({
-                            ...product,
-                            category: product.categories?.name || 'Uncategorized',
-                            image_url: this.getPrimaryImageUrl(product.images),
-                            in_stock: product.stock_status === 'in_stock',
-                            partner_only: false, // TODO: implement partner-only logic
-                            minimum_order: product.minimum_order || 1
-                        }));
+                        const transformedProducts = (data || []).map(product => {
+                            // Process multiple categories from product_categories junction table
+                            let categoriesArray: Array<{ name: string; isPrimary: boolean }> = [];
+                            
+                            if (product.product_categories && Array.isArray(product.product_categories)) {
+                                categoriesArray = product.product_categories.map((pc: any) => ({
+                                    name: pc.categories?.name || 'Unknown',
+                                    isPrimary: pc.is_primary || false
+                                }));
+                            }
+                            
+                            // Fallback to single category if no product_categories data
+                            if (categoriesArray.length === 0 && product.categories?.name) {
+                                categoriesArray = [{
+                                    name: product.categories.name,
+                                    isPrimary: true
+                                }];
+                            }
+
+                            return {
+                                ...product,
+                                category: product.categories?.name || 'Uncategorized', // Legacy single category
+                                categories: categoriesArray, // New multi-category array
+                                image_url: this.getPrimaryImageUrl(product.images),
+                                in_stock: product.stock_status === 'in_stock',
+                                partner_only: false, // TODO: implement partner-only logic
+                                minimum_order: product.minimum_order || 1
+                            };
+                        });
 
                         return ProductsActions.loadProductsSuccess({ products: transformedProducts });
                     }),

@@ -122,15 +122,26 @@ export class ProductPhotosComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // Get images from product data
-    if (this.product.imageUrl) {
-      // For local Product interface, we just have a single imageUrl
+    this.extractProductImages();
+    this.selectedImage = this.productImages[0];
+  }
+
+  private extractProductImages(): void {
+    // Check if product has images array (new format)
+    if (this.product.images && Array.isArray(this.product.images)) {
+      this.productImages = this.product.images.map((img: any) => {
+        // Handle both object format {url: string} and string format
+        return typeof img === 'string' ? img : img.url || img;
+      }).filter(url => url); // Filter out empty urls
+    } 
+    // Fallback to single imageUrl (legacy format)
+    else if (this.product.imageUrl) {
       this.productImages = [this.product.imageUrl];
-    } else {
-      // Fallback to placeholder if no images
+    } 
+    // Default placeholder if no images
+    else {
       this.productImages = ['assets/images/product-placeholder.jpg'];
     }
-    
-    this.selectedImage = this.productImages[0];
   }
 
   selectImage(image: string): void {

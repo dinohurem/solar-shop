@@ -205,16 +205,28 @@ import { LucideAngularModule, Star, StarHalf, ShoppingCart } from 'lucide-angula
         <div id="product-details-content" *ngIf="productDetailsOpen" class="mt-4">
         <dl class="grid grid-cols-1 gap-4">
           <div class="flex justify-between">
-            <dt class="text-sm font-medium text-gray-500 font-['DM_Sans']">{{ 'productDetails.category' | translate }}:</dt>
+            <dt class="text-sm font-medium text-gray-500 font-['DM_Sans']">{{ 'productDetails.categories' | translate }}:</dt>
             <dd class="text-sm font-['DM_Sans']">
+              <div *ngIf="product.categories && product.categories.length > 0" class="flex flex-wrap gap-1">
+                <button 
+                  *ngFor="let category of product.categories; let last = last"
+                  (click)="navigateToCategory(category.name)"
+                  class="text-solar-600 hover:text-solar-700 hover:underline transition-colors"
+                  [class.font-semibold]="category.isPrimary"
+                  [title]="category.isPrimary ? 'Primary category' : ''"
+                >
+                  {{ category.name }}{{ !last ? ',' : '' }}
+                </button>
+              </div>
+              <!-- Fallback to single category for legacy products -->
               <button 
-                *ngIf="product.category"
+                *ngIf="(!product.categories || product.categories.length === 0) && product.category"
                 (click)="navigateToCategory(product.category)"
                 class="text-solar-600 hover:text-solar-700 hover:underline transition-colors"
               >
                 {{ product.category }}
               </button>
-              <span *ngIf="!product.category" class="text-gray-500">-</span>
+              <span *ngIf="(!product.categories || product.categories.length === 0) && !product.category" class="text-gray-500">-</span>
             </dd>
           </div>
           <div class="flex justify-between">

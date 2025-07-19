@@ -138,7 +138,7 @@ export class AdminCategoriesComponent implements OnInit {
 
         switch (action) {
             case 'edit':
-                this.router.navigate(['/admin/categories/edit', item.id]);
+                this.router.navigate(['/admin/kategorije/uredi', item.id]);
                 break;
             case 'delete':
                 this.deleteCategory(item);
@@ -147,11 +147,11 @@ export class AdminCategoriesComponent implements OnInit {
     }
 
     onRowClick(item: any): void {
-        this.router.navigate(['/admin/categories/edit', item.id]);
+        this.router.navigate(['/admin/kategorije/uredi', item.id]);
     }
 
     onAddCategory(): void {
-        this.router.navigate(['/admin/categories/create']);
+        this.router.navigate(['/admin/kategorije/kreiraj']);
     }
 
     async onCsvImported(csvData: any[]): Promise<void> {

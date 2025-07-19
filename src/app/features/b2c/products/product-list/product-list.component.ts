@@ -33,6 +33,7 @@ export interface Product {
   discount?: number;
   imageUrl: string;
   category: string;
+  categories?: Array<{ name: string; isPrimary: boolean }>;
   manufacturer: string;
   model?: string;
   weight?: number;
@@ -47,6 +48,7 @@ export interface Product {
   createdAt: Date;
   sku?: string;
   isOnSale?: boolean;
+  images?: any[];
 }
 
 export interface ProductFilters {
@@ -204,40 +206,30 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
                     [alt]="product.name"
                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   >
-                  <!-- Featured Badge -->
+                  <!-- Featured Badge - Top Left -->
                   <div 
                     *ngIf="product.featured" 
                     class="absolute top-3 left-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg"
                   >
                     {{ 'productList.featured' | translate }}
                   </div>
-                  <!-- On Sale Badge -->
+                  <!-- On Sale Badge - Bottom Left -->
                   <div 
                     *ngIf="product.isOnSale" 
-                    class="absolute px-2 py-1 rounded-full text-xs font-semibold bg-red-500 text-white"
-                    [ngClass]="{
-                      'top-3 left-3': !product.featured,
-                      'top-12 left-3': product.featured
-                    }"
+                    class="absolute bottom-3 left-3 px-2 py-1 rounded-full text-xs font-semibold bg-red-500 text-white"
                   >
-                    {{ 'productList.onSale' | translate }}
+                    {{ 'productDetails.onSale' | translate }}
                   </div>
-                  <!-- Discount Badge -->
+                  <!-- Discount Badge - Top Right -->
                   <div 
                     *ngIf="product.discount" 
-                    class="absolute px-2 py-1 rounded-full text-xs font-semibold bg-solar-500 text-white"
-                    [ngClass]="{
-                      'top-3 left-3': !product.featured && !product.isOnSale,
-                      'top-12 left-3': product.featured && !product.isOnSale,
-                      'top-3 right-3': product.isOnSale && !product.featured,
-                      'top-12 right-3': product.isOnSale && product.featured
-                    }"
+                    class="absolute top-3 right-3 px-2 py-1 rounded-full text-xs font-semibold bg-solar-500 text-white"
                   >
                     -{{ product.discount }}%
                   </div>
-                  <!-- Availability Badge -->
+                  <!-- Availability Badge - Bottom Right -->
                   <div 
-                    class="absolute top-3 right-3 px-2 py-1 rounded-full text-xs font-semibold"
+                    class="absolute bottom-3 right-3 px-2 py-1 rounded-full text-xs font-semibold"
                     [ngClass]="{
                       'bg-green-100 text-green-800': product.availability === 'available',
                       'bg-yellow-100 text-yellow-800': product.availability === 'limited',

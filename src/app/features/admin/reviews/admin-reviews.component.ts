@@ -78,11 +78,14 @@ export class AdminReviewsComponent implements OnInit {
     tableConfig: TableConfig = {
         columns: [
             {
-                key: 'product.name',
-                label: this.translationService.translate('admin.reviewsForm.reviewProduct'),
+                key: 'rating',
+                label: this.translationService.translate('admin.reviewsForm.reviewRating'),
                 type: 'text',
                 sortable: true,
-                searchable: true
+                format: (value: any) => {
+                    const stars = '★'.repeat(value);
+                    return `${stars} ${value}/5`;
+                }
             },
             {
                 key: 'user.firstName',
@@ -90,61 +93,22 @@ export class AdminReviewsComponent implements OnInit {
                 type: 'text',
                 sortable: true,
                 searchable: true,
-                format: (value: any) => `${value || ''}`
-            },
-            {
-                key: 'rating',
-                label: this.translationService.translate('admin.reviewsForm.reviewRating'),
-                type: 'text',
-                sortable: true,
-                format: (value: any) => {
-                    const stars = '★'.repeat(value) + '☆'.repeat(5 - value);
-                    return `${stars} (${value}/5)`;
-                }
+                format: (value: any) => `${value || 'Anonymous'}`
             },
             {
                 key: 'title',
                 label: this.translationService.translate('admin.reviewsForm.reviewTitle'),
                 type: 'text',
                 sortable: true,
-                searchable: true
-            },
-            {
-                key: 'comment',
-                label: this.translationService.translate('admin.reviewsForm.reviewContent'),
-                type: 'text',
                 searchable: true,
-                format: (value) => value ? (value.length > 100 ? value.substring(0, 100) + '...' : value) : ''
-            },
-            {
-                key: 'status',
-                label: this.translationService.translate('admin.reviewsForm.reviewStatus'),
-                type: 'status',
-                sortable: true,
-                searchable: true,
-                format: (value) => {
-                    return this.translationService.translate(`admin.reviewsForm.${value}`) || value;
-                }
+                format: (value) => value ? (value.length > 30 ? value.substring(0, 30) + '...' : value) : ''
             },
             {
                 key: 'isApproved',
                 label: this.translationService.translate('admin.reviewsForm.reviewApproval'),
                 type: 'boolean',
                 sortable: true,
-                format: (value) => value ? this.translationService.translate('admin.reviewsForm.approved') : this.translationService.translate('admin.reviewsForm.pending')
-            },
-            {
-                key: 'isVerifiedPurchase',
-                label: this.translationService.translate('reviews.verifiedPurchase'),
-                type: 'boolean',
-                sortable: true,
-                format: (value) => value ? this.translationService.translate('common.yes') : this.translationService.translate('common.no')
-            },
-            {
-                key: 'helpfulCount',
-                label: this.translationService.translate('reviews.helpful'),
-                type: 'number',
-                sortable: true
+                format: (value) => value ? '✓ ' + this.translationService.translate('admin.reviewsForm.approved') : '⏳ ' + this.translationService.translate('admin.reviewsForm.pending')
             },
             {
                 key: 'createdAt',
@@ -226,7 +190,7 @@ export class AdminReviewsComponent implements OnInit {
 
         switch (action) {
             case 'view':
-                this.router.navigate(['/admin/reviews/view', item.id]);
+                this.router.navigate(['/admin/recenzije/pregled', item.id]);
                 break;
             case 'approve':
                 this.store.dispatch(ReviewsActions.approveReview({ reviewId: item.id }));
@@ -246,11 +210,10 @@ export class AdminReviewsComponent implements OnInit {
     }
 
     onRowClick(item: Review): void {
-        this.router.navigate(['/admin/reviews/view', item.id]);
+        this.router.navigate(['/admin/recenzije/detalji', item.id]);
     }
 
     onAddReview(): void {
-        // this.router.navigate(['/admin/reviews/create']);
         return;
     }
 

@@ -155,15 +155,28 @@ import * as B2BCartActions from '../../cart/store/b2b-cart.actions';
             <!-- Product Header -->
             <div>
               <div class="flex items-center space-x-2 mb-2">
+                <!-- Multiple Categories Display -->
+                <div *ngIf="product.categories && product.categories.length > 0" class="flex flex-wrap items-center gap-1">
+                  <button 
+                    *ngFor="let category of product.categories; let last = last"
+                    (click)="navigateToCategory(category.name)"
+                    class="text-sm font-medium text-solar-600 hover:text-solar-700 hover:underline uppercase transition-colors"
+                    [class.font-bold]="category.isPrimary"
+                    [title]="category.isPrimary ? 'Primary category' : ''"
+                  >
+                    {{ category.name }}{{ !last ? ',' : '' }}
+                  </button>
+                </div>
+                <!-- Fallback to single category for legacy products -->
                 <button 
-                  *ngIf="product.category"
+                  *ngIf="(!product.categories || product.categories.length === 0) && product.category"
                   (click)="navigateToCategory(product.category)"
                   class="text-sm font-medium text-solar-600 hover:text-solar-700 hover:underline uppercase transition-colors"
                 >
                   {{ product.category }}
                 </button>
                 <span 
-                  *ngIf="!product.category"
+                  *ngIf="(!product.categories || product.categories.length === 0) && !product.category"
                   class="text-sm font-medium text-gray-500 uppercase"
                 >
                   Product
@@ -407,7 +420,17 @@ import * as B2BCartActions from '../../cart/store/b2b-cart.actions';
               <!-- Product Info -->
               <div class="p-4">
                 <h3 class="text-lg font-semibold text-gray-900 mb-1">{{ suggested.name }}</h3>
-                <p class="text-sm text-gray-500 mb-3">{{ suggested.category || 'Product' }}</p>
+                <!-- Multiple Categories Display -->
+                <div *ngIf="suggested.categories && suggested.categories.length > 0" class="text-sm text-gray-500 mb-3">
+                  <span *ngFor="let category of suggested.categories; let last = last" 
+                        [class.font-semibold]="category.isPrimary">
+                    {{ category.name }}{{ !last ? ', ' : '' }}
+                  </span>
+                </div>
+                <!-- Fallback to single category for legacy products -->
+                <p *ngIf="(!suggested.categories || suggested.categories.length === 0)" class="text-sm text-gray-500 mb-3">
+                  {{ suggested.category || 'Product' }}
+                </p>
                 
                 <!-- Pricing -->
                 <div *ngIf="isCompanyContact && suggested.company_price" class="space-y-1">

@@ -19,7 +19,7 @@ import { TranslationService } from '../../../../shared/services/translation.serv
       [form]="offerForm"
       [isEditMode]="isEditMode"
       [isSubmitting]="isSubmitting"
-      [backRoute]="'/admin/offers'"
+      [backRoute]="'/admin/ponude'"
       (formSubmit)="onSubmit($event)"
     >
       <div [formGroup]="offerForm" class="space-y-8">
@@ -85,6 +85,28 @@ import { TranslationService } from '../../../../shared/services/translation.serv
               <label for="description" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
                 {{ 'admin.offersForm.description' | translate }}
               </label>
+            </div>
+          </div>
+
+          <!-- Offer Image -->
+          <div class="mt-6">
+            <div class="relative">
+              <input
+                type="text"
+                id="image_url"
+                formControlName="image_url"
+                class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
+                placeholder="Image URL"
+              >
+              <label for="image_url" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+                {{ 'admin.offersForm.offerImage' | translate }}
+              </label>
+              <p class="mt-3 text-sm text-gray-500 flex items-center">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Optional image URL for the offer banner
+              </p>
             </div>
           </div>
         </div>
@@ -545,7 +567,7 @@ import { TranslationService } from '../../../../shared/services/translation.serv
             Offer Status
           </h3>
           
-          <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <div class="relative">
               <select
                 id="status"
@@ -562,26 +584,6 @@ import { TranslationService } from '../../../../shared/services/translation.serv
               </label>
             </div>
 
-            <div class="flex items-center">
-              <label class="relative flex items-center p-4 rounded-lg border-2 border-gray-200 cursor-pointer hover:border-blue-300 transition-colors duration-200 w-full">
-              <input
-                id="is_active"
-                type="checkbox"
-                formControlName="is_active"
-                  class="sr-only"
-                >
-                <span class="flex items-center">
-                  <span class="flex-shrink-0 w-5 h-5 border-2 border-gray-300 rounded mr-3 transition-colors duration-200" 
-                        [class.bg-blue-600]="offerForm.get('is_active')?.value"
-                        [class.border-blue-600]="offerForm.get('is_active')?.value">
-                    <svg *ngIf="offerForm.get('is_active')?.value" class="w-3 h-3 text-white mx-auto mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                    </svg>
-                  </span>
-                  <span class="text-sm font-medium text-gray-700">{{ 'admin.offersForm.active' | translate }}</span>
-                </span>
-              </label>
-            </div>
 
             <div class="flex items-center">
               <label class="relative flex items-center p-4 rounded-lg border-2 border-gray-200 cursor-pointer hover:border-blue-300 transition-colors duration-200 w-full">
@@ -648,6 +650,7 @@ export class OfferFormComponent implements OnInit {
     this.offerForm = this.fb.group({
       title: ['', [Validators.required]],
       description: [''],
+      image_url: [''],
       code: ['', [Validators.required]],
       discount_type: ['', [Validators.required]],
       discount_value: [0, [Validators.required, Validators.min(0)]],
@@ -657,7 +660,6 @@ export class OfferFormComponent implements OnInit {
       max_usage: [null],
       priority: [0],
       status: ['draft', [Validators.required]],
-      is_active: [false],
       is_b2b: [false],
       category_id: [null],
       apply_to_category: [false],
@@ -832,7 +834,7 @@ export class OfferFormComponent implements OnInit {
       // Save products to offer_products table
       await this.saveOfferProducts(savedOfferId, products);
 
-      this.router.navigate(['/admin/offers']);
+      this.router.navigate(['/admin/ponude']);
     } catch (error) {
       console.error('Error saving offer:', error);
     } finally {
@@ -1050,12 +1052,12 @@ export class OfferFormComponent implements OnInit {
     const product = this.allProducts.find(p => p.id === productId);
     if (product) {
       const productControl = this.productsArray.at(index);
-      
+
       // Get the global discount to apply
       const globalDiscountType = this.offerForm.get('discount_type')?.value;
       const globalDiscountValue = this.offerForm.get('discount_value')?.value;
       const discountToApply = (globalDiscountType === 'percentage' && globalDiscountValue > 0) ? globalDiscountValue : 0;
-      
+
       productControl.patchValue({
         id: productId,
         name: product.name,

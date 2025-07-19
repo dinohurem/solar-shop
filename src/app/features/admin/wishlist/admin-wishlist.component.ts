@@ -374,7 +374,7 @@ export class AdminWishlistComponent implements OnInit {
     }
 
     viewProduct(productId: string): void {
-        this.router.navigate(['/admin/products/edit', productId]);
+        this.router.navigate(['/admin/proizvodi/uredi', productId]);
     }
 
     async removeFromWishlist(wishlistItemId: string): Promise<void> {

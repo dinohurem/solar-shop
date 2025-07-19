@@ -156,7 +156,7 @@ export class AdminUsersComponent implements OnInit {
 
         switch (action) {
             case 'edit':
-                this.router.navigate(['/admin/users/edit', item.id]);
+                this.router.navigate(['/admin/korisnici/uredi', item.id]);
                 break;
             case 'delete':
                 this.deleteUser(item);
@@ -166,11 +166,11 @@ export class AdminUsersComponent implements OnInit {
 
     onRowClick(item: any): void {
         // Navigate to edit form when row is clicked
-        this.router.navigate(['/admin/users/edit', item.id]);
+        this.router.navigate(['/admin/korisnici/uredi', item.id]);
     }
 
     onAddUser(): void {
-        this.router.navigate(['/admin/users/create']);
+        this.router.navigate(['/admin/korisnici/novi']);
     }
 
     async onCsvImported(csvData: any[]): Promise<void> {
