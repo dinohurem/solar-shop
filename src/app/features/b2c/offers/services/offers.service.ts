@@ -164,8 +164,7 @@ export class OffersService {
                         price
                     )
                 `)
-                .eq('offer_id', offer.id)
-                .eq('is_active', true);
+                .eq('offer_id', offer.id);
 
             if (error || !offerProducts || offerProducts.length === 0) {
                 // If no products, use placeholder values for general offers

@@ -30,8 +30,8 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
           
           <div class="flex items-center space-x-3">
             <span class="px-3 py-1 rounded-full text-sm font-medium"
-                  [class]="offer.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
-              {{ offer.is_active ? ('admin.active' | translate) : ('admin.inactive' | translate) }}
+                  [class]="offer.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
+              {{ offer.status === 'active' ? ('admin.active' | translate) : ('admin.inactive' | translate) }}
             </span>
             <button 
               (click)="editOffer()"
@@ -293,7 +293,6 @@ export class OfferDetailsComponent implements OnInit {
           )
         `)
         .eq('offer_id', offerId)
-        .eq('is_active', true)
         .order('sort_order');
 
       if (error) throw error;

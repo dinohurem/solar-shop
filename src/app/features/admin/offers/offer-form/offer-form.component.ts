@@ -99,13 +99,13 @@ import { TranslationService } from '../../../../shared/services/translation.serv
                 placeholder="Image URL"
               >
               <label for="image_url" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                {{ 'admin.offersForm.offerImage' | translate }}
+                {{ 'admin.common.image' | translate }}
               </label>
               <p class="mt-3 text-sm text-gray-500 flex items-center">
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                Optional image URL for the offer banner
+                  {{ 'admin.common.imageUrl' | translate }}
               </p>
             </div>
           </div>
@@ -757,7 +757,6 @@ export class OfferFormComponent implements OnInit {
           )
         `)
         .eq('offer_id', this.offerId)
-        .eq('is_active', true)
         .order('sort_order');
 
       if (error) throw error;
@@ -858,8 +857,7 @@ export class OfferFormComponent implements OnInit {
           discount_percentage: product.discount_percentage || 0,
           original_price: product.price,
           discounted_price: this.calculateDiscountedPrice(product.price, product.discount_percentage),
-          sort_order: index,
-          is_active: true
+          sort_order: index
         }));
 
         await this.supabaseService.client
@@ -878,7 +876,7 @@ export class OfferFormComponent implements OnInit {
       const { data, error } = await this.supabaseService.client
         .from('categories')
         .select('*')
-        .eq('is_active', true)
+        .eq('status', 'active')
         .order('name');
 
       if (error) throw error;
@@ -928,7 +926,7 @@ export class OfferFormComponent implements OnInit {
         .from('products')
         .select('*')
         .eq('category_id', categoryId)
-        .eq('is_active', true)
+        .eq('status', 'active')
         .order('name');
 
       if (error) throw error;
@@ -966,7 +964,7 @@ export class OfferFormComponent implements OnInit {
       const { data, error } = await this.supabaseService.client
         .from('products')
         .select('*')
-        .eq('is_active', true)
+        .eq('status', 'active')
         .order('name');
 
       if (error) throw error;

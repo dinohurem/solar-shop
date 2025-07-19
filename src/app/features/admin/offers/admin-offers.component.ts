@@ -194,8 +194,7 @@ export class AdminOffersComponent implements OnInit {
         max_order_amount: row.max_order_amount ? parseFloat(row.max_order_amount) : undefined,
         start_date: row.start_date || row['Start Date'] || undefined,
         end_date: row.end_date || row['End Date'] || undefined,
-        image_url: row.image_url || row['Image URL'] || undefined,
-        is_active: (row.is_active || row['Is Active'] || 'true').toLowerCase() === 'true'
+        image_url: row.image_url || row['Image URL'] || undefined
       }));
 
       // Import offers one by one

@@ -420,7 +420,6 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
           )
         `)
         .eq('offer_id', offerId)
-        .eq('is_active', true)
         .order('sort_order')
     ).pipe(
       map(({ data, error }) => {

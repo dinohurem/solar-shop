@@ -305,7 +305,6 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
           )
         `)
         .eq('offer_id', offer.id)
-        .eq('is_active', true)
         .order('sort_order')
     ).pipe(
       switchMap(({ data: offerProducts, error }) => {

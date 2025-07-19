@@ -1,9 +1,12 @@
 -- Add image column to offers table
 ALTER TABLE offers ADD COLUMN IF NOT EXISTS image_url TEXT;
 
--- Drop RLS policies that depend on is_active column
+-- Drop all existing RLS policies for offers table
 DROP POLICY IF EXISTS "Active offers are viewable by everyone" ON offers;
 DROP POLICY IF EXISTS "Users can view offers" ON offers;
+DROP POLICY IF EXISTS "Public offers are viewable by everyone" ON offers;
+DROP POLICY IF EXISTS "Users can view all offers" ON offers;
+DROP POLICY IF EXISTS "Admins can manage offers" ON offers;
 
 -- Remove the is_active column from offers table (if it exists)
 ALTER TABLE offers DROP COLUMN IF EXISTS is_active;

@@ -264,7 +264,6 @@ export class PartnersOffersComponent implements OnInit, OnDestroy {
       // Load offers where is_b2b is true and status is active
       const offers = await this.supabaseService.getTable('offers', {
         is_b2b: true,
-        is_active: true,
         status: 'active'
       });
 
@@ -362,7 +361,6 @@ export class PartnersOffersComponent implements OnInit, OnDestroy {
           )
         `)
         .eq('offer_id', offerId)
-        .eq('is_active', true)
         .order('sort_order')
     ).pipe(
       switchMap(({ data, error }) => {

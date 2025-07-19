@@ -446,7 +446,6 @@ export class SupabaseService {
         const { data, error } = await this.supabase
             .from('offers')
             .select('*')
-            .eq('is_active', true)
             .eq('status', 'active')
             .lte('start_date', new Date().toISOString())
             .or('end_date.is.null,end_date.gte.' + new Date().toISOString())
@@ -464,7 +463,6 @@ export class SupabaseService {
         let query = this.supabase
             .from('offers')
             .select('*')
-            .eq('is_active', true)
             .eq('is_b2b', true)
             .eq('status', 'active');
 
