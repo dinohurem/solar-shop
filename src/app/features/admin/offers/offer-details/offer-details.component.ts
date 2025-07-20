@@ -305,18 +305,23 @@ export class OfferDetailsComponent implements OnInit {
       if (error) throw error;
 
       if (data && data.length > 0) {
-        const offerProducts = data.map((offerProduct: any) => ({
-          id: offerProduct.products.id,
-          name: offerProduct.products.name,
-          sku: offerProduct.products.sku,
-          category: offerProduct.products.categories?.name || 'Solar Equipment',
-          price: offerProduct.products.price || 0,
-          discount_percentage: offerProduct.discount_percentage || 0,
-          discount_amount: offerProduct.discount_amount || 0,
-          discount_type: offerProduct.discount_type || 'percentage',
-          stock_quantity: offerProduct.products.stock_quantity || 0,
-          offer_product_id: offerProduct.id
-        }));
+        const offerProducts = data.map((offerProduct: any) => {
+          // Determine discount type based on which field has a value
+          const discountType = (offerProduct.discount_amount && offerProduct.discount_amount > 0) ? 'fixed_amount' : 'percentage';
+          
+          return {
+            id: offerProduct.products.id,
+            name: offerProduct.products.name,
+            sku: offerProduct.products.sku,
+            category: offerProduct.products.categories?.name || 'Solar Equipment',
+            price: offerProduct.products.price || 0,
+            discount_percentage: offerProduct.discount_percentage || 0,
+            discount_amount: offerProduct.discount_amount || 0,
+            discount_type: discountType,
+            stock_quantity: offerProduct.products.stock_quantity || 0,
+            offer_product_id: offerProduct.id
+          };
+        });
 
         this.offerProducts = offerProducts;
       } else {

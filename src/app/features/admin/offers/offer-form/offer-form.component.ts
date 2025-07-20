@@ -806,6 +806,9 @@ export class OfferFormComponent implements OnInit {
         // Add each offer product to the form
         data.forEach((offerProduct: any) => {
           const product = offerProduct.products;
+          // Determine discount type based on which field has a value
+          const discountType = (offerProduct.discount_amount && offerProduct.discount_amount > 0) ? 'fixed_amount' : 'percentage';
+          
           const productFormGroup = this.fb.group({
             id: [product.id, Validators.required],
             name: [product.name, Validators.required],
@@ -814,7 +817,7 @@ export class OfferFormComponent implements OnInit {
             price: [product.price || 0, [Validators.required, Validators.min(0)]],
             discount_percentage: [offerProduct.discount_percentage || 0, [Validators.min(0), Validators.max(100)]],
             discount_amount: [offerProduct.discount_amount || 0, [Validators.min(0)]],
-            discount_type: [offerProduct.discount_type || 'percentage']
+            discount_type: [discountType]
           });
 
           this.productsArray.push(productFormGroup);
@@ -902,7 +905,6 @@ export class OfferFormComponent implements OnInit {
             product_id: product.id,
             discount_percentage: product.discount_percentage || 0,
             discount_amount: product.discount_amount || 0,
-            discount_type: discountType,
             original_price: product.price,
             discounted_price: this.calculateDiscountedPriceByType(product.price, discountValue, discountType),
             sort_order: index
