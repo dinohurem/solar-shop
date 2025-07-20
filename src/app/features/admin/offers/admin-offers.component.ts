@@ -94,7 +94,13 @@ export class AdminOffersComponent implements OnInit {
         label: this.translationService.translate('admin.offersForm.discountValue'),
         type: 'number',
         sortable: true,
-        format: (value) => value ? `${value}%` : ''
+        format: (value: any, item: any) => {
+          if (!value) return '';
+          if (item?.discount_type === 'fixed_amount') {
+            return `€${value}`;
+          }
+          return `${value}%`;
+        }
       },
       {
         key: 'is_b2b',

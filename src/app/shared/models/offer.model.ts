@@ -15,6 +15,7 @@ export interface Offer {
     featured?: boolean;
     isB2B?: boolean; // Flag to separate B2B offers from regular offers
     discount_type?: string;
+    discount_value?: number;
 }
 
 export interface OfferFilters {

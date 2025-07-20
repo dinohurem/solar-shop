@@ -413,7 +413,22 @@ import { TranslationService } from '../../../../shared/services/translation.serv
                 </div>
 
                 <div class="relative">
-                  <input 
+                  <!-- Discount Type Selector for Individual Product -->
+                  <div class="flex space-x-2 mb-3">
+                    <button type="button" 
+                            (click)="setProductDiscountType(i, 'percentage')"
+                            [class]="getProductDiscountType(i) === 'percentage' ? 'px-3 py-1 bg-blue-600 text-white rounded text-sm' : 'px-3 py-1 bg-gray-200 text-gray-700 rounded text-sm hover:bg-gray-300'">
+                      %
+                    </button>
+                    <button type="button" 
+                            (click)="setProductDiscountType(i, 'fixed_amount')"
+                            [class]="getProductDiscountType(i) === 'fixed_amount' ? 'px-3 py-1 bg-blue-600 text-white rounded text-sm' : 'px-3 py-1 bg-gray-200 text-gray-700 rounded text-sm hover:bg-gray-300'">
+                      €
+                    </button>
+                  </div>
+                  
+                  <!-- Percentage Input -->
+                  <input *ngIf="getProductDiscountType(i) === 'percentage'"
                     type="number"
                     formControlName="discount_percentage"
                     min="0"
@@ -421,15 +436,31 @@ import { TranslationService } from '../../../../shared/services/translation.serv
                     step="0.1"
                     class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
                     placeholder="0">
+                  
+                  <!-- Fixed Amount Input -->
+                  <div *ngIf="getProductDiscountType(i) === 'fixed_amount'" class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <span class="text-gray-500 text-lg">€</span>
+                    </div>
+                    <input 
+                      type="number"
+                      formControlName="discount_amount"
+                      min="0"
+                      [max]="getProductPrice(i)"
+                      step="0.01"
+                      class="peer w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
+                      placeholder="0.00">
+                  </div>
+                  
                   <label class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
-                    {{ 'admin.discountPercent' | translate }}
+                    {{ getProductDiscountType(i) === 'percentage' ? ('admin.discountPercent' | translate) : ('admin.discountAmount' | translate) }}
                   </label>
                 </div>
 
                 <div class="text-center">
                   <p class="text-sm font-medium text-gray-700 mb-2">{{ 'admin.finalPrice' | translate }}</p>
                   <p class="text-lg font-semibold text-green-600">
-                    {{ calculateDiscountedPrice(getProductPrice(i), getProductDiscount(i)) | currency:'EUR':'symbol':'1.2-2' }}
+                    {{ calculateDiscountedPriceByType(getProductPrice(i), getProductDiscountValue(i), getProductDiscountType(i)) | currency:'EUR':'symbol':'1.2-2' }}
                   </p>
                 </div>
 
@@ -691,11 +722,18 @@ export class OfferFormComponent implements OnInit {
     const discountType = this.offerForm.get('discount_type')?.value;
     const discountValue = this.offerForm.get('discount_value')?.value;
 
-    // Only apply if we have a percentage discount type and a valid value
-    if (discountType === 'percentage' && discountValue && discountValue > 0) {
+    if (discountValue && discountValue > 0) {
       // Update all products in the form array with the global discount
       this.productsArray.controls.forEach(productControl => {
-        productControl.get('discount_percentage')?.setValue(discountValue, { emitEvent: false });
+        if (discountType === 'percentage') {
+          productControl.get('discount_percentage')?.setValue(discountValue, { emitEvent: false });
+          productControl.get('discount_amount')?.setValue(0, { emitEvent: false });
+          productControl.get('discount_type')?.setValue('percentage', { emitEvent: false });
+        } else if (discountType === 'fixed_amount') {
+          productControl.get('discount_amount')?.setValue(discountValue, { emitEvent: false });
+          productControl.get('discount_percentage')?.setValue(0, { emitEvent: false });
+          productControl.get('discount_type')?.setValue('fixed_amount', { emitEvent: false });
+        }
       });
     }
   }
@@ -774,7 +812,9 @@ export class OfferFormComponent implements OnInit {
             sku: [product.sku || ''],
             category: [product.categories?.name || ''],
             price: [product.price || 0, [Validators.required, Validators.min(0)]],
-            discount_percentage: [offerProduct.discount_percentage || 0, [Validators.min(0), Validators.max(100)]]
+            discount_percentage: [offerProduct.discount_percentage || 0, [Validators.min(0), Validators.max(100)]],
+            discount_amount: [offerProduct.discount_amount || 0, [Validators.min(0)]],
+            discount_type: [offerProduct.discount_type || 'percentage']
           });
 
           this.productsArray.push(productFormGroup);
@@ -851,14 +891,23 @@ export class OfferFormComponent implements OnInit {
 
       // Then insert new offer products
       if (products.length > 0) {
-        const offerProducts = products.map((product, index) => ({
-          offer_id: offerId,
-          product_id: product.id,
-          discount_percentage: product.discount_percentage || 0,
-          original_price: product.price,
-          discounted_price: this.calculateDiscountedPrice(product.price, product.discount_percentage),
-          sort_order: index
-        }));
+        const offerProducts = products.map((product, index) => {
+          const discountType = product.discount_type || 'percentage';
+          const discountValue = discountType === 'percentage' 
+            ? (product.discount_percentage || 0) 
+            : (product.discount_amount || 0);
+          
+          return {
+            offer_id: offerId,
+            product_id: product.id,
+            discount_percentage: product.discount_percentage || 0,
+            discount_amount: product.discount_amount || 0,
+            discount_type: discountType,
+            original_price: product.price,
+            discounted_price: this.calculateDiscountedPriceByType(product.price, discountValue, discountType),
+            sort_order: index
+          };
+        });
 
         await this.supabaseService.client
           .from('offer_products')
@@ -876,13 +925,25 @@ export class OfferFormComponent implements OnInit {
       const { data, error } = await this.supabaseService.client
         .from('categories')
         .select('*')
-        .eq('status', 'active')
+        .eq('is_active', true)
         .order('name');
 
-      if (error) throw error;
-      this.categories = data || [];
+      if (error) {
+        console.error('Error loading categories:', error);
+        // Fallback: try without is_active filter
+        const { data: fallbackData, error: fallbackError } = await this.supabaseService.client
+          .from('categories')
+          .select('*')
+          .order('name');
+        
+        if (fallbackError) throw fallbackError;
+        this.categories = fallbackData || [];
+      } else {
+        this.categories = data || [];
+      }
     } catch (error) {
       console.error('Error loading categories:', error);
+      this.categories = [];
     } finally {
       this.isLoadingCategories = false;
     }
@@ -924,15 +985,46 @@ export class OfferFormComponent implements OnInit {
     try {
       const { data, error } = await this.supabaseService.client
         .from('products')
-        .select('*')
+        .select(`
+          *,
+          categories (
+            name
+          )
+        `)
         .eq('category_id', categoryId)
-        .eq('status', 'active')
+        .eq('is_active', true)
         .order('name');
 
-      if (error) throw error;
-      this.categoryProducts = data || [];
+      if (error) {
+        console.error('Error loading category products:', error);
+        // Fallback: try without is_active filter
+        const { data: fallbackData, error: fallbackError } = await this.supabaseService.client
+          .from('products')
+          .select(`
+            *,
+            categories (
+              name
+            )
+          `)
+          .eq('category_id', categoryId)
+          .order('name');
+        
+        if (fallbackError) throw fallbackError;
+        // Map category names for easier access
+        this.categoryProducts = (fallbackData || []).map(product => ({
+          ...product,
+          category_name: product.categories?.name || ''
+        }));
+      } else {
+        // Map category names for easier access
+        this.categoryProducts = (data || []).map(product => ({
+          ...product,
+          category_name: product.categories?.name || ''
+        }));
+      }
     } catch (error) {
       console.error('Error loading category products:', error);
+      this.categoryProducts = [];
     } finally {
       this.isLoadingProducts = false;
     }
@@ -963,14 +1055,44 @@ export class OfferFormComponent implements OnInit {
     try {
       const { data, error } = await this.supabaseService.client
         .from('products')
-        .select('*')
-        .eq('status', 'active')
+        .select(`
+          *,
+          categories (
+            name
+          )
+        `)
+        .eq('is_active', true)
         .order('name');
 
-      if (error) throw error;
-      this.allProducts = data || [];
+      if (error) {
+        console.error('Error loading all products:', error);
+        // Fallback: try without is_active filter
+        const { data: fallbackData, error: fallbackError } = await this.supabaseService.client
+          .from('products')
+          .select(`
+            *,
+            categories (
+              name
+            )
+          `)
+          .order('name');
+        
+        if (fallbackError) throw fallbackError;
+        // Map category names for easier access
+        this.allProducts = (fallbackData || []).map(product => ({
+          ...product,
+          category_name: product.categories?.name || ''
+        }));
+      } else {
+        // Map category names for easier access
+        this.allProducts = (data || []).map(product => ({
+          ...product,
+          category_name: product.categories?.name || ''
+        }));
+      }
     } catch (error) {
       console.error('Error loading all products:', error);
+      this.allProducts = [];
     } finally {
       this.isLoadingAllProducts = false;
     }
@@ -984,7 +1106,22 @@ export class OfferFormComponent implements OnInit {
     // Get the global discount to apply
     const globalDiscountType = this.offerForm.get('discount_type')?.value;
     const globalDiscountValue = this.offerForm.get('discount_value')?.value;
-    const discountToApply = (globalDiscountType === 'percentage' && globalDiscountValue > 0) ? globalDiscountValue : (product?.discount_percentage || 0);
+    
+    let discountPercentage = 0;
+    let discountAmount = 0;
+    let discountType = 'percentage';
+
+    if (globalDiscountType === 'percentage' && globalDiscountValue > 0) {
+      discountPercentage = globalDiscountValue;
+      discountType = 'percentage';
+    } else if (globalDiscountType === 'fixed_amount' && globalDiscountValue > 0) {
+      discountAmount = globalDiscountValue;
+      discountType = 'fixed_amount';
+    } else if (product) {
+      discountPercentage = product.discount_percentage || 0;
+      discountAmount = product.discount_amount || 0;
+      discountType = product.discount_type || 'percentage';
+    }
 
     return this.fb.group({
       id: [product?.id || '', Validators.required],
@@ -992,7 +1129,9 @@ export class OfferFormComponent implements OnInit {
       sku: [product?.sku || ''],
       category: [product?.category_name || ''],
       price: [product?.price || 0, [Validators.required, Validators.min(0)]],
-      discount_percentage: [discountToApply, [Validators.min(0), Validators.max(100)]]
+      discount_percentage: [discountPercentage, [Validators.min(0), Validators.max(100)]],
+      discount_amount: [discountAmount, [Validators.min(0)]],
+      discount_type: [discountType]
     });
   }
 
@@ -1033,7 +1172,9 @@ export class OfferFormComponent implements OnInit {
         sku: [product.sku || ''],
         category: [product.category_name || ''],
         price: [product.price || 0, [Validators.required, Validators.min(0)]],
-        discount_percentage: [0, [Validators.min(0), Validators.max(100)]]
+        discount_percentage: [0, [Validators.min(0), Validators.max(100)]],
+        discount_amount: [0, [Validators.min(0)]],
+        discount_type: ['percentage']
       });
 
       this.productsArray.push(productFormGroup);
@@ -1051,10 +1192,21 @@ export class OfferFormComponent implements OnInit {
     if (product) {
       const productControl = this.productsArray.at(index);
 
-      // Get the global discount to apply
+      // Apply discount based on global discount type
       const globalDiscountType = this.offerForm.get('discount_type')?.value;
       const globalDiscountValue = this.offerForm.get('discount_value')?.value;
-      const discountToApply = (globalDiscountType === 'percentage' && globalDiscountValue > 0) ? globalDiscountValue : 0;
+      
+      let discountPercentage = 0;
+      let discountAmount = 0;
+      let discountType = 'percentage';
+      
+      if (globalDiscountType === 'percentage' && globalDiscountValue > 0) {
+        discountPercentage = globalDiscountValue;
+        discountType = 'percentage';
+      } else if (globalDiscountType === 'fixed_amount' && globalDiscountValue > 0) {
+        discountAmount = globalDiscountValue;
+        discountType = 'fixed_amount';
+      }
 
       productControl.patchValue({
         id: productId,
@@ -1062,7 +1214,9 @@ export class OfferFormComponent implements OnInit {
         sku: product.sku || '',
         category: product.category_name || '',
         price: product.price || 0,
-        discount_percentage: discountToApply // Apply global discount automatically
+        discount_percentage: discountPercentage,
+        discount_amount: discountAmount,
+        discount_type: discountType
       });
     } else if (productId === '') {
       // Clear the form when no product is selected
@@ -1073,7 +1227,9 @@ export class OfferFormComponent implements OnInit {
         sku: '',
         category: '',
         price: 0,
-        discount_percentage: 0
+        discount_percentage: 0,
+        discount_amount: 0,
+        discount_type: 'percentage'
       });
     }
   }
@@ -1091,6 +1247,46 @@ export class OfferFormComponent implements OnInit {
   calculateDiscountedPrice(originalPrice: number, discountPercentage: number): number {
     if (!discountPercentage) return originalPrice;
     return originalPrice * (1 - discountPercentage / 100);
+  }
+
+  calculateDiscountedPriceByType(originalPrice: number, discountValue: number, discountType: string): number {
+    if (!discountValue || discountValue <= 0) return originalPrice;
+    
+    if (discountType === 'percentage') {
+      return originalPrice * (1 - discountValue / 100);
+    } else if (discountType === 'fixed_amount') {
+      return Math.max(0, originalPrice - discountValue);
+    }
+    
+    return originalPrice;
+  }
+
+  getProductDiscountType(index: number): string {
+    const product = this.productsArray.at(index);
+    return product.get('discount_type')?.value || 'percentage';
+  }
+
+  setProductDiscountType(index: number, type: string): void {
+    const product = this.productsArray.at(index);
+    product.get('discount_type')?.setValue(type);
+    
+    // Reset the other discount field when switching types
+    if (type === 'percentage') {
+      product.get('discount_amount')?.setValue(0);
+    } else {
+      product.get('discount_percentage')?.setValue(0);
+    }
+  }
+
+  getProductDiscountValue(index: number): number {
+    const product = this.productsArray.at(index);
+    const discountType = this.getProductDiscountType(index);
+    
+    if (discountType === 'percentage') {
+      return product.get('discount_percentage')?.value || 0;
+    } else {
+      return product.get('discount_amount')?.value || 0;
+    }
   }
 
   getTotalOriginalPrice(): number {
@@ -1171,7 +1367,9 @@ export class OfferFormComponent implements OnInit {
           sku: [product.sku || ''],
           category: [product.category_name || this.selectedCategory.name],
           price: [product.price || 0, [Validators.required, Validators.min(0)]],
-          discount_percentage: [0, [Validators.min(0), Validators.max(100)]]
+          discount_percentage: [0, [Validators.min(0), Validators.max(100)]],
+          discount_amount: [0, [Validators.min(0)]],
+          discount_type: ['percentage']
         });
 
         this.productsArray.push(productFormGroup);

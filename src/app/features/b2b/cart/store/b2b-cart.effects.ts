@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { of } from 'rxjs';
-import { map, catchError, switchMap, withLatestFrom, tap } from 'rxjs/operators';
+import { of, forkJoin } from 'rxjs';
+import { map, catchError, switchMap, withLatestFrom, tap, mergeMap } from 'rxjs/operators';
 import { ToastService } from '../../../../shared/services/toast.service';
 import { TranslationService } from '../../../../shared/services/translation.service';
 import { B2BCartService } from '../services/b2b-cart.service';
@@ -32,7 +32,7 @@ export class B2BCartEffects {
                     ),
                     catchError(error =>
                         of(B2BCartActions.loadB2BCartFailure({
-                            error: error.message || 'Failed to load cart'
+                            error: error.message || this.translationService.translate('b2bCart.failedToLoad')
                         }))
                     )
                 )
@@ -49,7 +49,7 @@ export class B2BCartEffects {
                     map((item: B2BCartItem) => B2BCartActions.addToB2BCartSuccess({ item })),
                     catchError(error =>
                         of(B2BCartActions.addToB2BCartFailure({
-                            error: error.message || 'Failed to add item to cart'
+                            error: error.message || this.translationService.translate('b2bCart.failedToAdd')
                         }))
                     )
                 )
@@ -65,7 +65,7 @@ export class B2BCartEffects {
             switchMap(([{ productId, quantity }, companyInfo]) => {
                 if (!companyInfo.companyId) {
                     return of(B2BCartActions.updateB2BCartItemFailure({
-                        error: 'Company information not available'
+                        error: this.translationService.translate('b2bCart.companyInfoNotAvailable')
                     }));
                 }
 
@@ -73,7 +73,7 @@ export class B2BCartEffects {
                     map(() => B2BCartActions.updateB2BCartItemSuccess({ productId, quantity })),
                     catchError(error =>
                         of(B2BCartActions.updateB2BCartItemFailure({
-                            error: error.message || 'Failed to update cart item'
+                            error: error.message || this.translationService.translate('b2bCart.failedToUpdate')
                         }))
                     )
                 );
@@ -89,7 +89,7 @@ export class B2BCartEffects {
             switchMap(([{ productId }, companyInfo]) => {
                 if (!companyInfo.companyId) {
                     return of(B2BCartActions.removeFromB2BCartFailure({
-                        error: 'Company information not available'
+                        error: this.translationService.translate('b2bCart.companyInfoNotAvailable')
                     }));
                 }
 
@@ -97,7 +97,7 @@ export class B2BCartEffects {
                     map(() => B2BCartActions.removeFromB2BCartSuccess({ productId })),
                     catchError(error =>
                         of(B2BCartActions.removeFromB2BCartFailure({
-                            error: error.message || 'Failed to remove item from cart'
+                            error: error.message || this.translationService.translate('b2bCart.failedToRemove')
                         }))
                     )
                 );
@@ -113,7 +113,7 @@ export class B2BCartEffects {
             switchMap(([_, companyInfo]) => {
                 if (!companyInfo.companyId) {
                     return of(B2BCartActions.clearB2BCartFailure({
-                        error: 'Company information not available'
+                        error: this.translationService.translate('b2bCart.companyInfoNotAvailable')
                     }));
                 }
 
@@ -121,7 +121,7 @@ export class B2BCartEffects {
                     map(() => B2BCartActions.clearB2BCartSuccess()),
                     catchError(error =>
                         of(B2BCartActions.clearB2BCartFailure({
-                            error: error.message || 'Failed to clear cart'
+                            error: error.message || this.translationService.translate('b2bCart.failedToClear')
                         }))
                     )
                 );
@@ -138,7 +138,7 @@ export class B2BCartEffects {
                     map(({ items }) => B2BCartActions.syncB2BCartSuccess({ items })),
                     catchError(error =>
                         of(B2BCartActions.syncB2BCartFailure({
-                            error: error.message || 'Failed to sync cart'
+                            error: error.message || this.translationService.translate('b2bCart.failedToSync')
                         }))
                     )
                 )
@@ -165,7 +165,7 @@ export class B2BCartEffects {
             ofType(B2BCartActions.updateB2BCartItemSuccess),
             tap(() => {
                 this.toastService.showSuccess(
-                    'Cart updated successfully'
+                    this.translationService.translate('b2bCart.cartUpdated')
                 );
             })
         ),
@@ -177,7 +177,7 @@ export class B2BCartEffects {
             ofType(B2BCartActions.removeFromB2BCartSuccess),
             tap(() => {
                 this.toastService.showSuccess(
-                    'Item removed from cart'
+                    this.translationService.translate('b2bCart.itemRemoved')
                 );
             })
         ),
@@ -189,7 +189,7 @@ export class B2BCartEffects {
             ofType(B2BCartActions.clearB2BCartSuccess),
             tap(() => {
                 this.toastService.showSuccess(
-                    'Cart cleared successfully'
+                    this.translationService.translate('b2bCart.cartCleared')
                 );
             })
         ),
@@ -205,10 +205,80 @@ export class B2BCartEffects {
                 B2BCartActions.updateB2BCartItemFailure,
                 B2BCartActions.removeFromB2BCartFailure,
                 B2BCartActions.clearB2BCartFailure,
-                B2BCartActions.syncB2BCartFailure
+                B2BCartActions.syncB2BCartFailure,
+                B2BCartActions.addAllToB2BCartFromOfferFailure
             ),
             tap(({ error }) => {
                 this.toastService.showError(error);
+            })
+        ),
+        { dispatch: false }
+    );
+
+    // Add all to cart from partner offer effect
+    addAllToB2BCartFromOffer$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(B2BCartActions.addAllToB2BCartFromOffer),
+            switchMap(({ products, companyId, partnerOfferId, partnerOfferName, partnerOfferType, partnerOfferDiscount, partnerOfferValidUntil }) => {
+                // Create observables for each product add operation
+                const addObservables = products.map(({ productId, quantity }) =>
+                    this.b2bCartService.addToCart(productId, quantity, companyId).pipe(
+                        map((item: B2BCartItem) => ({ success: true as const, item })),
+                        catchError(error => {
+                            console.error(`Failed to add product ${productId} to cart:`, error);
+                            return of({ success: false as const, error, item: null as B2BCartItem | null });
+                        })
+                    )
+                );
+
+                // Execute all add operations in parallel
+                return forkJoin(addObservables).pipe(
+                    map(results => {
+                        const addedItems: B2BCartItem[] = [];
+                        let addedCount = 0;
+                        let skippedCount = 0;
+
+                        results.forEach(result => {
+                            if (result.success && result.item) {
+                                addedItems.push(result.item);
+                                addedCount++;
+                            } else {
+                                skippedCount++;
+                            }
+                        });
+
+                        return B2BCartActions.addAllToB2BCartFromOfferSuccess({
+                            items: addedItems,
+                            addedCount,
+                            skippedCount
+                        });
+                    }),
+                    catchError(error => {
+                        return of(B2BCartActions.addAllToB2BCartFromOfferFailure({
+                            error: error.message || this.translationService.translate('b2bCart.failedToAddProducts')
+                        }));
+                    })
+                );
+            })
+        )
+    );
+
+    // Add all to cart from partner offer success notifications
+    addAllToB2BCartFromOfferSuccess$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(B2BCartActions.addAllToB2BCartFromOfferSuccess),
+            tap(({ addedCount, skippedCount }) => {
+                if (addedCount > 0) {
+                    const message = this.translationService.translate('b2bCart.productsAddedToCart', { count: addedCount });
+                    this.toastService.showSuccess(message);
+                    
+                    if (skippedCount > 0) {
+                        const warningMessage = this.translationService.translate('b2bCart.productsSkipped', { count: skippedCount });
+                        this.toastService.showWarning(warningMessage);
+                    }
+                } else {
+                    this.toastService.showError(this.translationService.translate('b2bCart.noProductsAdded'));
+                }
             })
         ),
         { dispatch: false }

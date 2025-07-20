@@ -143,7 +143,8 @@ export class OffersService {
                 couponCode: offer.code,
                 startDate: offer.start_date,
                 endDate: offer.end_date,
-                featured: offer.featured
+                featured: offer.featured,
+                discount_type: offer.discount_type
             };
         } catch (error) {
             console.error('Error converting offer:', error);

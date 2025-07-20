@@ -231,5 +231,25 @@ export const cartReducer = createReducer(
     on(CartActions.resetCouponError, (state) => ({
         ...state,
         couponError: null
+    })),
+
+    // Add All to Cart from Offer Actions
+    on(CartActions.addAllToCartFromOffer, (state) => ({
+        ...state,
+        isLoading: true,
+        error: null
+    })),
+
+    on(CartActions.addAllToCartFromOfferSuccess, (state, { cart }) => ({
+        ...state,
+        cart,
+        isLoading: false,
+        error: null
+    })),
+
+    on(CartActions.addAllToCartFromOfferFailure, (state, { error }) => ({
+        ...state,
+        isLoading: false,
+        error
     }))
 ); 

@@ -65,7 +65,11 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
                   </div>
                   <div>
                     <span class="font-medium text-gray-900">{{ 'admin.discountValue' | translate }}:</span>
-                    <span class="ml-2 text-gray-600">{{ offer.discount_value }}{{ offer.discount_type === 'percentage' ? '%' : '€' }}</span>
+                    <span class="ml-2 text-gray-600">
+                      <span *ngIf="offer.discount_type === 'percentage'">{{ offer.discount_value }}%</span>
+                      <span *ngIf="offer.discount_type === 'fixed_amount'">{{ offer.discount_value | currency:'EUR':'symbol':'1.2-2' }}</span>
+                      <span *ngIf="!offer.discount_type">{{ offer.discount_value }}%</span>
+                    </span>
                   </div>
                   <div *ngIf="offer.min_order_amount">
                     <span class="font-medium text-gray-900">{{ 'admin.minPurchase' | translate }}:</span>
@@ -144,21 +148,24 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
               </div>
 
               <div class="text-center">
-                <p class="text-sm font-medium text-gray-700">{{ 'admin.discountPercent' | translate }}</p>
-                <p class="text-lg font-semibold text-blue-600">{{ product.discount_percentage }}%</p>
+                <p class="text-sm font-medium text-gray-700">{{ 'admin.discount' | translate }}</p>
+                <p class="text-lg font-semibold text-blue-600">
+                  <span *ngIf="product.discount_type === 'percentage' || !product.discount_type">{{ product.discount_percentage }}%</span>
+                  <span *ngIf="product.discount_type === 'fixed_amount'">{{ product.discount_amount | currency:'EUR':'symbol':'1.2-2' }}</span>
+                </p>
               </div>
 
               <div class="text-center">
                 <p class="text-sm font-medium text-gray-700">{{ 'admin.finalPrice' | translate }}</p>
                 <p class="text-lg font-semibold text-green-600">
-                  {{ calculateDiscountedPrice(product.price, product.discount_percentage) | currency:'EUR':'symbol':'1.2-2' }}
+                  {{ calculateDiscountedPriceByType(product.price, product.discount_type, product.discount_percentage, product.discount_amount) | currency:'EUR':'symbol':'1.2-2' }}
                 </p>
               </div>
 
               <div class="text-center">
                 <p class="text-sm font-medium text-gray-700">{{ 'admin.savings' | translate }}</p>
                 <p class="text-lg font-semibold text-red-600">
-                  {{ (product.price * product.discount_percentage / 100) | currency:'EUR':'symbol':'1.2-2' }}
+                  {{ (product.price - calculateDiscountedPriceByType(product.price, product.discount_type, product.discount_percentage, product.discount_amount)) | currency:'EUR':'symbol':'1.2-2' }}
                 </p>
               </div>
             </div>
@@ -305,6 +312,8 @@ export class OfferDetailsComponent implements OnInit {
           category: offerProduct.products.categories?.name || 'Solar Equipment',
           price: offerProduct.products.price || 0,
           discount_percentage: offerProduct.discount_percentage || 0,
+          discount_amount: offerProduct.discount_amount || 0,
+          discount_type: offerProduct.discount_type || 'percentage',
           stock_quantity: offerProduct.products.stock_quantity || 0,
           offer_product_id: offerProduct.id
         }));
@@ -325,13 +334,22 @@ export class OfferDetailsComponent implements OnInit {
     return originalPrice * (1 - discountPercentage / 100);
   }
 
+  calculateDiscountedPriceByType(originalPrice: number, discountType: string, discountPercentage: number, discountAmount: number): number {
+    if (!discountType || discountType === 'percentage') {
+      return this.calculateDiscountedPrice(originalPrice, discountPercentage || 0);
+    } else if (discountType === 'fixed_amount') {
+      return Math.max(0, originalPrice - (discountAmount || 0));
+    }
+    return originalPrice;
+  }
+
   getTotalOriginalPrice(): number {
     return this.offerProducts.reduce((total, product) => total + product.price, 0);
   }
 
   getTotalDiscountedPrice(): number {
     return this.offerProducts.reduce((total, product) => {
-      return total + this.calculateDiscountedPrice(product.price, product.discount_percentage);
+      return total + this.calculateDiscountedPriceByType(product.price, product.discount_type, product.discount_percentage, product.discount_amount);
     }, 0);
   }
 
@@ -368,4 +386,5 @@ export class OfferDetailsComponent implements OnInit {
       this.offerCategory = null;
     }
   }
+
 } 

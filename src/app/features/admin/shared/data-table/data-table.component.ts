@@ -13,7 +13,7 @@ export interface TableColumn {
   type?: 'text' | 'number' | 'date' | 'boolean' | 'image' | 'status' | 'array';
   sortable?: boolean;
   searchable?: boolean;
-  format?: (value: any) => string;
+  format?: (value: any, item?: any) => string;
 }
 
 export interface TableAction {
@@ -204,14 +204,14 @@ export interface TableConfig {
                         [class.text-green-800]="getColumnValue(item, column.key)"
                         [class.bg-red-100]="!getColumnValue(item, column.key)"
                         [class.text-red-800]="!getColumnValue(item, column.key)">
-                    {{ column.format ? column.format(getColumnValue(item, column.key)) : (getColumnValue(item, column.key) ? 'Yes' : 'No') }}
+                    {{ column.format ? column.format(getColumnValue(item, column.key), item) : (getColumnValue(item, column.key) ? 'Yes' : 'No') }}
                   </span>
                   
                   <!-- Status -->
                   <span *ngSwitchCase="'status'" 
                         class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
                         [ngClass]="getStatusClass(getColumnValue(item, column.key))">
-                    {{ column.format ? column.format(getColumnValue(item, column.key)) : getColumnValue(item, column.key) }}
+                    {{ column.format ? column.format(getColumnValue(item, column.key), item) : getColumnValue(item, column.key) }}
                   </span>
                   
                   <!-- Array -->
@@ -229,7 +229,7 @@ export interface TableConfig {
                   
                   <!-- Default (text/number) -->
                   <span *ngSwitchDefault>
-                    {{ column.format ? column.format(getColumnValue(item, column.key)) : getColumnValue(item, column.key) }}
+                    {{ column.format ? column.format(getColumnValue(item, column.key), item) : getColumnValue(item, column.key) }}
                   </span>
                 </ng-container>
               </td>

@@ -17,6 +17,8 @@ interface PartnerOffer {
   originalPrice: number;
   discountedPrice: number;
   discountPercentage: number;
+  discount_type?: string;
+  discount_value?: number;
   imageUrl: string;
   description: string;
   shortDescription: string;
@@ -59,7 +61,8 @@ interface PartnerProduct {
               >
               <!-- Discount Badge -->
               <div class="absolute top-6 left-6 bg-accent-500 text-white text-lg font-bold px-4 py-3 rounded-full shadow-lg">
-                -{{ offer.discountPercentage }}%
+                <span *ngIf="offer.discount_type === 'percentage' || !offer.discount_type">-{{ offer.discountPercentage }}%</span>
+                <span *ngIf="offer.discount_type === 'fixed_amount'">-{{ offer.discount_value | currency:'EUR':'symbol':'1.0-2' }}</span>
               </div>
               <!-- Partner Only Badge -->
               <div class="absolute top-6 right-6 bg-solar-100 text-solar-800 text-sm font-bold px-3 py-2 rounded-full shadow-lg">
@@ -191,7 +194,8 @@ interface PartnerProduct {
               </div>
               <!-- Discount Badge -->
               <div class="absolute top-4 right-4 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                -{{ offer.discountPercentage }}%
+                <span *ngIf="offer.discount_type === 'percentage' || !offer.discount_type">-{{ offer.discountPercentage }}%</span>
+                <span *ngIf="offer.discount_type === 'fixed_amount'">-{{ offer.discount_value | currency:'EUR':'symbol':'1.0-2' }}</span>
               </div>
             </div>
 
@@ -369,9 +373,13 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
       const discountPercentage = offer.discount_type === 'percentage' ? offer.discount_value : 0;
       let discountedPrice = offer.discounted_price || 0;
 
-      // Calculate discounted price for percentage-only offers if not provided
-      if (discountedPrice === 0 && discountPercentage > 0 && originalPrice > 0) {
-        discountedPrice = originalPrice * (1 - discountPercentage / 100);
+      // Calculate discounted price based on discount type
+      if (discountedPrice === 0 && originalPrice > 0) {
+        if (offer.discount_type === 'percentage' && offer.discount_value > 0) {
+          discountedPrice = originalPrice * (1 - offer.discount_value / 100);
+        } else if (offer.discount_type === 'fixed_amount' && offer.discount_value > 0) {
+          discountedPrice = Math.max(0, originalPrice - offer.discount_value);
+        }
       }
 
       this.offer = {
@@ -380,6 +388,8 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
         originalPrice: originalPrice,
         discountedPrice: discountedPrice,
         discountPercentage: discountPercentage,
+        discount_type: offer.discount_type,
+        discount_value: offer.discount_value,
         imageUrl: offer.image_url || 'assets/images/product-placeholder.svg',
         description: offer.description || '',
         shortDescription: offer.short_description || '',
@@ -456,8 +466,15 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
     return 'assets/images/product-placeholder.svg';
   }
 
-  calculateDiscountedPrice(originalPrice: number, discountPercentage: number): number {
-    return originalPrice * (1 - discountPercentage / 100);
+  calculateDiscountedPrice(originalPrice: number, offer: PartnerOffer): number {
+    if (!offer.discount_type || offer.discount_type === 'percentage') {
+      const discountPercentage = offer.discountPercentage || 0;
+      return originalPrice * (1 - discountPercentage / 100);
+    } else if (offer.discount_type === 'fixed_amount') {
+      const discountAmount = offer.discount_value || 0;
+      return Math.max(0, originalPrice - discountAmount);
+    }
+    return originalPrice;
   }
 
   getPartnerPrice(offer: PartnerOffer): number {
@@ -477,8 +494,8 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
   }
 
   getProductPartnerPrice(product: PartnerProduct, offer: PartnerOffer): number {
-    const offerDiscountedPrice = this.calculateDiscountedPrice(product.price, offer.discountPercentage);
-    return this.calculateDiscountedPrice(offerDiscountedPrice, this.PARTNER_DISCOUNT_PERCENTAGE);
+    const offerDiscountedPrice = this.calculateDiscountedPrice(product.price, offer);
+    return offerDiscountedPrice * (1 - this.PARTNER_DISCOUNT_PERCENTAGE / 100);
   }
 
   getProductTotalSavings(product: PartnerProduct, offer: PartnerOffer): number {
@@ -636,20 +653,24 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
           quantity: 1
         }));
 
+        // Get the offer discount type from the original database offer
+        const offerType = (this.offer!.discount_type || 'percentage') as 'percentage' | 'fixed_amount' | 'tier_based' | 'bundle';
+        const discountValue = this.offer!.discount_value || this.offer!.discountPercentage || 0;
+
         // Dispatch the partner offer-based add all to cart action
         this.store.dispatch(addAllToB2BCartFromOffer({
           products: productsToAdd,
           companyId,
           partnerOfferId: this.offer!.id,
           partnerOfferName: this.offer!.title,
-          partnerOfferType: 'percentage', // Based on the discount type
-          partnerOfferDiscount: this.offer!.discountPercentage,
+          partnerOfferType: offerType,
+          partnerOfferDiscount: discountValue,
           partnerOfferValidUntil: this.offer!.endDate
         }));
 
         // Show success message
         this.toastService.showSuccess(
-          this.translationService.translate('offers.addedSuccessfully', { count: availableProducts.length })
+          this.translationService.translate('offers.addedProductsToCart', { count: availableProducts.length })
         );
 
         // Show warning for out-of-stock products if any

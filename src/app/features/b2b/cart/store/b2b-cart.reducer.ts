@@ -287,7 +287,38 @@ export const b2bCartReducer = createReducer(
     on(B2BCartActions.clearB2BCouponError, (state) => ({
         ...state,
         couponError: null
-    }))
+    })),
+
+    // Add all to cart from offer
+    on(B2BCartActions.addAllToB2BCartFromOfferSuccess, (state, { items }) => {
+        const updatedItems = [...state.items];
+        
+        items.forEach(newItem => {
+            const existingItemIndex = updatedItems.findIndex(i => i.productId === newItem.productId);
+            
+            if (existingItemIndex >= 0) {
+                // Update existing item quantity
+                updatedItems[existingItemIndex] = {
+                    ...updatedItems[existingItemIndex],
+                    quantity: updatedItems[existingItemIndex].quantity + newItem.quantity,
+                    totalPrice: (updatedItems[existingItemIndex].quantity + newItem.quantity) * updatedItems[existingItemIndex].unitPrice,
+                    addedAt: new Date()
+                };
+            } else {
+                // Add new item
+                updatedItems.push(newItem);
+            }
+        });
+
+        return {
+            ...state,
+            items: updatedItems,
+            loading: false,
+            error: null,
+            lastUpdated: new Date(),
+            ...calculateCartTotals(updatedItems)
+        };
+    })
 );
 
 // Helper function to calculate cart totals

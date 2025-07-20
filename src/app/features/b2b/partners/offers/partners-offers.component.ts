@@ -9,7 +9,7 @@ import { Offer } from '../../../../shared/models/offer.model';
 import { SupabaseService } from '../../../../services/supabase.service';
 import { ToastService } from '../../../../shared/services/toast.service';
 import { selectCurrentUser, selectIsAuthenticated } from '../../../../core/auth/store/auth.selectors';
-import { addToB2BCart } from '../../cart/store/b2b-cart.actions';
+import { addToB2BCart, addAllToB2BCartFromOffer } from '../../cart/store/b2b-cart.actions';
 import { selectB2BCartHasCompanyId, selectB2BCartCompanyId } from '../../cart/store/b2b-cart.selectors';
 import { TranslationService } from '../../../../shared/services/translation.service';
 import { User } from '../../../../shared/models/user.model';
@@ -292,7 +292,9 @@ export class PartnersOffersComponent implements OnInit, OnDestroy {
           startDate: offer.start_date,
           endDate: offer.end_date,
           featured: offer.featured || false,
-          isB2B: offer.is_b2b || false
+          isB2B: offer.is_b2b || false,
+          discount_type: offer.discount_type,
+          discount_value: offer.discount_value
         };
       });
     } catch (error) {
@@ -309,7 +311,7 @@ export class PartnersOffersComponent implements OnInit, OnDestroy {
 
   navigateToPartnerRegistration(): void {
     // Navigate to partner registration page
-    this.router.navigate(['/partneri/register']);
+    this.router.navigate(['/partneri/registracija']);
   }
 
   claimOffer(offer: Offer): void {
@@ -339,8 +341,8 @@ export class PartnersOffersComponent implements OnInit, OnDestroy {
         return;
       }
 
-      // Add products to B2B cart
-      this.addOfferProductsToCart(products, offer);
+      // Use the bulk add action for better performance and consistency
+      this.addOfferProductsToCartBulk(products, offer);
     });
   }
 
@@ -373,72 +375,54 @@ export class PartnersOffersComponent implements OnInit, OnDestroy {
     );
   }
 
-  private addOfferProductsToCart(offerProducts: any[], offer: Offer): void {
+  private addOfferProductsToCartBulk(offerProducts: any[], offer: Offer): void {
     if (!this.userCompanyId) {
       this.toastService.showError(this.translationService.translate('b2b.auth.companyIdNotFound'));
       return;
     }
 
-    let successCount = 0;
-    let errorCount = 0;
-    let outOfStockCount = 0;
+    // Filter and prepare products for bulk add
+    const availableProducts = offerProducts
+      .filter(offerProduct => {
+        const product = offerProduct.products;
+        return product && product.stock_quantity > 0;
+      })
+      .map(offerProduct => ({
+        productId: offerProduct.products.id,
+        quantity: 1
+      }));
 
-    for (const offerProduct of offerProducts) {
-      const product = offerProduct.products;
-
-      if (!product) {
-        console.warn('Product not found for offer product:', offerProduct);
-        errorCount++;
-        continue;
-      }
-
-      try {
-        // Check stock availability
-        if (product.stock_quantity <= 0) {
-          console.warn(`Product ${product.name} is out of stock`);
-          outOfStockCount++;
-          continue;
-        }
-
-        // Add to cart
-        this.store.dispatch(addToB2BCart({
-          companyId: this.userCompanyId,
-          productId: product.id,
-          quantity: 1
-        }));
-
-        successCount++;
-      } catch (error) {
-        console.error(`Error adding product ${product.name} to cart:`, error);
-        errorCount++;
-      }
+    if (availableProducts.length === 0) {
+      this.toastService.showWarning(this.translationService.translate('b2b.offers.allProductsOutOfStock'));
+      return;
     }
 
-    // Provide detailed feedback
-    if (successCount > 0) {
-      let message = this.translationService.translate('b2b.offers.offerClaimedWithProducts', {
-        title: offer.title,
-        count: successCount
-      });
+    // Get offer details for the bulk action
+    const offerType = (offer.discount_type || 'percentage') as 'percentage' | 'fixed_amount' | 'tier_based' | 'bundle';
+    const discountValue = offer.discount_value || offer.discountPercentage || 0;
 
-      if (offer.couponCode) {
-        message += ' ' + this.translationService.translate('b2b.offers.useCouponCode', { code: offer.couponCode });
-      }
+    // Dispatch the bulk add action
+    this.store.dispatch(addAllToB2BCartFromOffer({
+      products: availableProducts,
+      companyId: this.userCompanyId,
+      partnerOfferId: offer.id,
+      partnerOfferName: offer.title,
+      partnerOfferType: offerType,
+      partnerOfferDiscount: discountValue,
+      partnerOfferValidUntil: offer.endDate
+    }));
 
-      if (outOfStockCount > 0) {
-        message += ' ' + this.translationService.translate('b2b.offers.itemsOutOfStock', { count: outOfStockCount });
-      }
-
-      this.toastService.showSuccess(message);
-    } else if (outOfStockCount > 0) {
-      this.toastService.showWarning(this.translationService.translate('b2b.offers.offerClaimedButOutOfStock', { title: offer.title }));
-    } else {
-      this.toastService.showError(this.translationService.translate('b2b.offers.failedToAddProducts'));
+    // Show immediate feedback for skipped products
+    const skippedCount = offerProducts.length - availableProducts.length;
+    if (skippedCount > 0) {
+      this.toastService.showWarning(
+        this.translationService.translate('b2b.offers.productsOutOfStock', { count: skippedCount })
+      );
     }
   }
 
   viewOfferDetails(offer: Offer): void {
-    this.router.navigate(['/partneri/offers', offer.id]);
+    this.router.navigate(['/partneri/ponude', offer.id]);
   }
 
   copyCouponCode(couponCode: string): void {

@@ -49,7 +49,7 @@ export class B2BCartService {
                     productId,
                     name: product.name,
                     sku: product.sku,
-                    imageUrl: product.image_url || '/assets/images/default-product.jpg',
+                    imageUrl: this.getProductImageUrl(product.images) || 'assets/images/product-placeholder.svg',
                     quantity,
                     unitPrice,
                     retailPrice: product.price,
@@ -186,28 +186,63 @@ export class B2BCartService {
     }
 
     /**
+     * Get product image URL from images array
+     */
+    private getProductImageUrl(images: any): string {
+        if (images && Array.isArray(images) && images.length > 0) {
+            return images[0].url || images[0];
+        }
+        return '';
+    }
+
+    /**
      * Get product with pricing information from database
      */
     private async getProductWithPricing(productId: string, companyId: string): Promise<any> {
-        // Get product details
-        const { data: product, error: productError } = await this.supabaseService.client
-            .from('products')
-            .select('*')
-            .eq('id', productId)
-            .eq('is_active', true)
-            .single();
+        // Get product details (try with is_active first, fallback without it)
+        let product, productError;
+        try {
+            const result = await this.supabaseService.client
+                .from('products')
+                .select('*')
+                .eq('id', productId)
+                .eq('is_active', true)
+                .single();
+            product = result.data;
+            productError = result.error;
+        } catch (error) {
+            // Fallback query without is_active filter
+            console.warn('Falling back to query without is_active filter');
+            const result = await this.supabaseService.client
+                .from('products')
+                .select('*')
+                .eq('id', productId)
+                .single();
+            product = result.data;
+            productError = result.error;
+        }
 
         if (productError || !product) {
             throw new Error('Product not found');
         }
 
-        // Get company-specific pricing
-        const { data: companyPricing } = await this.supabaseService.client
-            .from('company_pricing')
-            .select('price, minimum_order')
-            .eq('company_id', companyId)
-            .eq('product_id', productId)
-            .single();
+        // Get company-specific pricing (handle gracefully if table doesn't exist or no permissions)
+        let companyPricing = null;
+        try {
+            const { data, error } = await this.supabaseService.client
+                .from('company_pricing')
+                .select('price, minimum_order')
+                .eq('company_id', companyId)
+                .eq('product_id', productId)
+                .single();
+            
+            if (!error) {
+                companyPricing = data;
+            }
+        } catch (error) {
+            console.warn('Company pricing not available for product:', productId, error);
+            // Continue without company pricing
+        }
 
         return {
             ...product,
