@@ -71,60 +71,17 @@ import * as CartSelectors from '../../../cart/store/cart.selectors';
             </label>
           </div>
           
-          <!-- Credit Card Form -->
-          <div *ngIf="paymentForm.get('paymentMethod')?.value === 'credit_card'" class="mt-6 p-4 bg-gray-50 rounded-lg">
-            <h4 class="text-lg font-semibold text-gray-900 mb-4 font-['Poppins']">Card Details</h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="md:col-span-2">
-                <label for="cardNumber" class="block text-sm font-medium text-gray-700 mb-2 font-['DM_Sans']">{{ 'checkout.cardNumber' | translate }}</label>
-                <input
-                  type="text"
-                  id="cardNumber"
-                  formControlName="cardNumber"
-                  placeholder="1234 5678 9012 3456"
-                  maxlength="19"
-                  (input)="formatCardNumber($event)"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-['DM_Sans']"
-                >
-                <div *ngIf="paymentForm.get('cardNumber')?.invalid && paymentForm.get('cardNumber')?.touched" class="mt-1 text-sm text-red-600">
-                  <span *ngIf="paymentForm.get('cardNumber')?.errors?.['required']">Card number is required</span>
-                  <span *ngIf="paymentForm.get('cardNumber')?.errors?.['invalidCardNumber']">Invalid card number</span>
-                  <span *ngIf="paymentForm.get('cardNumber')?.errors?.['invalidCardLength']">Card number must be 13-16 digits</span>
-                </div>
-              </div>
+          <!-- Credit Card Notice -->
+          <div *ngIf="paymentForm.get('paymentMethod')?.value === 'credit_card'" class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div class="flex items-center space-x-3">
+              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+              </svg>
               <div>
-                <label for="expiryDate" class="block text-sm font-medium text-gray-700 mb-2 font-['DM_Sans']">{{ 'checkout.expiryDate' | translate }}</label>
-                <input
-                  type="text"
-                  id="expiryDate"
-                  formControlName="expiryDate"
-                  placeholder="MM/YY"
-                  maxlength="5"
-                  (input)="formatExpiryDate($event)"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-['DM_Sans']"
-                >
-                <div *ngIf="paymentForm.get('expiryDate')?.invalid && paymentForm.get('expiryDate')?.touched" class="mt-1 text-sm text-red-600">
-                  <span *ngIf="paymentForm.get('expiryDate')?.errors?.['required']">Expiry date is required</span>
-                  <span *ngIf="paymentForm.get('expiryDate')?.errors?.['invalidExpiryFormat']">Use MM/YY format</span>
-                  <span *ngIf="paymentForm.get('expiryDate')?.errors?.['cardExpired']">Card has expired</span>
-                  <span *ngIf="paymentForm.get('expiryDate')?.errors?.['invalidExpiryYear']">Invalid expiry year</span>
-                </div>
-              </div>
-              <div>
-                <label for="cvv" class="block text-sm font-medium text-gray-700 mb-2 font-['DM_Sans']">{{ 'checkout.cvv' | translate }}</label>
-                <input
-                  type="text"
-                  id="cvv"
-                  formControlName="cvv"
-                  placeholder="123"
-                  maxlength="4"
-                  (input)="formatCvv($event)"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-['DM_Sans']"
-                >
-                <div *ngIf="paymentForm.get('cvv')?.invalid && paymentForm.get('cvv')?.touched" class="mt-1 text-sm text-red-600">
-                  <span *ngIf="paymentForm.get('cvv')?.errors?.['required']">CVV is required</span>
-                  <span *ngIf="paymentForm.get('cvv')?.errors?.['invalidCvv']">CVV must be 3-4 digits</span>
-                </div>
+                <h4 class="text-lg font-semibold text-blue-900 mb-2 font-['Poppins']">{{ 'checkout.securePayment' | translate }}</h4>
+                <p class="text-sm text-blue-800 font-['DM_Sans']">
+                  {{ 'checkout.securePaymentDescription' | translate }}
+                </p>
               </div>
             </div>
           </div>
@@ -280,33 +237,10 @@ export class PaymentComponent implements OnInit, OnDestroy {
 
     this.paymentForm = this.fb.group({
       paymentMethod: ['cash_on_delivery', [Validators.required]],
-      cardNumber: [''],
-      expiryDate: [''],
-      cvv: [''],
       isB2BOrder: [false],
       acceptTerms: [false, [Validators.requiredTrue]]
     });
 
-    // Add conditional validators for credit card fields
-    this.paymentForm.get('paymentMethod')?.valueChanges.subscribe(method => {
-      const cardNumber = this.paymentForm.get('cardNumber');
-      const expiryDate = this.paymentForm.get('expiryDate');
-      const cvv = this.paymentForm.get('cvv');
-
-      if (method === 'credit_card') {
-        cardNumber?.setValidators([Validators.required, this.creditCardValidator]);
-        expiryDate?.setValidators([Validators.required, this.expiryDateValidator]);
-        cvv?.setValidators([Validators.required, this.cvvValidator]);
-      } else {
-        cardNumber?.clearValidators();
-        expiryDate?.clearValidators();
-        cvv?.clearValidators();
-      }
-
-      cardNumber?.updateValueAndValidity();
-      expiryDate?.updateValueAndValidity();
-      cvv?.updateValueAndValidity();
-    });
   }
 
   ngOnInit(): void {
@@ -533,11 +467,6 @@ export class PaymentComponent implements OnInit, OnDestroy {
       // Generate order number for payment
       this.orderNumber = 'ORD-' + Date.now();
 
-      // Get card details from form (optional - for pre-filling Monri form)
-      const cardNumber = this.paymentForm.get('cardNumber')?.value || '';
-      const expiryDate = this.paymentForm.get('expiryDate')?.value || '';
-      const cvv = this.paymentForm.get('cvv')?.value || '';
-
       // Prepare payment data for Monri
       const paymentData: MonriPaymentRequest = {
         order_number: this.orderNumber,
@@ -552,9 +481,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
         ch_phone: shippingInfo.phone || '',
         ch_email: currentUser?.email || shippingInfo.email || '',
         language: 'hr',
-        transaction_type: 'purchase',
-        // Note: Card details are only collected for validation, not sent to Monri for security
-        // Monri will handle card input securely on their payment form
+        transaction_type: 'purchase'
       };
 
       // Store order data temporarily for after payment completion
@@ -603,146 +530,8 @@ export class PaymentComponent implements OnInit, OnDestroy {
 
 
 
-  /**
-   * Credit card number validator using Luhn algorithm
-   */
-  private creditCardValidator(control: AbstractControl): ValidationErrors | null {
-    if (!control.value) {
-      return null;
-    }
-
-    const cardNumber = control.value.replace(/\s/g, ''); // Remove spaces
-    
-    // Check if it's all digits
-    if (!/^\d+$/.test(cardNumber)) {
-      return { invalidCardNumber: true };
-    }
-
-    // Check length (13-16 digits for most cards)
-    if (cardNumber.length < 13 || cardNumber.length > 16) {
-      return { invalidCardLength: true };
-    }
-
-    // Luhn algorithm validation
-    let sum = 0;
-    let isEven = false;
-    
-    for (let i = cardNumber.length - 1; i >= 0; i--) {
-      let digit = parseInt(cardNumber.charAt(i), 10);
-      
-      if (isEven) {
-        digit *= 2;
-        if (digit > 9) {
-          digit -= 9;
-        }
-      }
-      
-      sum += digit;
-      isEven = !isEven;
-    }
-    
-    return sum % 10 === 0 ? null : { invalidCardNumber: true };
-  }
-
-  /**
-   * Expiry date validator (MM/YY format)
-   */
-  private expiryDateValidator(control: AbstractControl): ValidationErrors | null {
-    if (!control.value) {
-      return null;
-    }
-
-    const expiryDate = control.value;
-    const regex = /^(0[1-9]|1[0-2])\/([0-9]{2})$/;
-    
-    if (!regex.test(expiryDate)) {
-      return { invalidExpiryFormat: true };
-    }
-
-    const [month, year] = expiryDate.split('/');
-    const currentDate = new Date();
-    const currentYear = currentDate.getFullYear() % 100; // Get last 2 digits
-    const currentMonth = currentDate.getMonth() + 1; // getMonth() returns 0-11
-    
-    const expYear = parseInt(year, 10);
-    const expMonth = parseInt(month, 10);
-    
-    // Check if card is expired
-    if (expYear < currentYear || (expYear === currentYear && expMonth < currentMonth)) {
-      return { cardExpired: true };
-    }
-    
-    // Check if expiry is too far in the future (more than 20 years)
-    if (expYear > currentYear + 20) {
-      return { invalidExpiryYear: true };
-    }
-    
-    return null;
-  }
-
-  /**
-   * CVV validator (3-4 digits)
-   */
-  private cvvValidator(control: AbstractControl): ValidationErrors | null {
-    if (!control.value) {
-      return null;
-    }
-
-    const cvv = control.value;
-    const regex = /^[0-9]{3,4}$/;
-    
-    return regex.test(cvv) ? null : { invalidCvv: true };
-  }
-
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
-  }
-
-  /**
-   * Format card number with spaces (1234 5678 9012 3456)
-   */
-  formatCardNumber(event: any): void {
-    let value = event.target.value.replace(/\s/g, '').replace(/[^0-9]/gi, '');
-    
-    // Limit to 16 digits
-    if (value.length > 16) {
-      value = value.slice(0, 16);
-    }
-    
-    // Add spaces every 4 digits
-    const formattedValue = value.replace(/(\d{4})/g, '$1 ').trim();
-    
-    // Update form control value
-    this.paymentForm.get('cardNumber')?.setValue(formattedValue, { emitEvent: false });
-  }
-
-  /**
-   * Format expiry date (MM/YY)
-   */
-  formatExpiryDate(event: any): void {
-    let value = event.target.value.replace(/[^0-9]/g, '');
-    
-    if (value.length >= 2) {
-      value = value.substring(0, 2) + '/' + value.substring(2, 4);
-    }
-    
-    // Update form control value
-    this.paymentForm.get('expiryDate')?.setValue(value, { emitEvent: false });
-  }
-
-  /**
-   * Format CVV (numeric only, max 4 digits)
-   */
-  formatCvv(event: any): void {
-    let value = event.target.value.replace(/[^0-9]/g, '');
-    
-    // Limit to 4 digits
-    if (value.length > 4) {
-      value = value.slice(0, 4);
-    }
-    
-    // Update form control value
-    this.paymentForm.get('cvv')?.setValue(value, { emitEvent: false });
   }
 
   goBack() {

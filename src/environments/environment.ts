@@ -14,9 +14,9 @@ export const environment = {
         endpoint: 'https://ipgtest.monri.com', // Test endpoint
         formEndpoint: 'https://ipgtest.monri.com/v2/form',
         debug: true,
-        successUrl: 'http://localhost:4200/payment-callback',
-        cancelUrl: 'http://localhost:4200/payment-callback',
-        redirectToSuccessUrl: false,
+        successUrl: 'http://localhost:4200/payment-callback?status=approved',
+        cancelUrl: 'http://localhost:4200/payment-callback?status=cancelled',
+        redirectToSuccessUrl: true, // Enable redirect to success URL
         terminalRedirectToSuccessUrl: true
     }
 }; 

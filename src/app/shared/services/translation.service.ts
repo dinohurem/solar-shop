@@ -1994,7 +1994,34 @@ export class TranslationService {
                 bulkDiscounts: 'Količinski popusti',
                 prioritySupport: 'Prioritetna podrška',
                 customInvoicing: 'Posebno fakturiranje',
-                oneOrMoreItemsUnavailable: 'Jedan ili više proizvoda u vašoj košarici nije dostupan u traženoj količini. Molimo provjerite vašu košaricu i pokušajte ponovno.'
+                oneOrMoreItemsUnavailable: 'Jedan ili više proizvoda u vašoj košarici nije dostupan u traženoj količini. Molimo provjerite vašu košaricu i pokušajte ponovno.',
+                securePayment: 'Sigurno plaćanje',
+                securePaymentDescription: 'Detalji vaše kartice bit će sigurno uneseni na Monri platformi za plaćanje.'
+            },
+            // Payment
+            payment: {
+                processing: 'Obrađujemo vaše plaćanje...',
+                processingDescription: 'Molimo sačekajte dok obrađujemo vašu transakciju. Ovo može potrajati nekoliko trenutaka.',
+                success: 'Plaćanje uspješno!',
+                successDescription: 'Vaše plaćanje je uspješno obrađeno i narudžba je potvrđena.',
+                failed: 'Plaćanje neuspješno',
+                failedDescription: 'Nažalost, vaše plaćanje nije uspješno obrađeno. Molimo pokušajte ponovno.',
+                cancelled: 'Plaćanje otkazano',
+                cancelledDescription: 'Plaćanje je otkazano. Možete pokušati ponovno ili se vratiti u košaricu.',
+                orderNumber: 'Broj narudžbe',
+                viewOrder: 'Pogledaj narudžbu',
+                retryPayment: 'Pokušaj ponovno',
+                tryAgain: 'Pokušaj ponovno',
+                backToCart: 'Nazad u košaricu'
+            },
+            // Order Confirmation
+            orderConfirmation: {
+                title: 'Narudžba potvrđena!',
+                description: 'Hvala vam na kupovini! Vaša narudžba je uspješno kreirana i bit će obrađena u najkraćem roku.',
+                orderNumber: 'Broj narudžbe',
+                emailSent: 'Poslali smo vam potvrdu narudžbe na vaš email.',
+                continueShopping: 'Nastavi kupovinu',
+                viewOrders: 'Pogledaj narudžbe'
             },
             // Order Details
             orderDetails: {
@@ -4382,7 +4409,34 @@ export class TranslationService {
                 bulkDiscounts: 'Bulk Discounts',
                 prioritySupport: 'Priority Support',
                 customInvoicing: 'Custom Invoicing',
-                oneOrMoreItemsUnavailable: 'One or more items in your cart are no longer available in the requested quantity. Please review your cart and try again.'
+                oneOrMoreItemsUnavailable: 'One or more items in your cart are no longer available in the requested quantity. Please review your cart and try again.',
+                securePayment: 'Secure Payment',
+                securePaymentDescription: 'Your card details will be securely entered on the Monri payment platform.'
+            },
+            // Payment
+            payment: {
+                processing: 'Processing your payment...',
+                processingDescription: 'Please wait while we process your transaction. This may take a few moments.',
+                success: 'Payment Successful!',
+                successDescription: 'Your payment has been successfully processed and your order is confirmed.',
+                failed: 'Payment Failed',
+                failedDescription: 'Unfortunately, your payment could not be processed. Please try again.',
+                cancelled: 'Payment Cancelled',
+                cancelledDescription: 'Payment has been cancelled. You can try again or return to your cart.',
+                orderNumber: 'Order Number',
+                viewOrder: 'View Order',
+                retryPayment: 'Retry Payment',
+                tryAgain: 'Try Again',
+                backToCart: 'Back to Cart'
+            },
+            // Order Confirmation
+            orderConfirmation: {
+                title: 'Order Confirmed!',
+                description: 'Thank you for your purchase! Your order has been successfully created and will be processed shortly.',
+                orderNumber: 'Order Number',
+                emailSent: 'We have sent you an order confirmation email.',
+                continueShopping: 'Continue Shopping',
+                viewOrders: 'View Orders'
             },
             // Order Details
             orderDetails: {

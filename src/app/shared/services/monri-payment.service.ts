@@ -50,6 +50,11 @@ export interface MonriFormParams {
   authenticity_token: string;
   success_url?: string;
   cancel_url?: string;
+  // Try different Monri redirect parameter names
+  success_redirect?: string;
+  cancel_redirect?: string;
+  return_url?: string;
+  callback_url?: string;
 }
 
 @Injectable({
@@ -76,7 +81,12 @@ export class MonriPaymentService {
       transaction_type: paymentData.transaction_type || 'purchase',
       success_url: this.monriConfig.successUrl,
       cancel_url: this.monriConfig.cancelUrl,
-      order_info: paymentData.order_info || `Solar Shop Order ${paymentData.order_number}` // Required parameter
+      order_info: paymentData.order_info || `Solar Shop Order ${paymentData.order_number}`, // Required parameter
+      // Try multiple redirect parameter variations
+      success_redirect: this.monriConfig.successUrl,
+      cancel_redirect: this.monriConfig.cancelUrl,
+      return_url: this.monriConfig.successUrl,
+      callback_url: this.monriConfig.successUrl
     };
 
     // Add other optional parameters
@@ -104,7 +114,17 @@ export class MonriPaymentService {
    */
   submitPaymentForm(formParams: MonriFormParams): void {
     // Log parameters for debugging (remove in production)
-    console.log('Monri form parameters:', formParams);
+    console.log('🔍 MONRI FORM SUBMISSION DEBUG:');
+    console.log('📝 All form parameters:', formParams);
+    console.log('🔗 Redirect URLs being sent:', {
+      success_url: formParams.success_url,
+      cancel_url: formParams.cancel_url,
+      success_redirect: formParams.success_redirect,
+      cancel_redirect: formParams.cancel_redirect,
+      return_url: formParams.return_url,
+      callback_url: formParams.callback_url
+    });
+    console.log('🎯 Form endpoint:', this.monriConfig.formEndpoint);
     
     // Create a hidden form and submit it to Monri
     const form = document.createElement('form');

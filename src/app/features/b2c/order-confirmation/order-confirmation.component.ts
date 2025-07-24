@@ -71,7 +71,7 @@ export class OrderConfirmationComponent implements OnInit {
   }
 
   goToHome(): void {
-    this.router.navigate(['/']);
+    this.router.navigate(['/proizvodi']);
   }
 
   goToProfile(): void {
