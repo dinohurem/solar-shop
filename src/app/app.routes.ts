@@ -64,6 +64,8 @@ import { BlogFormComponent } from './features/admin/blog/blog-form/blog-form.com
 import { UserFormComponent } from './features/admin/users/user-form/user-form.component';
 import { OrderFormComponent } from './features/admin/orders/order-form/order-form.component';
 import { OrderDetailsComponent } from './features/b2c/order-details/order-details.component';
+import { PaymentCallbackComponent } from './features/b2c/checkout/payment-callback/payment-callback.component';
+import { OrderConfirmationComponent } from './features/b2c/order-confirmation/order-confirmation.component';
 // Import admin detail components
 import { OfferDetailsComponent as AdminOfferDetailsComponent } from './features/admin/offers/offer-details/offer-details.component';
 import { OrderDetailsComponent as AdminOrderDetailsComponent } from './features/admin/orders/order-details/order-details.component';
@@ -76,6 +78,12 @@ export const routes: Routes = [
     { path: 'potvrda', component: ConfirmationComponent },
     { path: 'zaboravljena-lozinka', component: ForgotPasswordComponent },
     { path: 'reset-lozinka', component: ResetPasswordComponent },
+    
+    // Payment callback (no layout needed)
+    { path: 'payment-callback', component: PaymentCallbackComponent },
+    
+    // Order confirmation (no layout needed)
+    { path: 'order-confirmation', component: OrderConfirmationComponent },
 
     // Main application routes (with layout)
     {

@@ -5,5 +5,18 @@ export const environment = {
 
     // App Configuration
     appUrl: 'http://localhost:4200', // Update this for production
-    adminEmail: 'adminshop@sharklasers.com'
+    adminEmail: 'adminshop@sharklasers.com',
+
+    // Monri Payment Gateway Configuration
+    monri: {
+        key: 'key-f909fd217f04ecdace0d565c9a65cdb8',
+        authenticityToken: '2e438f62bff6e2862703bf155a361341958607ed',
+        endpoint: 'https://ipgtest.monri.com', // Test endpoint
+        formEndpoint: 'https://ipgtest.monri.com/v2/form',
+        debug: true,
+        successUrl: 'http://localhost:4200/payment-callback',
+        cancelUrl: 'http://localhost:4200/payment-callback',
+        redirectToSuccessUrl: false,
+        terminalRedirectToSuccessUrl: true
+    }
 }; 
