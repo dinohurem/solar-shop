@@ -122,8 +122,12 @@ export interface Category {
     name: string;
     slug: string;
     description?: string;
+    image_url?: string;
+    parent_id?: string;
     is_active: boolean;
     sort_order: number;
+    created_at?: string;
+    updated_at?: string;
 }
 
 export const loadCategories = createAction(

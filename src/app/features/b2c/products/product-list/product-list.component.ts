@@ -60,6 +60,15 @@ export interface ProductFilters {
 
 export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'price-low' | 'price-high';
 
+export interface HierarchicalCategory {
+  id: string;
+  name: string;
+  slug: string;
+  parentId?: string;
+  children: HierarchicalCategory[];
+  level: number;
+}
+
 @Component({
   selector: 'app-product-list',
   standalone: true,
@@ -103,17 +112,120 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
               <!-- Categories Filter -->
               <div class="mb-6">
                 <h4 class="text-sm font-medium text-gray-900 mb-3 font-['DM_Sans']">{{ 'productList.categories' | translate }}</h4>
-                <div class="space-y-2">
-                  <label *ngFor="let category of categories$ | async" class="flex items-center">
-                    <input 
-                      type="checkbox" 
-                      [value]="category.name"
-                      [checked]="(filters$ | async)?.categories?.includes(category.name) || false"
-                      (change)="onCategoryChange(category.name, $event)"
-                      class="rounded border-gray-300 text-solar-600 focus:ring-solar-500"
+                <div class="space-y-1">
+                  <ng-container *ngFor="let category of hierarchicalCategories">
+                    <div 
+                      class="flex items-center"
+                      [style.padding-left.px]="category.level * 16"
                     >
-                    <span class="ml-2 text-sm text-gray-700 font-['DM_Sans']">{{ category.name }}</span>
-                  </label>
+                      <!-- Expand/Collapse button for parent categories -->
+                      <button 
+                        *ngIf="category.children.length > 0"
+                        (click)="toggleCategoryExpansion(category.id)"
+                        class="mr-2 p-1 hover:bg-gray-100 rounded transition-colors"
+                        type="button"
+                      >
+                        <svg 
+                          class="w-3 h-3 text-gray-400 transition-transform duration-200"
+                          [class.rotate-90]="expandedCategories.has(category.id)"
+                          fill="none" 
+                          stroke="currentColor" 
+                          viewBox="0 0 24 24"
+                        >
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                      </button>
+                      <!-- Spacer for leaf categories -->
+                      <div *ngIf="category.children.length === 0" class="w-5 mr-2"></div>
+                      
+                      <label class="flex items-center flex-1 py-1">
+                        <input 
+                          type="checkbox" 
+                          [value]="category.name"
+                          [checked]="(filters$ | async)?.categories?.includes(category.name) || false"
+                          (change)="onCategoryChange(category.name, $event)"
+                          class="rounded border-gray-300 text-solar-600 focus:ring-solar-500"
+                        >
+                        <span 
+                          class="ml-2 text-sm font-['DM_Sans']"
+                          [class.font-medium]="category.level === 0"
+                          [class.text-gray-900]="category.level === 0"
+                          [class.text-gray-700]="category.level > 0"
+                        >
+                          {{ category.name }}
+                        </span>
+                      </label>
+                    </div>
+                    
+                    <!-- Render children recursively if expanded -->
+                    <ng-container *ngIf="expandedCategories.has(category.id)">
+                      <ng-container *ngFor="let child of category.children">
+                        <div 
+                          class="flex items-center"
+                          [style.padding-left.px]="child.level * 16"
+                        >
+                          <!-- Expand/Collapse button for child categories -->
+                          <button 
+                            *ngIf="child.children.length > 0"
+                            (click)="toggleCategoryExpansion(child.id)"
+                            class="mr-2 p-1 hover:bg-gray-100 rounded transition-colors"
+                            type="button"
+                          >
+                            <svg 
+                              class="w-3 h-3 text-gray-400 transition-transform duration-200"
+                              [class.rotate-90]="expandedCategories.has(child.id)"
+                              fill="none" 
+                              stroke="currentColor" 
+                              viewBox="0 0 24 24"
+                            >
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                          </button>
+                          <!-- Spacer for leaf categories -->
+                          <div *ngIf="child.children.length === 0" class="w-5 mr-2"></div>
+                          
+                          <label class="flex items-center flex-1 py-1">
+                            <input 
+                              type="checkbox" 
+                              [value]="child.name"
+                              [checked]="(filters$ | async)?.categories?.includes(child.name) || false"
+                              (change)="onCategoryChange(child.name, $event)"
+                              class="rounded border-gray-300 text-solar-600 focus:ring-solar-500"
+                            >
+                            <span 
+                              class="ml-2 text-sm text-gray-700 font-['DM_Sans']"
+                            >
+                              {{ child.name }}
+                            </span>
+                          </label>
+                        </div>
+                        
+                        <!-- Render grandchildren if expanded -->
+                        <ng-container *ngIf="expandedCategories.has(child.id)">
+                          <ng-container *ngFor="let grandchild of child.children">
+                            <div 
+                              class="flex items-center"
+                              [style.padding-left.px]="grandchild.level * 16"
+                            >
+                              <div class="w-5 mr-2"></div>
+                              <label class="flex items-center flex-1 py-1">
+                                <input 
+                                  type="checkbox" 
+                                  [value]="grandchild.name"
+                                  [checked]="(filters$ | async)?.categories?.includes(grandchild.name) || false"
+                                  (change)="onCategoryChange(grandchild.name, $event)"
+                                  class="rounded border-gray-300 text-solar-600 focus:ring-solar-500"
+                                >
+                                <span class="ml-2 text-sm text-gray-700 font-['DM_Sans']">
+                                  {{ grandchild.name }}
+                                </span>
+                              </label>
+                            </div>
+                          </ng-container>
+                        </ng-container>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
                 </div>
               </div>
 
@@ -355,6 +467,10 @@ export class ProductListComponent implements OnInit, OnDestroy {
   searchQuery$: Observable<string>;
 
   private searchSubject = new Subject<string>();
+  
+  // Category hierarchy state
+  hierarchicalCategories: HierarchicalCategory[] = [];
+  expandedCategories = new Set<string>();
 
   constructor() {
     this.products$ = this.store.select(selectProducts);
@@ -371,6 +487,14 @@ export class ProductListComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.store.dispatch(ProductListActions.loadProducts());
     this.store.dispatch(ProductsActions.loadProductCategories());
+
+    // Subscribe to categories to build hierarchy
+    this.categories$.pipe(
+      takeUntil(this.destroy$),
+      filter(categories => categories && categories.length > 0)
+    ).subscribe(categories => {
+      this.buildCategoryHierarchy(categories);
+    });
 
     // Check if we should clear filters based on navigation source
     this.checkAndClearFiltersIfNeeded();
@@ -476,7 +600,20 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
   onCategoryChange(category: string, event: Event): void {
     const target = event.target as HTMLInputElement;
-    this.store.dispatch(ProductListActions.toggleCategoryFilter({ category, checked: target.checked }));
+    
+    if (target.checked) {
+      // When checking a category, also include all its subcategories
+      const categoriesToAdd = this.getAllSubcategories(category);
+      categoriesToAdd.forEach(cat => {
+        this.store.dispatch(ProductListActions.toggleCategoryFilter({ category: cat, checked: true }));
+      });
+    } else {
+      // When unchecking a category, also uncheck all its subcategories
+      const categoriesToRemove = this.getAllSubcategories(category);
+      categoriesToRemove.forEach(cat => {
+        this.store.dispatch(ProductListActions.toggleCategoryFilter({ category: cat, checked: false }));
+      });
+    }
   }
 
   onPriceRangeChange(type: 'min' | 'max', event: Event): void {
@@ -575,6 +712,89 @@ export class ProductListComponent implements OnInit, OnDestroy {
     const target = event.target as HTMLImageElement;
     if (target) {
       target.src = 'assets/images/product-placeholder.svg';
+    }
+  }
+
+  buildCategoryHierarchy(categories: ProductCategory[]): void {
+    // Create a map for quick lookup
+    const categoryMap = new Map<string, HierarchicalCategory>();
+    
+    // First pass: create all categories
+    categories.forEach(cat => {
+      categoryMap.set(cat.id, {
+        id: cat.id,
+        name: cat.name,
+        slug: cat.slug,
+        parentId: cat.parentId,
+        children: [],
+        level: 0
+      });
+    });
+
+    // Second pass: build parent-child relationships and set levels
+    const rootCategories: HierarchicalCategory[] = [];
+    
+    categories.forEach(cat => {
+      const hierarchicalCat = categoryMap.get(cat.id)!;
+      
+      if (cat.parentId) {
+        const parent = categoryMap.get(cat.parentId);
+        if (parent) {
+          parent.children.push(hierarchicalCat);
+          hierarchicalCat.level = parent.level + 1;
+        }
+      } else {
+        rootCategories.push(hierarchicalCat);
+      }
+    });
+
+    // Sort categories by name at each level
+    this.sortCategoriesRecursively(rootCategories);
+    
+    this.hierarchicalCategories = rootCategories;
+  }
+
+  private sortCategoriesRecursively(categories: HierarchicalCategory[]): void {
+    categories.sort((a, b) => a.name.localeCompare(b.name));
+    categories.forEach(cat => {
+      if (cat.children.length > 0) {
+        this.sortCategoriesRecursively(cat.children);
+      }
+    });
+  }
+
+  toggleCategoryExpansion(categoryId: string): void {
+    if (this.expandedCategories.has(categoryId)) {
+      this.expandedCategories.delete(categoryId);
+    } else {
+      this.expandedCategories.add(categoryId);
+    }
+  }
+
+  getAllSubcategories(categoryName: string): string[] {
+    const result: string[] = [categoryName]; // Include the category itself
+    
+    // Find the category in the hierarchy
+    const findCategoryAndChildren = (categories: HierarchicalCategory[]): void => {
+      for (const category of categories) {
+        if (category.name === categoryName) {
+          // Found the category, now collect all its children recursively
+          this.collectAllChildren(category, result);
+          return;
+        }
+        // Search in children
+        findCategoryAndChildren(category.children);
+      }
+    };
+    
+    findCategoryAndChildren(this.hierarchicalCategories);
+    return result;
+  }
+
+  private collectAllChildren(category: HierarchicalCategory, result: string[]): void {
+    for (const child of category.children) {
+      result.push(child.name);
+      this.collectAllChildren(child, result); // Recursively collect grandchildren
     }
   }
 } 

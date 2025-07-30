@@ -17,6 +17,15 @@ import * as ProductsActions from '../../shared/store/products.actions';
 import { selectProductsWithPricing, selectProductsLoading, selectCategories, selectCategoriesLoading } from '../../shared/store/products.selectors';
 import { ProductWithPricing, Category } from '../../shared/store/products.actions';
 
+export interface B2BHierarchicalCategory {
+  id: string;
+  name: string;
+  slug: string;
+  parentId?: string;
+  children: B2BHierarchicalCategory[];
+  level: number;
+}
+
 @Component({
   selector: 'app-partners-products',
   standalone: true,
@@ -124,25 +133,129 @@ import { ProductWithPricing, Category } from '../../shared/store/products.action
               <!-- Categories Filter -->
               <div class="mb-6">
                 <h4 class="text-sm font-medium text-gray-900 mb-3 font-['DM_Sans']">{{ 'b2b.products.category' | translate }}</h4>
-                <div class="space-y-2">
-                  <label class="flex items-center">
+                <div class="space-y-1">
+                  <!-- All Categories Option -->
+                  <label class="flex items-center py-1">
                     <input type="radio" 
                            name="category"
                            value=""
                            [checked]="selectedCategory === ''"
                            (change)="selectedCategory = ''; filterProducts()"
                            class="rounded border-gray-300 text-solar-600 focus:ring-solar-500">
-                    <span class="ml-2 text-sm text-gray-700 font-['DM_Sans']">{{ 'b2b.products.allCategories' | translate }}</span>
+                    <span class="ml-2 text-sm font-medium text-gray-900 font-['DM_Sans']">{{ 'b2b.products.allCategories' | translate }}</span>
                   </label>
-                  <label *ngFor="let category of (categories$ | async)" class="flex items-center">
-                    <input type="radio" 
-                           name="category"
-                           [value]="category.slug"
-                           [checked]="selectedCategory === category.slug"
-                           (change)="selectedCategory = category.slug; filterProducts()"
-                           class="rounded border-gray-300 text-solar-600 focus:ring-solar-500">
-                    <span class="ml-2 text-sm text-gray-700 font-['DM_Sans']">{{ category.name }}</span>
-                  </label>
+                  
+                  <!-- Hierarchical Categories -->
+                  <ng-container *ngFor="let category of hierarchicalCategories">
+                    <div 
+                      class="flex items-center"
+                      [style.padding-left.px]="category.level * 16"
+                    >
+                      <!-- Expand/Collapse button for parent categories -->
+                      <button 
+                        *ngIf="category.children.length > 0"
+                        (click)="toggleCategoryExpansion(category.id)"
+                        class="mr-2 p-1 hover:bg-gray-100 rounded transition-colors"
+                        type="button"
+                      >
+                        <svg 
+                          class="w-3 h-3 text-gray-400 transition-transform duration-200"
+                          [class.rotate-90]="expandedCategories.has(category.id)"
+                          fill="none" 
+                          stroke="currentColor" 
+                          viewBox="0 0 24 24"
+                        >
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                      </button>
+                      <!-- Spacer for leaf categories -->
+                      <div *ngIf="category.children.length === 0" class="w-5 mr-2"></div>
+                      
+                      <label class="flex items-center flex-1 py-1">
+                        <input type="radio" 
+                               name="category"
+                               [value]="category.slug"
+                               [checked]="selectedCategory === category.slug"
+                               (change)="selectedCategory = category.slug; filterProducts()"
+                               class="rounded border-gray-300 text-solar-600 focus:ring-solar-500">
+                        <span 
+                          class="ml-2 text-sm font-['DM_Sans']"
+                          [class.font-medium]="category.level === 0"
+                          [class.text-gray-900]="category.level === 0"
+                          [class.text-gray-700]="category.level > 0"
+                        >
+                          {{ category.name }}
+                        </span>
+                      </label>
+                    </div>
+                    
+                    <!-- Render children recursively if expanded -->
+                    <ng-container *ngIf="expandedCategories.has(category.id)">
+                      <ng-container *ngFor="let child of category.children">
+                        <div 
+                          class="flex items-center"
+                          [style.padding-left.px]="child.level * 16"
+                        >
+                          <!-- Expand/Collapse button for child categories -->
+                          <button 
+                            *ngIf="child.children.length > 0"
+                            (click)="toggleCategoryExpansion(child.id)"
+                            class="mr-2 p-1 hover:bg-gray-100 rounded transition-colors"
+                            type="button"
+                          >
+                            <svg 
+                              class="w-3 h-3 text-gray-400 transition-transform duration-200"
+                              [class.rotate-90]="expandedCategories.has(child.id)"
+                              fill="none" 
+                              stroke="currentColor" 
+                              viewBox="0 0 24 24"
+                            >
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                          </button>
+                          <!-- Spacer for leaf categories -->
+                          <div *ngIf="child.children.length === 0" class="w-5 mr-2"></div>
+                          
+                          <label class="flex items-center flex-1 py-1">
+                            <input type="radio" 
+                                   name="category"
+                                   [value]="child.slug"
+                                   [checked]="selectedCategory === child.slug"
+                                   (change)="selectedCategory = child.slug; filterProducts()"
+                                   class="rounded border-gray-300 text-solar-600 focus:ring-solar-500">
+                            <span 
+                              class="ml-2 text-sm text-gray-700 font-['DM_Sans']"
+                            >
+                              {{ child.name }}
+                            </span>
+                          </label>
+                        </div>
+                        
+                        <!-- Render grandchildren if expanded -->
+                        <ng-container *ngIf="expandedCategories.has(child.id)">
+                          <ng-container *ngFor="let grandchild of child.children">
+                            <div 
+                              class="flex items-center"
+                              [style.padding-left.px]="grandchild.level * 16"
+                            >
+                              <div class="w-5 mr-2"></div>
+                              <label class="flex items-center flex-1 py-1">
+                                <input type="radio" 
+                                       name="category"
+                                       [value]="grandchild.slug"
+                                       [checked]="selectedCategory === grandchild.slug"
+                                       (change)="selectedCategory = grandchild.slug; filterProducts()"
+                                       class="rounded border-gray-300 text-solar-600 focus:ring-solar-500">
+                                <span class="ml-2 text-sm text-gray-700 font-['DM_Sans']">
+                                  {{ grandchild.name }}
+                                </span>
+                              </label>
+                            </div>
+                          </ng-container>
+                        </ng-container>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
                 </div>
               </div>
 
@@ -517,6 +630,10 @@ export class PartnersProductsComponent implements OnInit, OnDestroy {
 
   allProducts: ProductWithPricing[] = [];
   filteredProducts: ProductWithPricing[] = [];
+  
+  // Category hierarchy state
+  hierarchicalCategories: B2BHierarchicalCategory[] = [];
+  expandedCategories = new Set<string>();
 
   constructor() {
     this.currentUser$ = this.store.select(selectCurrentUser);
@@ -531,6 +648,14 @@ export class PartnersProductsComponent implements OnInit, OnDestroy {
     // Load products and categories
     this.store.dispatch(ProductsActions.loadProducts());
     this.store.dispatch(ProductsActions.loadCategories());
+
+    // Subscribe to categories to build hierarchy
+    this.categories$.pipe(
+      takeUntil(this.destroy$),
+      filter(categories => categories && categories.length > 0)
+    ).subscribe(categories => {
+      this.buildCategoryHierarchy(categories);
+    });
 
     // Subscribe to user changes
     this.currentUser$.pipe(takeUntil(this.destroy$)).subscribe(async (user) => {
@@ -635,10 +760,8 @@ export class PartnersProductsComponent implements OnInit, OnDestroy {
 
   filterProducts(): void {
     this.filteredProducts = this.allProducts.filter(product => {
-      // Check category by comparing with category slug or name
-      const matchesCategory = !this.selectedCategory ||
-        product.category?.toLowerCase().includes(this.selectedCategory.toLowerCase()) ||
-        product.category_id === this.selectedCategory;
+      // Check category hierarchically - if parent is selected, include all children
+      const matchesCategory = this.matchesCategoryHierarchically(product);
 
       const matchesSearch = !this.searchTerm ||
         product.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
@@ -776,5 +899,122 @@ export class PartnersProductsComponent implements OnInit, OnDestroy {
 
   hasProductImage(product: ProductWithPricing): boolean {
     return !!this.getProductImageUrl(product);
+  }
+
+  buildCategoryHierarchy(categories: Category[]): void {
+    // Create a map for quick lookup
+    const categoryMap = new Map<string, B2BHierarchicalCategory>();
+    
+    // First pass: create all categories
+    categories.forEach(cat => {
+      categoryMap.set(cat.id, {
+        id: cat.id,
+        name: cat.name,
+        slug: cat.slug,
+        parentId: cat.parent_id,
+        children: [],
+        level: 0
+      });
+    });
+
+    // Second pass: build parent-child relationships and set levels
+    const rootCategories: B2BHierarchicalCategory[] = [];
+    
+    categories.forEach(cat => {
+      const hierarchicalCat = categoryMap.get(cat.id)!;
+      
+      if (cat.parent_id) {
+        const parent = categoryMap.get(cat.parent_id);
+        if (parent) {
+          parent.children.push(hierarchicalCat);
+          hierarchicalCat.level = parent.level + 1;
+        }
+      } else {
+        rootCategories.push(hierarchicalCat);
+      }
+    });
+
+    // Sort categories by name at each level
+    this.sortCategoriesRecursively(rootCategories);
+    
+    this.hierarchicalCategories = rootCategories;
+  }
+
+  private sortCategoriesRecursively(categories: B2BHierarchicalCategory[]): void {
+    categories.sort((a, b) => a.name.localeCompare(b.name));
+    categories.forEach(cat => {
+      if (cat.children.length > 0) {
+        this.sortCategoriesRecursively(cat.children);
+      }
+    });
+  }
+
+  toggleCategoryExpansion(categoryId: string): void {
+    if (this.expandedCategories.has(categoryId)) {
+      this.expandedCategories.delete(categoryId);
+    } else {
+      this.expandedCategories.add(categoryId);
+    }
+  }
+
+  private matchesCategoryHierarchically(product: ProductWithPricing): boolean {
+    if (!this.selectedCategory) {
+      return true; // No category filter applied
+    }
+
+    // Find the selected category in hierarchy
+    const selectedCategoryObj = this.findCategoryInHierarchy(this.selectedCategory);
+    if (!selectedCategoryObj) {
+      // Fallback to original matching logic
+      return product.category?.toLowerCase().includes(this.selectedCategory.toLowerCase()) ||
+             product.category_id === this.selectedCategory;
+    }
+
+    // Get all category names/slugs that should match (selected category + all its children)
+    const allowedCategorySlugs = this.getAllSubcategorySlugs(selectedCategoryObj);
+    const allowedCategoryNames = this.getAllSubcategoryNames(selectedCategoryObj);
+
+    // Check if product matches any of the allowed categories
+    return allowedCategorySlugs.includes(product.category_id) ||
+           allowedCategoryNames.some(name => 
+             product.category?.toLowerCase().includes(name.toLowerCase())
+           );
+  }
+
+  private findCategoryInHierarchy(slug: string): B2BHierarchicalCategory | null {
+    const searchCategories = (categories: B2BHierarchicalCategory[]): B2BHierarchicalCategory | null => {
+      for (const category of categories) {
+        if (category.slug === slug) {
+          return category;
+        }
+        const found = searchCategories(category.children);
+        if (found) {
+          return found;
+        }
+      }
+      return null;
+    };
+    
+    return searchCategories(this.hierarchicalCategories);
+  }
+
+  private getAllSubcategorySlugs(category: B2BHierarchicalCategory): string[] {
+    const result: string[] = [category.slug]; // Include the category itself
+    
+    for (const child of category.children) {
+      result.push(...this.getAllSubcategorySlugs(child)); // Recursively get children
+    }
+    
+    return result;
+  }
+
+  private getAllSubcategoryNames(category: B2BHierarchicalCategory): string[] {
+    const result: string[] = [category.name]; // Include the category itself
+    
+    for (const child of category.children) {
+      result.push(...this.getAllSubcategoryNames(child)); // Recursively get children
+    }
+    
+    return result;
   }
 } 
