@@ -2086,6 +2086,8 @@ export class TranslationService {
                 yourEmail: 'Vaš email',
                 copyright: 'Copyright',
                 allRightsReserved: 'Sva prava pridržana.',
+                paymentMethods: 'Načini plaćanja:',
+                safetyPayment: 'Sigurnost plaćanja karticama',
                 privacyPolicy: 'Pravila privatnosti',
                 termsOfService: 'Uvjeti korištenja',
                 cookiePolicy: 'Pravila kolačića',
@@ -2137,6 +2139,76 @@ export class TranslationService {
                 batteries: 'Baterije',
                 mountingSystems: 'Sustavi za montažu',
                 cables: 'Kabeli'
+            },
+            // Safety Payment
+            safetyPayment: {
+                title: 'Sigurnost plaćanja karticama',
+                subtitle: 'Vaša sigurnost je naš prioritet',
+                acceptedCards: 'Prihvaćene kartice',
+                creditCardSecurity: {
+                    title: 'Sigurnost plaćanja kreditnim karticama',
+                    intro: 'Tajnost Vaših podataka je zaštićena i osigurana upotrebom SSL enkripcije.',
+                    sslDescription: 'Stranice za naplatu putem interneta osigurane su korištenjem Secure Socket Layer (SSL) protokola sa 128-bitnom enkripcijom podataka. SSL enkripcija je postupak šifriranja podataka radi sprječavanja neovlaštenog pristupa prilikom njihovog prenosa.',
+                    dataTransfer: 'Time je omogućen siguran prenos informacija te onemogućen nedozvoljen pristup podacima prilikom komunikacije između korisnikovog računara i WebPay servisa, te obratno.',
+                    vpnSecurity: 'WebPay servis i finansijske ustanove razmjenjuju podatke upotrebom virtualne privatne mreže (VPN), koja je zaštićena od neautorizovanog pristupa.',
+                    pciCompliance: 'Monri Payment Gateway je certificiran prema PCI DSS Level 1 sigurnosnom standardu propisanom Visa i MasterCard pravilima.',
+                    merchantSecurity: 'Trgovac ne pohranjuje brojeve kreditnih kartica i brojevi nisu dostupni neovlaštenim osobama.'
+                },
+                privacyStatement: {
+                    title: 'Izjava o privatnosti',
+                    commitment: 'Obavezujemo se pružati zaštitu ličnim podacima kupaca, na način da prikupljamo samo nužne, osnovne podatke o kupcima / korisnicima koji su nužni za ispunjenje naših obaveza; informišemo kupce o načinu korištenja prikupljenih podataka, redovno dajemo kupcima mogućnost izbora o upotrebi njihovih podataka, uključujući mogućnost odluke žele li ili ne da se njihovo ime ukloni s lista koje se koriste za marketinške kampanje.',
+                    dataAccess: 'Svi se podaci o korisnicima strogo čuvaju i dostupni su samo zaposlenicima kojima su ti podaci nužni za obavljanje posla.',
+                    employeeResponsibility: 'Svi naši zaposlenici i poslovni partneri odgovorni su za poštivanje načela zaštite privatnosti.'
+                },
+                termsOfUse: {
+                    title: 'Uslovi korištenja',
+                    ownership: 'Energo Solar ONLINE WEB SHOP (solar-shop.ba) je u vlasništvu firme Energo Solar d.o.o. Sarajevo. Putem ONLINE WEB SHOPA nudimo usluge pružanja informacija te online naručivanja i kupovine proizvoda.',
+                    availability: 'Energo Solar ONLINE WEB SHOP je aktivan 24h dnevno, svaki dan u godini. Pristup online trgovini može biti povremeno onemogućen radi održavanja ili eventualnih tehničkih problema.',
+                    compliance: 'solar-shop.ba kao pružatelj usluga pridržava se zakonskih propisa sa ciljem zaštite privatnosti korisnika, a uslovi korištenja napravljeni su u skladu sa međunarodnim običajima online poslovanja.',
+                    pricing: 'Cijene navedene na ONLINE SHOP-u izražene su u valuti konvertibilna marka (KM), međunarodne oznake BAM. Cijene su maloprodajne, sa uračunatim PDV-om, a važeća cijena je ona cijena navedena u trenutku primanja narudžbe.',
+                    payment: 'Za kartično plaćanje na rate ili druge načine plaćanja, su pune cijene u ovom slučaju (prekrižene cijene) iznad cijene za gotovinsko plaćanje.',
+                    delivery: 'solar-shop.ba radi dostavu i isporuku ISKLJUČIVO na teritoriji Bosne i Hercegovine. Kupac koji će preuzeti i platiti artikl mora se nalaziti na teritoriji Bosne i Hercegovine.',
+                    accuracy: 'Mi ne garantujemo da su podaci na web-stranici 100% tačni, te ne odgovaramo za posljedice nastale zbog netačnosti navedenih podataka ili slika koje ne predstavljaju stvarni izgled proizvoda.',
+                    warranty: 'Garancija na proizvod starta na dan prodaje proizvoda i unosi se u garantni list, te ovjerava pečatom.',
+                    dataCollection: 'Za obradu vaše narudžbe potrebni su nam vaši osnovni podaci, kao što su ime i prezime kupca, adresa, e-mail i kontakt broj. Mi ćemo čuvati privatnost podataka kupaca u skladu sa propisima o zaštiti podataka u ovoj branši.'
+                },
+                ordering: {
+                    title: 'Naručivanje',
+                    process: 'Kupac naručuje proizvod ili proizvode putem elektronskog obrasca narudžbe. Kupcem se smatra svaka osoba koja elektronski naruči barem jedan proizvod, popuni tražene podatke i pošalje narudžbu.',
+                    pricing: 'Cijene navedene na ONLINE SHOP-u izražene su u valuti konvertibilna marka (KM), međunarodne oznake BAM sa PDV-om. Kupac dodatno ima mogućnost prikaza cijena u američkim dolarima te eurima.',
+                    completion: 'Roba se naručuje elektronskim putem, pritiskom na određeni proizvod te spremanjem istog u košaricu. Roba se smatra naručenom u trenutku kada kupac odabere te potvrdi način plaćanja.'
+                },
+                paymentSection: {
+                    title: 'Plaćanje',
+                    methods: 'Naručeni proizvodi ili usluge plaćaju se online jednom od kreditnih kartica: Mastercard, Maestro ili Visa.'
+                },
+                delivery: {
+                    title: 'Isporuka',
+                    packaging: 'Naručeni proizvodi pakiraju se na način da tokom uobičajene manipulacije ne budu oštećeni.',
+                    inspection: 'Prilikom preuzimanja kupac je dužan provjeriti stanje pošiljke te u slučaju oštećenja odmah reklamirati proizvod dostavljaču (zaposleniku tvrtke koja vrši dostavu).',
+                    nonReceipt: 'Ako kupac ne primi robu, ili obavijest o isporuci, nakon što je poslana, u očekivanom vremenu, kupac ima pravo o tome obavijestiti prodavatelj kako bi se poduzele radnje pronalaska pošiljke.',
+                    refusal: 'Ako kupac odbije primiti robu koju je naručio od prodavatelja ima pravo tražiti od kupca nadoknadu svih troškova koji su vezani za isporuku.',
+                    timeline: 'Prodavatelj se obvezuje poslati pošiljku kupcu onoga trenutka kada zaprimi potvrdu kojom se odobrava online transakcija. Nakon zaprimanja te potvrde prodavatelj se obvezuje poslati pošiljku u roku do 5 (pet) radnih dana.',
+                    courierResponsibility: 'Nakon što dostavljač (firma koja vrši dostavu) zaprimi pošiljku od strane prodavatelja, prodavatelj više nije odgovoran za daljnji tok isporuke i eventualna kašnjenja.',
+                    downloadOption: 'Ako kupac umjesto dostave izabere opciju downloada proizvoda, prodavatelj se obvezuje poslati obavijest isključivo u obliku elektronske pošte kupcu na kojoj će se nalaziti linkovi za download i upute.'
+                },
+                complaints: {
+                    title: 'Reklamacija',
+                    guarantee: 'Prodavatelj se obvezuje isporučiti proizvod koji je tehnički ispravan te odgovara opisu proizvoda navedenom na web aplikaciji.',
+                    imageDisclaimer: 'Slika koja ilustrira proizvod na Internet stranici ne mora odgovarati stvarnom izgledu proizvoda te kupac ne može reklamirati ovaj segment.',
+                    technicalIssues: 'U slučaju tehničke neispravnosti audio zapisa koji su pohranjeni na prijenosniku zvuka prodavatelj preuzima potpunu odgovornost.',
+                    procedure: 'U slučaju tehničke neispravnosti, kupac je dužan reklamirati proizvod u roku od 4 (četiri) radna dana.',
+                    replacement: 'Nakon što reklamira tehničku neispravnost kupac je dužan poštom, uz dostavnicu, vratiti tehnički neispravan prijenosnik zvuka nakon čega će prodavatelj u roku od 3(tri) radna dana poslati kupcu zamjenski proizvod, bez ikakve naknade.',
+                    noRefund: 'U slučaju gore navedenog kupac nema pravo tražiti povrat novca, već isključivo zamjenski proizvod.',
+                    courierLimitation: 'Prodavatelj nije odgovoran za eventualna oštećenja i ostale obveze koje se nalaze u domeni dostavljača (firma koja obavlja poslove dostave proizvoda).',
+                    downloadIssues: 'Ako kupac odabere opciju downloada proizvoda te kupac ne bude u mogućnosti obaviti download zbog tehničkih problema uzrokovanih na serveru prodavatelja prodavatelj se obvezuje poslati elektronsku poštu sa novom mogućnosti za download za što kupac ne snosi nikakve troškove.'
+                },
+                contact: {
+                    title: 'Trebate pomoć?',
+                    content: 'Ako imate bilo kakvih pitanja o sigurnosti plaćanja ili trebate pomoć s narudžbom, naš tim je tu za vas:',
+                    email: 'Pošaljite e-mail',
+                    phone: 'Nazovite nas'
+                }
             },
             // Contact & Support
             contactSupport: {
@@ -4501,6 +4573,8 @@ export class TranslationService {
                 yourEmail: 'Your email',
                 copyright: 'Copyright',
                 allRightsReserved: 'All rights reserved.',
+                paymentMethods: 'Payment methods:',
+                safetyPayment: 'Credit card payment security',
                 privacyPolicy: 'Privacy Policy',
                 termsOfService: 'Terms of Service',
                 cookiePolicy: 'Cookie Policy',
@@ -4552,6 +4626,76 @@ export class TranslationService {
                 batteries: 'Batteries',
                 mountingSystems: 'Mounting Systems',
                 cables: 'Cables'
+            },
+            // Safety Payment
+            safetyPayment: {
+                title: 'Credit card payment security',
+                subtitle: 'Your security is our priority',
+                acceptedCards: 'Accepted cards',
+                creditCardSecurity: {
+                    title: 'Credit card payment security',
+                    intro: 'The confidentiality of your data is protected and secured using SSL encryption.',
+                    sslDescription: 'Internet payment pages are secured using Secure Socket Layer (SSL) protocol with 128-bit data encryption. SSL encryption is a data encryption process to prevent unauthorized access during their transmission.',
+                    dataTransfer: 'This enables secure information transfer and prevents unauthorized access to data during communication between the user\'s computer and WebPay service, and vice versa.',
+                    vpnSecurity: 'WebPay service and financial institutions exchange data using a virtual private network (VPN), which is protected from unauthorized access.',
+                    pciCompliance: 'Monri Payment Gateway is certified according to PCI DSS Level 1 security standard prescribed by Visa and MasterCard rules.',
+                    merchantSecurity: 'The merchant does not store credit card numbers and the numbers are not available to unauthorized persons.'
+                },
+                privacyStatement: {
+                    title: 'Privacy statement',
+                    commitment: 'We are committed to providing protection for customers\' personal data, by collecting only necessary, basic data about customers/users that are necessary to fulfill our obligations; we inform customers about how collected data is used, we regularly give customers the choice about the use of their data, including the ability to decide whether or not they want their name removed from lists used for marketing campaigns.',
+                    dataAccess: 'All user data is strictly protected and accessible only to employees who need this data to perform their work.',
+                    employeeResponsibility: 'All our employees and business partners are responsible for respecting privacy protection principles.'
+                },
+                termsOfUse: {
+                    title: 'Terms of use',
+                    ownership: 'Energo Solar ONLINE WEB SHOP (solar-shop.ba) is owned by Energo Solar d.o.o. Sarajevo. Through the ONLINE WEB SHOP we offer information services and online ordering and purchasing of products.',
+                    availability: 'Energo Solar ONLINE WEB SHOP is active 24 hours a day, every day of the year. Access to the online store may be temporarily disabled for maintenance or possible technical problems.',
+                    compliance: 'solar-shop.ba as a service provider adheres to legal regulations with the aim of protecting user privacy, and the terms of use are made in accordance with international online business customs.',
+                    pricing: 'Prices listed on the ONLINE SHOP are expressed in the currency convertible mark (KM), international designation BAM. Prices are retail, including VAT, and the valid price is the price stated at the time of receiving the order.',
+                    payment: 'For card payments in installments or other payment methods, the full prices in this case (crossed out prices) are above the cash payment price.',
+                    delivery: 'solar-shop.ba delivers and ships EXCLUSIVELY on the territory of Bosnia and Herzegovina. The customer who will pick up and pay for the item must be located on the territory of Bosnia and Herzegovina.',
+                    accuracy: 'We do not guarantee that the data on the website is 100% accurate, and we are not responsible for consequences arising from inaccurate data or images that do not represent the actual appearance of the product.',
+                    warranty: 'Product warranty starts on the day of product sale and is entered in the warranty card and certified with a stamp.',
+                    dataCollection: 'To process your order, we need your basic information, such as the customer\'s first and last name, address, e-mail and contact number. We will keep customer data privacy in accordance with data protection regulations in this industry.'
+                },
+                ordering: {
+                    title: 'Ordering',
+                    process: 'The customer orders a product or products through an electronic order form. A customer is considered any person who electronically orders at least one product, fills in the required data and sends the order.',
+                    pricing: 'Prices listed on the ONLINE SHOP are expressed in the currency convertible mark (KM), international designation BAM with VAT. The customer additionally has the option of displaying prices in US dollars and euros.',
+                    completion: 'Goods are ordered electronically, by clicking on a specific product and storing it in the cart. The goods are considered ordered when the customer selects and confirms the payment method.'
+                },
+                paymentSection: {
+                    title: 'Payment',
+                    methods: 'Ordered products or services are paid online with one of the credit cards: Mastercard, Maestro or Visa.'
+                },
+                delivery: {
+                    title: 'Delivery',
+                    packaging: 'Ordered products are packaged in such a way that they are not damaged during normal handling.',
+                    inspection: 'Upon receipt, the customer is obliged to check the condition of the shipment and in case of damage, immediately file a complaint with the deliverer (employee of the company that performs the delivery).',
+                    nonReceipt: 'If the customer does not receive the goods, or notification of delivery, after it has been sent, within the expected time, the customer has the right to inform the seller so that actions can be taken to find the shipment.',
+                    refusal: 'If the customer refuses to receive the goods they ordered, the seller has the right to demand compensation from the customer for all costs related to delivery.',
+                    timeline: 'The seller undertakes to send the shipment to the customer the moment they receive confirmation approving the online transaction. After receiving this confirmation, the seller undertakes to send the shipment within 5 (five) working days.',
+                    courierResponsibility: 'After the deliverer (company that performs delivery) receives the shipment from the seller, the seller is no longer responsible for the further course of delivery and possible delays.',
+                    downloadOption: 'If the customer chooses the product download option instead of delivery, the seller undertakes to send a notification exclusively in the form of e-mail to the customer which will contain download links and instructions.'
+                },
+                complaints: {
+                    title: 'Complaints',
+                    guarantee: 'The seller undertakes to deliver a product that is technically correct and corresponds to the product description listed on this web application.',
+                    imageDisclaimer: 'The image that illustrates the product on the Internet page does not have to correspond to the actual appearance of the product and the customer cannot complain about this segment.',
+                    technicalIssues: 'In case of technical malfunction of audio recordings stored on the sound carrier, the seller assumes full responsibility.',
+                    procedure: 'In case of technical malfunction, the customer is obliged to complain about the product within 4 (four) working days.',
+                    replacement: 'After complaining about the technical malfunction, the customer is obliged to return the technically defective sound carrier by mail, with a delivery note, after which the seller will send the customer a replacement product within 3 (three) working days, without any charge.',
+                    noRefund: 'In the above case, the customer does not have the right to demand a refund, but exclusively a replacement product.',
+                    courierLimitation: 'The seller is not responsible for possible damages and other obligations that are in the domain of the deliverer (company that performs product delivery services).',
+                    downloadIssues: 'If the customer chooses the product download option and the customer is not able to perform the download due to technical problems caused on the seller\'s server, the seller undertakes to send an e-mail with a new download option for which the customer bears no costs.'
+                },
+                contact: {
+                    title: 'Need help?',
+                    content: 'If you have any questions about payment security or need help with your order, our team is here for you:',
+                    email: 'Send email',
+                    phone: 'Call us'
+                }
             },
             // Contact & Support
             contactSupport: {

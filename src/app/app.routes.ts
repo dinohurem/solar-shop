@@ -19,6 +19,7 @@ import { ContactComponent } from './features/b2c/contact/contact.component';
 import { PrivacyPolicyComponent } from './features/b2c/privacy-policy/privacy-policy.component';
 import { TermsOfServiceComponent } from './features/b2c/terms-of-service/terms-of-service.component';
 import { CookiePolicyComponent } from './features/b2c/cookie-policy/cookie-policy.component';
+import { SafetyPaymentComponent } from './features/b2c/safety-payment/safety-payment.component';
 import { PartnersComponent } from './features/b2b/partners/partners.component';
 import { PartnersRegisterComponent } from './features/b2b/partners/register/partners-register.component';
 import { PartnersProductsComponent } from './features/b2b/partners/products/partners-products.component';
@@ -102,6 +103,7 @@ export const routes: Routes = [
             { path: 'privatnost', component: PrivacyPolicyComponent },
             { path: 'uvjeti', component: TermsOfServiceComponent },
             { path: 'kolacici', component: CookiePolicyComponent },
+            { path: 'sigurnost-kupovine', component: SafetyPaymentComponent },
 
 
             // Protected routes

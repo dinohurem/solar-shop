@@ -63,6 +63,24 @@ export interface FooterData {
             
             <!-- Contact Info -->
             <div *ngIf="footerData$ | async as footer" class="space-y-3">
+            <div class="flex items-center gap-3">
+                <svg class="w-5 h-5 text-solar-400 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/>
+                </svg>
+                <span class="text-gray-300 text-sm hover:text-solar-400 transition-colors duration-300">
+                  Hvaljen budi d.o.o.
+                </span>
+              </div>
+              <div class="flex items-center gap-3">
+                <svg class="w-5 h-5 text-solar-400 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                  <path d="M8,12V14H16V12H8M8,16V18H13V16H8Z"/>
+                </svg>
+                <span class="text-gray-300 text-sm hover:text-solar-400 transition-colors duration-300">
+                  OIB: 81742701785
+                </span>
+              </div>
+
               <div class="flex items-center gap-3">
                 <svg class="w-5 h-5 text-solar-400 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
@@ -226,20 +244,40 @@ export interface FooterData {
               </div>
             </div>
 
-            <!-- Certifications/Badges -->
-            <!-- <div class="flex items-center gap-6">
-              <div class="flex items-center gap-2">
-                <svg class="w-6 h-6 text-solar-400" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                </svg>
+            <!-- Payment Methods -->
+            <div class="flex items-center gap-4">
+              <span class="text-gray-300 text-sm font-medium">{{ 'footer.paymentMethods' | translate }}</span>
+              <div class="flex gap-3 flex-wrap">
+                <a href="https://www.mastercard.ba/bs-ba.html" target="_blank" rel="noopener noreferrer" 
+                   class="bg-white/10 rounded-lg p-2 hover:bg-white/20 transition-all duration-300" 
+                   title="Mastercard">
+                  <img src="assets/images/payment/mastercard.svg" alt="Mastercard" class="h-6 w-auto">
+                </a>
+                <a href="https://www.mastercard.com/brandcenter/us/en/home.html" target="_blank" rel="noopener noreferrer" 
+                   class="bg-white/10 rounded-lg p-2 hover:bg-white/20 transition-all duration-300" 
+                   title="Maestro">
+                  <img src="assets/images/payment/maestro.svg" alt="Maestro" class="h-6 w-auto">
+                </a>
+                <a href="https://www.visa.co.uk/about-visa/visa-in-europe.html" target="_blank" rel="noopener noreferrer" 
+                   class="bg-white/10 rounded-lg p-2 hover:bg-white/20 transition-all duration-300" 
+                   title="Visa">
+                  <img src="assets/images/payment/visa.svg" alt="Visa" class="h-6 w-auto">
+                </a>
+                <div class="bg-white/10 rounded-lg p-2" 
+                     title="Visa Secure">
+                  <img src="assets/images/payment/visa-secure.svg" alt="Visa Secure" class="h-6 w-auto">
+                </div>
+                <div class="bg-white/10 rounded-lg p-2" 
+                     title="ID Check">
+                  <img src="assets/images/payment/id-check.svg" alt="ID Check" class="h-6 w-auto">
+                </div>
+                <a href="https://www.monri.com" target="_blank" rel="noopener noreferrer" 
+                   class="bg-white/10 rounded-lg p-2 hover:bg-white/20 transition-all duration-300" 
+                   title="Monri">
+                  <img src="assets/images/payment/monri.svg" alt="Monri" class="h-6 w-auto">
+                </a>
               </div>
-              <div class="flex items-center gap-2">
-                <svg class="w-6 h-6 text-solar-400" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.66c.03-.08.06-.17.09-.25C6.84 17.25 9.5 14.9 12 13.5c2.5 1.4 5.16 3.75 5.25 5.59.03.08.06.17.09.25l.95 2.66 1.89-.66C18.1 16.17 16 10 17 8z"/>
-                </svg>
-                <span class="text-gray-300 text-sm">{{ 'footer.sustainable' | translate }}</span>
-              </div>
-            </div> -->
+            </div>
           </div>
         </div>
       </div>
@@ -252,14 +290,17 @@ export interface FooterData {
               © {{ currentYear }} SolarShop. {{ 'footer.allRightsReserved' | translate }}
             </p>
             
-            <div class="flex items-center gap-6">
-              <a href="/privatnost" class="text-gray-400 hover:text-solar-400 text-sm transition-colors duration-300">
+            <div class="flex items-center gap-6 flex-wrap">
+              <a routerLink="/sigurnost-kupovine" class="text-gray-400 hover:text-solar-400 text-sm transition-colors duration-300">
+                {{ 'footer.safetyPayment' | translate }}
+              </a>
+              <a routerLink="/privatnost" class="text-gray-400 hover:text-solar-400 text-sm transition-colors duration-300">
                 {{ 'footer.privacyPolicy' | translate }}
               </a>
-              <a href="/uvjeti" class="text-gray-400 hover:text-solar-400 text-sm transition-colors duration-300">
+              <a routerLink="/uvjeti" class="text-gray-400 hover:text-solar-400 text-sm transition-colors duration-300">
                 {{ 'footer.termsOfService' | translate }}
               </a>
-              <a href="/kolacici" class="text-gray-400 hover:text-solar-400 text-sm transition-colors duration-300">
+              <a routerLink="/kolacici" class="text-gray-400 hover:text-solar-400 text-sm transition-colors duration-300">
                 {{ 'footer.cookiePolicy' | translate }}
               </a>
             </div>
