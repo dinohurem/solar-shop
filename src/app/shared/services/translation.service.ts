@@ -2175,7 +2175,7 @@ export class TranslationService {
                 ordering: {
                     title: 'Naručivanje',
                     process: 'Kupac naručuje proizvod ili proizvode putem elektronskog obrasca narudžbe. Kupcem se smatra svaka osoba koja elektronski naruči barem jedan proizvod, popuni tražene podatke i pošalje narudžbu.',
-                    pricing: 'Cijene navedene na ONLINE SHOP-u izražene su u valuti konvertibilna marka (KM), međunarodne oznake BAM sa PDV-om. Kupac dodatno ima mogućnost prikaza cijena u američkim dolarima te eurima.',
+                    pricing: 'Cijene navedene na ONLINE SHOP-u izražene su u valuti eura (EUR), međunarodne oznake EUR sa PDV-om.',
                     completion: 'Roba se naručuje elektronskim putem, pritiskom na određeni proizvod te spremanjem istog u košaricu. Roba se smatra naručenom u trenutku kada kupac odabere te potvrdi način plaćanja.'
                 },
                 paymentSection: {
