@@ -2162,12 +2162,12 @@ export class TranslationService {
                 },
                 termsOfUse: {
                     title: 'Uslovi korištenja',
-                    ownership: 'Energo Solar ONLINE WEB SHOP (solar-shop.ba) je u vlasništvu firme Energo Solar d.o.o. Sarajevo. Putem ONLINE WEB SHOPA nudimo usluge pružanja informacija te online naručivanja i kupovine proizvoda.',
+                    ownership: 'Energo Solar ONLINE WEB SHOP (solarno.hr) je u vlasništvu firme Energo Solar d.o.o. Sarajevo. Putem ONLINE WEB SHOPA nudimo usluge pružanja informacija te online naručivanja i kupovine proizvoda.',
                     availability: 'Energo Solar ONLINE WEB SHOP je aktivan 24h dnevno, svaki dan u godini. Pristup online trgovini može biti povremeno onemogućen radi održavanja ili eventualnih tehničkih problema.',
-                    compliance: 'solar-shop.ba kao pružatelj usluga pridržava se zakonskih propisa sa ciljem zaštite privatnosti korisnika, a uslovi korištenja napravljeni su u skladu sa međunarodnim običajima online poslovanja.',
-                    pricing: 'Cijene navedene na ONLINE SHOP-u izražene su u valuti konvertibilna marka (KM), međunarodne oznake BAM. Cijene su maloprodajne, sa uračunatim PDV-om, a važeća cijena je ona cijena navedena u trenutku primanja narudžbe.',
+                    compliance: 'solarno.hr kao pružatelj usluga pridržava se zakonskih propisa sa ciljem zaštite privatnosti korisnika, a uslovi korištenja napravljeni su u skladu sa međunarodnim običajima online poslovanja.',
+                    pricing: 'Cijene navedene na ONLINE SHOP-u izražene su u valuti eura (EUR), međunarodne oznake EUR. Cijene su maloprodajne, sa uračunatim PDV-om, a važeća cijena je ona cijena navedena u trenutku primanja narudžbe.',
                     payment: 'Za kartično plaćanje na rate ili druge načine plaćanja, su pune cijene u ovom slučaju (prekrižene cijene) iznad cijene za gotovinsko plaćanje.',
-                    delivery: 'solar-shop.ba radi dostavu i isporuku ISKLJUČIVO na teritoriji Bosne i Hercegovine. Kupac koji će preuzeti i platiti artikl mora se nalaziti na teritoriji Bosne i Hercegovine.',
+                    delivery: 'solarno.hr radi dostavu i isporuku ISKLJUČIVO na teritoriji Bosne i Hercegovine. Kupac koji će preuzeti i platiti artikl mora se nalaziti na teritoriji Bosne i Hercegovine.',
                     accuracy: 'Mi ne garantujemo da su podaci na web-stranici 100% tačni, te ne odgovaramo za posljedice nastale zbog netačnosti navedenih podataka ili slika koje ne predstavljaju stvarni izgled proizvoda.',
                     warranty: 'Garancija na proizvod starta na dan prodaje proizvoda i unosi se u garantni list, te ovjerava pečatom.',
                     dataCollection: 'Za obradu vaše narudžbe potrebni su nam vaši osnovni podaci, kao što su ime i prezime kupca, adresa, e-mail i kontakt broj. Mi ćemo čuvati privatnost podataka kupaca u skladu sa propisima o zaštiti podataka u ovoj branši.'
@@ -4649,12 +4649,12 @@ export class TranslationService {
                 },
                 termsOfUse: {
                     title: 'Terms of use',
-                    ownership: 'Energo Solar ONLINE WEB SHOP (solar-shop.ba) is owned by Energo Solar d.o.o. Sarajevo. Through the ONLINE WEB SHOP we offer information services and online ordering and purchasing of products.',
+                    ownership: 'Energo Solar ONLINE WEB SHOP (solarno.hr) is owned by Energo Solar d.o.o. Sarajevo. Through the ONLINE WEB SHOP we offer information services and online ordering and purchasing of products.',
                     availability: 'Energo Solar ONLINE WEB SHOP is active 24 hours a day, every day of the year. Access to the online store may be temporarily disabled for maintenance or possible technical problems.',
-                    compliance: 'solar-shop.ba as a service provider adheres to legal regulations with the aim of protecting user privacy, and the terms of use are made in accordance with international online business customs.',
+                    compliance: 'solarno.hr as a service provider adheres to legal regulations with the aim of protecting user privacy, and the terms of use are made in accordance with international online business customs.',
                     pricing: 'Prices listed on the ONLINE SHOP are expressed in the currency convertible mark (KM), international designation BAM. Prices are retail, including VAT, and the valid price is the price stated at the time of receiving the order.',
                     payment: 'For card payments in installments or other payment methods, the full prices in this case (crossed out prices) are above the cash payment price.',
-                    delivery: 'solar-shop.ba delivers and ships EXCLUSIVELY on the territory of Bosnia and Herzegovina. The customer who will pick up and pay for the item must be located on the territory of Bosnia and Herzegovina.',
+                    delivery: 'solarno.hr delivers and ships EXCLUSIVELY on the territory of Bosnia and Herzegovina. The customer who will pick up and pay for the item must be located on the territory of Bosnia and Herzegovina.',
                     accuracy: 'We do not guarantee that the data on the website is 100% accurate, and we are not responsible for consequences arising from inaccurate data or images that do not represent the actual appearance of the product.',
                     warranty: 'Product warranty starts on the day of product sale and is entered in the warranty card and certified with a stamp.',
                     dataCollection: 'To process your order, we need your basic information, such as the customer\'s first and last name, address, e-mail and contact number. We will keep customer data privacy in accordance with data protection regulations in this industry.'
