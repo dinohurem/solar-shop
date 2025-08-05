@@ -2274,7 +2274,9 @@ export class TranslationService {
                 addToCart: 'Dodaj u košaricu',
                 reviews: 'recenzija',
                 noProductsFound: 'Nema pronađenih proizvoda',
-                adjustFilters: 'Pokušajte prilagoditi filtere da biste vidjeli više rezultata.'
+                adjustFilters: 'Pokušajte prilagoditi filtere da biste vidjeli više rezultata.',
+                itemsPerPage: 'Stavki po stranici',
+                showingResults: 'Prikazuje se {{start}} - {{end}} od {{total}} rezultata'
             },
             // Product Details
             productDetails: {
@@ -4762,7 +4764,9 @@ export class TranslationService {
                 addToCart: 'Add to Cart',
                 reviews: 'reviews',
                 noProductsFound: 'No products found',
-                adjustFilters: 'Try adjusting your filters to see more results.'
+                adjustFilters: 'Try adjusting your filters to see more results.',
+                itemsPerPage: 'Items per page',
+                showingResults: 'Showing {{start}} - {{end}} of {{total}} results'
             },
             // Product Details
             productDetails: {

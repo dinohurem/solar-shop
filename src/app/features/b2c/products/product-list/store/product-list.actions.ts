@@ -16,5 +16,10 @@ export const ProductListActions = createActionGroup({
 
         'Update Sort Option': props<{ sortOption: SortOption }>(),
         'Search Products': props<{ query: string }>(),
+
+        // Pagination actions
+        'Set Current Page': props<{ page: number }>(),
+        'Set Items Per Page': props<{ itemsPerPage: number }>(),
+        'Update Total Items': props<{ totalItems: number }>(),
     }
 }); 

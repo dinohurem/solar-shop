@@ -34,6 +34,31 @@ export const selectSearchQuery = createSelector(
     (state: ProductListState) => state.searchQuery
 );
 
+export const selectPagination = createSelector(
+    selectProductListState,
+    (state: ProductListState) => state.pagination
+);
+
+export const selectCurrentPage = createSelector(
+    selectPagination,
+    (pagination) => pagination.currentPage
+);
+
+export const selectItemsPerPage = createSelector(
+    selectPagination,
+    (pagination) => pagination.itemsPerPage
+);
+
+export const selectTotalItems = createSelector(
+    selectPagination,
+    (pagination) => pagination.totalItems
+);
+
+export const selectTotalPages = createSelector(
+    selectPagination,
+    (pagination) => Math.ceil(pagination.totalItems / pagination.itemsPerPage)
+);
+
 export const selectCategories = createSelector(
     selectProducts,
     (products: Product[]) => {
@@ -131,4 +156,26 @@ export const selectFilteredProducts = createSelector(
                 return filtered;
         }
     }
+);
+
+export const selectPaginatedProducts = createSelector(
+    selectFilteredProducts,
+    selectPagination,
+    (filteredProducts, pagination) => {
+        const startIndex = (pagination.currentPage - 1) * pagination.itemsPerPage;
+        const endIndex = startIndex + pagination.itemsPerPage;
+        return filteredProducts.slice(startIndex, endIndex);
+    }
+);
+
+export const selectPaginationInfo = createSelector(
+    selectPagination,
+    selectFilteredProducts,
+    (pagination, filteredProducts) => ({
+        ...pagination,
+        totalItems: filteredProducts.length,
+        totalPages: Math.ceil(filteredProducts.length / pagination.itemsPerPage),
+        startIndex: (pagination.currentPage - 1) * pagination.itemsPerPage + 1,
+        endIndex: Math.min(pagination.currentPage * pagination.itemsPerPage, filteredProducts.length)
+    })
 ); 

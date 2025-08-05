@@ -4,23 +4,29 @@ import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable, Subject } from 'rxjs';
-import { takeUntil, debounceTime, distinctUntilChanged, filter } from 'rxjs/operators';
+import { takeUntil, debounceTime, distinctUntilChanged, filter, map } from 'rxjs/operators';
 import { ProductListActions } from './store/product-list.actions';
 import {
   selectProducts,
   selectFilteredProducts,
+  selectPaginatedProducts,
   selectIsLoading,
   selectFilters,
   selectSortOption,
   selectCategories,
   selectManufacturers,
   selectCertificates,
-  selectSearchQuery
+  selectSearchQuery,
+  selectPagination,
+  selectPaginationInfo,
+  selectCurrentPage,
+  selectItemsPerPage,
+  selectTotalPages
 } from './store/product-list.selectors';
 import { AddToCartButtonComponent } from '../../cart/components/add-to-cart-button/add-to-cart-button.component';
 import * as CartActions from '../../cart/store/cart.actions';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
-import { ProductCategory } from '../services/categories.service';
+import { ProductCategory, CategoriesService } from '../services/categories.service';
 import { selectProductCategories } from '../store/products.selectors';
 import { ProductsActions } from '../store/products.actions';
 
@@ -56,6 +62,16 @@ export interface ProductFilters {
   priceRange: { min: number; max: number };
   certificates: string[];
   manufacturers: string[];
+}
+
+export interface CategoryExpansionState {
+  [categoryId: string]: boolean;
+}
+
+export interface PaginationState {
+  currentPage: number;
+  itemsPerPage: number;
+  totalItems: number;
 }
 
 export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'price-low' | 'price-high';
@@ -104,16 +120,72 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
               <div class="mb-6">
                 <h4 class="text-sm font-medium text-gray-900 mb-3 font-['DM_Sans']">{{ 'productList.categories' | translate }}</h4>
                 <div class="space-y-2">
-                  <label *ngFor="let category of categories$ | async" class="flex items-center">
-                    <input 
-                      type="checkbox" 
-                      [value]="category.name"
-                      [checked]="(filters$ | async)?.categories?.includes(category.name) || false"
-                      (change)="onCategoryChange(category.name, $event)"
-                      class="rounded border-gray-300 text-solar-600 focus:ring-solar-500"
+                  <!-- Parent Categories with Collapsible Subcategories -->
+                  <div *ngFor="let parentCategory of nestedCategories" class="space-y-1">
+                    <!-- Parent Category -->
+                    <div class="flex items-center justify-between">
+                      <label class="flex items-center flex-1">
+                        <input 
+                          type="checkbox" 
+                          [value]="parentCategory.name"
+                          [checked]="(filters$ | async)?.categories?.includes(parentCategory.name) || false"
+                          (change)="onParentCategoryChange(parentCategory, $event)"
+                          class="rounded border-gray-300 text-solar-600 focus:ring-solar-500"
+                        >
+                        <span class="ml-2 text-sm text-gray-700 font-['DM_Sans'] font-medium">{{ parentCategory.name }}</span>
+                        <span *ngIf="parentCategory.productCount" class="ml-2 text-xs text-gray-500">({{ parentCategory.productCount }})</span>
+                      </label>
+                      <!-- Expand/Collapse Button -->
+                      <button 
+                        *ngIf="parentCategory.subcategories && parentCategory.subcategories.length > 0"
+                        (click)="toggleCategoryExpansion(parentCategory.id)"
+                        class="ml-2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                        type="button"
+                      >
+                        <svg 
+                          class="w-4 h-4 transform transition-transform"
+                          [class.rotate-180]="isCategoryExpanded(parentCategory.id)"
+                          fill="none" 
+                          stroke="currentColor" 
+                          viewBox="0 0 24 24"
+                        >
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                      </button>
+                    </div>
+                    
+                    <!-- Child Categories (Collapsible) -->
+                    <div 
+                      *ngIf="parentCategory.subcategories && parentCategory.subcategories.length > 0 && isCategoryExpanded(parentCategory.id)"
+                      class="ml-6 space-y-1 animate-fade-in"
                     >
-                    <span class="ml-2 text-sm text-gray-700 font-['DM_Sans']">{{ category.name }}</span>
-                  </label>
+                      <label *ngFor="let subCategory of parentCategory.subcategories" class="flex items-center">
+                        <input 
+                          type="checkbox" 
+                          [value]="subCategory.name"
+                          [checked]="(filters$ | async)?.categories?.includes(subCategory.name) || false"
+                          (change)="onCategoryChange(subCategory.name, $event)"
+                          class="rounded border-gray-300 text-solar-600 focus:ring-solar-500"
+                        >
+                        <span class="ml-2 text-sm text-gray-600 font-['DM_Sans']">{{ subCategory.name }}</span>
+                        <span *ngIf="subCategory.productCount" class="ml-2 text-xs text-gray-400">({{ subCategory.productCount }})</span>
+                      </label>
+                    </div>
+                  </div>
+                  
+                  <!-- Fallback for flat categories (if nested categories are not available) -->
+                  <div *ngIf="nestedCategories.length === 0">
+                    <label *ngFor="let category of categories$ | async" class="flex items-center">
+                      <input 
+                        type="checkbox" 
+                        [value]="category.name"
+                        [checked]="(filters$ | async)?.categories?.includes(category.name) || false"
+                        (change)="onCategoryChange(category.name, $event)"
+                        class="rounded border-gray-300 text-solar-600 focus:ring-solar-500"
+                      >
+                      <span class="ml-2 text-sm text-gray-700 font-['DM_Sans']">{{ category.name }}</span>
+                    </label>
+                  </div>
                 </div>
               </div>
 
@@ -192,10 +264,31 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
               </div>
             </div>
 
+            <!-- Pagination Controls (Top) -->
+            <div class="flex justify-between items-center mb-4">
+              <div class="flex items-center space-x-2">
+                <span class="text-sm text-gray-600 font-['DM_Sans']">{{ 'productList.itemsPerPage' | translate }}:</span>
+                <select 
+                  [value]="itemsPerPage$ | async"
+                  (change)="onItemsPerPageChange($event)"
+                  class="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-solar-500 focus:border-solar-500 font-['DM_Sans']"
+                >
+                  <option *ngFor="let option of itemsPerPageOptions" [value]="option">{{ option }}</option>
+                </select>
+              </div>
+              <div class="text-sm text-gray-600 font-['DM_Sans']" *ngIf="paginationInfo$ | async as paginationInfo">
+                {{ 'productList.showingResults' | translate: {
+                  start: paginationInfo.startIndex,
+                  end: paginationInfo.endIndex,
+                  total: paginationInfo.totalItems
+                } }}
+              </div>
+            </div>
+
             <!-- Products Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <div 
-                *ngFor="let product of filteredProducts$ | async; trackBy: trackByProductId"
+                *ngFor="let product of paginatedProducts$ | async; trackBy: trackByProductId"
                 class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow duration-300 group cursor-pointer"
                 [routerLink]="['/proizvodi', product.id]"
               >
@@ -308,9 +401,44 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
               <div class="animate-spin rounded-full h-12 w-12 border-4 border-solar-500 border-t-transparent"></div>
             </div>
 
+            <!-- Pagination Controls (Bottom) -->
+            <div *ngIf="(totalPages$ | async) && (totalPages$ | async)! > 1" class="flex justify-center mt-8">
+              <nav class="flex items-center space-x-2">
+                <!-- Previous Button -->
+                <button 
+                  (click)="onPreviousPage()"
+                  [disabled]="(currentPage$ | async) === 1"
+                  class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-['DM_Sans']"
+                >
+                  {{ 'pagination.previous' | translate }}
+                </button>
+                
+                <!-- Page Numbers -->
+                <button
+                  *ngFor="let page of getPageNumbers() | async"
+                  (click)="onPageChange(page)"
+                  [ngClass]="{
+                    'px-3 py-2 text-sm font-medium text-white bg-solar-600 border border-solar-600 rounded-md hover:bg-solar-700 transition-colors font-DM_Sans': page === (currentPage$ | async),
+                    'px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors font-DM_Sans': page !== (currentPage$ | async)
+                  }"
+                >
+                  {{ page }}
+                </button>
+                
+                <!-- Next Button -->
+                <button 
+                  (click)="onNextPage()"
+                  [disabled]="(currentPage$ | async) === (totalPages$ | async)"
+                  class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-['DM_Sans']"
+                >
+                  {{ 'pagination.next' | translate }}
+                </button>
+              </nav>
+            </div>
+
             <!-- Empty State -->
             <div 
-              *ngIf="!(isLoading$ | async) && (filteredProducts$ | async)?.length === 0"
+              *ngIf="!(isLoading$ | async) && (paginatedProducts$ | async)?.length === 0 && (paginationInfo$ | async)?.totalItems === 0"
               class="text-center py-12"
             >
               <div class="text-gray-400 mb-4">
@@ -336,6 +464,25 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
+    
+    .animate-fade-in {
+      animation: fadeIn 0.2s ease-in-out;
+    }
+    
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-4px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .rotate-180 {
+      transform: rotate(180deg);
+    }
   `]
 })
 export class ProductListComponent implements OnInit, OnDestroy {
@@ -354,9 +501,21 @@ export class ProductListComponent implements OnInit, OnDestroy {
   certificates$: Observable<string[]>;
   searchQuery$: Observable<string>;
 
+  // Category expansion state
+  categoryExpansionState: CategoryExpansionState = {};
+  nestedCategories: ProductCategory[] = [];
+
+  // Pagination observables from NgRx store
+  paginatedProducts$: Observable<Product[]>;
+  paginationInfo$: Observable<any>;
+  currentPage$: Observable<number>;
+  itemsPerPage$: Observable<number>;
+  totalPages$: Observable<number>;
+  itemsPerPageOptions = [10, 20, 50];
+
   private searchSubject = new Subject<string>();
 
-  constructor() {
+  constructor(private categoriesService: CategoriesService) {
     this.products$ = this.store.select(selectProducts);
     this.filteredProducts$ = this.store.select(selectFilteredProducts);
     this.isLoading$ = this.store.select(selectIsLoading);
@@ -366,11 +525,21 @@ export class ProductListComponent implements OnInit, OnDestroy {
     this.manufacturers$ = this.store.select(selectManufacturers);
     this.certificates$ = this.store.select(selectCertificates);
     this.searchQuery$ = this.store.select(selectSearchQuery);
+    
+    // Initialize pagination observables
+    this.paginatedProducts$ = this.store.select(selectPaginatedProducts);
+    this.paginationInfo$ = this.store.select(selectPaginationInfo);
+    this.currentPage$ = this.store.select(selectCurrentPage);
+    this.itemsPerPage$ = this.store.select(selectItemsPerPage);
+    this.totalPages$ = this.store.select(selectTotalPages);
   }
 
   ngOnInit(): void {
     this.store.dispatch(ProductListActions.loadProducts());
     this.store.dispatch(ProductsActions.loadProductCategories());
+
+    // Load nested categories for hierarchical display
+    this.loadNestedCategories();
 
     // Check if we should clear filters based on navigation source
     this.checkAndClearFiltersIfNeeded();
@@ -436,6 +605,21 @@ export class ProductListComponent implements OnInit, OnDestroy {
       });
     });
   }
+
+  private loadNestedCategories(): void {
+    this.categoriesService.getNestedCategories().pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(categories => {
+      this.nestedCategories = categories;
+      // Initialize expansion state for parent categories (collapsed by default)
+      categories.forEach(category => {
+        if (category.subcategories && category.subcategories.length > 0) {
+          this.categoryExpansionState[category.id] = false;
+        }
+      });
+    });
+  }
+
 
   ngOnDestroy(): void {
     // Clear filters when leaving the product list page to ensure clean state
@@ -576,5 +760,98 @@ export class ProductListComponent implements OnInit, OnDestroy {
     if (target) {
       target.src = 'assets/images/product-placeholder.svg';
     }
+  }
+
+  // Category expansion methods
+  toggleCategoryExpansion(categoryId: string): void {
+    this.categoryExpansionState[categoryId] = !this.categoryExpansionState[categoryId];
+  }
+
+  isCategoryExpanded(categoryId: string): boolean {
+    return this.categoryExpansionState[categoryId] || false;
+  }
+
+  onParentCategoryChange(parentCategory: ProductCategory, event: Event): void {
+    const target = event.target as HTMLInputElement;
+    const isChecked = target.checked;
+    
+    // Toggle parent category
+    this.store.dispatch(ProductListActions.toggleCategoryFilter({ 
+      category: parentCategory.name, 
+      checked: isChecked 
+    }));
+    
+    // If parent is selected, also select all child categories
+    if (isChecked && parentCategory.subcategories) {
+      parentCategory.subcategories.forEach(subCategory => {
+        this.store.dispatch(ProductListActions.toggleCategoryFilter({ 
+          category: subCategory.name, 
+          checked: true 
+        }));
+      });
+    }
+    // If parent is deselected, deselect all child categories
+    else if (!isChecked && parentCategory.subcategories) {
+      parentCategory.subcategories.forEach(subCategory => {
+        this.store.dispatch(ProductListActions.toggleCategoryFilter({ 
+          category: subCategory.name, 
+          checked: false 
+        }));
+      });
+    }
+  }
+
+  isParentCategorySelected(parentCategory: ProductCategory): boolean {
+    // This will be handled in the template using the async pipe with filters$
+    // The template already handles this with [checked]="(filters$ | async)?.categories?.includes(parentCategory.name) || false"
+    return false;
+  }
+
+  // Pagination methods using NgRx
+  onPageChange(page: number): void {
+    this.store.dispatch(ProductListActions.setCurrentPage({ page }));
+  }
+
+  onPreviousPage(): void {
+    this.currentPage$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(currentPage => {
+      if (currentPage > 1) {
+        this.onPageChange(currentPage - 1);
+      }
+    });
+  }
+
+  onNextPage(): void {
+    this.currentPage$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(currentPage => {
+      this.totalPages$.pipe(
+        takeUntil(this.destroy$)
+      ).subscribe(totalPages => {
+        if (currentPage < totalPages) {
+          this.onPageChange(currentPage + 1);
+        }
+      });
+    });
+  }
+
+  onItemsPerPageChange(event: Event): void {
+    const target = event.target as HTMLSelectElement;
+    const itemsPerPage = +target.value;
+    this.store.dispatch(ProductListActions.setItemsPerPage({ itemsPerPage }));
+  }
+
+  // Helper methods for template - these now use observables
+  getPageNumbers(): Observable<number[]> {
+    return this.totalPages$.pipe(
+      map(totalPages => {
+        const pages: number[] = [];
+        for (let i = 1; i <= totalPages; i++) {
+          pages.push(i);
+        }
+        return pages;
+      })
+    );
   }
 } 

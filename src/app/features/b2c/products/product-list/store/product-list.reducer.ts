@@ -1,5 +1,5 @@
 import { createReducer, on } from '@ngrx/store';
-import { Product, ProductFilters, SortOption } from '../product-list.component';
+import { Product, ProductFilters, SortOption, PaginationState } from '../product-list.component';
 import { ProductListActions } from './product-list.actions';
 
 export interface ProductListState {
@@ -9,6 +9,7 @@ export interface ProductListState {
     filters: ProductFilters;
     sortOption: SortOption;
     searchQuery: string;
+    pagination: PaginationState;
 }
 
 const initialState: ProductListState = {
@@ -22,7 +23,12 @@ const initialState: ProductListState = {
         manufacturers: []
     },
     sortOption: 'featured',
-    searchQuery: ''
+    searchQuery: '',
+    pagination: {
+        currentPage: 1,
+        itemsPerPage: 10,
+        totalItems: 0
+    }
 };
 
 export const productListReducer = createReducer(
@@ -54,6 +60,10 @@ export const productListReducer = createReducer(
             categories: checked
                 ? [...state.filters.categories, category]
                 : state.filters.categories.filter(c => c !== category)
+        },
+        pagination: {
+            ...state.pagination,
+            currentPage: 1 // Reset to first page when filters change
         }
     })),
 
@@ -95,6 +105,10 @@ export const productListReducer = createReducer(
             priceRange: { min: 0, max: 0 },
             certificates: [],
             manufacturers: []
+        },
+        pagination: {
+            ...state.pagination,
+            currentPage: 1 // Reset to first page when clearing filters
         }
     })),
 
@@ -105,6 +119,35 @@ export const productListReducer = createReducer(
 
     on(ProductListActions.searchProducts, (state, { query }) => ({
         ...state,
-        searchQuery: query
+        searchQuery: query,
+        pagination: {
+            ...state.pagination,
+            currentPage: 1 // Reset to first page when searching
+        }
+    })),
+
+    on(ProductListActions.setCurrentPage, (state, { page }) => ({
+        ...state,
+        pagination: {
+            ...state.pagination,
+            currentPage: page
+        }
+    })),
+
+    on(ProductListActions.setItemsPerPage, (state, { itemsPerPage }) => ({
+        ...state,
+        pagination: {
+            ...state.pagination,
+            itemsPerPage,
+            currentPage: 1 // Reset to first page when changing items per page
+        }
+    })),
+
+    on(ProductListActions.updateTotalItems, (state, { totalItems }) => ({
+        ...state,
+        pagination: {
+            ...state.pagination,
+            totalItems
+        }
     }))
 ); 
