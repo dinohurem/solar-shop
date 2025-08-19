@@ -751,7 +751,7 @@ export class ProductFormComponent implements OnInit, OnDestroy {
 
   private loadCategoriesAndProducts(): void {
     this.store.dispatch(loadCategories());
-    this.store.dispatch(loadProducts());
+    this.store.dispatch(loadProducts({}));
   }
 
   private subscribeToStoreData(): void {

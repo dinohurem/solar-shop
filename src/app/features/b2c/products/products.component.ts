@@ -93,7 +93,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
                       {{ subcategory.name }}
                     </h4>
                     <p class="text-sm text-gray-600 mt-1 font-['DM_Sans']">
-                      {{ subcategory.productCount || 0 }} products
+                      {{ 'products.productsCount' | translate:{ count: (subcategory.productCount || 0) } }}
                     </p>
                   </div>
                   <svg class="w-5 h-5 text-gray-400 group-hover:text-solar-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { Observable, Subject } from 'rxjs';
-import { takeUntil, debounceTime, distinctUntilChanged, filter, map, take } from 'rxjs/operators';
+import { Observable, Subject, combineLatest } from 'rxjs';
+import { takeUntil, debounceTime, distinctUntilChanged, filter, map, take, skip } from 'rxjs/operators';
 import { ProductListActions } from './store/product-list.actions';
 import {
   selectProducts,
@@ -21,7 +21,9 @@ import {
   selectPaginationInfo,
   selectCurrentPage,
   selectItemsPerPage,
-  selectTotalPages
+  selectTotalPages,
+  selectCachedPages,
+  selectLastQuery
 } from './store/product-list.selectors';
 import { AddToCartButtonComponent } from '../../cart/components/add-to-cart-button/add-to-cart-button.component';
 import * as CartActions from '../../cart/store/cart.actions';
@@ -418,8 +420,8 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
                   *ngFor="let page of getPageNumbers() | async"
                   (click)="onPageChange(page)"
                   [ngClass]="{
-                    'px-3 py-2 text-sm font-medium text-white bg-solar-600 border border-solar-600 rounded-md hover:bg-solar-700 transition-colors font-DM_Sans': page === (currentPage$ | async),
-                    'px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors font-DM_Sans': page !== (currentPage$ | async)
+                    'px-3 py-2 text-sm font-bold text-gray-700 bg-white border border-gray-300 rounded-md': page === (currentPage$ | async),
+                    'px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors': page !== (currentPage$ | async)
                   }"
                 >
                   {{ page }}
@@ -535,8 +537,10 @@ export class ProductListComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.store.dispatch(ProductListActions.loadProducts());
     this.store.dispatch(ProductsActions.loadProductCategories());
+    
+    // Load initial products with default parameters
+    this.loadProductsWithCurrentState();
 
     // Load nested categories for hierarchical display
     this.loadNestedCategories();
@@ -604,6 +608,9 @@ export class ProductListComponent implements OnInit, OnDestroy {
         replaceUrl: true // Use replaceUrl to avoid creating history entries for each keystroke
       });
     });
+
+    // Setup reactive product loading
+    this.setupProductReloading();
   }
 
   private loadNestedCategories(): void {
@@ -897,5 +904,115 @@ export class ProductListComponent implements OnInit, OnDestroy {
         return pages;
       })
     );
+  }
+
+  private loadProductsWithCurrentState(): void {
+    // Combine current state values
+    combineLatest([
+      this.filters$,
+      this.searchQuery$,
+      this.sortOption$,
+      this.currentPage$,
+      this.itemsPerPage$,
+      this.store.select(selectCachedPages),
+      this.store.select(selectLastQuery)
+    ]).pipe(
+      take(1) // Only take initial values
+    ).subscribe(([filters, searchQuery, sortOption, currentPage, itemsPerPage, cachedPages, lastQuery]) => {
+      const query = {
+        page: currentPage,
+        itemsPerPage: itemsPerPage,
+        searchQuery: searchQuery,
+        categories: filters.categories,
+        manufacturers: filters.manufacturers,
+        certificates: filters.certificates,
+        priceRange: filters.priceRange,
+        sortOption: sortOption
+      };
+      
+      // Check if we have this page cached
+      const currentQueryKey = JSON.stringify({
+        searchQuery,
+        filters,
+        sortOption,
+        itemsPerPage
+      });
+      const pageKey = `${currentQueryKey}_page_${currentPage}`;
+      const cachedPage = cachedPages[pageKey];
+      
+      // Use cache if available and not too old (5 minutes)
+      if (cachedPage && cachedPage.query === currentQueryKey && 
+          (Date.now() - cachedPage.timestamp) < 5 * 60 * 1000) {
+        this.store.dispatch(ProductListActions.loadProductsFromCache({ 
+          products: cachedPage.products, 
+          currentPage 
+        }));
+      } else {
+        this.store.dispatch(ProductListActions.loadProducts({ query }));
+      }
+    });
+  }
+
+  private setupProductReloading(): void {
+    let previousPage = 1; // Track previous page to detect page changes
+    
+    // React to filter and pagination changes
+    combineLatest([
+      this.filters$,
+      this.searchQuery$,
+      this.sortOption$,
+      this.currentPage$,
+      this.itemsPerPage$,
+      this.store.select(selectCachedPages)
+    ]).pipe(
+      skip(1), // Skip initial emission
+      debounceTime(300), // Debounce rapid changes
+      takeUntil(this.destroy$)
+    ).subscribe(([filters, searchQuery, sortOption, currentPage, itemsPerPage, cachedPages]) => {
+      const query = {
+        page: currentPage,
+        itemsPerPage: itemsPerPage,
+        searchQuery: searchQuery,
+        categories: filters.categories,
+        manufacturers: filters.manufacturers,
+        certificates: filters.certificates,
+        priceRange: filters.priceRange,
+        sortOption: sortOption
+      };
+      
+      // Check if we have this page cached
+      const currentQueryKey = JSON.stringify({
+        searchQuery,
+        filters,
+        sortOption,
+        itemsPerPage
+      });
+      const pageKey = `${currentQueryKey}_page_${currentPage}`;
+      const cachedPage = cachedPages[pageKey];
+      
+      // Use cache if available and not too old (5 minutes)
+      if (cachedPage && cachedPage.query === currentQueryKey && 
+          (Date.now() - cachedPage.timestamp) < 5 * 60 * 1000) {
+        this.store.dispatch(ProductListActions.loadProductsFromCache({ 
+          products: cachedPage.products, 
+          currentPage 
+        }));
+      } else {
+        this.store.dispatch(ProductListActions.loadProducts({ query }));
+      }
+      
+      // Only scroll to top when the page actually changes
+      if (currentPage !== previousPage) {
+        this.scrollToTop();
+        previousPage = currentPage;
+      }
+    });
+  }
+
+  private scrollToTop(): void {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   }
 } 

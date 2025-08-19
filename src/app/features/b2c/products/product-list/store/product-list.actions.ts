@@ -1,12 +1,31 @@
 import { createActionGroup, emptyProps, props } from '@ngrx/store';
 import { Product, ProductFilters, SortOption } from '../product-list.component';
 
+export interface ProductsQuery {
+    page?: number;
+    itemsPerPage?: number;
+    searchQuery?: string;
+    categories?: string[];
+    manufacturers?: string[];
+    certificates?: string[];
+    priceRange?: { min: number; max: number };
+    sortOption?: SortOption;
+}
+
+export interface ProductsResponse {
+    products: Product[];
+    totalItems: number;
+    totalPages: number;
+    currentPage: number;
+}
+
 export const ProductListActions = createActionGroup({
     source: 'Product List',
     events: {
-        'Load Products': emptyProps(),
-        'Load Products Success': props<{ products: Product[] }>(),
+        'Load Products': props<{ query?: ProductsQuery }>(),
+        'Load Products Success': props<{ response: ProductsResponse }>(),
         'Load Products Failure': props<{ error: string }>(),
+        'Load Products From Cache': props<{ products: Product[], currentPage: number }>(),
 
         'Toggle Category Filter': props<{ category: string; checked: boolean }>(),
         'Update Price Range': props<{ rangeType: 'min' | 'max'; value: number }>(),

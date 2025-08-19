@@ -13,9 +13,9 @@ export class ProductListEffects {
     loadProducts$ = createEffect(() =>
         this.actions$.pipe(
             ofType(ProductListActions.loadProducts),
-            switchMap(() =>
-                this.productListService.getProducts().pipe(
-                    map(products => ProductListActions.loadProductsSuccess({ products })),
+            switchMap(({ query }) =>
+                this.productListService.getProductsWithPagination(query || {}).pipe(
+                    map(response => ProductListActions.loadProductsSuccess({ response })),
                     catchError((error: any) => of(ProductListActions.loadProductsFailure({ error: error.message || 'Failed to load products' })))
                 )
             )

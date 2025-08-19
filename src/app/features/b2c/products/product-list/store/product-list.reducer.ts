@@ -2,6 +2,12 @@ import { createReducer, on } from '@ngrx/store';
 import { Product, ProductFilters, SortOption, PaginationState } from '../product-list.component';
 import { ProductListActions } from './product-list.actions';
 
+export interface CachedPage {
+    products: Product[];
+    timestamp: number;
+    query: string; // Serialized query for cache invalidation
+}
+
 export interface ProductListState {
     products: Product[];
     loading: boolean;
@@ -10,6 +16,8 @@ export interface ProductListState {
     sortOption: SortOption;
     searchQuery: string;
     pagination: PaginationState;
+    cachedPages: { [pageKey: string]: CachedPage };
+    lastQuery: string;
 }
 
 const initialState: ProductListState = {
@@ -28,7 +36,9 @@ const initialState: ProductListState = {
         currentPage: 1,
         itemsPerPage: 10,
         totalItems: 0
-    }
+    },
+    cachedPages: {},
+    lastQuery: ''
 };
 
 export const productListReducer = createReducer(
@@ -40,17 +50,58 @@ export const productListReducer = createReducer(
         error: null
     })),
 
-    on(ProductListActions.loadProductsSuccess, (state, { products }) => ({
-        ...state,
-        products,
-        loading: false,
-        error: null
-    })),
+    on(ProductListActions.loadProductsSuccess, (state, { response }) => {
+        // Create a query key for caching
+        const queryKey = JSON.stringify({
+            searchQuery: state.searchQuery,
+            filters: state.filters,
+            sortOption: state.sortOption,
+            itemsPerPage: state.pagination.itemsPerPage
+        });
+        
+        // Create page key
+        const pageKey = `${queryKey}_page_${response.currentPage}`;
+        
+        // Cache the page
+        const cachedPage: CachedPage = {
+            products: response.products,
+            timestamp: Date.now(),
+            query: queryKey
+        };
+        
+        return {
+            ...state,
+            products: response.products,
+            pagination: {
+                ...state.pagination,
+                currentPage: response.currentPage,
+                totalItems: response.totalItems
+            },
+            cachedPages: {
+                ...state.cachedPages,
+                [pageKey]: cachedPage
+            },
+            lastQuery: queryKey,
+            loading: false,
+            error: null
+        };
+    }),
 
     on(ProductListActions.loadProductsFailure, (state, { error }) => ({
         ...state,
         loading: false,
         error
+    })),
+
+    on(ProductListActions.loadProductsFromCache, (state, { products, currentPage }) => ({
+        ...state,
+        products,
+        pagination: {
+            ...state.pagination,
+            currentPage
+        },
+        loading: false,
+        error: null
     })),
 
     on(ProductListActions.toggleCategoryFilter, (state, { category, checked }) => ({
@@ -64,7 +115,8 @@ export const productListReducer = createReducer(
         pagination: {
             ...state.pagination,
             currentPage: 1 // Reset to first page when filters change
-        }
+        },
+        cachedPages: {} // Clear cache when filters change
     })),
 
     on(ProductListActions.updatePriceRange, (state, { rangeType, value }) => ({
@@ -75,7 +127,8 @@ export const productListReducer = createReducer(
                 ...state.filters.priceRange,
                 [rangeType]: value
             }
-        }
+        },
+        cachedPages: {} // Clear cache when filters change
     })),
 
     on(ProductListActions.toggleCertificateFilter, (state, { certificate, checked }) => ({
@@ -85,7 +138,8 @@ export const productListReducer = createReducer(
             certificates: checked
                 ? [...state.filters.certificates, certificate]
                 : state.filters.certificates.filter(c => c !== certificate)
-        }
+        },
+        cachedPages: {} // Clear cache when filters change
     })),
 
     on(ProductListActions.toggleManufacturerFilter, (state, { manufacturer, checked }) => ({
@@ -95,7 +149,8 @@ export const productListReducer = createReducer(
             manufacturers: checked
                 ? [...state.filters.manufacturers, manufacturer]
                 : state.filters.manufacturers.filter(m => m !== manufacturer)
-        }
+        },
+        cachedPages: {} // Clear cache when filters change
     })),
 
     on(ProductListActions.clearFilters, (state) => ({
@@ -109,12 +164,14 @@ export const productListReducer = createReducer(
         pagination: {
             ...state.pagination,
             currentPage: 1 // Reset to first page when clearing filters
-        }
+        },
+        cachedPages: {} // Clear cache when clearing filters
     })),
 
     on(ProductListActions.updateSortOption, (state, { sortOption }) => ({
         ...state,
-        sortOption
+        sortOption,
+        cachedPages: {} // Clear cache when sort changes
     })),
 
     on(ProductListActions.searchProducts, (state, { query }) => ({
@@ -123,7 +180,8 @@ export const productListReducer = createReducer(
         pagination: {
             ...state.pagination,
             currentPage: 1 // Reset to first page when searching
-        }
+        },
+        cachedPages: {} // Clear cache when search changes
     })),
 
     on(ProductListActions.setCurrentPage, (state, { page }) => ({

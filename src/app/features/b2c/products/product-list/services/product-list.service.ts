@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Observable, from, map, catchError, of } from 'rxjs';
 import { SupabaseService } from '../../../../../services/supabase.service';
-import { Product } from '../product-list.component';
+import { Product, SortOption } from '../product-list.component';
+import { ProductsQuery, ProductsResponse } from '../store/product-list.actions';
 
 export interface ProductFilters {
     category?: string;
@@ -63,6 +64,120 @@ export class ProductListService {
                 return of([]);
             })
         );
+    }
+
+    getProductsWithPagination(query: ProductsQuery): Observable<ProductsResponse> {
+        return from(this.fetchProductsWithPagination(query)).pipe(
+            catchError(error => {
+                console.error('Error fetching products with pagination:', error);
+                return of({ products: [], totalItems: 0, totalPages: 0, currentPage: 1 });
+            })
+        );
+    }
+
+    private async fetchProductsWithPagination(query: ProductsQuery): Promise<ProductsResponse> {
+        try {
+            const page = query.page || 1;
+            const itemsPerPage = query.itemsPerPage || 10;
+            const from = (page - 1) * itemsPerPage;
+            const to = from + itemsPerPage - 1;
+
+            // Build the query
+            let supabaseQuery = this.supabaseService.client
+                .from('products')
+                .select(`
+                    *,
+                    categories!inner(name, slug),
+                    product_categories!left(
+                        category_id,
+                        is_primary,
+                        categories!inner(id, name, slug)
+                    )
+                `, { count: 'exact' })
+                .eq('is_active', true);
+
+            // Apply filters
+            if (query.searchQuery && query.searchQuery.trim()) {
+                const searchTerm = `%${query.searchQuery.trim()}%`;
+                supabaseQuery = supabaseQuery.or(`name.ilike.${searchTerm},description.ilike.${searchTerm},sku.ilike.${searchTerm}`);
+            }
+
+            if (query.categories && query.categories.length > 0) {
+                // Filter by categories using the junction table
+                const categoryFilter = query.categories.map(cat => `categories.name.eq.${cat}`).join(',');
+                supabaseQuery = supabaseQuery.or(categoryFilter);
+            }
+
+            if (query.manufacturers && query.manufacturers.length > 0) {
+                const manufacturerFilter = query.manufacturers.map(mfg => `brand.eq.${mfg}`).join(',');
+                supabaseQuery = supabaseQuery.or(manufacturerFilter);
+            }
+
+            if (query.priceRange && (query.priceRange.min > 0 || query.priceRange.max > 0)) {
+                if (query.priceRange.min > 0) {
+                    supabaseQuery = supabaseQuery.gte('price', query.priceRange.min);
+                }
+                if (query.priceRange.max > 0) {
+                    supabaseQuery = supabaseQuery.lte('price', query.priceRange.max);
+                }
+            }
+
+            // Apply sorting
+            if (query.sortOption) {
+                switch (query.sortOption) {
+                    case 'featured':
+                        supabaseQuery = supabaseQuery.order('is_featured', { ascending: false })
+                                                   .order('created_at', { ascending: false });
+                        break;
+                    case 'newest':
+                        supabaseQuery = supabaseQuery.order('created_at', { ascending: false });
+                        break;
+                    case 'name-asc':
+                        supabaseQuery = supabaseQuery.order('name', { ascending: true });
+                        break;
+                    case 'name-desc':
+                        supabaseQuery = supabaseQuery.order('name', { ascending: false });
+                        break;
+                    case 'price-low':
+                        supabaseQuery = supabaseQuery.order('price', { ascending: true });
+                        break;
+                    case 'price-high':
+                        supabaseQuery = supabaseQuery.order('price', { ascending: false });
+                        break;
+                    default:
+                        supabaseQuery = supabaseQuery.order('created_at', { ascending: false });
+                        break;
+                }
+            } else {
+                supabaseQuery = supabaseQuery.order('is_featured', { ascending: false })
+                                             .order('created_at', { ascending: false });
+            }
+
+            // Apply pagination
+            supabaseQuery = supabaseQuery.range(from, to);
+
+            const { data, error, count } = await supabaseQuery;
+
+            if (error) {
+                throw error;
+            }
+
+            // Convert products using existing method
+            const products = await this.convertSupabaseProductsToLocal(data || []);
+            
+            const totalItems = count || 0;
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+            return {
+                products,
+                totalItems,
+                totalPages,
+                currentPage: page
+            };
+        } catch (error) {
+            console.error('Error in fetchProductsWithPagination:', error);
+            return { products: [], totalItems: 0, totalPages: 0, currentPage: 1 };
+        }
     }
 
     private async fetchProductsFromSupabase(filters?: ProductFilters): Promise<Product[]> {

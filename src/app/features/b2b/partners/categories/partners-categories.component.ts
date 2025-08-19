@@ -136,16 +136,18 @@ export class PartnersCategoriesComponent implements OnInit {
       const dbCategories = await this.supabase.getCategories();
       if (dbCategories && dbCategories.length > 0) {
         // Map database categories to our interface and limit to 8
-        this.categories = dbCategories
+        const categoryPromises = dbCategories
           .slice(0, 8)
-          .map((cat: any, index: number) => ({
+          .map(async (cat: any, index: number) => ({
             id: cat.id || `cat-${index}`,
             name: cat.name || `Category ${index + 1}`,
             slug: this.createSlug(cat.name || `category-${index}`),
             imageUrl: cat.image_url || '',
             icon: this.getIconForCategory(cat.name || ''),
-            productCount: cat.product_count || Math.floor(Math.random() * 25) + 5
+            productCount: await this.getProductCountForCategory(cat.name || cat.name)
           }));
+        
+        this.categories = await Promise.all(categoryPromises);
       }
     } catch (err) {
       console.warn('Categories table not found in database. Using sample data as placeholder.');
@@ -252,6 +254,27 @@ export class PartnersCategoriesComponent implements OnInit {
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-')
       .trim();
+  }
+
+  private async getProductCountForCategory(categoryName: string): Promise<number> {
+    try {
+      // Get products that match the category name
+      const { count, error } = await this.supabase.client
+        .from('products')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_active', true)
+        .ilike('category', `%${categoryName}%`);
+      
+      if (error) {
+        console.error('Error fetching product count:', error);
+        return Math.floor(Math.random() * 25) + 5; // Fallback to random count
+      }
+      
+      return count || 0;
+    } catch (error) {
+      console.error('Error in getProductCountForCategory:', error);
+      return Math.floor(Math.random() * 25) + 5; // Fallback to random count
+    }
   }
 
   private getIconForCategory(categoryName: string): string {

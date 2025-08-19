@@ -9,12 +9,20 @@ export interface ProductFilters {
     sortBy: string;
 }
 
+export interface PaginationState {
+    currentPage: number;
+    itemsPerPage: number;
+    totalItems: number;
+    totalPages: number;
+}
+
 export interface ProductsState {
     products: Product[];
     categories: Category[];
     companyPricing: CompanyPricing[];
     selectedProduct: Product | null;
     filters: ProductFilters;
+    pagination: PaginationState;
     loading: boolean;
     categoriesLoading: boolean;
     error: string | null;
@@ -31,6 +39,12 @@ export const initialState: ProductsState = {
         availability: '',
         sortBy: 'name'
     },
+    pagination: {
+        currentPage: 1,
+        itemsPerPage: 10,
+        totalItems: 0,
+        totalPages: 0
+    },
     loading: false,
     categoriesLoading: false,
     error: null
@@ -46,9 +60,15 @@ export const productsReducer = createReducer(
         error: null
     })),
 
-    on(ProductsActions.loadProductsSuccess, (state, { products }) => ({
+    on(ProductsActions.loadProductsSuccess, (state, { response }) => ({
         ...state,
-        products,
+        products: response.products,
+        pagination: {
+            ...state.pagination,
+            currentPage: response.currentPage,
+            totalItems: response.totalItems,
+            totalPages: response.totalPages
+        },
         loading: false,
         error: null
     })),
@@ -131,6 +151,10 @@ export const productsReducer = createReducer(
         filters: {
             ...state.filters,
             searchQuery: query
+        },
+        pagination: {
+            ...state.pagination,
+            currentPage: 1 // Reset to first page when searching
         }
     })),
 
@@ -141,6 +165,10 @@ export const productsReducer = createReducer(
             categories: checked
                 ? [...state.filters.categories, category]
                 : state.filters.categories.filter(c => c !== category)
+        },
+        pagination: {
+            ...state.pagination,
+            currentPage: 1 // Reset to first page when filtering
         }
     })),
 
@@ -149,6 +177,10 @@ export const productsReducer = createReducer(
         filters: {
             ...state.filters,
             availability
+        },
+        pagination: {
+            ...state.pagination,
+            currentPage: 1 // Reset to first page when filtering
         }
     })),
 
@@ -167,6 +199,37 @@ export const productsReducer = createReducer(
             searchQuery: '',
             availability: '',
             sortBy: 'name'
+        },
+        pagination: {
+            ...state.pagination,
+            currentPage: 1 // Reset to first page when clearing filters
+        }
+    })),
+
+    // Pagination actions
+    on(ProductsActions.setCurrentPage, (state, { page }) => ({
+        ...state,
+        pagination: {
+            ...state.pagination,
+            currentPage: page
+        }
+    })),
+
+    on(ProductsActions.setItemsPerPage, (state, { itemsPerPage }) => ({
+        ...state,
+        pagination: {
+            ...state.pagination,
+            itemsPerPage,
+            currentPage: 1 // Reset to first page when changing items per page
+        }
+    })),
+
+    on(ProductsActions.updatePaginationInfo, (state, { totalItems, totalPages }) => ({
+        ...state,
+        pagination: {
+            ...state.pagination,
+            totalItems,
+            totalPages
         }
     }))
 ); 

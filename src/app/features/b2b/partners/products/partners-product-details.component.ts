@@ -625,7 +625,7 @@ export class PartnersProductDetailsComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.error = null;
     // Load all products (which includes the specific product)
-    this.store.dispatch(ProductsActions.loadProducts());
+    this.store.dispatch(ProductsActions.loadProducts({}));
 
     // If we need company-specific pricing, load that too
     if (this.isCompanyContact && this.company) {

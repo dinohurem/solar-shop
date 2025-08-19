@@ -124,63 +124,61 @@ export const selectSortBy = createSelector(
     (filters) => filters.sortBy
 );
 
-// Filtered products selector
+// Filtered products selector - now just returns products with pricing since filtering is done server-side
 export const selectFilteredProducts = createSelector(
     selectProductsWithPricing,
-    selectFilters,
-    (products, filters) => {
-        let filteredProducts = products.filter(product => {
-            // Search filter
-            const matchesSearch = !filters.searchQuery ||
-                product.name.toLowerCase().includes(filters.searchQuery.toLowerCase()) ||
-                product.description.toLowerCase().includes(filters.searchQuery.toLowerCase()) ||
-                product.short_description?.toLowerCase().includes(filters.searchQuery.toLowerCase()) ||
-                product.sku.toLowerCase().includes(filters.searchQuery.toLowerCase()) ||
-                product.brand?.toLowerCase().includes(filters.searchQuery.toLowerCase());
-
-            // Category filter
-            const matchesCategory = filters.categories.length === 0 ||
-                filters.categories.some(filterCategory => 
-                    product.category?.toLowerCase().includes(filterCategory.toLowerCase()) ||
-                    (product.categories && product.categories.some(cat => 
-                        cat.name.toLowerCase().includes(filterCategory.toLowerCase())
-                    ))
-                );
-
-            // Availability filter
-            const matchesAvailability = !filters.availability ||
-                (filters.availability === 'in-stock' && product.in_stock) ||
-                (filters.availability === 'partner-only' && product.partner_only);
-
-            return matchesSearch && matchesCategory && matchesAvailability;
-        });
-
-        // Sort products
-        filteredProducts.sort((a, b) => {
-            switch (filters.sortBy) {
-                case 'name':
-                    return a.name.localeCompare(b.name);
-                case 'price-low':
-                    const priceA = a.company_price || a.partner_price || a.price;
-                    const priceB = b.company_price || b.partner_price || b.price;
-                    return priceA - priceB;
-                case 'price-high':
-                    const priceA2 = a.company_price || a.partner_price || a.price;
-                    const priceB2 = b.company_price || b.partner_price || b.price;
-                    return priceB2 - priceA2;
-                case 'savings':
-                    return (b.savings || 0) - (a.savings || 0);
-                default:
-                    return 0;
-            }
-        });
-
-        return filteredProducts;
-    }
+    (products) => products
 );
 
 // Get product by ID with pricing
 export const selectProductById = (productId: string) => createSelector(
     selectProductsWithPricing,
     (products: ProductWithPricing[]) => products.find(p => p.id === productId)
+);
+
+// Pagination selectors
+export const selectPagination = createSelector(
+    selectProductsFeature,
+    (state: ProductsState) => state.pagination
+);
+
+export const selectCurrentPage = createSelector(
+    selectPagination,
+    (pagination) => pagination.currentPage
+);
+
+export const selectItemsPerPage = createSelector(
+    selectPagination,
+    (pagination) => pagination.itemsPerPage
+);
+
+export const selectTotalItems = createSelector(
+    selectPagination,
+    (pagination) => pagination.totalItems
+);
+
+export const selectTotalPages = createSelector(
+    selectPagination,
+    (pagination) => pagination.totalPages
+);
+
+// Paginated products selector - now just returns all products since server-side pagination is handled
+export const selectPaginatedProducts = createSelector(
+    selectProductsWithPricing,
+    (products) => products
+);
+
+// Pagination info selector (for displaying pagination details)
+export const selectPaginationInfo = createSelector(
+    selectPagination,
+    (pagination) => {
+        const startIndex = (pagination.currentPage - 1) * pagination.itemsPerPage + 1;
+        const endIndex = Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems);
+        
+        return {
+            ...pagination,
+            startIndex,
+            endIndex
+        };
+    }
 ); 

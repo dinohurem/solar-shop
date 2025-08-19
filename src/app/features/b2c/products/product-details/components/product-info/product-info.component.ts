@@ -296,7 +296,7 @@ import { LucideAngularModule, Star, StarHalf, ShoppingCart } from 'lucide-angula
       </div>
 
       <!-- Certificates -->
-      <div class="border-t border-gray-200 pt-6">
+      <div *ngIf="hasCertifications()" class="border-t border-gray-200 pt-6">
         <button 
           type="button" 
           (click)="toggleCertificates()" 
@@ -316,14 +316,18 @@ import { LucideAngularModule, Star, StarHalf, ShoppingCart } from 'lucide-angula
           </svg>
         </button>
         <div id="certificates-content" *ngIf="certificatesOpen" class="mt-4">
-          <div class="flex flex-wrap gap-2">
-            <span 
-              *ngFor="let certificate of product.certificates"
-              class="px-3 py-1 bg-gray-100 text-gray-800 text-sm rounded-full font-['DM_Sans']"
-            >
-              {{ certificate }}
-            </span>
-          </div>
+          <dl class="grid grid-cols-1 gap-4">
+            <div class="flex justify-between">
+              <dt class="text-sm font-medium text-gray-500 font-['DM_Sans']">{{ 'productDetails.certifications' | translate }}:</dt>
+              <dd class="text-sm text-gray-900 font-['DM_Sans'] text-right">
+                <div class="space-y-1">
+                  <div *ngFor="let certificate of product.certificates" class="text-sm">
+                    {{ certificate }}
+                  </div>
+                </div>
+              </dd>
+            </div>
+          </dl>
         </div>
       </div>
 
@@ -602,6 +606,10 @@ export class ProductInfoComponent implements OnInit, OnDestroy {
 
   hasFeatures(): boolean {
     return !!(this.product.features && this.product.features.length > 0);
+  }
+
+  hasCertifications(): boolean {
+    return !!(this.product.certificates && this.product.certificates.length > 0);
   }
 
   toggleDescription() {

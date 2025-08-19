@@ -64,14 +64,31 @@ export interface ProductWithPricing extends Product {
     }[];
 }
 
-// Load products
+// Load products with pagination and filters
+export interface ProductsQuery {
+    page?: number;
+    itemsPerPage?: number;
+    searchQuery?: string;
+    categories?: string[];
+    availability?: string;
+    sortBy?: string;
+}
+
+export interface ProductsResponse {
+    products: Product[];
+    totalItems: number;
+    totalPages: number;
+    currentPage: number;
+}
+
 export const loadProducts = createAction(
-    '[B2B Products] Load Products'
+    '[B2B Products] Load Products',
+    props<{ query?: ProductsQuery }>()
 );
 
 export const loadProductsSuccess = createAction(
     '[B2B Products] Load Products Success',
-    props<{ products: Product[] }>()
+    props<{ response: ProductsResponse }>()
 );
 
 export const loadProductsFailure = createAction(
@@ -178,4 +195,20 @@ export const setSortOption = createAction(
 
 export const clearFilters = createAction(
     '[B2B Products] Clear Filters'
+);
+
+// Pagination Actions
+export const setCurrentPage = createAction(
+    '[B2B Products] Set Current Page',
+    props<{ page: number }>()
+);
+
+export const setItemsPerPage = createAction(
+    '[B2B Products] Set Items Per Page',
+    props<{ itemsPerPage: number }>()
+);
+
+export const updatePaginationInfo = createAction(
+    '[B2B Products] Update Pagination Info',
+    props<{ totalItems: number; totalPages: number }>()
 ); 
