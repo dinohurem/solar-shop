@@ -4,7 +4,7 @@ import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable, Subject } from 'rxjs';
-import { takeUntil, debounceTime, distinctUntilChanged, filter, map } from 'rxjs/operators';
+import { takeUntil, debounceTime, distinctUntilChanged, filter, map, take } from 'rxjs/operators';
 import { ProductListActions } from './store/product-list.actions';
 import {
   selectProducts,
@@ -660,7 +660,42 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
   onCategoryChange(category: string, event: Event): void {
     const target = event.target as HTMLInputElement;
-    this.store.dispatch(ProductListActions.toggleCategoryFilter({ category, checked: target.checked }));
+    const isChecked = target.checked;
+    
+    // Toggle the specific child category
+    this.store.dispatch(ProductListActions.toggleCategoryFilter({ category, checked: isChecked }));
+    
+    // Check if we need to update parent category state
+    const parentCategory = this.nestedCategories.find(parent => 
+      parent.subcategories?.some(sub => sub.name === category)
+    );
+    
+    if (parentCategory) {
+      // Use take(1) to ensure single execution and avoid memory leaks
+      this.filters$.pipe(
+        takeUntil(this.destroy$),
+        take(1)
+      ).subscribe(currentFilters => {
+        if (currentFilters) {
+          const selectedSubcategories = parentCategory.subcategories?.filter(sub => 
+            currentFilters.categories.includes(sub.name)
+          ) || [];
+          
+          // If all subcategories are selected, mark parent as selected
+          // If no subcategories are selected, mark parent as unselected
+          const allSubcategoriesSelected = parentCategory.subcategories?.length === selectedSubcategories.length;
+          const parentShouldBeSelected = allSubcategoriesSelected && selectedSubcategories.length > 0;
+          
+          // Update parent category selection state
+          if (parentShouldBeSelected !== currentFilters.categories.includes(parentCategory.name)) {
+            this.store.dispatch(ProductListActions.toggleCategoryFilter({ 
+              category: parentCategory.name, 
+              checked: parentShouldBeSelected 
+            }));
+          }
+        }
+      });
+    }
   }
 
   onPriceRangeChange(type: 'min' | 'max', event: Event): void {
@@ -770,34 +805,43 @@ export class ProductListComponent implements OnInit, OnDestroy {
   isCategoryExpanded(categoryId: string): boolean {
     return this.categoryExpansionState[categoryId] || false;
   }
+  
 
   onParentCategoryChange(parentCategory: ProductCategory, event: Event): void {
     const target = event.target as HTMLInputElement;
     const isChecked = target.checked;
     
-    // Toggle parent category
-    this.store.dispatch(ProductListActions.toggleCategoryFilter({ 
-      category: parentCategory.name, 
-      checked: isChecked 
-    }));
-    
-    // If parent is selected, also select all child categories
-    if (isChecked && parentCategory.subcategories) {
-      parentCategory.subcategories.forEach(subCategory => {
-        this.store.dispatch(ProductListActions.toggleCategoryFilter({ 
-          category: subCategory.name, 
-          checked: true 
-        }));
-      });
-    }
-    // If parent is deselected, deselect all child categories
-    else if (!isChecked && parentCategory.subcategories) {
-      parentCategory.subcategories.forEach(subCategory => {
-        this.store.dispatch(ProductListActions.toggleCategoryFilter({ 
-          category: subCategory.name, 
-          checked: false 
-        }));
-      });
+    if (isChecked) {
+      // When parent is selected, select all its child categories
+      // This ensures products from all child categories are shown
+      if (parentCategory.subcategories) {
+        parentCategory.subcategories.forEach(subCategory => {
+          this.store.dispatch(ProductListActions.toggleCategoryFilter({ 
+            category: subCategory.name, 
+            checked: true 
+          }));
+        });
+      }
+      // Also add the parent category name to filters for products directly assigned to parent
+      this.store.dispatch(ProductListActions.toggleCategoryFilter({ 
+        category: parentCategory.name, 
+        checked: true 
+      }));
+    } else {
+      // When parent is deselected, deselect all child categories
+      if (parentCategory.subcategories) {
+        parentCategory.subcategories.forEach(subCategory => {
+          this.store.dispatch(ProductListActions.toggleCategoryFilter({ 
+            category: subCategory.name, 
+            checked: false 
+          }));
+        });
+      }
+      // Also remove parent category from filters
+      this.store.dispatch(ProductListActions.toggleCategoryFilter({ 
+        category: parentCategory.name, 
+        checked: false 
+      }));
     }
   }
 

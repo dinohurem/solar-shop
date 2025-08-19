@@ -98,6 +98,87 @@ export const selectProductsWithPricing = createSelector(
     }
 );
 
+// Filter selectors
+export const selectFilters = createSelector(
+    selectProductsFeature,
+    (state: ProductsState) => state.filters
+);
+
+export const selectSearchQuery = createSelector(
+    selectFilters,
+    (filters) => filters.searchQuery
+);
+
+export const selectCategoryFilters = createSelector(
+    selectFilters,
+    (filters) => filters.categories
+);
+
+export const selectAvailabilityFilter = createSelector(
+    selectFilters,
+    (filters) => filters.availability
+);
+
+export const selectSortBy = createSelector(
+    selectFilters,
+    (filters) => filters.sortBy
+);
+
+// Filtered products selector
+export const selectFilteredProducts = createSelector(
+    selectProductsWithPricing,
+    selectFilters,
+    (products, filters) => {
+        let filteredProducts = products.filter(product => {
+            // Search filter
+            const matchesSearch = !filters.searchQuery ||
+                product.name.toLowerCase().includes(filters.searchQuery.toLowerCase()) ||
+                product.description.toLowerCase().includes(filters.searchQuery.toLowerCase()) ||
+                product.short_description?.toLowerCase().includes(filters.searchQuery.toLowerCase()) ||
+                product.sku.toLowerCase().includes(filters.searchQuery.toLowerCase()) ||
+                product.brand?.toLowerCase().includes(filters.searchQuery.toLowerCase());
+
+            // Category filter
+            const matchesCategory = filters.categories.length === 0 ||
+                filters.categories.some(filterCategory => 
+                    product.category?.toLowerCase().includes(filterCategory.toLowerCase()) ||
+                    (product.categories && product.categories.some(cat => 
+                        cat.name.toLowerCase().includes(filterCategory.toLowerCase())
+                    ))
+                );
+
+            // Availability filter
+            const matchesAvailability = !filters.availability ||
+                (filters.availability === 'in-stock' && product.in_stock) ||
+                (filters.availability === 'partner-only' && product.partner_only);
+
+            return matchesSearch && matchesCategory && matchesAvailability;
+        });
+
+        // Sort products
+        filteredProducts.sort((a, b) => {
+            switch (filters.sortBy) {
+                case 'name':
+                    return a.name.localeCompare(b.name);
+                case 'price-low':
+                    const priceA = a.company_price || a.partner_price || a.price;
+                    const priceB = b.company_price || b.partner_price || b.price;
+                    return priceA - priceB;
+                case 'price-high':
+                    const priceA2 = a.company_price || a.partner_price || a.price;
+                    const priceB2 = b.company_price || b.partner_price || b.price;
+                    return priceB2 - priceA2;
+                case 'savings':
+                    return (b.savings || 0) - (a.savings || 0);
+                default:
+                    return 0;
+            }
+        });
+
+        return filteredProducts;
+    }
+);
+
 // Get product by ID with pricing
 export const selectProductById = (productId: string) => createSelector(
     selectProductsWithPricing,

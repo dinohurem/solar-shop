@@ -2,11 +2,19 @@ import { createReducer, on } from '@ngrx/store';
 import { Product, CompanyPricing, Category } from './products.actions';
 import * as ProductsActions from './products.actions';
 
+export interface ProductFilters {
+    categories: string[];
+    searchQuery: string;
+    availability: string;
+    sortBy: string;
+}
+
 export interface ProductsState {
     products: Product[];
     categories: Category[];
     companyPricing: CompanyPricing[];
     selectedProduct: Product | null;
+    filters: ProductFilters;
     loading: boolean;
     categoriesLoading: boolean;
     error: string | null;
@@ -17,6 +25,12 @@ export const initialState: ProductsState = {
     categories: [],
     companyPricing: [],
     selectedProduct: null,
+    filters: {
+        categories: [],
+        searchQuery: '',
+        availability: '',
+        sortBy: 'name'
+    },
     loading: false,
     categoriesLoading: false,
     error: null
@@ -109,5 +123,50 @@ export const productsReducer = createReducer(
         ...state,
         categoriesLoading: false,
         error
+    })),
+
+    // Filtering actions
+    on(ProductsActions.setSearchQuery, (state, { query }) => ({
+        ...state,
+        filters: {
+            ...state.filters,
+            searchQuery: query
+        }
+    })),
+
+    on(ProductsActions.toggleCategoryFilter, (state, { category, checked }) => ({
+        ...state,
+        filters: {
+            ...state.filters,
+            categories: checked
+                ? [...state.filters.categories, category]
+                : state.filters.categories.filter(c => c !== category)
+        }
+    })),
+
+    on(ProductsActions.setAvailabilityFilter, (state, { availability }) => ({
+        ...state,
+        filters: {
+            ...state.filters,
+            availability
+        }
+    })),
+
+    on(ProductsActions.setSortOption, (state, { sortBy }) => ({
+        ...state,
+        filters: {
+            ...state.filters,
+            sortBy
+        }
+    })),
+
+    on(ProductsActions.clearFilters, (state) => ({
+        ...state,
+        filters: {
+            categories: [],
+            searchQuery: '',
+            availability: '',
+            sortBy: 'name'
+        }
     }))
 ); 

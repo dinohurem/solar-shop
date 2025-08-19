@@ -16,6 +16,7 @@ interface Category {
   image_url?: string;
   sort_order: number;
   is_active: boolean;
+  parent_id?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -82,6 +83,22 @@ interface Category {
                 </svg>
               {{ 'admin.common.slugRequired' | translate }}
             </div>
+          </div>
+          
+          <div class="relative">
+            <select
+              id="parent_id"
+              formControlName="parent_id"
+              class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200"
+            >
+              <option [value]="null">{{ 'admin.categoriesForm.selectParentCategory' | translate }}</option>
+              <option *ngFor="let category of getAvailableParentCategories()" [value]="category.id">
+                {{ category.name }}
+              </option>
+            </select>
+            <label for="parent_id" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700">
+              {{ 'admin.categoriesForm.parentCategory' | translate }}
+            </label>
           </div>
         </div>
 
@@ -187,12 +204,14 @@ export class CategoryFormComponent implements OnInit {
   isEditMode = false;
   isSubmitting = false;
   categoryId: string | null = null;
+  availableCategories: Category[] = [];
 
   constructor() {
     this.initForm();
   }
 
   ngOnInit(): void {
+    this.loadAvailableCategories();
     this.checkEditMode();
   }
 
@@ -203,7 +222,8 @@ export class CategoryFormComponent implements OnInit {
       description: [''],
       image_url: [''],
       sort_order: [0, [Validators.min(0)]],
-      is_active: [true]
+      is_active: [true],
+      parent_id: [null]
     });
   }
 
@@ -270,5 +290,22 @@ export class CategoryFormComponent implements OnInit {
     } finally {
       this.isSubmitting = false;
     }
+  }
+
+  private async loadAvailableCategories(): Promise<void> {
+    try {
+      const categories = await this.supabaseService.getTable('categories');
+      this.availableCategories = categories || [];
+    } catch (error) {
+      console.error('Error loading categories:', error);
+      this.availableCategories = [];
+    }
+  }
+
+  getAvailableParentCategories(): Category[] {
+    if (this.isEditMode && this.categoryId) {
+      return this.availableCategories.filter(cat => cat.id !== this.categoryId);
+    }
+    return this.availableCategories;
   }
 } 

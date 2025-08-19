@@ -4,7 +4,7 @@ import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable, combineLatest, Subject } from 'rxjs';
-import { map, filter, switchMap, takeUntil } from 'rxjs/operators';
+import { map, filter, switchMap, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { TranslationService } from '../../../../shared/services/translation.service';
 import { selectCurrentUser } from '../../../../core/auth/store/auth.selectors';
@@ -14,8 +14,9 @@ import { SupabaseService } from '../../../../services/supabase.service';
 import * as B2BCartActions from '../../cart/store/b2b-cart.actions';
 import { selectB2BCartTotalItems } from '../../cart/store/b2b-cart.selectors';
 import * as ProductsActions from '../../shared/store/products.actions';
-import { selectProductsWithPricing, selectProductsLoading, selectCategories, selectCategoriesLoading } from '../../shared/store/products.selectors';
+import { selectProductsWithPricing, selectProductsLoading, selectCategories, selectCategoriesLoading, selectFilteredProducts, selectFilters } from '../../shared/store/products.selectors';
 import { ProductWithPricing, Category } from '../../shared/store/products.actions';
+import { ProductCategory, CategoriesService } from '../../../b2c/products/services/categories.service';
 
 @Component({
   selector: 'app-partners-products',
@@ -114,8 +115,8 @@ import { ProductWithPricing, Category } from '../../shared/store/products.action
                     </svg>
                   </div>
                   <input type="text" 
-                         [(ngModel)]="searchTerm" 
-                         (ngModelChange)="filterProducts()"
+                         [value]="(filters$ | async)?.searchQuery || ''"
+                         (input)="onSearchChange($event)"
                          [placeholder]="'b2b.products.searchProducts' | translate"
                          class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-solar-500 focus:border-solar-500 text-sm font-['DM_Sans']">
                 </div>
@@ -125,24 +126,72 @@ import { ProductWithPricing, Category } from '../../shared/store/products.action
               <div class="mb-6">
                 <h4 class="text-sm font-medium text-gray-900 mb-3 font-['DM_Sans']">{{ 'b2b.products.category' | translate }}</h4>
                 <div class="space-y-2">
-                  <label class="flex items-center">
-                    <input type="radio" 
-                           name="category"
-                           value=""
-                           [checked]="selectedCategory === ''"
-                           (change)="selectedCategory = ''; filterProducts()"
-                           class="rounded border-gray-300 text-solar-600 focus:ring-solar-500">
-                    <span class="ml-2 text-sm text-gray-700 font-['DM_Sans']">{{ 'b2b.products.allCategories' | translate }}</span>
-                  </label>
-                  <label *ngFor="let category of (categories$ | async)" class="flex items-center">
-                    <input type="radio" 
-                           name="category"
-                           [value]="category.slug"
-                           [checked]="selectedCategory === category.slug"
-                           (change)="selectedCategory = category.slug; filterProducts()"
-                           class="rounded border-gray-300 text-solar-600 focus:ring-solar-500">
-                    <span class="ml-2 text-sm text-gray-700 font-['DM_Sans']">{{ category.name }}</span>
-                  </label>
+                  <!-- Parent Categories with Collapsible Subcategories -->
+                  <div *ngFor="let parentCategory of nestedCategories" class="space-y-1">
+                    <!-- Parent Category -->
+                    <div class="flex items-center justify-between">
+                      <label class="flex items-center flex-1">
+                        <input 
+                          type="checkbox" 
+                          [value]="parentCategory.name"
+                          [checked]="(filters$ | async)?.categories?.includes(parentCategory.name) || false"
+                          (change)="onParentCategoryChange(parentCategory, $event)"
+                          class="rounded border-gray-300 text-solar-600 focus:ring-solar-500"
+                        >
+                        <span class="ml-2 text-sm text-gray-700 font-['DM_Sans'] font-medium">{{ parentCategory.name }}</span>
+                        <span *ngIf="parentCategory.productCount" class="ml-2 text-xs text-gray-500">({{ parentCategory.productCount }})</span>
+                      </label>
+                      <!-- Expand/Collapse Button -->
+                      <button 
+                        *ngIf="parentCategory.subcategories && parentCategory.subcategories.length > 0"
+                        (click)="toggleCategoryExpansion(parentCategory.id)"
+                        class="ml-2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                        type="button"
+                      >
+                        <svg 
+                          class="w-4 h-4 transform transition-transform"
+                          [class.rotate-180]="isCategoryExpanded(parentCategory.id)"
+                          fill="none" 
+                          stroke="currentColor" 
+                          viewBox="0 0 24 24"
+                        >
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                      </button>
+                    </div>
+                    
+                    <!-- Child Categories (Collapsible) -->
+                    <div 
+                      *ngIf="parentCategory.subcategories && parentCategory.subcategories.length > 0 && isCategoryExpanded(parentCategory.id)"
+                      class="ml-6 space-y-1 animate-fade-in"
+                    >
+                      <label *ngFor="let subCategory of parentCategory.subcategories" class="flex items-center">
+                        <input 
+                          type="checkbox" 
+                          [value]="subCategory.name"
+                          [checked]="(filters$ | async)?.categories?.includes(subCategory.name) || false"
+                          (change)="onCategoryChange(subCategory.name, $event)"
+                          class="rounded border-gray-300 text-solar-600 focus:ring-solar-500"
+                        >
+                        <span class="ml-2 text-sm text-gray-600 font-['DM_Sans']">{{ subCategory.name }}</span>
+                        <span *ngIf="subCategory.productCount" class="ml-2 text-xs text-gray-400">({{ subCategory.productCount }})</span>
+                      </label>
+                    </div>
+                  </div>
+                  
+                  <!-- Fallback for flat categories (if nested categories are not available) -->
+                  <div *ngIf="nestedCategories.length === 0">
+                    <label *ngFor="let category of categories$ | async" class="flex items-center">
+                      <input 
+                        type="checkbox" 
+                        [value]="category.name"
+                        [checked]="(filters$ | async)?.categories?.includes(category.name) || false"
+                        (change)="onCategoryChange(category.name, $event)"
+                        class="rounded border-gray-300 text-solar-600 focus:ring-solar-500"
+                      >
+                      <span class="ml-2 text-sm text-gray-700 font-['DM_Sans']">{{ category.name }}</span>
+                    </label>
+                  </div>
                 </div>
               </div>
 
@@ -154,8 +203,8 @@ import { ProductWithPricing, Category } from '../../shared/store/products.action
                     <input type="radio" 
                            name="availability"
                            value=""
-                           [checked]="availabilityFilter === ''"
-                           (change)="availabilityFilter = ''; filterProducts()"
+                           [checked]="(filters$ | async)?.availability === ''"
+                           (change)="onAvailabilityChange('')"
                            class="rounded border-gray-300 text-gray-600 focus:ring-gray-500">
                     <span class="ml-2 text-sm text-gray-700 font-['DM_Sans']">{{ 'b2b.products.allProducts' | translate }}</span>
                   </label>
@@ -163,8 +212,8 @@ import { ProductWithPricing, Category } from '../../shared/store/products.action
                     <input type="radio" 
                            name="availability"
                            value="in-stock"
-                           [checked]="availabilityFilter === 'in-stock'"
-                           (change)="availabilityFilter = 'in-stock'; filterProducts()"
+                           [checked]="(filters$ | async)?.availability === 'in-stock'"
+                           (change)="onAvailabilityChange('in-stock')"
                            class="rounded border-gray-300 text-green-600 focus:ring-green-500">
                     <span class="ml-2 text-sm text-gray-700 font-['DM_Sans']">{{ 'b2b.products.inStock' | translate }}</span>
                   </label>
@@ -172,8 +221,8 @@ import { ProductWithPricing, Category } from '../../shared/store/products.action
                     <input type="radio" 
                            name="availability"
                            value="partner-only"
-                           [checked]="availabilityFilter === 'partner-only'"
-                           (change)="availabilityFilter = 'partner-only'; filterProducts()"
+                           [checked]="(filters$ | async)?.availability === 'partner-only'"
+                           (change)="onAvailabilityChange('partner-only')"
                            class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                     <span class="ml-2 text-sm text-gray-700 font-['DM_Sans']">{{ 'b2b.products.partnerOnly' | translate }}</span>
                   </label>
@@ -223,14 +272,14 @@ import { ProductWithPricing, Category } from '../../shared/store/products.action
                   
                   <!-- Results Count -->
                   <p class="text-sm text-gray-600 font-['DM_Sans']">
-                    {{ 'b2b.products.showing' | translate }} {{ filteredProducts.length }} {{ 'b2b.products.of' | translate }} {{ allProducts.length }} {{ 'b2b.products.productsCount' | translate }}
+                    {{ 'b2b.products.showing' | translate }} {{ (filteredProducts$ | async)?.length || 0 }} {{ 'b2b.products.of' | translate }} {{ (products$ | async)?.length || 0 }} {{ 'b2b.products.productsCount' | translate }}
                   </p>
                 </div>
 
                 <!-- Right: Sort Controls -->
                 <div class="flex items-center space-x-3">
                   <label class="text-sm font-medium text-gray-700 whitespace-nowrap font-['DM_Sans']">{{ 'b2b.products.sortBy' | translate }}:</label>
-                  <select [(ngModel)]="sortBy" (ngModelChange)="sortProducts()" 
+                  <select [value]="(filters$ | async)?.sortBy || 'name'" (change)="onSortChange($event)" 
                           class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-solar-500 focus:border-solar-500 text-sm font-medium font-['DM_Sans']">
                     <option value="name">{{ 'b2b.products.name' | translate }}</option>
                     <option value="price-low">{{ 'b2b.products.priceLowToHigh' | translate }}</option>
@@ -248,7 +297,7 @@ import { ProductWithPricing, Category } from '../../shared/store/products.action
                 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6': gridView === 'grid',
                 'space-y-4': gridView === 'list'
               }">
-                <div *ngFor="let product of filteredProducts" 
+                <div *ngFor="let product of filteredProducts$ | async" 
                      [ngClass]="{
                        'bg-white rounded-lg shadow-sm border-2 border-orange-200 hover:border-orange-300 overflow-hidden hover:shadow-md transition-all flex flex-col h-full': gridView === 'grid',
                        'bg-white rounded-lg shadow-sm border border-orange-200 hover:border-orange-300 p-4 flex items-center space-x-4 hover:shadow-md transition-all': gridView === 'list'
@@ -452,7 +501,7 @@ import { ProductWithPricing, Category } from '../../shared/store/products.action
               </div>
 
               <!-- No Products Found -->
-              <div *ngIf="filteredProducts.length === 0" class="text-center py-12">
+              <div *ngIf="(filteredProducts$ | async)?.length === 0" class="text-center py-12">
                 <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
                 </svg>
@@ -487,6 +536,25 @@ import { ProductWithPricing, Category } from '../../shared/store/products.action
       overflow: hidden;
       text-overflow: ellipsis;
     }
+    
+    .animate-fade-in {
+      animation: fadeIn 0.2s ease-in-out;
+    }
+    
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-4px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .rotate-180 {
+      transform: rotate(180deg);
+    }
   `]
 })
 export class PartnersProductsComponent implements OnInit, OnDestroy {
@@ -500,31 +568,34 @@ export class PartnersProductsComponent implements OnInit, OnDestroy {
   currentUser$: Observable<User | null>;
   cartItemsCount$: Observable<number>;
   products$: Observable<ProductWithPricing[]>;
+  filteredProducts$: Observable<ProductWithPricing[]>;
   categories$: Observable<Category[]>;
   loading$: Observable<boolean>;
   categoriesLoading$: Observable<boolean>;
+  filters$: Observable<any>;
 
   isAuthenticated = false;
   isCompanyContact = false;
   company: Company | null = null;
 
-  selectedCategory = '';
-  searchTerm = '';
-  availabilityFilter = '';
-  sortBy = 'name';
   gridView = 'grid';
   showMobileFilters = false;
+  
+  // Category expansion state
+  categoryExpansionState: { [categoryId: string]: boolean } = {};
+  nestedCategories: ProductCategory[] = [];
+  
+  private searchSubject = new Subject<string>();
 
-  allProducts: ProductWithPricing[] = [];
-  filteredProducts: ProductWithPricing[] = [];
-
-  constructor() {
+  constructor(private categoriesService: CategoriesService) {
     this.currentUser$ = this.store.select(selectCurrentUser);
     this.cartItemsCount$ = this.store.select(selectB2BCartTotalItems);
     this.products$ = this.store.select(selectProductsWithPricing);
+    this.filteredProducts$ = this.store.select(selectFilteredProducts);
     this.categories$ = this.store.select(selectCategories);
     this.loading$ = this.store.select(selectProductsLoading);
     this.categoriesLoading$ = this.store.select(selectCategoriesLoading);
+    this.filters$ = this.store.select(selectFilters);
   }
 
   ngOnInit(): void {
@@ -546,17 +617,42 @@ export class PartnersProductsComponent implements OnInit, OnDestroy {
       }
     });
 
-    // Subscribe to products
-    this.products$.pipe(takeUntil(this.destroy$)).subscribe(products => {
-      this.allProducts = products;
-      this.filterProducts();
+    // Load nested categories for hierarchical display
+    this.loadNestedCategories();
+    
+    // Handle debounced search
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      takeUntil(this.destroy$)
+    ).subscribe(query => {
+      this.store.dispatch(ProductsActions.setSearchQuery({ query }));
     });
 
     // Handle query params
     this.activatedRoute.queryParams.pipe(takeUntil(this.destroy$)).subscribe(params => {
       if (params['category']) {
-        this.selectedCategory = params['category'];
-        this.filterProducts();
+        // Clear existing filters first
+        this.store.dispatch(ProductsActions.clearFilters());
+        
+        // Wait for categories to be loaded, then find the matching category
+        this.categories$.pipe(
+          takeUntil(this.destroy$),
+          filter((categories): categories is Category[] => categories !== null && categories.length > 0)
+        ).subscribe((categories) => {
+          const matchingCategory = categories.find((cat) =>
+            cat.slug === params['category'] ||
+            cat.id === params['category'] ||
+            cat.name.toLowerCase() === params['category'].toLowerCase()
+          );
+
+          if (matchingCategory) {
+            this.store.dispatch(ProductsActions.toggleCategoryFilter({
+              category: matchingCategory.name,
+              checked: true
+            }));
+          }
+        });
       }
     });
   }
@@ -633,49 +729,83 @@ export class PartnersProductsComponent implements OnInit, OnDestroy {
     }
   }
 
-  filterProducts(): void {
-    this.filteredProducts = this.allProducts.filter(product => {
-      // Check category by comparing with category slug or name
-      const matchesCategory = !this.selectedCategory ||
-        product.category?.toLowerCase().includes(this.selectedCategory.toLowerCase()) ||
-        product.category_id === this.selectedCategory;
-
-      const matchesSearch = !this.searchTerm ||
-        product.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        product.description.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        product.short_description?.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        product.sku.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        product.brand?.toLowerCase().includes(this.searchTerm.toLowerCase());
-
-      const matchesAvailability = !this.availabilityFilter ||
-        (this.availabilityFilter === 'in-stock' && product.in_stock) ||
-        (this.availabilityFilter === 'partner-only' && product.partner_only);
-
-      return matchesCategory && matchesSearch && matchesAvailability;
+  private loadNestedCategories(): void {
+    this.categoriesService.getNestedCategories().pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(categories => {
+      this.nestedCategories = categories;
+      // Initialize expansion state for parent categories (collapsed by default)
+      categories.forEach(category => {
+        if (category.subcategories && category.subcategories.length > 0) {
+          this.categoryExpansionState[category.id] = false;
+        }
+      });
     });
-
-    this.sortProducts();
   }
 
-  sortProducts(): void {
-    this.filteredProducts.sort((a, b) => {
-      switch (this.sortBy) {
-        case 'name':
-          return a.name.localeCompare(b.name);
-        case 'price-low':
-          const priceA = a.company_price || a.partner_price || a.price;
-          const priceB = b.company_price || b.partner_price || b.price;
-          return priceA - priceB;
-        case 'price-high':
-          const priceA2 = a.company_price || a.partner_price || a.price;
-          const priceB2 = b.company_price || b.partner_price || b.price;
-          return priceB2 - priceA2;
-        case 'savings':
-          return (b.savings || 0) - (a.savings || 0);
-        default:
-          return 0;
+  onSearchChange(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    this.searchSubject.next(target.value);
+  }
+  
+  onCategoryChange(category: string, event: Event): void {
+    const target = event.target as HTMLInputElement;
+    this.store.dispatch(ProductsActions.toggleCategoryFilter({ category, checked: target.checked }));
+  }
+  
+  onParentCategoryChange(parentCategory: ProductCategory, event: Event): void {
+    const target = event.target as HTMLInputElement;
+    const isChecked = target.checked;
+    
+    if (isChecked) {
+      // When parent is selected, select all its child categories
+      if (parentCategory.subcategories) {
+        parentCategory.subcategories.forEach(subCategory => {
+          this.store.dispatch(ProductsActions.toggleCategoryFilter({ 
+            category: subCategory.name, 
+            checked: true 
+          }));
+        });
       }
-    });
+      // Also add the parent category name to filters
+      this.store.dispatch(ProductsActions.toggleCategoryFilter({ 
+        category: parentCategory.name, 
+        checked: true 
+      }));
+    } else {
+      // When parent is deselected, deselect all child categories
+      if (parentCategory.subcategories) {
+        parentCategory.subcategories.forEach(subCategory => {
+          this.store.dispatch(ProductsActions.toggleCategoryFilter({ 
+            category: subCategory.name, 
+            checked: false 
+          }));
+        });
+      }
+      // Also remove parent category from filters
+      this.store.dispatch(ProductsActions.toggleCategoryFilter({ 
+        category: parentCategory.name, 
+        checked: false 
+      }));
+    }
+  }
+  
+  onAvailabilityChange(availability: string): void {
+    this.store.dispatch(ProductsActions.setAvailabilityFilter({ availability }));
+  }
+  
+  onSortChange(event: Event): void {
+    const target = event.target as HTMLSelectElement;
+    this.store.dispatch(ProductsActions.setSortOption({ sortBy: target.value }));
+  }
+  
+  // Category expansion methods
+  toggleCategoryExpansion(categoryId: string): void {
+    this.categoryExpansionState[categoryId] = !this.categoryExpansionState[categoryId];
+  }
+
+  isCategoryExpanded(categoryId: string): boolean {
+    return this.categoryExpansionState[categoryId] || false;
   }
 
   navigateToLogin(): void {
@@ -735,11 +865,7 @@ export class PartnersProductsComponent implements OnInit, OnDestroy {
   }
 
   clearFilters(): void {
-    this.selectedCategory = '';
-    this.searchTerm = '';
-    this.availabilityFilter = '';
-    this.sortBy = 'name';
-    this.filterProducts();
+    this.store.dispatch(ProductsActions.clearFilters());
   }
 
   onImageError(event: Event): void {

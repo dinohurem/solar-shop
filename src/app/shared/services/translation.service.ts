@@ -875,6 +875,8 @@ export class TranslationService {
                     categoryAlreadyExists: 'Kategorija {{name}} već postoji',
                     confirmCategoryDeletion: 'Jeste li sigurni da želite obrisati kategoriju "{{name}}"?',
                     categoryHasRelatedProducts: 'Kategorija se ne može obrisati jer sadrži povezane proizvode. Prvo uklonite sve proizvode iz ove kategorije.',
+                    parentCategory: 'Nadkategorija',
+                    selectParentCategory: 'Odaberite nadkategoriju',
                     success: 'Uspjeh',
                     error: 'Greška',
                     longTitle: 'Kategorije - Solar Shop Admin'
@@ -3382,6 +3384,8 @@ export class TranslationService {
                     categoryAlreadyExists: 'Category {{name}} already exists',
                     confirmCategoryDeletion: 'Are you sure you want to delete the category "{{name}}"?',
                     categoryHasRelatedProducts: 'Category cannot be deleted because it contains related products. Please remove all products from this category first.',
+                    parentCategory: 'Parent Category',
+                    selectParentCategory: 'Select parent category',
                     success: 'Success',
                     error: 'Error',
                     longTitle: 'Categories - Solar Shop Admin'

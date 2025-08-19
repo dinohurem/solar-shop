@@ -138,4 +138,44 @@ export const loadCategoriesSuccess = createAction(
 export const loadCategoriesFailure = createAction(
     '[B2B Products] Load Categories Failure',
     props<{ error: string }>()
+);
+
+// Load nested categories
+export const loadNestedCategories = createAction(
+    '[B2B Products] Load Nested Categories'
+);
+
+export const loadNestedCategoriesSuccess = createAction(
+    '[B2B Products] Load Nested Categories Success',
+    props<{ nestedCategories: any[] }>()
+);
+
+export const loadNestedCategoriesFailure = createAction(
+    '[B2B Products] Load Nested Categories Failure',
+    props<{ error: string }>()
+);
+
+// Product Filtering Actions
+export const setSearchQuery = createAction(
+    '[B2B Products] Set Search Query',
+    props<{ query: string }>()
+);
+
+export const toggleCategoryFilter = createAction(
+    '[B2B Products] Toggle Category Filter',
+    props<{ category: string; checked: boolean }>()
+);
+
+export const setAvailabilityFilter = createAction(
+    '[B2B Products] Set Availability Filter',
+    props<{ availability: string }>()
+);
+
+export const setSortOption = createAction(
+    '[B2B Products] Set Sort Option',
+    props<{ sortBy: string }>()
+);
+
+export const clearFilters = createAction(
+    '[B2B Products] Clear Filters'
 ); 
