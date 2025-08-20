@@ -258,12 +258,12 @@ export class PartnersCategoriesComponent implements OnInit {
 
   private async getProductCountForCategory(categoryName: string): Promise<number> {
     try {
-      // Get products that match the category name
+      // Get products that match the category name using the categories table
       const { count, error } = await this.supabase.client
         .from('products')
-        .select('*', { count: 'exact', head: true })
+        .select('*, categories!inner(name)', { count: 'exact', head: true })
         .eq('is_active', true)
-        .ilike('category', `%${categoryName}%`);
+        .eq('categories.name', categoryName);
       
       if (error) {
         console.error('Error fetching product count:', error);

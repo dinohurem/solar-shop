@@ -72,9 +72,8 @@ export class ProductsEffects {
         }
 
         if (query.categories && query.categories.length > 0) {
-            // Filter by categories using the junction table
-            const categoryFilter = query.categories.map(cat => `categories.name.eq.${cat}`).join(',');
-            supabaseQuery = supabaseQuery.or(categoryFilter);
+            // Use 'in' operator which is cleaner for multiple values
+            supabaseQuery = supabaseQuery.in('categories.name', query.categories);
         }
 
         if (query.availability && query.availability !== '') {

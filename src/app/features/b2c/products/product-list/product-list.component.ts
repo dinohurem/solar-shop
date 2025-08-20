@@ -669,40 +669,8 @@ export class ProductListComponent implements OnInit, OnDestroy {
     const target = event.target as HTMLInputElement;
     const isChecked = target.checked;
     
-    // Toggle the specific child category
+    // Toggle the specific child category only
     this.store.dispatch(ProductListActions.toggleCategoryFilter({ category, checked: isChecked }));
-    
-    // Check if we need to update parent category state
-    const parentCategory = this.nestedCategories.find(parent => 
-      parent.subcategories?.some(sub => sub.name === category)
-    );
-    
-    if (parentCategory) {
-      // Use take(1) to ensure single execution and avoid memory leaks
-      this.filters$.pipe(
-        takeUntil(this.destroy$),
-        take(1)
-      ).subscribe(currentFilters => {
-        if (currentFilters) {
-          const selectedSubcategories = parentCategory.subcategories?.filter(sub => 
-            currentFilters.categories.includes(sub.name)
-          ) || [];
-          
-          // If all subcategories are selected, mark parent as selected
-          // If no subcategories are selected, mark parent as unselected
-          const allSubcategoriesSelected = parentCategory.subcategories?.length === selectedSubcategories.length;
-          const parentShouldBeSelected = allSubcategoriesSelected && selectedSubcategories.length > 0;
-          
-          // Update parent category selection state
-          if (parentShouldBeSelected !== currentFilters.categories.includes(parentCategory.name)) {
-            this.store.dispatch(ProductListActions.toggleCategoryFilter({ 
-              category: parentCategory.name, 
-              checked: parentShouldBeSelected 
-            }));
-          }
-        }
-      });
-    }
   }
 
   onPriceRangeChange(type: 'min' | 'max', event: Event): void {

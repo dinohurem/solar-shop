@@ -830,9 +830,10 @@ export class PartnersProductsComponent implements OnInit, OnDestroy {
   onParentCategoryChange(parentCategory: ProductCategory, event: Event): void {
     const target = event.target as HTMLInputElement;
     const isChecked = target.checked;
-
+    
     if (isChecked) {
       // When parent is selected, select all its child categories
+      // This ensures products from all child categories are shown
       if (parentCategory.subcategories) {
         parentCategory.subcategories.forEach(subCategory => {
           this.store.dispatch(ProductsActions.toggleCategoryFilter({
@@ -841,7 +842,7 @@ export class PartnersProductsComponent implements OnInit, OnDestroy {
           }));
         });
       }
-      // Also add the parent category name to filters
+      // Also add the parent category name to filters for products directly assigned to parent
       this.store.dispatch(ProductsActions.toggleCategoryFilter({
         category: parentCategory.name,
         checked: true

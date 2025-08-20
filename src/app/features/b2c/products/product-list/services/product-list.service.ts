@@ -104,13 +104,13 @@ export class ProductListService {
 
             if (query.categories && query.categories.length > 0) {
                 // Filter by categories using the junction table
-                const categoryFilter = query.categories.map(cat => `categories.name.eq.${cat}`).join(',');
-                supabaseQuery = supabaseQuery.or(categoryFilter);
+                // Use 'in' operator which is cleaner for multiple values
+                supabaseQuery = supabaseQuery.in('categories.name', query.categories);
             }
 
             if (query.manufacturers && query.manufacturers.length > 0) {
-                const manufacturerFilter = query.manufacturers.map(mfg => `brand.eq.${mfg}`).join(',');
-                supabaseQuery = supabaseQuery.or(manufacturerFilter);
+                // Use 'in' operator for manufacturers too
+                supabaseQuery = supabaseQuery.in('brand', query.manufacturers);
             }
 
             if (query.priceRange && (query.priceRange.min > 0 || query.priceRange.max > 0)) {
