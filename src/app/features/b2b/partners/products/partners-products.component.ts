@@ -1025,10 +1025,10 @@ export class PartnersProductsComponent implements OnInit, OnDestroy {
   }
 
   onPreviousPage(): void {
-    this.currentPage$.pipe(
+    combineLatest([this.currentPage$, this.totalPages$]).pipe(
       takeUntil(this.destroy$),
       take(1)
-    ).subscribe(currentPage => {
+    ).subscribe(([currentPage, totalPages]) => {
       if (currentPage > 1) {
         this.onPageChange(currentPage - 1);
       }

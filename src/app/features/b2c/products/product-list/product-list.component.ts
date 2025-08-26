@@ -874,7 +874,8 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
   onPreviousPage(): void {
     this.currentPage$.pipe(
-      takeUntil(this.destroy$)
+      takeUntil(this.destroy$),
+      take(1)
     ).subscribe(currentPage => {
       if (currentPage > 1) {
         this.onPageChange(currentPage - 1);
