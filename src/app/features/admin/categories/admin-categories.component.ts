@@ -81,28 +81,38 @@ export class AdminCategoriesComponent implements OnInit {
                 label: this.translationService.translate('admin.common.image'),
                 type: 'image',
                 sortable: false,
-                searchable: false
+                searchable: false,
+                width: '10%',
+                minWidth: '80px'
             },
             {
                 key: 'name',
                 label: this.translationService.translate('admin.common.name'),
                 type: 'text',
                 sortable: true,
-                searchable: true
+                searchable: true,
+                width: '25%',
+                minWidth: '180px',
+                maxWidth: '250px'
             },
             {
                 key: 'description',
                 label: this.translationService.translate('admin.common.description'),
                 type: 'text',
                 sortable: false,
-                searchable: true
+                searchable: true,
+                width: '50%',
+                minWidth: '200px',
+                maxWidth: '400px'
             },
             {
                 key: 'is_active',
                 label: this.translationService.translate('admin.common.status'),
                 type: 'boolean',
                 sortable: true,
-                format: (value) => value ? this.translationService.translate('admin.common.yes') : this.translationService.translate('admin.common.no')
+                format: (value) => value ? this.translationService.translate('admin.common.yes') : this.translationService.translate('admin.common.no'),
+                width: '15%',
+                minWidth: '100px'
             }
         ],
         actions: [

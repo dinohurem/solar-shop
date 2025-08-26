@@ -73,14 +73,19 @@ export class AdminBlogComponent implements OnInit {
                 label: this.translationService.translate('admin.common.image'),
                 type: 'image',
                 sortable: false,
-                searchable: false
+                searchable: false,
+                width: '10%',
+                minWidth: '80px'
             },
             {
                 key: 'title',
                 label: this.translationService.translate('admin.blogForm.postTitle'),
                 type: 'text',
                 sortable: true,
-                searchable: true
+                searchable: true,
+                width: '40%',
+                minWidth: '250px',
+                maxWidth: '400px'
             },
             {
                 key: 'status',
@@ -89,13 +94,17 @@ export class AdminBlogComponent implements OnInit {
                 sortable: true,
                 format: (value) => {
                     return this.translationService.translate(`admin.blogForm.${value}`) || value;
-                }
+                },
+                width: '15%',
+                minWidth: '120px'
             },
             {
                 key: 'published_at',
                 label: this.translationService.translate('admin.blogForm.published'),
                 type: 'date',
-                sortable: true
+                sortable: true,
+                width: '25%',
+                minWidth: '150px'
             }
         ],
         actions: [

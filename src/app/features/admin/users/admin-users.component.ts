@@ -83,48 +83,65 @@ export class AdminUsersComponent implements OnInit {
                     label: 'Avatar',
                     type: 'image',
                     sortable: false,
-                    searchable: false
+                    searchable: false,
+                    width: '8%',
+                    minWidth: '60px'
                 },
                 {
                     key: 'first_name',
                     label: this.translationService.translate('adminUsers.firstName'),
                     type: 'text',
                     sortable: true,
-                    searchable: true
+                    searchable: true,
+                    width: '15%',
+                    minWidth: '120px',
+                    maxWidth: '180px'
                 },
                 {
                     key: 'last_name',
                     label: this.translationService.translate('adminUsers.lastName'),
                     type: 'text',
                     sortable: true,
-                    searchable: true
+                    searchable: true,
+                    width: '15%',
+                    minWidth: '120px',
+                    maxWidth: '180px'
                 },
                 {
                     key: 'email',
                     label: this.translationService.translate('adminUsers.email'),
                     type: 'text',
                     sortable: true,
-                    searchable: true
+                    searchable: true,
+                    width: '25%',
+                    minWidth: '200px',
+                    maxWidth: '300px'
                 },
                 {
                     key: 'phone',
                     label: this.translationService.translate('adminUsers.phone'),
                     type: 'text',
                     sortable: false,
-                    searchable: true
+                    searchable: true,
+                    width: '15%',
+                    minWidth: '120px'
                 },
                 {
                     key: 'role',
                     label: this.translationService.translate('adminUsers.role'),
                     type: 'status',
                     sortable: true,
-                    searchable: true
+                    searchable: true,
+                    width: '10%',
+                    minWidth: '100px'
                 },
                 {
                     key: 'created_at',
                     label: 'Created',
                     type: 'date',
-                    sortable: true
+                    sortable: true,
+                    width: '12%',
+                    minWidth: '120px'
                 }
             ],
             actions: [

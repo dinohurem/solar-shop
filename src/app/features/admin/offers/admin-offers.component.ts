@@ -66,28 +66,37 @@ export class AdminOffersComponent implements OnInit {
         label: this.translationService.translate('admin.common.image'),
         type: 'image',
         sortable: false,
-        searchable: false
+        searchable: false,
+        width: '8%',
+        minWidth: '70px'
       },
       {
         key: 'title',
         label: this.translationService.translate('admin.offersForm.offerName'),
         type: 'text',
         sortable: true,
-        searchable: true
+        searchable: true,
+        width: '25%',
+        minWidth: '180px',
+        maxWidth: '300px'
       },
       {
         key: 'code',
         label: this.translationService.translate('admin.offersForm.couponCode'),
         type: 'text',
         sortable: true,
-        searchable: true
+        searchable: true,
+        width: '15%',
+        minWidth: '120px'
       },
       {
         key: 'discount_type',
         label: this.translationService.translate('admin.offersForm.discountType'),
         type: 'status',
         sortable: true,
-        searchable: true
+        searchable: true,
+        width: '12%',
+        minWidth: '100px'
       },
       {
         key: 'discount_value',
@@ -100,7 +109,9 @@ export class AdminOffersComponent implements OnInit {
             return `€${value}`;
           }
           return `${value}%`;
-        }
+        },
+        width: '10%',
+        minWidth: '90px'
       },
       {
         key: 'is_b2b',
@@ -108,7 +119,9 @@ export class AdminOffersComponent implements OnInit {
         type: 'boolean',
         sortable: true,
         searchable: true,
-        format: (value) => value ? this.translationService.translate('admin.contactsForm.yes') : this.translationService.translate('admin.contactsForm.no')
+        format: (value) => value ? this.translationService.translate('admin.contactsForm.yes') : this.translationService.translate('admin.contactsForm.no'),
+        width: '10%',
+        minWidth: '80px'
       },
       {
         key: 'status',
@@ -117,7 +130,9 @@ export class AdminOffersComponent implements OnInit {
         sortable: true,
         format: (value) => {
           return this.translationService.translate(`admin.offersForm.${value}`) || value;
-        }
+        },
+        width: '12%',
+        minWidth: '100px'
       }
     ],
     actions: [

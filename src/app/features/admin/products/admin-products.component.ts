@@ -76,54 +76,73 @@ export class AdminProductsComponent implements OnInit {
                 label: this.translationService.translate('admin.productName'),
                 type: 'text',
                 sortable: true,
-                searchable: true
+                searchable: true,
+                width: '25%',
+                minWidth: '200px',
+                maxWidth: '300px'
             },
             {
                 key: 'sku',
                 label: 'SKU',
                 type: 'text',
                 sortable: true,
-                searchable: true
+                searchable: true,
+                width: '15%',
+                minWidth: '120px',
+                maxWidth: '150px'
             },
             {
                 key: 'brand',
                 label: this.translationService.translate('admin.productBrand'),
                 type: 'text',
                 sortable: true,
-                searchable: true
+                searchable: true,
+                width: '15%',
+                minWidth: '120px',
+                maxWidth: '180px'
             },
             {
                 key: 'price',
                 label: this.translationService.translate('admin.productPricing'),
                 type: 'number',
                 sortable: true,
-                format: (value) => value ? `$${value.toFixed(2)}` : ''
+                format: (value) => value ? `$${value.toFixed(2)}` : '',
+                width: '10%',
+                minWidth: '100px'
             },
             {
                 key: 'original_price',
                 label: this.translationService.translate('admin.productCompareAtPrice'),
                 type: 'number',
                 sortable: true,
-                format: (value) => value ? `$${value.toFixed(2)}` : ''
+                format: (value) => value ? `$${value.toFixed(2)}` : '',
+                width: '10%',
+                minWidth: '120px'
             },
             {
                 key: 'stock_quantity',
                 label: this.translationService.translate('admin.productStock'),
                 type: 'number',
-                sortable: true
+                sortable: true,
+                width: '8%',
+                minWidth: '80px'
             },
             {
                 key: 'is_active',
                 label: this.translationService.translate('admin.common.status'),
                 type: 'boolean',
                 sortable: true,
-                format: (value) => value ? this.translationService.translate('admin.common.yes') : this.translationService.translate('admin.common.no')
+                format: (value) => value ? this.translationService.translate('admin.common.yes') : this.translationService.translate('admin.common.no'),
+                width: '8%',
+                minWidth: '80px'
             },
             {
                 key: 'created_at',
                 label: this.translationService.translate('admin.productCreated'),
                 type: 'date',
-                sortable: true
+                sortable: true,
+                width: '12%',
+                minWidth: '120px'
             }
         ],
         actions: [

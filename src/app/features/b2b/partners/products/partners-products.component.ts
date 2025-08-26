@@ -532,32 +532,72 @@ import { ProductCategory, CategoriesService } from '../../../b2c/products/servic
 
                 <!-- Pagination Navigation -->
                 <div class="flex justify-center">
-                  <nav class="flex items-center space-x-2">
+                  <nav class="flex items-center space-x-1">
+                    <!-- First Page Button -->
+                    <button 
+                      (click)="onPageChange(1)"
+                      [disabled]="(currentPage$ | async) === 1"
+                      class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-['DM_Sans']">
+                      ««
+                    </button>
+                    
                     <!-- Previous Button -->
                     <button 
                       (click)="onPreviousPage()"
                       [disabled]="(currentPage$ | async) === 1"
-                      class="px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-['DM_Sans']">
-                      {{ 'pagination.previous' | translate }}
+                      class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-['DM_Sans']">
+                      «
                     </button>
                     
-                    <!-- Page Numbers -->
-                    <button
-                      *ngFor="let page of getPageNumbers() | async"
-                      (click)="onPageChange(page)"
-                      [ngClass]="{
-                        'px-4 py-2 text-sm font-bold text-gray-700 bg-white border border-gray-300 rounded-md': page === (currentPage$ | async),
-                        'px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors': page !== (currentPage$ | async)
-                      }">
-                      {{ page }}
-                    </button>
+                    <!-- Page Numbers with Smart Display -->
+                    <ng-container *ngIf="getSmartPageNumbers() | async as pageInfo">
+                      <!-- First page if not in visible range -->
+                      <ng-container *ngIf="pageInfo.showFirstPage">
+                        <button
+                          (click)="onPageChange(1)"
+                          class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
+                          1
+                        </button>
+                        <span *ngIf="pageInfo.showFirstEllipsis" class="px-2 py-2 text-sm text-gray-500">...</span>
+                      </ng-container>
+                      
+                      <!-- Visible page numbers -->
+                      <button
+                        *ngFor="let page of pageInfo.visiblePages"
+                        (click)="onPageChange(page)"
+                        class="px-3 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                        [class.font-bold]="page === (currentPage$ | async)"
+                        [class.font-medium]="page !== (currentPage$ | async)"
+                        [class.text-gray-900]="page === (currentPage$ | async)"
+                        [class.text-gray-700]="page !== (currentPage$ | async)">
+                        {{ page }}
+                      </button>
+                      
+                      <!-- Last page if not in visible range -->
+                      <ng-container *ngIf="pageInfo.showLastPage">
+                        <span *ngIf="pageInfo.showLastEllipsis" class="px-2 py-2 text-sm text-gray-500">...</span>
+                        <button
+                          (click)="onPageChange(pageInfo.totalPages)"
+                          class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
+                          {{ pageInfo.totalPages }}
+                        </button>
+                      </ng-container>
+                    </ng-container>
                     
                     <!-- Next Button -->
                     <button 
                       (click)="onNextPage()"
                       [disabled]="(currentPage$ | async) === (totalPages$ | async)"
-                      class="px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-['DM_Sans']">
-                      {{ 'pagination.next' | translate }}
+                      class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-['DM_Sans']">
+                      »
+                    </button>
+                    
+                    <!-- Last Page Button -->
+                    <button 
+                      (click)="onLastPage()"
+                      [disabled]="(currentPage$ | async) === (totalPages$ | async)"
+                      class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-['DM_Sans']">
+                      »»
                     </button>
                   </nav>
                 </div>
@@ -1006,21 +1046,69 @@ export class PartnersProductsComponent implements OnInit, OnDestroy {
     });
   }
 
+  onLastPage(): void {
+    this.totalPages$.pipe(
+      takeUntil(this.destroy$),
+      take(1)
+    ).subscribe(totalPages => {
+      if (totalPages > 0) {
+        this.onPageChange(totalPages);
+      }
+    });
+  }
+
   onItemsPerPageChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
     const itemsPerPage = +target.value;
     this.store.dispatch(ProductsActions.setItemsPerPage({ itemsPerPage }));
   }
 
-  // Helper method for pagination display
-  getPageNumbers(): Observable<number[]> {
-    return this.totalPages$.pipe(
-      map(totalPages => {
-        const pages: number[] = [];
-        for (let i = 1; i <= totalPages; i++) {
-          pages.push(i);
+  // Helper method for smart pagination display
+  getSmartPageNumbers(): Observable<{
+    visiblePages: number[];
+    showFirstPage: boolean;
+    showLastPage: boolean;
+    showFirstEllipsis: boolean;
+    showLastEllipsis: boolean;
+    totalPages: number;
+  }> {
+    return combineLatest([this.currentPage$, this.totalPages$]).pipe(
+      map(([currentPage, totalPages]) => {
+        const visiblePages: number[] = [];
+        let showFirstPage = false;
+        let showLastPage = false;
+        let showFirstEllipsis = false;
+        let showLastEllipsis = false;
+        
+        // Calculate visible page range (current page + 1 adjacent page on each side)
+        const startPage = Math.max(1, currentPage - 1);
+        const endPage = Math.min(totalPages, currentPage + 1);
+        
+        // Add visible pages
+        for (let i = startPage; i <= endPage; i++) {
+          visiblePages.push(i);
         }
-        return pages;
+        
+        // Show first page if not in visible range
+        if (startPage > 1) {
+          showFirstPage = true;
+          showFirstEllipsis = startPage > 2;
+        }
+        
+        // Show last page if not in visible range
+        if (endPage < totalPages) {
+          showLastPage = true;
+          showLastEllipsis = endPage < totalPages - 1;
+        }
+        
+        return {
+          visiblePages,
+          showFirstPage,
+          showLastPage,
+          showFirstEllipsis,
+          showLastEllipsis,
+          totalPages
+        };
       })
     );
   }

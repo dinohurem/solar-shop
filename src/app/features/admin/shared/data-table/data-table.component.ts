@@ -14,6 +14,9 @@ export interface TableColumn {
   sortable?: boolean;
   searchable?: boolean;
   format?: (value: any, item?: any) => string;
+  width?: string;
+  minWidth?: string;
+  maxWidth?: string;
 }
 
 export interface TableAction {
@@ -141,12 +144,15 @@ export interface TableConfig {
 
       <!-- Table -->
       <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
+        <table class="min-w-full table-fixed divide-y divide-gray-200">
           <thead class="bg-gray-50">
             <tr>
               <th *ngFor="let column of config.columns"
                   class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                   [class.cursor-default]="!column.sortable"
+                  [style.width]="column.width || 'auto'"
+                  [style.min-width]="column.minWidth || 'auto'"
+                  [style.max-width]="column.maxWidth || 'auto'"
                   (click)="onSort(column)">
                 <div class="flex items-center space-x-1">
                   <span>{{ column.label }}</span>
@@ -158,7 +164,7 @@ export interface TableConfig {
                   </svg>
                 </div>
               </th>
-              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 120px; min-width: 120px;">
                 {{ 'common.actions' | translate }}
               </th>
             </tr>
@@ -181,7 +187,10 @@ export interface TableConfig {
                 [class.cursor-pointer]="config.rowClickable !== false"
                 (click)="onRowClick(item)">
               <td *ngFor="let column of config.columns" 
-                  class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  class="px-6 py-4 text-sm text-gray-900"
+                  [style.width]="column.width || 'auto'"
+                  [style.min-width]="column.minWidth || 'auto'"
+                  [style.max-width]="column.maxWidth || 'auto'">
                 <ng-container [ngSwitch]="column.type">
                   <!-- Image -->
                   <div *ngSwitchCase="'image'" class="flex items-center">
@@ -199,43 +208,51 @@ export interface TableConfig {
                   
                   <!-- Boolean -->
                   <span *ngSwitchCase="'boolean'" 
-                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium truncate"
                         [class.bg-green-100]="getColumnValue(item, column.key)"
                         [class.text-green-800]="getColumnValue(item, column.key)"
                         [class.bg-red-100]="!getColumnValue(item, column.key)"
-                        [class.text-red-800]="!getColumnValue(item, column.key)">
+                        [class.text-red-800]="!getColumnValue(item, column.key)"
+                        [title]="column.format ? column.format(getColumnValue(item, column.key), item) : (getColumnValue(item, column.key) ? 'Yes' : 'No')">
                     {{ column.format ? column.format(getColumnValue(item, column.key), item) : (getColumnValue(item, column.key) ? 'Yes' : 'No') }}
                   </span>
                   
                   <!-- Status -->
                   <span *ngSwitchCase="'status'" 
-                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                        [ngClass]="getStatusClass(getColumnValue(item, column.key))">
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium truncate"
+                        [ngClass]="getStatusClass(getColumnValue(item, column.key))"
+                        [title]="column.format ? column.format(getColumnValue(item, column.key), item) : getColumnValue(item, column.key)">
                     {{ column.format ? column.format(getColumnValue(item, column.key), item) : getColumnValue(item, column.key) }}
                   </span>
                   
                   <!-- Array -->
-                  <div *ngSwitchCase="'array'" class="flex flex-wrap gap-1">
-                    <span *ngFor="let tag of getColumnValue(item, column.key) || []" 
-                          class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800">
+                  <div *ngSwitchCase="'array'" class="flex flex-wrap gap-1 overflow-hidden">
+                    <span *ngFor="let tag of (getColumnValue(item, column.key) || []).slice(0, 3)" 
+                          class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800 truncate"
+                          [title]="tag">
                       {{ tag }}
+                    </span>
+                    <span *ngIf="(getColumnValue(item, column.key) || []).length > 3"
+                          class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-600"
+                          [title]="'And ' + ((getColumnValue(item, column.key) || []).length - 3) + ' more'">
+                      +{{ (getColumnValue(item, column.key) || []).length - 3 }}
                     </span>
                   </div>
                   
                   <!-- Date -->
-                  <span *ngSwitchCase="'date'">
+                  <span *ngSwitchCase="'date'" class="block truncate" [title]="formatDate(getColumnValue(item, column.key))">
                     {{ formatDate(getColumnValue(item, column.key)) }}
                   </span>
                   
                   <!-- Default (text/number) -->
-                  <span *ngSwitchDefault>
+                  <span *ngSwitchDefault class="block truncate" [title]="column.format ? column.format(getColumnValue(item, column.key), item) : getColumnValue(item, column.key)">
                     {{ column.format ? column.format(getColumnValue(item, column.key), item) : getColumnValue(item, column.key) }}
                   </span>
                 </ng-container>
               </td>
               
               <!-- Actions -->
-              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium" style="width: 120px; min-width: 120px;">
                 <div class="flex items-center justify-end space-x-2">
                   <ng-container *ngFor="let action of config.actions">
                     <button *ngIf="!action.condition || action.condition(item)"
