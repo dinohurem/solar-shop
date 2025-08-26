@@ -125,63 +125,55 @@ import { ProductCategory, CategoriesService } from '../../../b2c/products/servic
               <!-- Categories Filter -->
               <div class="mb-6">
                 <h4 class="text-sm font-medium text-gray-900 mb-3 font-['DM_Sans']">{{ 'b2b.products.category' | translate }}</h4>
-                <div class="space-y-2">
-                  <!-- Parent Categories with Collapsible Subcategories -->
-                  <div *ngFor="let parentCategory of nestedCategories" class="space-y-1">
+                <div class="space-y-1">
+                  <!-- Hierarchical Category List -->
+                  <div *ngFor="let parentCategory of nestedCategories">
                     <!-- Parent Category -->
-                    <div class="flex items-center justify-between">
-                      <label class="flex items-center flex-1">
+                    <div class="flex items-center justify-between py-1">
+                      <label class="flex items-center flex-1 cursor-pointer">
                         <input 
                           type="checkbox" 
                           [value]="parentCategory.name"
-                          [checked]="(filters$ | async)?.categories?.includes(parentCategory.name) || false"
+                          [checked]="isParentCategorySelected(parentCategory)"
                           (change)="onParentCategoryChange(parentCategory, $event)"
                           class="rounded border-gray-300 text-solar-600 focus:ring-solar-500"
                         >
-                        <span class="ml-2 text-sm text-gray-700 font-['DM_Sans'] font-medium">{{ parentCategory.name }}</span>
-                        <span *ngIf="parentCategory.productCount" class="ml-2 text-xs text-gray-500">({{ parentCategory.productCount }})</span>
+                        <span class="ml-2 text-sm text-gray-900 font-['DM_Sans'] font-semibold">
+                          {{ parentCategory.name }}
+                        </span>
+                        <span class="ml-2 text-xs text-gray-500">
+                          ({{ getTotalProductCount(parentCategory) }})
+                        </span>
                       </label>
-                      <!-- Expand/Collapse Button -->
-                      <button 
-                        *ngIf="parentCategory.subcategories && parentCategory.subcategories.length > 0"
-                        (click)="toggleCategoryExpansion(parentCategory.id)"
-                        class="ml-2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
-                        type="button"
-                      >
-                        <svg 
-                          class="w-4 h-4 transform transition-transform"
-                          [class.rotate-180]="isCategoryExpanded(parentCategory.id)"
-                          fill="none" 
-                          stroke="currentColor" 
-                          viewBox="0 0 24 24"
-                        >
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                        </svg>
-                      </button>
                     </div>
                     
-                    <!-- Child Categories (Collapsible) -->
+                    <!-- Subcategories (Always visible, indented) -->
                     <div 
-                      *ngIf="parentCategory.subcategories && parentCategory.subcategories.length > 0 && isCategoryExpanded(parentCategory.id)"
-                      class="ml-6 space-y-1 animate-fade-in"
+                      *ngIf="parentCategory.subcategories && parentCategory.subcategories.length > 0"
+                      class="ml-4 space-y-1 border-l-2 border-gray-100 pl-3 mt-1"
                     >
-                      <label *ngFor="let subCategory of parentCategory.subcategories" class="flex items-center">
+                      <label *ngFor="let subCategory of parentCategory.subcategories" 
+                             class="flex items-center cursor-pointer py-1 hover:bg-gray-50 px-2 rounded transition-colors">
                         <input 
                           type="checkbox" 
                           [value]="subCategory.name"
                           [checked]="(filters$ | async)?.categories?.includes(subCategory.name) || false"
-                          (change)="onCategoryChange(subCategory.name, $event)"
+                          (change)="onSubCategoryChange(parentCategory, subCategory.name, $event)"
                           class="rounded border-gray-300 text-solar-600 focus:ring-solar-500"
                         >
-                        <span class="ml-2 text-sm text-gray-600 font-['DM_Sans']">{{ subCategory.name }}</span>
-                        <span *ngIf="subCategory.productCount" class="ml-2 text-xs text-gray-400">({{ subCategory.productCount }})</span>
+                        <span class="ml-2 text-sm text-gray-700 font-['DM_Sans']">
+                          {{ subCategory.name }}
+                        </span>
+                        <span *ngIf="subCategory.productCount" class="ml-2 text-xs text-gray-500">
+                          ({{ subCategory.productCount }})
+                        </span>
                       </label>
                     </div>
                   </div>
                   
-                  <!-- Fallback for flat categories (if nested categories are not available) -->
+                  <!-- Fallback for flat categories -->
                   <div *ngIf="nestedCategories.length === 0">
-                    <label *ngFor="let category of categories$ | async" class="flex items-center">
+                    <label *ngFor="let category of categories$ | async" class="flex items-center py-1 cursor-pointer">
                       <input 
                         type="checkbox" 
                         [value]="category.name"
@@ -872,8 +864,7 @@ export class PartnersProductsComponent implements OnInit, OnDestroy {
     const isChecked = target.checked;
     
     if (isChecked) {
-      // When parent is selected, select all its child categories
-      // This ensures products from all child categories are shown
+      // When parent is selected, select all its subcategories
       if (parentCategory.subcategories) {
         parentCategory.subcategories.forEach(subCategory => {
           this.store.dispatch(ProductsActions.toggleCategoryFilter({
@@ -882,13 +873,8 @@ export class PartnersProductsComponent implements OnInit, OnDestroy {
           }));
         });
       }
-      // Also add the parent category name to filters for products directly assigned to parent
-      this.store.dispatch(ProductsActions.toggleCategoryFilter({
-        category: parentCategory.name,
-        checked: true
-      }));
     } else {
-      // When parent is deselected, deselect all child categories
+      // When parent is deselected, deselect all subcategories
       if (parentCategory.subcategories) {
         parentCategory.subcategories.forEach(subCategory => {
           this.store.dispatch(ProductsActions.toggleCategoryFilter({
@@ -897,12 +883,18 @@ export class PartnersProductsComponent implements OnInit, OnDestroy {
           }));
         });
       }
-      // Also remove parent category from filters
-      this.store.dispatch(ProductsActions.toggleCategoryFilter({
-        category: parentCategory.name,
-        checked: false
-      }));
     }
+  }
+
+  onSubCategoryChange(parentCategory: ProductCategory, subCategoryName: string, event: Event): void {
+    const target = event.target as HTMLInputElement;
+    const isChecked = target.checked;
+    
+    // Toggle the specific subcategory
+    this.store.dispatch(ProductsActions.toggleCategoryFilter({
+      category: subCategoryName,
+      checked: isChecked
+    }));
   }
 
   onAvailabilityChange(availability: string): void {
@@ -914,7 +906,39 @@ export class PartnersProductsComponent implements OnInit, OnDestroy {
     this.store.dispatch(ProductsActions.setSortOption({ sortBy: target.value }));
   }
 
-  // Category expansion methods
+  // Helper methods for improved category filtering
+  isParentCategorySelected(parentCategory: ProductCategory): boolean {
+    // Get current filters synchronously using store selector
+    let isSelected = false;
+    this.filters$.pipe(
+      take(1)
+    ).subscribe(filters => {
+      if (parentCategory.subcategories && parentCategory.subcategories.length > 0) {
+        // Parent is considered selected if ALL its subcategories are selected
+        const allSubcategoriesSelected = parentCategory.subcategories.every(sub => 
+          filters?.categories?.includes(sub.name) || false
+        );
+        isSelected = allSubcategoriesSelected;
+      } else {
+        // For categories without subcategories, check if directly selected
+        isSelected = filters?.categories?.includes(parentCategory.name) || false;
+      }
+    });
+    return isSelected;
+  }
+
+  getTotalProductCount(parentCategory: ProductCategory): number {
+    if (!parentCategory.subcategories || parentCategory.subcategories.length === 0) {
+      return parentCategory.productCount || 0;
+    }
+    
+    // Sum up all subcategory product counts
+    return parentCategory.subcategories.reduce((total, sub) => {
+      return total + (sub.productCount || 0);
+    }, 0);
+  }
+
+  // Legacy expansion methods (kept for compatibility)
   toggleCategoryExpansion(categoryId: string): void {
     this.categoryExpansionState[categoryId] = !this.categoryExpansionState[categoryId];
   }
