@@ -82,17 +82,12 @@ export class ProductListService {
             const from = (page - 1) * itemsPerPage;
             const to = from + itemsPerPage - 1;
 
-            // Build the query
+            // Build the query - simpler approach using direct category_id
             let supabaseQuery = this.supabaseService.client
                 .from('products')
                 .select(`
                     *,
-                    categories!inner(name, slug),
-                    product_categories!left(
-                        category_id,
-                        is_primary,
-                        categories!inner(id, name, slug)
-                    )
+                    categories!inner(id, name, slug)
                 `, { count: 'exact' })
                 .eq('is_active', true);
 
@@ -103,9 +98,16 @@ export class ProductListService {
             }
 
             if (query.categories && query.categories.length > 0) {
-                // Filter by categories using the junction table
-                // Use 'in' operator which is cleaner for multiple values
-                supabaseQuery = supabaseQuery.in('categories.name', query.categories);
+                // First, get the category IDs from category names
+                const { data: categoryData } = await this.supabaseService.client
+                    .from('categories')
+                    .select('id, name')
+                    .in('name', query.categories);
+
+                if (categoryData && categoryData.length > 0) {
+                    const categoryIds = categoryData.map(cat => cat.id);
+                    supabaseQuery = supabaseQuery.in('category_id', categoryIds);
+                }
             }
 
             if (query.manufacturers && query.manufacturers.length > 0) {
@@ -292,39 +294,14 @@ export class ProductListService {
 
     private async convertSupabaseProductToLocal(product: any): Promise<Product | null> {
         try {
-            // Get category name (legacy single category)
-            const category = await this.supabaseService.getTableById('categories', product.category_id);
-            const categoryName = category?.name || 'Unknown Category';
+            // Get category name from the joined categories table
+            const categoryName = product.categories?.name || 'Unknown Category';
 
-            // Get multiple categories from product_categories junction table
-            let categoriesArray: Array<{ name: string; isPrimary: boolean }> = [];
-            
-            try {
-                const { data: productCategories } = await this.supabaseService.client
-                    .from('product_categories')
-                    .select(`
-                        is_primary,
-                        categories!inner(name, slug)
-                    `)
-                    .eq('product_id', product.id);
-
-                if (productCategories && productCategories.length > 0) {
-                    categoriesArray = productCategories.map((pc: any) => ({
-                        name: pc.categories?.name || 'Unknown',
-                        isPrimary: pc.is_primary || false
-                    }));
-                }
-            } catch (categoryError) {
-                console.error('Error loading product categories:', categoryError);
-            }
-
-            // Fallback to single category if no product_categories data
-            if (categoriesArray.length === 0 && categoryName) {
-                categoriesArray = [{
-                    name: categoryName,
-                    isPrimary: true
-                }];
-            }
+            // For now, use simple single category approach
+            const categoriesArray: Array<{ name: string; isPrimary: boolean }> = [{
+                name: categoryName,
+                isPrimary: true
+            }];
 
             // Get primary image
             const imageUrl = this.getProductImage(product.images);

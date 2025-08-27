@@ -141,12 +141,26 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
                           ({{ getTotalProductCount(parentCategory) }})
                         </span>
                       </label>
+                      <!-- Collapse/Expand Button -->
+                      <button
+                        *ngIf="parentCategory.subcategories && parentCategory.subcategories.length > 0"
+                        type="button"
+                        (click)="toggleCategoryExpansion(parentCategory.id)"
+                        class="p-1 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                        [title]="isCategoryExpanded(parentCategory.id) ? 'Collapse subcategories' : 'Expand subcategories'"
+                      >
+                        <svg class="w-4 h-4 transform transition-transform duration-200"
+                             [class.rotate-180]="isCategoryExpanded(parentCategory.id)"
+                             fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                      </button>
                     </div>
                     
-                    <!-- Subcategories (Always visible, indented) -->
+                    <!-- Subcategories (Collapsible, indented) -->
                     <div 
-                      *ngIf="parentCategory.subcategories && parentCategory.subcategories.length > 0"
-                      class="ml-4 space-y-1 border-l-2 border-gray-100 pl-3 mt-1"
+                      *ngIf="parentCategory.subcategories && parentCategory.subcategories.length > 0 && isCategoryExpanded(parentCategory.id)"
+                      class="ml-4 space-y-1 border-l-2 border-gray-100 pl-3 mt-1 animate-fade-in"
                     >
                       <label *ngFor="let subCategory of parentCategory.subcategories" 
                              class="flex items-center cursor-pointer py-1 hover:bg-gray-50 px-2 rounded transition-colors">
@@ -599,28 +613,39 @@ export class ProductListComponent implements OnInit, OnDestroy {
           this.store.dispatch(ProductListActions.clearFilters());
         }
 
-        // Wait for categories to be loaded, then find the matching category
-        this.categories$.pipe(
-          takeUntil(this.destroy$),
-          // Only process when categories are actually loaded
-          filter((categories): categories is ProductCategory[] =>
-            categories !== null && categories.length > 0
-          )
-        ).subscribe((categories) => {
-          const matchingCategory = categories.find((cat) =>
-            cat.slug === params['category'] ||
-            cat.id === params['category'] ||
-            cat.name.toLowerCase() === params['category'].toLowerCase()
-          );
-
-          if (matchingCategory) {
-            // Apply category filter using the category name (what products use)
+        // Check if we have multiple categories passed (from hierarchical navigation)
+        if (params['categories']) {
+          const categoryNames = params['categories'].split(',');
+          categoryNames.forEach((categoryName: string) => {
             this.store.dispatch(ProductListActions.toggleCategoryFilter({
-              category: matchingCategory.name,
+              category: categoryName.trim(),
               checked: true
             }));
-          }
-        });
+          });
+        } else {
+          // Wait for categories to be loaded, then find the matching category
+          this.categories$.pipe(
+            takeUntil(this.destroy$),
+            // Only process when categories are actually loaded
+            filter((categories): categories is ProductCategory[] =>
+              categories !== null && categories.length > 0
+            )
+          ).subscribe((categories) => {
+            const matchingCategory = categories.find((cat) =>
+              cat.slug === params['category'] ||
+              cat.id === params['category'] ||
+              cat.name.toLowerCase() === params['category'].toLowerCase()
+            );
+
+            if (matchingCategory) {
+              // Apply category filter using the category name (what products use)
+              this.store.dispatch(ProductListActions.toggleCategoryFilter({
+                category: matchingCategory.name,
+                checked: true
+              }));
+            }
+          });
+        }
       }
     });
 
@@ -820,8 +845,14 @@ export class ProductListComponent implements OnInit, OnDestroy {
     const isChecked = target.checked;
     
     if (isChecked) {
-      // When parent is selected, select all its subcategories
-      if (parentCategory.subcategories) {
+      // Always include the parent category itself
+      this.store.dispatch(ProductListActions.toggleCategoryFilter({ 
+        category: parentCategory.name, 
+        checked: true 
+      }));
+
+      // When parent is selected, also select all its subcategories
+      if (parentCategory.subcategories && parentCategory.subcategories.length > 0) {
         parentCategory.subcategories.forEach(subCategory => {
           this.store.dispatch(ProductListActions.toggleCategoryFilter({ 
             category: subCategory.name, 
@@ -830,8 +861,13 @@ export class ProductListComponent implements OnInit, OnDestroy {
         });
       }
     } else {
-      // When parent is deselected, deselect all subcategories
-      if (parentCategory.subcategories) {
+      // When parent is deselected, deselect parent and all subcategories
+      this.store.dispatch(ProductListActions.toggleCategoryFilter({ 
+        category: parentCategory.name, 
+        checked: false 
+      }));
+
+      if (parentCategory.subcategories && parentCategory.subcategories.length > 0) {
         parentCategory.subcategories.forEach(subCategory => {
           this.store.dispatch(ProductListActions.toggleCategoryFilter({ 
             category: subCategory.name, 
@@ -860,11 +896,12 @@ export class ProductListComponent implements OnInit, OnDestroy {
       take(1)
     ).subscribe(filters => {
       if (parentCategory.subcategories && parentCategory.subcategories.length > 0) {
-        // Parent is considered selected if ALL its subcategories are selected
+        // Parent is considered selected if the parent itself AND ALL its subcategories are selected
+        const parentSelected = filters?.categories?.includes(parentCategory.name) || false;
         const allSubcategoriesSelected = parentCategory.subcategories.every(sub => 
           filters?.categories?.includes(sub.name) || false
         );
-        isSelected = allSubcategoriesSelected;
+        isSelected = parentSelected && allSubcategoriesSelected;
       } else {
         // For categories without subcategories, check if directly selected
         isSelected = filters?.categories?.includes(parentCategory.name) || false;
@@ -874,14 +911,9 @@ export class ProductListComponent implements OnInit, OnDestroy {
   }
 
   getTotalProductCount(parentCategory: ProductCategory): number {
-    if (!parentCategory.subcategories || parentCategory.subcategories.length === 0) {
-      return parentCategory.productCount || 0;
-    }
-    
-    // Sum up all subcategory product counts
-    return parentCategory.subcategories.reduce((total, sub) => {
-      return total + (sub.productCount || 0);
-    }, 0);
+    // The CategoriesService.fetchNestedCategories() already calculated the total count
+    // (parent products + all subcategory products), so just return that
+    return parentCategory.productCount || 0;
   }
 
   // Pagination methods using NgRx

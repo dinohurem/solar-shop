@@ -189,8 +189,30 @@ export class ProductsComponent implements OnInit {
     // Navigate to product list with category filter
     // Use slug first, then fallback to name (URL-friendly)
     const categoryParam = category.slug || category.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    
+    // If this is a parent category with subcategories, pass ALL category names (parent + subcategories)
+    // If it's a subcategory, just pass that subcategory name
+    let categoryNames: string[] = [];
+    
+    if (category.subcategories && category.subcategories.length > 0) {
+      // Parent category: include ALL subcategories (but not parent itself unless it has products)
+      category.subcategories.forEach(sub => {
+        categoryNames.push(sub.name);
+      });
+      // Also include parent category if it has its own products
+      if (category.ownProductCount && category.ownProductCount > 0) {
+        categoryNames.push(category.name);
+      }
+    } else {
+      // Subcategory or parent without subcategories: just include this category
+      categoryNames.push(category.name);
+    }
+    
     this.router.navigate(['/proizvodi'], {
-      queryParams: { category: categoryParam }
+      queryParams: { 
+        category: categoryParam,
+        categories: categoryNames.join(',') // Pass all relevant category names
+      }
     });
   }
 

@@ -203,38 +203,50 @@ interface ProductRelationship {
 
             <div class="relative">
               <div class="border-2 border-gray-200 rounded-lg p-3 min-h-[120px] max-h-[240px] overflow-y-auto bg-white">
-                <div class="space-y-2">
-                  <div *ngFor="let category of categories" class="flex items-center">
-                    <input
-                      type="checkbox"
-                      [id]="'category_' + category.id"
-                      [value]="category.id"
-                      (change)="onCategorySelectionChange(category.id, $event)"
-                      [checked]="selectedCategoryIds.includes(category.id)"
-                      class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                    >
-                    <label [for]="'category_' + category.id" class="ml-2 text-sm text-gray-700 cursor-pointer">
-                      {{ category.name }}
-                    </label>
-                    <button
-                      *ngIf="selectedCategoryIds.includes(category.id)"
-                      type="button"
-                      (click)="setPrimaryCategory(category.id)"
-                      [class.bg-blue-600]="primaryCategoryId === category.id"
-                      [class.text-white]="primaryCategoryId === category.id"
-                      [class.bg-gray-200]="primaryCategoryId !== category.id"
-                      [class.text-gray-600]="primaryCategoryId !== category.id"
-                      class="ml-auto px-2 py-1 text-xs rounded transition-colors"
-                      [title]="primaryCategoryId === category.id ? 'Primary category' : 'Set as primary'"
-                    >
-                      {{ primaryCategoryId === category.id ? 'Primary' : 'Set Primary' }}
-                    </button>
+                <div class="space-y-1">
+                  <div *ngFor="let category of organizedCategories" class="space-y-1">
+                    <!-- Parent Category -->
+                    <div class="flex items-center py-1" [class.border-l-4]="!category.parent_id" [class.border-blue-500]="!category.parent_id" [class.pl-2]="!category.parent_id">
+                      <input
+                        type="radio"
+                        name="category"
+                        [id]="'category_' + category.id"
+                        [value]="category.id"
+                        (change)="onCategorySelectionChange(category.id, $event)"
+                        [checked]="selectedCategoryId === category.id"
+                        class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                      >
+                      <label [for]="'category_' + category.id" [class]="!category.parent_id ? 'ml-2 text-sm font-semibold text-gray-900 cursor-pointer' : 'ml-2 text-sm text-gray-700 cursor-pointer'">
+                        <span *ngIf="!category.parent_id" class="inline-flex items-center">
+                          <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10.707 2.293a1 1 0 00-1.414 0l-9 9a1 1 0 001.414 1.414L2 12.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-4.586l.293.293a1 1 0 001.414-1.414l-9-9z"/>
+                          </svg>
+                          {{ category.name }}
+                        </span>
+                        <span *ngIf="category.parent_id" class="inline-flex items-center ml-4">
+                          <svg class="w-3 h-3 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                          </svg>
+                          {{ category.name }}
+                        </span>
+                      </label>
+                    </div>
                   </div>
                 </div>
               </div>
               <label class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700">
-                {{ 'admin.productCategory' | translate }} (Select multiple)
+                {{ 'admin.productCategory' | translate }}
               </label>
+              <p class="mt-2 text-xs text-gray-500 flex items-start">
+                <svg class="w-3 h-3 mr-1 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10.707 2.293a1 1 0 00-1.414 0l-9 9a1 1 0 001.414 1.414L2 12.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-4.586l.293.293a1 1 0 001.414-1.414l-9-9z"/>
+                </svg>
+                <span class="mr-3">{{ 'admin.parentCategories' | translate }}</span>
+                <svg class="w-3 h-3 mr-1 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+                <span>{{ 'admin.childCategories' | translate }}</span>
+              </p>
             </div>
           </div>
 
@@ -693,11 +705,11 @@ export class ProductFormComponent implements OnInit, OnDestroy {
   products$: Observable<Product[]>;
   loading$: Observable<boolean>;
   categories: Category[] = [];
+  organizedCategories: Category[] = [];
   products: Product[] = [];
   relationships: ProductRelationship[] = [];
   availableProducts: Product[] = [];
-  selectedCategoryIds: string[] = [];
-  primaryCategoryId: string | null = null;
+  selectedCategoryId: string | null = null;
   newRelationship: Partial<ProductRelationship> = {
     relationship_type: 'suggested',
     related_product_id: undefined,
@@ -734,8 +746,7 @@ export class ProductFormComponent implements OnInit, OnDestroy {
       sku: ['', [Validators.required]],
       brand: [''],
       model: [''],
-      categories: [[]],
-      primary_category_id: [''],
+      category_id: [''],
       images: [''],
       stock_quantity: [0, [Validators.required, Validators.min(0)]],
       weight: [null],
@@ -757,12 +768,33 @@ export class ProductFormComponent implements OnInit, OnDestroy {
   private subscribeToStoreData(): void {
     this.categories$.pipe(takeUntil(this.destroy$)).subscribe(categories => {
       this.categories = categories;
+      this.organizeCategories();
     });
 
     this.products$.pipe(takeUntil(this.destroy$)).subscribe(products => {
       this.products = products;
       this.updateAvailableProducts();
     });
+  }
+
+  private organizeCategories(): void {
+    // Organize categories hierarchically: parent categories first, then their children
+    const parentCategories = this.categories.filter(cat => !cat.parent_id);
+    const childCategories = this.categories.filter(cat => cat.parent_id);
+    
+    this.organizedCategories = [];
+    
+    // Add each parent category followed by its children
+    parentCategories.forEach(parent => {
+      this.organizedCategories.push(parent);
+      const children = childCategories.filter(child => child.parent_id === parent.id);
+      this.organizedCategories.push(...children);
+    });
+    
+    // Add any orphaned child categories at the end
+    const parentIds = parentCategories.map(p => p.id);
+    const orphanedChildren = childCategories.filter(child => !parentIds.includes(child.parent_id || ''));
+    this.organizedCategories.push(...orphanedChildren);
   }
 
   private checkEditMode(): void {
@@ -794,8 +826,7 @@ export class ProductFormComponent implements OnInit, OnDestroy {
           sku: data.sku || '',
           brand: data.brand || '',
           model: data.model || '',
-          categories: [],
-          primary_category_id: '',
+          category_id: data.category_id || '',
           stock_quantity: Number(data.stock_quantity) || 0,
           weight: data.weight ? Number(data.weight) : null,
           dimensions: data.dimensions || '',
@@ -974,7 +1005,7 @@ export class ProductFormComponent implements OnInit, OnDestroy {
         sku: formValue.sku,
         brand: formValue.brand,
         model: formValue.model,
-        // category_id will be handled via product_categories table
+        category_id: formValue.category_id || null,
         stock_quantity: Number(formValue.stock_quantity),
         weight: formValue.weight ? Number(formValue.weight) : undefined,
         dimensions: formValue.dimensions || '',
@@ -1245,87 +1276,34 @@ export class ProductFormComponent implements OnInit, OnDestroy {
     const isChecked = event.target.checked;
     
     if (isChecked) {
-      if (!this.selectedCategoryIds.includes(categoryId)) {
-        this.selectedCategoryIds.push(categoryId);
-        // Set as primary if it's the first category
-        if (this.selectedCategoryIds.length === 1) {
-          this.primaryCategoryId = categoryId;
-        }
-      }
-    } else {
-      const index = this.selectedCategoryIds.indexOf(categoryId);
-      if (index > -1) {
-        this.selectedCategoryIds.splice(index, 1);
-        // If removing primary category, set new primary
-        if (this.primaryCategoryId === categoryId) {
-          this.primaryCategoryId = this.selectedCategoryIds.length > 0 ? this.selectedCategoryIds[0] : null;
-        }
-      }
-    }
-
-    // Update form control
-    this.productForm.patchValue({ categories: this.selectedCategoryIds });
-  }
-
-  setPrimaryCategory(categoryId: string): void {
-    if (this.selectedCategoryIds.includes(categoryId)) {
-      this.primaryCategoryId = categoryId;
-      this.productForm.patchValue({ primary_category_id: categoryId });
+      this.selectedCategoryId = categoryId;
+      // Update form control
+      this.productForm.patchValue({ category_id: categoryId });
     }
   }
+
 
   private async loadProductCategories(): Promise<void> {
     if (!this.productId) return;
 
     try {
-      const { data, error } = await this.supabaseService.client
-        .from('product_categories')
-        .select('category_id, is_primary')
-        .eq('product_id', this.productId);
-
-      if (error) {
-        console.error('Error loading product categories:', error);
-        return;
-      }
-
-      if (data && data.length > 0) {
-        this.selectedCategoryIds = data.map(pc => pc.category_id);
-        const primaryCategory = data.find(pc => pc.is_primary);
-        this.primaryCategoryId = primaryCategory ? primaryCategory.category_id : this.selectedCategoryIds[0];
-        
+      // Since we're using single category now, get it directly from the product record
+      const productData = await this.supabaseService.getTableById('products', this.productId);
+      
+      if (productData && productData.category_id) {
+        this.selectedCategoryId = productData.category_id;
         this.productForm.patchValue({
-          categories: this.selectedCategoryIds,
-          primary_category_id: this.primaryCategoryId
+          category_id: this.selectedCategoryId
         });
       }
     } catch (error) {
-      console.error('Error loading product categories:', error);
+      console.error('Error loading product category:', error);
     }
   }
 
   private async saveProductCategories(productId: string): Promise<void> {
-    try {
-      // First, delete existing product categories
-      await this.supabaseService.client
-        .from('product_categories')
-        .delete()
-        .eq('product_id', productId);
-
-      // Then insert new product categories
-      if (this.selectedCategoryIds.length > 0) {
-        const productCategories = this.selectedCategoryIds.map(categoryId => ({
-          product_id: productId,
-          category_id: categoryId,
-          is_primary: categoryId === this.primaryCategoryId
-        }));
-
-        await this.supabaseService.client
-          .from('product_categories')
-          .insert(productCategories);
-      }
-    } catch (error) {
-      console.error('Error saving product categories:', error);
-      throw error;
-    }
+    // Since we're using single category stored directly in the product record,
+    // we don't need to manage the product_categories table anymore.
+    // The category_id is already saved in the main product record.
   }
 }

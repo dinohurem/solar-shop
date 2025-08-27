@@ -12,6 +12,7 @@ export interface ProductCategory {
     isActive: boolean;
     sortOrder: number;
     productCount?: number;
+    ownProductCount?: number; // Products directly assigned to this category (not including subcategories)
     createdAt: Date;
     updatedAt: Date;
     subcategories?: ProductCategory[];
@@ -180,11 +181,20 @@ export class CategoriesService {
             // Get top-level categories
             const topLevelCategories = allCategories.filter(category => !category.parentId);
             
-            // For each top-level category, find its subcategories
+            // For each top-level category, find its subcategories and calculate hierarchical product counts
             const nestedCategories = topLevelCategories.map(parent => {
                 const subcategories = allCategories.filter(category => category.parentId === parent.id);
+                
+                // For parent categories:
+                // - Keep their individual count as-is (products directly assigned to parent)
+                // - Calculate total count = parent's own products + all subcategory products
+                const subcategoriesProductCount = subcategories.reduce((total, sub) => total + (sub.productCount || 0), 0);
+                const totalProductCount = (parent.productCount || 0) + subcategoriesProductCount;
+                
                 return {
                     ...parent,
+                    productCount: totalProductCount, // Total count for display/filtering
+                    ownProductCount: parent.productCount || 0, // Keep track of parent's own products
                     subcategories: subcategories.length > 0 ? subcategories : undefined
                 };
             });
@@ -256,15 +266,25 @@ export class CategoriesService {
                 productCounts[id] = 0;
             });
 
-            // Get all products at once
-            const allProducts = await this.supabaseService.getProducts({});
-            
+            // Use direct query on products table with category_id
+            const { data: products, error } = await this.supabaseService.client
+                .from('products')
+                .select('category_id')
+                .in('category_id', categoryIds)
+                .eq('is_active', true);
+
+            if (error) {
+                throw error;
+            }
+
             // Count products per category
-            allProducts.forEach(product => {
-                if (product.category_id && categoryIds.includes(product.category_id)) {
-                    productCounts[product.category_id] = (productCounts[product.category_id] || 0) + 1;
-                }
-            });
+            if (products) {
+                products.forEach(product => {
+                    if (product.category_id && categoryIds.includes(product.category_id)) {
+                        productCounts[product.category_id] = (productCounts[product.category_id] || 0) + 1;
+                    }
+                });
+            }
 
             return productCounts;
         } catch (error) {

@@ -51,17 +51,12 @@ export class ProductsEffects {
         const from = (page - 1) * itemsPerPage;
         const to = from + itemsPerPage - 1;
 
-        // Build the query
+        // Build the query - simpler approach using direct category_id
         let supabaseQuery = this.supabaseService.client
             .from('products')
             .select(`
                 *,
-                categories!inner(name, slug),
-                product_categories!left(
-                    category_id,
-                    is_primary,
-                    categories!inner(id, name, slug)
-                )
+                categories!inner(id, name, slug)
             `, { count: 'exact' })
             .eq('is_active', true);
 
@@ -72,8 +67,16 @@ export class ProductsEffects {
         }
 
         if (query.categories && query.categories.length > 0) {
-            // Use 'in' operator which is cleaner for multiple values
-            supabaseQuery = supabaseQuery.in('categories.name', query.categories);
+            // First, get the category IDs from category names
+            const { data: categoryData } = await this.supabaseService.client
+                .from('categories')
+                .select('id, name')
+                .in('name', query.categories);
+
+            if (categoryData && categoryData.length > 0) {
+                const categoryIds = categoryData.map(cat => cat.id);
+                supabaseQuery = supabaseQuery.in('category_id', categoryIds);
+            }
         }
 
         if (query.availability && query.availability !== '') {
@@ -118,27 +121,16 @@ export class ProductsEffects {
 
         // Transform the data to include category name and extract primary image
         const transformedProducts = (data || []).map(product => {
-            // Process multiple categories from product_categories junction table
-            let categoriesArray: Array<{ name: string; isPrimary: boolean }> = [];
-            
-            if (product.product_categories && Array.isArray(product.product_categories)) {
-                categoriesArray = product.product_categories.map((pc: any) => ({
-                    name: pc.categories?.name || 'Unknown',
-                    isPrimary: pc.is_primary || false
-                }));
-            }
-            
-            // Fallback to single category if no product_categories data
-            if (categoriesArray.length === 0 && product.categories?.name) {
-                categoriesArray = [{
-                    name: product.categories.name,
-                    isPrimary: true
-                }];
-            }
+            // Use simple single category from joined categories table
+            const categoryName = product.categories?.name || 'Uncategorized';
+            const categoriesArray: Array<{ name: string; isPrimary: boolean }> = [{
+                name: categoryName,
+                isPrimary: true
+            }];
 
             return {
                 ...product,
-                category: product.categories?.name || 'Uncategorized', // Legacy single category
+                category: categoryName, // Legacy single category
                 categories: categoriesArray, // New multi-category array
                 image_url: this.getPrimaryImageUrl(product.images),
                 in_stock: product.stock_status === 'in_stock',

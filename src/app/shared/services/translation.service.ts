@@ -1477,6 +1477,8 @@ export class TranslationService {
                     previous: 'Prethodna',
                     next: 'Sljedeća'
                 },
+                parentCategories: 'Nadkategorije',
+                childCategories: 'Podkategorije'
             },
             // Admin Users
             adminUsers: {
@@ -3974,6 +3976,8 @@ export class TranslationService {
                     previous: 'Previous',
                     next: 'Next'
                 },
+                parentCategories: 'Parent Categories',
+                childCategories: 'Child Categories'
             },
             // Admin Users
             adminUsers: {

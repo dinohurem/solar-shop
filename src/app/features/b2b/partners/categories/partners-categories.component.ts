@@ -4,6 +4,7 @@ import { RouterModule, Router } from '@angular/router';
 import { SupabaseService } from '../../../../services/supabase.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { CategoriesService } from '../../../b2c/products/services/categories.service';
 
 interface CategoryItem {
   id: string;
@@ -57,6 +58,7 @@ interface CategoryItem {
 export class PartnersCategoriesComponent implements OnInit {
   private supabase = inject(SupabaseService);
   private router = inject(Router);
+  private categoriesService = inject(CategoriesService);
 
   categories: CategoryItem[] = [];
 
@@ -130,33 +132,26 @@ export class PartnersCategoriesComponent implements OnInit {
 
   private sanitizer = inject(DomSanitizer);
 
-  async ngOnInit() {
-    try {
-      // Try to load categories from database
-      const dbCategories = await this.supabase.getCategories();
-      if (dbCategories && dbCategories.length > 0) {
-        // Map database categories to our interface and limit to 8
-        const categoryPromises = dbCategories
+  ngOnInit() {
+    // Use CategoriesService to load nested categories for consistency
+    this.categoriesService.getNestedCategories().subscribe(nestedCategories => {
+      if (nestedCategories && nestedCategories.length > 0) {
+        // Map ProductCategory to CategoryItem interface
+        this.categories = nestedCategories
           .slice(0, 8)
-          .map(async (cat: any, index: number) => ({
-            id: cat.id || `cat-${index}`,
-            name: cat.name || `Category ${index + 1}`,
-            slug: this.createSlug(cat.name || `category-${index}`),
-            imageUrl: cat.image_url || '',
-            icon: this.getIconForCategory(cat.name || ''),
-            productCount: await this.getProductCountForCategory(cat.name || cat.name)
+          .map(cat => ({
+            id: cat.id,
+            name: cat.name,
+            slug: cat.slug || this.createSlug(cat.name),
+            imageUrl: cat.imageUrl || '',
+            icon: this.getIconForCategory(cat.name),
+            productCount: cat.productCount || 0 // Use the already calculated count from CategoriesService
           }));
-        
-        this.categories = await Promise.all(categoryPromises);
+      } else {
+        // Fallback to sample data if no categories available
+        this.categories = this.sampleCategories.slice(0, 8);
       }
-    } catch (err) {
-      console.warn('Categories table not found in database. Using sample data as placeholder.');
-    }
-
-    // If no database categories or error, use sample data
-    if (this.categories.length === 0) {
-      this.categories = this.sampleCategories.slice(0, 8);
-    }
+    });
   }
 
   navigateToProducts(categorySlug: string): void {
@@ -256,26 +251,6 @@ export class PartnersCategoriesComponent implements OnInit {
       .trim();
   }
 
-  private async getProductCountForCategory(categoryName: string): Promise<number> {
-    try {
-      // Get products that match the category name using the categories table
-      const { count, error } = await this.supabase.client
-        .from('products')
-        .select('*, categories!inner(name)', { count: 'exact', head: true })
-        .eq('is_active', true)
-        .eq('categories.name', categoryName);
-      
-      if (error) {
-        console.error('Error fetching product count:', error);
-        return Math.floor(Math.random() * 25) + 5; // Fallback to random count
-      }
-      
-      return count || 0;
-    } catch (error) {
-      console.error('Error in getProductCountForCategory:', error);
-      return Math.floor(Math.random() * 25) + 5; // Fallback to random count
-    }
-  }
 
   private getIconForCategory(categoryName: string): string {
     const name = categoryName.toLowerCase();

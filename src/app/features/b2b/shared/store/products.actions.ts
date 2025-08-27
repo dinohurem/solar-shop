@@ -139,6 +139,7 @@ export interface Category {
     name: string;
     slug: string;
     description?: string;
+    parent_id?: string;
     is_active: boolean;
     sort_order: number;
 }
