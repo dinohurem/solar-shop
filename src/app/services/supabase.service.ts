@@ -400,12 +400,21 @@ export class SupabaseService {
                     id,
                     name,
                     slug
+                ),
+                product_categories!product_categories_product_id_fkey (
+                    is_primary,
+                    categories!product_categories_category_id_fkey (
+                        id,
+                        name,
+                        slug
+                    )
                 )
             `)
             .eq('is_active', true);
 
         if (filters?.categoryId) {
-            query = query.eq('category_id', filters.categoryId);
+            // Support both legacy category_id and product_categories filtering
+            query = query.or(`category_id.eq.${filters.categoryId},product_categories.category_id.eq.${filters.categoryId}`);
         }
         if (filters?.featured !== undefined) {
             query = query.eq('is_featured', filters.featured);

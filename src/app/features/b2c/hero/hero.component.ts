@@ -131,7 +131,7 @@ import { Offer } from '../../../shared/models/offer.model';
                                   [src]="offer.imageUrl" 
                                   [alt]="offer.title"
                                   class="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500"
-                                  onerror="this.src='/assets/images/product-placeholder.jpg'"
+                                  onerror="this.src='/assets/images/product-placeholder.svg'"
                                 >
                               </div>
                               <!-- Compact Discount Badge -->

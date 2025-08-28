@@ -15,7 +15,7 @@ export class ProductsEffects {
 
     private getPrimaryImageUrl(images: any[]): string {
         if (!images || !Array.isArray(images) || images.length === 0) {
-            return '/assets/images/product-placeholder.jpg';
+            return '/assets/images/product-placeholder.svg';
         }
 
         // Find primary image first
@@ -26,7 +26,7 @@ export class ProductsEffects {
 
         // Fallback to first image
         const firstImage = images[0];
-        return firstImage?.url || '/assets/images/product-placeholder.jpg';
+        return firstImage?.url || '/assets/images/product-placeholder.svg';
     }
 
     loadProducts$ = createEffect(() =>

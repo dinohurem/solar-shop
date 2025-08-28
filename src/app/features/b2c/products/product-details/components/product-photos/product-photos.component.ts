@@ -14,7 +14,7 @@ import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
         <img 
           [src]="selectedImage" 
           [alt]="product.name"
-          class="w-full h-full object-cover cursor-zoom-in"
+          class="w-full h-full object-contain cursor-zoom-in"
           (click)="openZoom()"
         >
       </div>
@@ -31,7 +31,7 @@ import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
           <img 
             [src]="image" 
             [alt]="product.name + ' - Image ' + (i + 1)"
-            class="w-full h-full object-cover"
+            class="w-full h-full object-contain"
           >
         </button>
       </div>
@@ -140,7 +140,7 @@ export class ProductPhotosComponent implements OnInit, OnDestroy {
     } 
     // Default placeholder if no images
     else {
-      this.productImages = ['assets/images/product-placeholder.jpg'];
+      this.productImages = ['assets/images/product-placeholder.svg'];
     }
   }
 

@@ -266,20 +266,43 @@ export class CategoriesService {
                 productCounts[id] = 0;
             });
 
-            // Use direct query on products table with category_id
-            const { data: products, error } = await this.supabaseService.client
+            // Get counts from product_categories junction table
+            const { data: productCategories, error: pcError } = await this.supabaseService.client
+                .from('product_categories')
+                .select(`
+                    category_id,
+                    products!inner(id, is_active)
+                `)
+                .in('category_id', categoryIds)
+                .eq('products.is_active', true);
+
+            if (pcError) {
+                console.warn('Error querying product_categories table:', pcError);
+            }
+
+            // Count products per category from product_categories
+            if (productCategories) {
+                productCategories.forEach((pc: any) => {
+                    if (pc.category_id && categoryIds.includes(pc.category_id)) {
+                        productCounts[pc.category_id] = (productCounts[pc.category_id] || 0) + 1;
+                    }
+                });
+            }
+
+            // Also check legacy category_id in products table (for products not yet migrated)
+            const { data: legacyProducts, error: legacyError } = await this.supabaseService.client
                 .from('products')
                 .select('category_id')
                 .in('category_id', categoryIds)
                 .eq('is_active', true);
 
-            if (error) {
-                throw error;
+            if (legacyError) {
+                console.warn('Error querying products table for legacy category_id:', legacyError);
             }
 
-            // Count products per category
-            if (products) {
-                products.forEach(product => {
+            // Add legacy product counts
+            if (legacyProducts) {
+                legacyProducts.forEach(product => {
                     if (product.category_id && categoryIds.includes(product.category_id)) {
                         productCounts[product.category_id] = (productCounts[product.category_id] || 0) + 1;
                     }

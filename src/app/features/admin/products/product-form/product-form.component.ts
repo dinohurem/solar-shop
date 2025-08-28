@@ -206,30 +206,43 @@ interface ProductRelationship {
                 <div class="space-y-1">
                   <div *ngFor="let category of organizedCategories" class="space-y-1">
                     <!-- Parent Category -->
-                    <div class="flex items-center py-1" [class.border-l-4]="!category.parent_id" [class.border-blue-500]="!category.parent_id" [class.pl-2]="!category.parent_id">
-                      <input
-                        type="radio"
-                        name="category"
-                        [id]="'category_' + category.id"
-                        [value]="category.id"
-                        (change)="onCategorySelectionChange(category.id, $event)"
-                        [checked]="selectedCategoryId === category.id"
-                        class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                      >
-                      <label [for]="'category_' + category.id" [class]="!category.parent_id ? 'ml-2 text-sm font-semibold text-gray-900 cursor-pointer' : 'ml-2 text-sm text-gray-700 cursor-pointer'">
-                        <span *ngIf="!category.parent_id" class="inline-flex items-center">
-                          <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10.707 2.293a1 1 0 00-1.414 0l-9 9a1 1 0 001.414 1.414L2 12.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-4.586l.293.293a1 1 0 001.414-1.414l-9-9z"/>
+                    <div class="flex items-center justify-between py-1" [class.border-l-4]="!category.parent_id" [class.border-blue-500]="!category.parent_id" [class.pl-2]="!category.parent_id">
+                      <div class="flex items-center">
+                        <input
+                          type="checkbox"
+                          [id]="'category_' + category.id"
+                          [value]="category.id"
+                          (change)="onCategorySelectionChange(category.id, $event)"
+                          [checked]="selectedCategoryIds.includes(category.id)"
+                          class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500 rounded"
+                        >
+                        <label [for]="'category_' + category.id" [class]="!category.parent_id ? 'ml-2 text-sm font-semibold text-gray-900 cursor-pointer' : 'ml-2 text-sm text-gray-700 cursor-pointer'">
+                          <span *ngIf="!category.parent_id" class="inline-flex items-center">
+                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M10.707 2.293a1 1 0 00-1.414 0l-9 9a1 1 0 001.414 1.414L2 12.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-4.586l.293.293a1 1 0 001.414-1.414l-9-9z"/>
+                            </svg>
+                            {{ category.name }}
+                          </span>
+                          <span *ngIf="category.parent_id" class="inline-flex items-center ml-4">
+                            <svg class="w-3 h-3 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                            {{ category.name }}
+                          </span>
+                        </label>
+                      </div>
+                      <div *ngIf="selectedCategoryIds.includes(category.id)" class="flex items-center">
+                        <button
+                          type="button"
+                          (click)="setPrimaryCategory(category.id)"
+                          [class]="primaryCategoryId === category.id ? 'px-2 py-1 text-xs bg-yellow-500 text-white rounded-full' : 'px-2 py-1 text-xs bg-gray-200 text-gray-700 rounded-full hover:bg-yellow-200'"
+                          [title]="primaryCategoryId === category.id ? 'This is the primary category' : 'Set as primary category'"
+                        >
+                          <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                           </svg>
-                          {{ category.name }}
-                        </span>
-                        <span *ngIf="category.parent_id" class="inline-flex items-center ml-4">
-                          <svg class="w-3 h-3 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                          </svg>
-                          {{ category.name }}
-                        </span>
-                      </label>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -709,7 +722,8 @@ export class ProductFormComponent implements OnInit, OnDestroy {
   products: Product[] = [];
   relationships: ProductRelationship[] = [];
   availableProducts: Product[] = [];
-  selectedCategoryId: string | null = null;
+  selectedCategoryIds: string[] = [];
+  primaryCategoryId: string | null = null;
   newRelationship: Partial<ProductRelationship> = {
     relationship_type: 'suggested',
     related_product_id: undefined,
@@ -746,7 +760,6 @@ export class ProductFormComponent implements OnInit, OnDestroy {
       sku: ['', [Validators.required]],
       brand: [''],
       model: [''],
-      category_id: [''],
       images: [''],
       stock_quantity: [0, [Validators.required, Validators.min(0)]],
       weight: [null],
@@ -826,7 +839,6 @@ export class ProductFormComponent implements OnInit, OnDestroy {
           sku: data.sku || '',
           brand: data.brand || '',
           model: data.model || '',
-          category_id: data.category_id || '',
           stock_quantity: Number(data.stock_quantity) || 0,
           weight: data.weight ? Number(data.weight) : null,
           dimensions: data.dimensions || '',
@@ -1005,7 +1017,6 @@ export class ProductFormComponent implements OnInit, OnDestroy {
         sku: formValue.sku,
         brand: formValue.brand,
         model: formValue.model,
-        category_id: formValue.category_id || null,
         stock_quantity: Number(formValue.stock_quantity),
         weight: formValue.weight ? Number(formValue.weight) : undefined,
         dimensions: formValue.dimensions || '',
@@ -1276,9 +1287,29 @@ export class ProductFormComponent implements OnInit, OnDestroy {
     const isChecked = event.target.checked;
     
     if (isChecked) {
-      this.selectedCategoryId = categoryId;
-      // Update form control
-      this.productForm.patchValue({ category_id: categoryId });
+      // Add category to selected list
+      if (!this.selectedCategoryIds.includes(categoryId)) {
+        this.selectedCategoryIds.push(categoryId);
+      }
+      
+      // If this is the first category selected, make it primary
+      if (this.selectedCategoryIds.length === 1) {
+        this.primaryCategoryId = categoryId;
+      }
+    } else {
+      // Remove category from selected list
+      this.selectedCategoryIds = this.selectedCategoryIds.filter(id => id !== categoryId);
+      
+      // If this was the primary category, set a new primary (first in the list)
+      if (this.primaryCategoryId === categoryId) {
+        this.primaryCategoryId = this.selectedCategoryIds.length > 0 ? this.selectedCategoryIds[0] : null;
+      }
+    }
+  }
+
+  setPrimaryCategory(categoryId: string): void {
+    if (this.selectedCategoryIds.includes(categoryId)) {
+      this.primaryCategoryId = categoryId;
     }
   }
 
@@ -1287,23 +1318,67 @@ export class ProductFormComponent implements OnInit, OnDestroy {
     if (!this.productId) return;
 
     try {
-      // Since we're using single category now, get it directly from the product record
-      const productData = await this.supabaseService.getTableById('products', this.productId);
-      
-      if (productData && productData.category_id) {
-        this.selectedCategoryId = productData.category_id;
-        this.productForm.patchValue({
-          category_id: this.selectedCategoryId
-        });
+      // Load product categories from the product_categories junction table
+      const { data: productCategories } = await this.supabaseService.client
+        .from('product_categories')
+        .select(`
+          category_id,
+          is_primary,
+          categories!inner(id, name)
+        `)
+        .eq('product_id', this.productId);
+
+      if (productCategories && productCategories.length > 0) {
+        this.selectedCategoryIds = productCategories.map((pc: any) => pc.category_id);
+        
+        // Find the primary category
+        const primaryCategory = productCategories.find((pc: any) => pc.is_primary);
+        this.primaryCategoryId = primaryCategory ? primaryCategory.category_id : this.selectedCategoryIds[0];
+      } else {
+        // Fallback: check if there's a legacy category_id in the product record
+        const productData = await this.supabaseService.getTableById('products', this.productId);
+        if (productData && productData.category_id) {
+          this.selectedCategoryIds = [productData.category_id];
+          this.primaryCategoryId = productData.category_id;
+        }
       }
     } catch (error) {
-      console.error('Error loading product category:', error);
+      console.error('Error loading product categories:', error);
     }
   }
 
   private async saveProductCategories(productId: string): Promise<void> {
-    // Since we're using single category stored directly in the product record,
-    // we don't need to manage the product_categories table anymore.
-    // The category_id is already saved in the main product record.
+    if (this.selectedCategoryIds.length === 0) {
+      console.log('No categories selected, skipping product_categories save');
+      return;
+    }
+
+    try {
+      // First, delete existing product_categories entries for this product
+      await this.supabaseService.client
+        .from('product_categories')
+        .delete()
+        .eq('product_id', productId);
+
+      // Then, insert new entries
+      const productCategoryEntries = this.selectedCategoryIds.map((categoryId) => ({
+        product_id: productId,
+        category_id: categoryId,
+        is_primary: categoryId === this.primaryCategoryId
+      }));
+
+      const { error } = await this.supabaseService.client
+        .from('product_categories')
+        .insert(productCategoryEntries);
+
+      if (error) {
+        throw error;
+      }
+
+      console.log('Successfully saved product categories:', productCategoryEntries);
+    } catch (error) {
+      console.error('Error saving product categories:', error);
+      throw error;
+    }
   }
 }

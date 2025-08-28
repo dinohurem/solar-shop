@@ -82,12 +82,20 @@ export class ProductListService {
             const from = (page - 1) * itemsPerPage;
             const to = from + itemsPerPage - 1;
 
-            // Build the query - simpler approach using direct category_id
+            // Build the query with support for both legacy and product_categories
             let supabaseQuery = this.supabaseService.client
                 .from('products')
                 .select(`
                     *,
-                    categories!inner(id, name, slug)
+                    categories!inner(id, name, slug),
+                    product_categories!product_categories_product_id_fkey (
+                        is_primary,
+                        categories!product_categories_category_id_fkey (
+                            id,
+                            name,
+                            slug
+                        )
+                    )
                 `, { count: 'exact' })
                 .eq('is_active', true);
 
@@ -106,7 +114,8 @@ export class ProductListService {
 
                 if (categoryData && categoryData.length > 0) {
                     const categoryIds = categoryData.map(cat => cat.id);
-                    supabaseQuery = supabaseQuery.in('category_id', categoryIds);
+                    // Support both legacy category_id and product_categories filtering
+                    supabaseQuery = supabaseQuery.or(`category_id.in.(${categoryIds.join(',')}),product_categories.category_id.in.(${categoryIds.join(',')})`);
                 }
             }
 
@@ -227,8 +236,33 @@ export class ProductListService {
 
     private async fetchProductById(id: string): Promise<Product | null> {
         try {
-            const product = await this.supabaseService.getTableById('products', id);
-            if (!product) return null;
+            // Use supabase query with proper joins to get product_categories data
+            const { data: product, error } = await this.supabaseService.client
+                .from('products')
+                .select(`
+                    *,
+                    categories:category_id (
+                        id,
+                        name,
+                        slug
+                    ),
+                    product_categories!product_categories_product_id_fkey (
+                        is_primary,
+                        categories!product_categories_category_id_fkey (
+                            id,
+                            name,
+                            slug
+                        )
+                    )
+                `)
+                .eq('id', id)
+                .eq('is_active', true)
+                .single();
+
+            if (error || !product) {
+                console.error('Error fetching product by ID:', error);
+                return null;
+            }
 
             return await this.convertSupabaseProductToLocal(product);
         } catch (error) {
@@ -294,14 +328,30 @@ export class ProductListService {
 
     private async convertSupabaseProductToLocal(product: any): Promise<Product | null> {
         try {
-            // Get category name from the joined categories table
+            // Get legacy single category name
             const categoryName = product.categories?.name || 'Unknown Category';
 
-            // For now, use simple single category approach
-            const categoriesArray: Array<{ name: string; isPrimary: boolean }> = [{
-                name: categoryName,
-                isPrimary: true
-            }];
+            // Get multiple categories from product_categories junction table (already loaded)
+            let categoriesArray: Array<{ name: string; isPrimary: boolean }> = [];
+            
+            // Use the product_categories data that's already loaded from the join
+            if (product.product_categories && product.product_categories.length > 0) {
+                categoriesArray = product.product_categories.map((pc: any) => ({
+                    name: pc.categories?.name || 'Unknown',
+                    isPrimary: pc.is_primary || false
+                }));
+            }
+            // Fallback to single category if no product_categories data
+            else if (categoryName && categoryName !== 'Unknown Category') {
+                categoriesArray = [{
+                    name: categoryName,
+                    isPrimary: true
+                }];
+            }
+            // If no categories at all, set empty array (avoid Unknown Category)
+            else {
+                categoriesArray = [];
+            }
 
             // Get primary image
             const imageUrl = this.getProductImage(product.images);
@@ -319,6 +369,10 @@ export class ProductListService {
                 availability = 'limited';
             }
 
+            // Get the primary category name for legacy support
+            const primaryCategory = categoriesArray.find(cat => cat.isPrimary) || categoriesArray[0];
+            const legacyCategoryName = primaryCategory ? primaryCategory.name : categoryName;
+
             return {
                 id: product.id,
                 name: product.name,
@@ -327,7 +381,7 @@ export class ProductListService {
                 originalPrice: product.original_price || undefined,
                 discount,
                 imageUrl,
-                category: categoryName, // Legacy single category
+                category: legacyCategoryName, // Legacy single category (primary or first from categories)
                 categories: categoriesArray, // New multi-category array
                 manufacturer: product.brand,
                 model: product.model,

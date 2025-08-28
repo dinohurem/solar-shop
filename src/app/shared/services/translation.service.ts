@@ -1537,7 +1537,7 @@ export class TranslationService {
             reviewsSection: {
                 customerReviews: 'Recenzije kupaca',
                 basedOnReviews: 'Na temelju {{count}} recenzija',
-                ratingBreakdown: 'Razpodjela ocjena',
+                ratingBreakdown: 'Raspodjela ocjena',
                 writeReview: 'Napiši recenziju',
                 verifiedPurchase: 'Potvrđena kupnja',
                 helpful: 'Korisno',

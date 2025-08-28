@@ -92,14 +92,14 @@ import * as B2BCartActions from '../../cart/store/b2b-cart.actions';
                 <img *ngIf="getProductImages().length > 0" 
                      [src]="getCurrentImageUrl()" 
                      [alt]="product.name" 
-                     class="w-full h-96 object-cover"
+                     class="w-full h-96 object-contain"
                      (error)="onImageError($event)">
                 
                 <!-- Show placeholder if no images -->
                 <img *ngIf="getProductImages().length === 0" 
                      src="assets/images/product-placeholder.svg" 
                      [alt]="product.name" 
-                     class="w-full h-96 object-cover">
+                     class="w-full h-96 object-contain">
                 
                 <!-- Navigation arrows for multiple images -->
                 <div *ngIf="hasMultipleImages()" class="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-4">
@@ -141,7 +141,7 @@ import * as B2BCartActions from '../../cart/store/b2b-cart.actions';
                     <img 
                          [src]="image" 
                          [alt]="product.name"
-                         class="w-full h-full object-cover rounded"
+                         class="w-full h-full object-contain rounded"
                          (error)="onThumbnailImageError($event, i)">
                   </div>
                 </div>
@@ -345,7 +345,7 @@ import * as B2BCartActions from '../../cart/store/b2b-cart.actions';
                   [class.max-h-0]="!isDescriptionExpanded"
                   [class.max-h-screen]="isDescriptionExpanded"
                 >
-                  <p class="text-gray-600 font-['DM_Sans'] leading-relaxed">{{ product.description }}</p>
+                  <p class="text-gray-600 font-['DM_Sans'] leading-relaxed whitespace-pre-line">{{ product.description }}</p>
                 </div>
               </div>
               
@@ -439,7 +439,7 @@ import * as B2BCartActions from '../../cart/store/b2b-cart.actions';
                 <img 
                      [src]="getSuggestedProductImageUrl(suggested)" 
                      [alt]="suggested.name" 
-                     class="w-full h-48 object-cover"
+                     class="w-full h-48 object-contain"
                      (error)="onSuggestedImageError($event)">
               </div>
               
