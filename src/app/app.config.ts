@@ -3,6 +3,8 @@ import { provideRouter, withInMemoryScrolling } from '@angular/router';
 import { provideStore } from '@ngrx/store';
 import { provideEffects } from '@ngrx/effects';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
+import { registerLocaleData } from '@angular/common';
+import localeDE from '@angular/common/locales/de';
 
 import { routes } from './app.routes';
 import { AuthEffects } from './core/auth/store/auth.effects';
@@ -26,6 +28,9 @@ import { provideLottieOptions } from 'ngx-lottie';
 import { playerFactory } from './shared/components/loader/loader.component';
 import { environment } from '../environments/environment';
 import { provideHttpClient } from '@angular/common/http';
+
+// Register German locale data
+registerLocaleData(localeDE);
 
 export const appConfig: ApplicationConfig = {
   providers: [

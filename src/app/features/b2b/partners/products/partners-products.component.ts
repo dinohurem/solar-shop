@@ -329,7 +329,7 @@ import { ProductCategory, CategoriesService } from '../../../b2c/products/servic
                     <div class="w-full h-48 bg-gray-50 relative overflow-hidden flex items-center justify-center border-b border-gray-100">
                       <img [src]="getProductImageUrl(product)" 
                            [alt]="product.name" 
-                           class="w-full h-full object-cover"
+                           class="w-full h-full object-contain"
                            (error)="onImageError($event)"
                            loading="lazy">
                     </div>
@@ -369,25 +369,25 @@ import { ProductCategory, CategoriesService } from '../../../b2c/products/servic
                           <!-- Company Specific Price -->
                           <div *ngIf="product.company_price && isCompanyContact" class="flex items-center justify-between">
                             <span class="text-xs font-medium text-green-700">{{ 'b2b.products.yourPrice' | translate }}:</span>
-                            <span class="text-sm font-bold text-green-600">€{{ product.company_price | number:'1.2-2' }}</span>
+                            <span class="text-sm font-bold text-green-600">€{{ product.company_price | number:'1.2-2':'de' }}</span>
                           </div>
 
                           <!-- Partner Price -->
                           <div *ngIf="product.partner_price && (!product.company_price || !isCompanyContact)" class="flex items-center justify-between">
                             <span class="text-xs font-medium text-solar-700">{{ 'b2b.products.partnerPrice' | translate }}:</span>
-                            <span class="text-sm font-bold text-solar-600">€{{ product.partner_price | number:'1.2-2' }}</span>
+                            <span class="text-sm font-bold text-solar-600">€{{ product.partner_price | number:'1.2-2':'de' }}</span>
                           </div>
 
                           <!-- Retail Price -->
                           <div class="flex items-center justify-between">
                             <span class="text-xs text-gray-500">{{ 'b2b.products.retailPrice' | translate }}:</span>
-                            <span class="text-xs text-gray-500 line-through">€{{ product.price | number:'1.2-2' }}</span>
+                            <span class="text-xs text-gray-500 line-through">€{{ product.price | number:'1.2-2':'de' }}</span>
                           </div>
 
                           <!-- Savings -->
                           <div *ngIf="product.savings" class="flex items-center justify-between">
                             <span class="text-xs font-medium text-green-700">{{ 'b2b.products.savings' | translate }}:</span>
-                            <span class="text-xs font-bold text-green-600">€{{ product.savings | number:'1.2-2' }}</span>
+                            <span class="text-xs font-bold text-green-600">€{{ product.savings | number:'1.2-2':'de' }}</span>
                           </div>
                         </div>
                       </div>
@@ -463,7 +463,7 @@ import { ProductCategory, CategoriesService } from '../../../b2c/products/servic
                     <div class="w-24 h-24 bg-gray-50 rounded-lg flex-shrink-0 flex items-center justify-center border border-gray-200">
                       <img [src]="getProductImageUrl(product)" 
                            [alt]="product.name" 
-                           class="w-full h-full object-cover rounded-lg"
+                           class="w-full h-full object-contain rounded-lg"
                            (error)="onImageError($event)"
                            loading="lazy">
                     </div>
@@ -491,9 +491,9 @@ import { ProductCategory, CategoriesService } from '../../../b2c/products/servic
                         <!-- Pricing and Actions -->
                         <div class="ml-4 flex-shrink-0 text-right">
                           <div *ngIf="isAuthenticated && hasB2BPrice(product)" class="mb-2">
-                            <div *ngIf="product.company_price && isCompanyContact" class="text-lg font-bold text-green-600">€{{ product.company_price | number:'1.2-2' }}</div>
-                            <div *ngIf="product.partner_price && (!product.company_price || !isCompanyContact)" class="text-lg font-bold text-solar-600">€{{ product.partner_price | number:'1.2-2' }}</div>
-                            <div class="text-sm text-gray-500 line-through">€{{ product.price | number:'1.2-2' }}</div>
+                            <div *ngIf="product.company_price && isCompanyContact" class="text-lg font-bold text-green-600">€{{ product.company_price | number:'1.2-2':'de' }}</div>
+                            <div *ngIf="product.partner_price && (!product.company_price || !isCompanyContact)" class="text-lg font-bold text-solar-600">€{{ product.partner_price | number:'1.2-2':'de' }}</div>
+                            <div class="text-sm text-gray-500 line-through">€{{ product.price | number:'1.2-2':'de' }}</div>
                           </div>
                           <div class="space-x-2">
                             <button (click)="viewDetails(product)" 

@@ -155,9 +155,26 @@ export class PartnersCategoriesComponent implements OnInit {
   }
 
   navigateToProducts(categorySlug: string): void {
+    // Find the category to check if it has subcategories
+    const category = this.categories.find(cat => cat.slug === categorySlug);
+    if (!category) {
+      // Navigate to products page with category filter applied
+      this.router.navigate(['/partneri/proizvodi'], {
+        queryParams: { category: categorySlug }
+      });
+      return;
+    }
+
+    // Prepare category names for filtering (similar to B2C logic)
+    let categoryNames: string[] = [];
+    categoryNames.push(category.name); // Always include the selected category
+
     // Navigate to products page with category filter applied
     this.router.navigate(['/partneri/proizvodi'], {
-      queryParams: { category: categorySlug }
+      queryParams: { 
+        category: categorySlug,
+        categories: categoryNames.join(',') // Pass the category names for filtering
+      }
     });
   }
 

@@ -107,13 +107,13 @@ import { LucideAngularModule, Star, StarHalf, ShoppingCart } from 'lucide-angula
         <!-- Regular Pricing -->
         <div *ngIf="!isCompanyPricing" class="flex items-center space-x-4 mb-4">
           <span class="text-3xl font-bold text-gray-900 font-['DM_Sans']">
-            €{{ product.price | number:'1.2-2' }}
+            €{{ product.price | number:'1.2-2':'de' }}
           </span>
           <span 
             *ngIf="product.originalPrice && product.originalPrice !== product.price" 
             class="text-xl text-gray-500 line-through font-['DM_Sans']"
           >
-            €{{ product.originalPrice | number:'1.2-2' }}
+            €{{ product.originalPrice | number:'1.2-2':'de' }}
           </span>
           <span 
             *ngIf="product.discount" 
@@ -129,7 +129,7 @@ import { LucideAngularModule, Star, StarHalf, ShoppingCart } from 'lucide-angula
           <div class="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
             <span class="text-sm text-gray-600 font-['DM_Sans']">{{ 'b2b.products.retailPrice' | translate }}:</span>
             <span class="text-lg text-gray-500 line-through font-['DM_Sans']">
-              €{{ product.price | number:'1.2-2' }}
+              €{{ product.price | number:'1.2-2':'de' }}
             </span>
           </div>
           
@@ -137,7 +137,7 @@ import { LucideAngularModule, Star, StarHalf, ShoppingCart } from 'lucide-angula
           <div class="flex items-center justify-between bg-solar-50 p-4 rounded-lg border-2 border-solar-200">
             <span class="text-base font-semibold text-solar-700 font-['DM_Sans']">{{ 'b2b.products.partnerPrice' | translate }}:</span>
             <span class="text-3xl font-bold text-solar-600 font-['DM_Sans']">
-              €{{ getCompanyPrice() | number:'1.2-2' }}
+              €{{ getCompanyPrice() | number:'1.2-2':'de' }}
             </span>
           </div>
           
@@ -145,7 +145,7 @@ import { LucideAngularModule, Star, StarHalf, ShoppingCart } from 'lucide-angula
           <div class="flex items-center justify-between bg-green-50 p-3 rounded-lg">
             <span class="text-sm font-medium text-green-700 font-['DM_Sans']">{{ 'b2b.products.savings' | translate }}:</span>
             <span class="text-lg font-bold text-green-600 font-['DM_Sans']">
-              €{{ getCompanySavings() | number:'1.2-2' }} ({{ COMPANY_DISCOUNT_PERCENTAGE }}% off)
+              €{{ getCompanySavings() | number:'1.2-2':'de' }} ({{ COMPANY_DISCOUNT_PERCENTAGE }}% off)
             </span>
           </div>
         </div>
@@ -643,8 +643,15 @@ export class ProductInfoComponent implements OnInit, OnDestroy {
   }
 
   navigateToCategory(categoryName: string) {
+    // Navigate to product list with category filter
+    // Use the category name to create a slug-like parameter
+    const categorySlug = categoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    
     this.router.navigate(['/proizvodi'], {
-      queryParams: { category: categoryName }
+      queryParams: { 
+        category: categorySlug,
+        categories: categoryName // Pass the actual category name for filtering
+      }
     });
   }
 } 

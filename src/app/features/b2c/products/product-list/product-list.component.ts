@@ -305,7 +305,7 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
                   <img 
                     [src]="getProductImageUrl(product)" 
                     [alt]="product.name"
-                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
                     (error)="onProductImageError($event)"
                   >
                   <!-- Featured Badge - Top Left -->
@@ -381,13 +381,13 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
                   <div class="space-y-3">
                     <div class="flex items-center space-x-2">
                       <span class="text-xl font-bold text-gray-900 font-['DM_Sans']">
-                        €{{ product.price.toLocaleString() }}
+                        €{{ product.price | number:'1.2-2':'de' }}
                       </span>
                       <span 
                         *ngIf="product.originalPrice" 
                         class="text-sm text-gray-500 line-through font-['DM_Sans']"
                       >
-                        €{{ product.originalPrice.toLocaleString() }}
+                        €{{ product.originalPrice | number:'1.2-2':'de' }}
                       </span>
                     </div>
                     <app-add-to-cart-button 

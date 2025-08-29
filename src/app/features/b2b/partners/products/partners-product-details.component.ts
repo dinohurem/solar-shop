@@ -259,7 +259,7 @@ import * as B2BCartActions from '../../cart/store/b2b-cart.actions';
                   <div class="flex items-center justify-between mb-3">
                     <span class="text-lg font-medium text-green-700">{{ 'b2b.products.yourCompanyPrice' | translate }}:</span>
                     <div class="text-right">
-                      <span class="text-2xl font-bold text-green-600">€{{ product.company_price | number:'1.2-2' }}</span>
+                      <span class="text-2xl font-bold text-green-600">€{{ product.company_price | number:'1.2-2':'de' }}</span>
                       <div *ngIf="product.company_pricing_tiers && product.company_pricing_tiers.length > 1" class="text-xs text-gray-500">
                         {{ 'b2b.products.lowestPrice' | translate }}
                       </div>
@@ -278,7 +278,7 @@ import * as B2BCartActions from '../../cart/store/b2b-cart.actions';
                       <span class="font-medium" 
                             [class.text-green-600]="tier.price === product.company_price"
                             [class.text-gray-900]="tier.price !== product.company_price">
-                        €{{ tier.price | number:'1.2-2' }}
+                        €{{ tier.price | number:'1.2-2':'de' }}
                       </span>
                     </div>
                   </div>
@@ -287,19 +287,19 @@ import * as B2BCartActions from '../../cart/store/b2b-cart.actions';
                 <!-- Partner Price -->
                 <div *ngIf="product.partner_price && (!product.company_price || !isCompanyContact)" class="flex items-center justify-between">
                   <span class="text-lg font-medium text-solar-700">{{ 'b2b.products.partnerPrice' | translate }}:</span>
-                  <span class="text-2xl font-bold text-solar-600">€{{ product.partner_price | number:'1.2-2' }}</span>
+                  <span class="text-2xl font-bold text-solar-600">€{{ product.partner_price | number:'1.2-2':'de' }}</span>
                 </div>
 
                 <!-- Retail Price -->
                 <div class="flex items-center justify-between text-gray-500">
                   <span>{{ 'b2b.products.retailPrice' | translate }}:</span>
-                  <span class="line-through">€{{ product.price | number:'1.2-2' }}</span>
+                  <span class="line-through">€{{ product.price | number:'1.2-2':'de' }}</span>
                 </div>
 
                 <!-- Savings -->
                 <div *ngIf="product.savings" class="flex items-center justify-between">
                   <span class="font-medium text-green-700">{{ 'b2b.products.yourSavings' | translate }}:</span>
-                  <span class="font-bold text-green-600">€{{ product.savings | number:'1.2-2' }}</span>
+                  <span class="font-bold text-green-600">€{{ product.savings | number:'1.2-2':'de' }}</span>
                 </div>
 
                 <!-- No B2B Pricing Available -->
@@ -461,19 +461,19 @@ import * as B2BCartActions from '../../cart/store/b2b-cart.actions';
                 <!-- Pricing -->
                 <div *ngIf="isCompanyContact && suggested.company_price" class="space-y-1">
                   <div class="text-lg font-bold text-green-600">
-                    €{{ suggested.company_price | number:'1.2-2' }}
+                    €{{ suggested.company_price | number:'1.2-2':'de' }}
                     <span *ngIf="suggested.company_pricing_tiers && suggested.company_pricing_tiers.length > 1" 
                           class="text-xs font-normal text-gray-500">
                       ({{ 'b2b.products.from' | translate }})
                     </span>
                   </div>
                   <div class="text-sm text-gray-500 line-through">
-                    €{{ suggested.price | number:'1.2-2' }}
+                    €{{ suggested.price | number:'1.2-2':'de' }}
                   </div>
                 </div>
                 
                 <div *ngIf="!isCompanyContact || !suggested.company_price" class="text-lg font-bold text-gray-900">
-                  €{{ suggested.price | number:'1.2-2' }}
+                  €{{ suggested.price | number:'1.2-2':'de' }}
                 </div>
               </div>
             </div>
@@ -889,8 +889,15 @@ export class PartnersProductDetailsComponent implements OnInit, OnDestroy {
   }
 
   navigateToCategory(category: string): void {
+    // Navigate to product list with category filter
+    // Use the category name to create a slug-like parameter
+    const categorySlug = category.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    
     this.router.navigate(['/partneri/proizvodi'], {
-      queryParams: { category: category }
+      queryParams: { 
+        category: categorySlug,
+        categories: category // Pass the actual category name for filtering
+      }
     });
   }
 } 
