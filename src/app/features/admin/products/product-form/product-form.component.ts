@@ -328,6 +328,28 @@ interface ProductRelationship {
               {{ 'admin.productCertificationsHelp' | translate }}
             </p>
           </div>
+
+          <!-- Technical Sheet -->
+          <div class="mt-6">
+            <div class="relative">
+              <input
+                type="url"
+                id="technical_sheet"
+                formControlName="technical_sheet"
+                class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
+                placeholder="https://example.com/technical-sheet.pdf"
+              >
+              <label for="technical_sheet" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
+                {{ 'admin.productTechnicalSheet' | translate }}
+              </label>
+            </div>
+            <p class="mt-3 text-sm text-gray-500 flex items-center">
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              {{ 'admin.productTechnicalSheetHelp' | translate }}
+            </p>
+          </div>
         </div>
 
         <!-- Pricing -->
@@ -769,7 +791,8 @@ export class ProductFormComponent implements OnInit, OnDestroy {
       is_on_sale: [false],
       specifications: [''],
       features: [''],
-      certifications: ['']
+      certifications: [''],
+      technical_sheet: ['']
     });
   }
 
@@ -848,7 +871,8 @@ export class ProductFormComponent implements OnInit, OnDestroy {
           images: this.formatImages(data),
           specifications: this.formatSpecifications(data.specifications),
           features: this.formatFeatures(data.features),
-          certifications: this.formatCertifications(data.certifications)
+          certifications: this.formatCertifications(data.certifications),
+          technical_sheet: data.technical_sheet || ''
         };
 
         this.productForm.patchValue(formData);
@@ -1027,6 +1051,7 @@ export class ProductFormComponent implements OnInit, OnDestroy {
         specifications: specificationsObj,
         features: featuresArray,
         certifications: certificationsArray,
+        technical_sheet: formValue.technical_sheet || null,
         tags: [], // Default empty tags
         stock_status: Number(formValue.stock_quantity) > 0 ? 'in_stock' as const : 'out_of_stock' as const,
         updated_at: new Date().toISOString()

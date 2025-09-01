@@ -383,6 +383,48 @@ import * as B2BCartActions from '../../cart/store/b2b-cart.actions';
                   </dl>
                 </div>
               </div>
+              
+              <!-- Technical Sheet Section -->
+              <div *ngIf="product.technical_sheet" class="border-t border-gray-200 pt-6">
+                <div class="flex items-center justify-between mb-3">
+                  <h4 class="text-md font-medium text-gray-700">{{ 'admin.productTechnicalSheet' | translate }}</h4>
+                  <button 
+                    (click)="toggleTechnicalSheet()"
+                    class="flex items-center space-x-2 text-solar-600 hover:text-solar-700 transition-colors duration-200"
+                    [attr.aria-expanded]="isTechnicalSheetExpanded"
+                    [attr.aria-label]="isTechnicalSheetExpanded ? 'Collapse technical sheet' : 'Expand technical sheet'"
+                  >
+                    <svg 
+                      class="w-4 h-4 transition-transform duration-200"
+                      [class.rotate-180]="isTechnicalSheetExpanded"
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                  </button>
+                </div>
+                <div 
+                  class="overflow-hidden transition-all duration-300 ease-in-out"
+                  [class.max-h-0]="!isTechnicalSheetExpanded"
+                  [class.max-h-screen]="isTechnicalSheetExpanded"
+                >
+                  <div class="flex items-center justify-center p-6 bg-gray-50 rounded-lg border border-gray-200">
+                    <a 
+                      [href]="product.technical_sheet" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      class="inline-flex items-center px-6 py-3 bg-solar-600 text-white rounded-lg hover:bg-solar-700 transition-colors duration-200 font-medium"
+                    >
+                      {{ 'b2b.products.downloadTechnicalSheet' | translate }}
+                      <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-2M7 7h10v10M15 3h6v6m-6 0l6-6"/>
+                      </svg>
+                    </a>
+                  </div>
+                </div>
+              </div>
             </div>
 
             
@@ -530,7 +572,8 @@ export class PartnersProductDetailsComponent implements OnInit, OnDestroy {
   // Collapsible state
   isDescriptionExpanded = true;
   isSpecificationsExpanded = false;
-  
+  isTechnicalSheetExpanded = true;
+
   // Image carousel state
   currentImageIndex = 0;
 
@@ -702,21 +745,21 @@ export class PartnersProductDetailsComponent implements OnInit, OnDestroy {
       img.src = 'assets/images/product-placeholder.svg';
     }
   }
-  
+
   onThumbnailImageError(event: Event, index: number): void {
     const img = event.target as HTMLImageElement;
     if (img) {
       img.src = 'assets/images/product-placeholder.svg';
     }
   }
-  
+
   onSuggestedImageError(event: Event): void {
     const img = event.target as HTMLImageElement;
     if (img) {
       img.src = 'assets/images/product-placeholder.svg';
     }
   }
-  
+
   getCurrentImageUrl(): string {
     const images = this.getProductImages();
     if (images.length > 0 && this.currentImageIndex < images.length) {
@@ -724,17 +767,17 @@ export class PartnersProductDetailsComponent implements OnInit, OnDestroy {
     }
     return 'assets/images/product-placeholder.svg';
   }
-  
+
   getProductImages(): string[] {
     if (!this.product) return [];
-    
+
     const images: string[] = [];
-    
+
     // Add primary image from image_url if available and not empty
     if (this.product.image_url && this.product.image_url.trim()) {
       images.push(this.product.image_url);
     }
-    
+
     // Add images from images array
     if (this.product.images && Array.isArray(this.product.images)) {
       this.product.images.forEach(img => {
@@ -743,37 +786,37 @@ export class PartnersProductDetailsComponent implements OnInit, OnDestroy {
         }
       });
     }
-    
+
     // Only return images if we found valid ones, otherwise return empty array
     return images;
   }
-  
+
   hasMultipleImages(): boolean {
     const images = this.getProductImages();
     return images.length > 1;
   }
-  
+
   getImageCount(): number {
     return this.getProductImages().length;
   }
-  
+
   previousImage(): void {
     if (this.currentImageIndex > 0) {
       this.currentImageIndex--;
     }
   }
-  
+
   nextImage(): void {
     const imageCount = this.getImageCount();
     if (this.currentImageIndex < imageCount - 1) {
       this.currentImageIndex++;
     }
   }
-  
+
   selectImage(index: number): void {
     this.currentImageIndex = index;
   }
-  
+
   getSuggestedProductImageUrl(product: ProductWithPricing): string {
     // If image_url is available and not empty, use it
     if (product.image_url && product.image_url.trim()) {
@@ -815,11 +858,15 @@ export class PartnersProductDetailsComponent implements OnInit, OnDestroy {
     this.isSpecificationsExpanded = !this.isSpecificationsExpanded;
   }
 
+  toggleTechnicalSheet(): void {
+    this.isTechnicalSheetExpanded = !this.isTechnicalSheetExpanded;
+  }
+
   private async loadSuggestedProducts(productId: string): Promise<void> {
     try {
       // Reset image carousel when loading new product
       this.currentImageIndex = 0;
-      
+
       // Load product relationships
       const { data: relationships, error } = await this.supabaseService.client
         .from('product_relationships')
@@ -892,9 +939,9 @@ export class PartnersProductDetailsComponent implements OnInit, OnDestroy {
     // Navigate to product list with category filter
     // Use the category name to create a slug-like parameter
     const categorySlug = category.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    
+
     this.router.navigate(['/partneri/proizvodi'], {
-      queryParams: { 
+      queryParams: {
         category: categorySlug,
         categories: category // Pass the actual category name for filtering
       }

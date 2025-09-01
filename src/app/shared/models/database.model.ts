@@ -150,6 +150,7 @@ export interface Database {
                     power_output?: number;
                     power_unit?: 'W' | 'kW' | 'MW';
                     certifications: string[];
+                    technical_sheet?: string;
                     installation_required: boolean;
                     free_shipping: boolean;
                     shipping_cost?: number;
@@ -193,6 +194,7 @@ export interface Database {
                     power_output?: number;
                     power_unit?: 'W' | 'kW' | 'MW';
                     certifications?: string[];
+                    technical_sheet?: string;
                     installation_required?: boolean;
                     free_shipping?: boolean;
                     shipping_cost?: number;
@@ -236,6 +238,7 @@ export interface Database {
                     power_output?: number;
                     power_unit?: 'W' | 'kW' | 'MW';
                     certifications?: string[];
+                    technical_sheet?: string;
                     installation_required?: boolean;
                     free_shipping?: boolean;
                     shipping_cost?: number;

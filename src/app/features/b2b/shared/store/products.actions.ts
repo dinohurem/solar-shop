@@ -26,6 +26,7 @@ export interface Product {
     brand: string;
     specifications?: Record<string, string>;
     features?: string[];
+    technical_sheet?: string;
     created_at: string;
     updated_at: string;
 }

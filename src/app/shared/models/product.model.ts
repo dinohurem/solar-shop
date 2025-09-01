@@ -22,6 +22,7 @@ export interface Product {
     warranty: ProductWarranty;
     energyEfficiency?: EnergyEfficiency;
     certifications: string[];
+    technical_sheet?: string;
     installationRequired: boolean;
     shippingInfo: ShippingInfo;
     relatedProducts?: string[];

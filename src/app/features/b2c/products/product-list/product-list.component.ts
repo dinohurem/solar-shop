@@ -57,6 +57,7 @@ export interface Product {
   sku?: string;
   isOnSale?: boolean;
   images?: any[];
+  technical_sheet?: string;
 }
 
 export interface ProductFilters {

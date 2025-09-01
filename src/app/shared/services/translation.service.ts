@@ -389,6 +389,7 @@ export class TranslationService {
                     quantityPricing: 'Cijena prema količini',
                     lowestPrice: 'najniža cijena',
                     from: 'od',
+                    downloadTechnicalSheet: 'Pogledajte tehnički list',
                     // Status labels
                     pendingApproval: 'Čeka odobrenje',
                     rejected: 'Odbačeno'
@@ -829,6 +830,9 @@ export class TranslationService {
                 productFeaturesHelp: 'Unesite jednu značajku po retku (npr. Dual MPPT trackers, WiFi monitoring)',
                 productCertifications: 'Certifikati',
                 productCertificationsHelp: 'Unesite jedan certifikat po retku (npr. IEC 61215, IEC 61730)',
+                productTechnicalSheet: 'Tehnički list',
+                productTechnicalSheetHelp: 'URL do tehničke dokumentacije proizvoda (npr. PDF s tehničkim specifikacijama)',
+                downloadTechnicalSheetHelp: 'Pogledaj tehničku dokumentaciju',
                 productRelationshipsTitle: 'Povezani proizvodi',
                 productRelationshipsAddNew: 'Dodaj povezane proizvode',
                 productRelationshipsType: 'Tip veze',
@@ -3001,6 +3005,7 @@ export class TranslationService {
                     quantityPricing: 'Quantity Pricing',
                     lowestPrice: 'lowest price',
                     from: 'from',
+                    downloadTechnicalSheet: 'View Technical Sheet',
                     // Status labels
                     pendingApproval: 'Pending Approval',
                     rejected: 'Rejected'
@@ -3345,6 +3350,9 @@ export class TranslationService {
                 productFeaturesHelp: 'Enter one feature per line (e.g. Dual MPPT trackers, WiFi monitoring)',
                 productCertifications: 'Certifications',
                 productCertificationsHelp: 'Enter one certification per line (e.g. IEC 61215, IEC 61730)',
+                productTechnicalSheet: 'Technical Sheet',
+                productTechnicalSheetHelp: 'URL to the product technical documentation (e.g. PDF with technical specifications)',
+                downloadTechnicalSheetHelp: 'View the technical documentation',
                 productRelationshipsTitle: 'Related Products & Categories',
                 productRelationshipsAddNew: 'Add New',
                 productRelationshipsType: 'Type',

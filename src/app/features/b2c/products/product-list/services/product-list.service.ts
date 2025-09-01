@@ -394,7 +394,8 @@ export class ProductListService {
                 features: product.features || [],
                 sku: product.sku || '',
                 images: product.images || [],
-                isOnSale: product.is_on_sale || false
+                isOnSale: product.is_on_sale || false,
+                technical_sheet: product.technical_sheet || undefined
             };
         } catch (error) {
             console.error('Error converting product:', error);

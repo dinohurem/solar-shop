@@ -331,6 +331,50 @@ import { LucideAngularModule, Star, StarHalf, ShoppingCart } from 'lucide-angula
         </div>
       </div>
 
+      <!-- Technical Sheet -->
+      <div *ngIf="hasTechnicalSheet()" class="border-t border-gray-200 pt-6">
+        <button 
+          type="button" 
+          (click)="toggleTechnicalSheet()" 
+          class="flex items-center w-full justify-between group focus:outline-none" 
+          [attr.aria-expanded]="technicalSheetOpen" 
+          [attr.aria-controls]="'technical-sheet-content'"
+        >
+          <h3 class="text-lg font-semibold text-gray-900 font-['Poppins']">{{ 'admin.productTechnicalSheet' | translate }}</h3>
+          <svg 
+            [ngClass]="{'rotate-180': technicalSheetOpen, 'rotate-0': !technicalSheetOpen}" 
+            class="w-5 h-5 text-gray-500 transition-transform duration-200" 
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        <div id="technical-sheet-content" *ngIf="technicalSheetOpen" class="mt-4">
+          <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <div>
+                  <p class="text-sm text-blue-700 font-['DM_Sans']">{{ 'admin.downloadTechnicalSheetHelp' | translate }}</p>
+                </div>
+              </div>
+              <a 
+                [href]="product.technical_sheet" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors font-['DM_Sans']"
+              >
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+                {{ 'admin.downloadTechnicalSheetHelp' | translate }}
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Quantity and Add to Cart -->
       <div class="border-t border-gray-200 pt-6">
         <div class="flex items-center space-x-4 mb-6">
@@ -481,6 +525,7 @@ export class ProductInfoComponent implements OnInit, OnDestroy {
   certificatesOpen = false;
   specificationsOpen = false;
   featuresOpen = false;
+  technicalSheetOpen = false;
 
   ngOnInit(): void {
     // Create combined observable for template
@@ -612,6 +657,10 @@ export class ProductInfoComponent implements OnInit, OnDestroy {
     return !!(this.product.certificates && this.product.certificates.length > 0);
   }
 
+  hasTechnicalSheet(): boolean {
+    return !!(this.product.technical_sheet && this.product.technical_sheet.trim().length > 0);
+  }
+
   toggleDescription() {
     this.descriptionOpen = !this.descriptionOpen;
   }
@@ -632,6 +681,10 @@ export class ProductInfoComponent implements OnInit, OnDestroy {
     this.featuresOpen = !this.featuresOpen;
   }
 
+  toggleTechnicalSheet() {
+    this.technicalSheetOpen = !this.technicalSheetOpen;
+  }
+
   scrollToReviews() {
     const reviewsElement = document.getElementById('reviews');
     if (reviewsElement) {
@@ -646,9 +699,9 @@ export class ProductInfoComponent implements OnInit, OnDestroy {
     // Navigate to product list with category filter
     // Use the category name to create a slug-like parameter
     const categorySlug = categoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    
+
     this.router.navigate(['/proizvodi'], {
-      queryParams: { 
+      queryParams: {
         category: categorySlug,
         categories: categoryName // Pass the actual category name for filtering
       }
