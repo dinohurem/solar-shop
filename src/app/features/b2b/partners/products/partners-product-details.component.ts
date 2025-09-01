@@ -412,7 +412,7 @@ import * as B2BCartActions from '../../cart/store/b2b-cart.actions';
                 >
                   <div class="flex items-center justify-center p-6 bg-gray-50 rounded-lg border border-gray-200">
                     <a 
-                      [href]="product.technical_sheet" 
+                      [href]="getFullTechnicalSheetUrl(product.technical_sheet || '')" 
                       target="_blank" 
                       rel="noopener noreferrer"
                       class="inline-flex items-center px-6 py-3 bg-solar-600 text-white rounded-lg hover:bg-solar-700 transition-colors duration-200 font-medium"
@@ -933,6 +933,28 @@ export class PartnersProductDetailsComponent implements OnInit, OnDestroy {
       // Force component reload by scrolling to top
       window.scrollTo(0, 0);
     });
+  }
+
+  getFullTechnicalSheetUrl(url: string): string {
+    if (!url) return '';
+    
+    // If URL already has protocol, return as is
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+    
+    // If URL starts with www., add https://
+    if (url.startsWith('www.')) {
+      return `https://${url}`;
+    }
+    
+    // If it doesn't start with www. or protocol, assume it needs https://www.
+    if (!url.includes('.')) {
+      // If it doesn't contain a dot, it's probably not a valid URL
+      return url;
+    }
+    
+    return `https://${url}`;
   }
 
   navigateToCategory(category: string): void {

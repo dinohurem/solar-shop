@@ -981,6 +981,12 @@ export class ProductFormComponent implements OnInit, OnDestroy {
   async onSubmit(formValue: any): Promise<void> {
     if (this.productForm.invalid) return;
 
+    // Validate that at least one category is selected
+    if (this.selectedCategoryIds.length === 0) {
+      this.toastService.showError('Please select at least one category for the product.');
+      return;
+    }
+
     this.isSubmitting = true;
 
     try {
@@ -1054,6 +1060,7 @@ export class ProductFormComponent implements OnInit, OnDestroy {
         technical_sheet: formValue.technical_sheet || null,
         tags: [], // Default empty tags
         stock_status: Number(formValue.stock_quantity) > 0 ? 'in_stock' as const : 'out_of_stock' as const,
+        category_id: this.primaryCategoryId, // Set primary category for legacy support
         updated_at: new Date().toISOString()
       };
 
@@ -1070,9 +1077,16 @@ export class ProductFormComponent implements OnInit, OnDestroy {
         savedProductId = this.productId;
       } else {
         (productData as any).created_at = new Date().toISOString();
+        console.log('Creating product with data:', productData);
+        
         const result = await this.supabaseService.createRecord('products', productData);
+        console.log('Create product result:', result);
+        
         if (!result) {
           throw new Error('Failed to create product - no result returned');
+        }
+        if (!result.id) {
+          throw new Error('Failed to create product - no ID in result');
         }
         savedProductId = result.id;
       }
@@ -1081,8 +1095,22 @@ export class ProductFormComponent implements OnInit, OnDestroy {
       await this.saveProductCategories(savedProductId);
 
       this.router.navigate(['/admin/proizvodi']);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving product:', error);
+      console.error('Error details:', {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+        stack: error.stack
+      });
+      
+      // Show user-friendly error message
+      if (error.message) {
+        this.toastService.showError(`Failed to save product: ${error.message}`);
+      } else {
+        this.toastService.showError('Failed to save product. Please check the console for details.');
+      }
     } finally {
       this.isSubmitting = false;
     }
@@ -1401,8 +1429,14 @@ export class ProductFormComponent implements OnInit, OnDestroy {
       }
 
       console.log('Successfully saved product categories:', productCategoryEntries);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving product categories:', error);
+      console.error('Product categories error details:', {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint
+      });
       throw error;
     }
   }

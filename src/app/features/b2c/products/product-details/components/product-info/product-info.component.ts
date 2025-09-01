@@ -360,7 +360,7 @@ import { LucideAngularModule, Star, StarHalf, ShoppingCart } from 'lucide-angula
                 </div>
               </div>
               <a 
-                [href]="product.technical_sheet" 
+                [href]="getFullTechnicalSheetUrl(product.technical_sheet || '')" 
                 target="_blank" 
                 rel="noopener noreferrer" 
                 class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors font-['DM_Sans']"
@@ -693,6 +693,28 @@ export class ProductInfoComponent implements OnInit, OnDestroy {
         block: 'start'
       });
     }
+  }
+
+  getFullTechnicalSheetUrl(url: string): string {
+    if (!url) return '';
+    
+    // If URL already has protocol, return as is
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+    
+    // If URL starts with www., add https://
+    if (url.startsWith('www.')) {
+      return `https://${url}`;
+    }
+    
+    // If it doesn't start with www. or protocol, assume it needs https://www.
+    if (!url.includes('.')) {
+      // If it doesn't contain a dot, it's probably not a valid URL
+      return url;
+    }
+    
+    return `https://${url}`;
   }
 
   navigateToCategory(categoryName: string) {
