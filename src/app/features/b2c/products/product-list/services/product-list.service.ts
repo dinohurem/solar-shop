@@ -82,20 +82,12 @@ export class ProductListService {
             const from = (page - 1) * itemsPerPage;
             const to = from + itemsPerPage - 1;
 
-            // Build the query with support for both legacy and product_categories
+            // Build the query - simplified approach like B2B
             let supabaseQuery = this.supabaseService.client
                 .from('products')
                 .select(`
                     *,
-                    categories!inner(id, name, slug),
-                    product_categories!product_categories_product_id_fkey (
-                        is_primary,
-                        categories!product_categories_category_id_fkey (
-                            id,
-                            name,
-                            slug
-                        )
-                    )
+                    categories!inner(id, name, slug)
                 `, { count: 'exact' })
                 .eq('is_active', true);
 
@@ -114,8 +106,24 @@ export class ProductListService {
 
                 if (categoryData && categoryData.length > 0) {
                     const categoryIds = categoryData.map(cat => cat.id);
-                    // Support both legacy category_id and product_categories filtering
-                    supabaseQuery = supabaseQuery.or(`category_id.in.(${categoryIds.join(',')}),product_categories.category_id.in.(${categoryIds.join(',')})`);
+                    
+                    // Handle both legacy category_id and product_categories table
+                    // Get products that have category_id in the list OR have entries in product_categories
+                    const { data: productCategoryIds } = await this.supabaseService.client
+                        .from('product_categories')
+                        .select('product_id')
+                        .in('category_id', categoryIds);
+                    
+                    const productIdsFromJunction = (productCategoryIds || []).map(pc => pc.product_id);
+                    
+                    if (productIdsFromJunction.length > 0) {
+                        // Filter by either category_id OR product ID exists in junction table
+                        const filterQuery = `category_id.in.(${categoryIds.join(',')}),id.in.(${productIdsFromJunction.join(',')})`;
+                        supabaseQuery = supabaseQuery.or(filterQuery);
+                    } else {
+                        // Fallback to just legacy category_id
+                        supabaseQuery = supabaseQuery.in('category_id', categoryIds);
+                    }
                 }
             }
 
@@ -331,26 +339,15 @@ export class ProductListService {
             // Get legacy single category name
             const categoryName = product.categories?.name || 'Unknown Category';
 
-            // Get multiple categories from product_categories junction table (already loaded)
+            // For now, use the single category approach to simplify and avoid the complex joins
             let categoriesArray: Array<{ name: string; isPrimary: boolean }> = [];
             
-            // Use the product_categories data that's already loaded from the join
-            if (product.product_categories && product.product_categories.length > 0) {
-                categoriesArray = product.product_categories.map((pc: any) => ({
-                    name: pc.categories?.name || 'Unknown',
-                    isPrimary: pc.is_primary || false
-                }));
-            }
-            // Fallback to single category if no product_categories data
-            else if (categoryName && categoryName !== 'Unknown Category') {
+            // Use the single category from the join
+            if (categoryName && categoryName !== 'Unknown Category') {
                 categoriesArray = [{
                     name: categoryName,
                     isPrimary: true
                 }];
-            }
-            // If no categories at all, set empty array (avoid Unknown Category)
-            else {
-                categoriesArray = [];
             }
 
             // Get primary image

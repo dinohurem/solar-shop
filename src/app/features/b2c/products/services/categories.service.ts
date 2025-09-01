@@ -182,27 +182,104 @@ export class CategoriesService {
             const topLevelCategories = allCategories.filter(category => !category.parentId);
             
             // For each top-level category, find its subcategories and calculate hierarchical product counts
-            const nestedCategories = topLevelCategories.map(parent => {
+            const nestedCategories = await Promise.all(topLevelCategories.map(async parent => {
                 const subcategories = allCategories.filter(category => category.parentId === parent.id);
                 
-                // For parent categories:
-                // - Keep their individual count as-is (products directly assigned to parent)
-                // - Calculate total count = parent's own products + all subcategory products
-                const subcategoriesProductCount = subcategories.reduce((total, sub) => total + (sub.productCount || 0), 0);
-                const totalProductCount = (parent.productCount || 0) + subcategoriesProductCount;
-                
-                return {
-                    ...parent,
-                    productCount: totalProductCount, // Total count for display/filtering
-                    ownProductCount: parent.productCount || 0, // Keep track of parent's own products
-                    subcategories: subcategories.length > 0 ? subcategories : undefined
-                };
-            });
+                // For parent categories: show distinct count of products that would be returned when filtering
+                // This ensures display count matches exactly what users see when they click on the category
+                if (subcategories.length > 0) {
+                    // Get distinct count across parent + all subcategories (matches filtering logic)
+                    const hierarchicalCount = await this.getHierarchicalProductCount(parent.id, subcategories.map(sub => sub.id));
+                    
+                    return {
+                        ...parent,
+                        productCount: hierarchicalCount, // Distinct count that matches filtering
+                        ownProductCount: parent.productCount || 0, // Keep track of parent's own products
+                        subcategories: subcategories
+                    };
+                } else {
+                    // For categories without subcategories, just use their own count
+                    return {
+                        ...parent,
+                        productCount: parent.productCount || 0,
+                        ownProductCount: parent.productCount || 0,
+                        subcategories: undefined
+                    };
+                }
+            }));
             
             return nestedCategories;
         } catch (error) {
             console.error('Error in fetchNestedCategories:', error);
             return [];
+        }
+    }
+
+    private async getHierarchicalProductCount(parentCategoryId: string, subcategoryIds: string[]): Promise<number> {
+        try {
+            // Get distinct product count for parent category + all its subcategories
+            // This matches the filtering logic used in the components
+            const { data: result, error } = await this.supabaseService.client
+                .rpc('get_hierarchical_product_count', { 
+                    parent_category_id: parentCategoryId,
+                    subcategory_ids: subcategoryIds
+                });
+
+            if (error) {
+                console.warn('Error getting hierarchical product count, falling back:', error);
+                return await this.getFallbackHierarchicalCount(parentCategoryId, subcategoryIds);
+            }
+
+            return result || 0;
+        } catch (error) {
+            console.warn('Error in getHierarchicalProductCount:', error);
+            return await this.getFallbackHierarchicalCount(parentCategoryId, subcategoryIds);
+        }
+    }
+
+    private async getFallbackHierarchicalCount(parentCategoryId: string, subcategoryIds: string[]): Promise<number> {
+        try {
+            const allCategoryIds = [parentCategoryId, ...subcategoryIds];
+            
+            // Get all products that match any of these categories (main or additional)
+            const { data: products, error } = await this.supabaseService.client
+                .from('products')
+                .select(`
+                    id,
+                    category_id,
+                    product_categories!left(category_id)
+                `)
+                .eq('is_active', true);
+
+            if (error || !products) {
+                return 0;
+            }
+
+            // Use Set to ensure distinct product IDs
+            const distinctProductIds = new Set<string>();
+            
+            products.forEach((product: any) => {
+                // Check if main category matches any target category
+                if (allCategoryIds.includes(product.category_id)) {
+                    distinctProductIds.add(product.id);
+                }
+                
+                // Check if any additional categories match
+                if (product.product_categories) {
+                    const additionalCategories = Array.isArray(product.product_categories) 
+                        ? product.product_categories 
+                        : [product.product_categories];
+                    
+                    if (additionalCategories.some((pc: any) => allCategoryIds.includes(pc.category_id))) {
+                        distinctProductIds.add(product.id);
+                    }
+                }
+            });
+            
+            return distinctProductIds.size;
+        } catch (error) {
+            console.warn('Error in getFallbackHierarchicalCount:', error);
+            return 0;
         }
     }
 
@@ -266,45 +343,23 @@ export class CategoriesService {
                 productCounts[id] = 0;
             });
 
-            // Get counts from product_categories junction table
-            const { data: productCategories, error: pcError } = await this.supabaseService.client
-                .from('product_categories')
-                .select(`
-                    category_id,
-                    products!inner(id, is_active)
-                `)
-                .in('category_id', categoryIds)
-                .eq('products.is_active', true);
-
-            if (pcError) {
-                console.warn('Error querying product_categories table:', pcError);
-            }
-
-            // Count products per category from product_categories
-            if (productCategories) {
-                productCategories.forEach((pc: any) => {
-                    if (pc.category_id && categoryIds.includes(pc.category_id)) {
-                        productCounts[pc.category_id] = (productCounts[pc.category_id] || 0) + 1;
-                    }
+            // Use a single query with UNION to get DISTINCT product counts per category
+            // This avoids double-counting products that exist in both main category and additional categories
+            const { data: categoryProductCounts, error } = await this.supabaseService.client
+                .rpc('get_distinct_product_counts_by_categories', { 
+                    category_ids: categoryIds 
                 });
+
+            if (error) {
+                console.warn('Error getting distinct product counts, falling back to legacy method:', error);
+                return await this.getFallbackProductCounts(categoryIds);
             }
 
-            // Also check legacy category_id in products table (for products not yet migrated)
-            const { data: legacyProducts, error: legacyError } = await this.supabaseService.client
-                .from('products')
-                .select('category_id')
-                .in('category_id', categoryIds)
-                .eq('is_active', true);
-
-            if (legacyError) {
-                console.warn('Error querying products table for legacy category_id:', legacyError);
-            }
-
-            // Add legacy product counts
-            if (legacyProducts) {
-                legacyProducts.forEach(product => {
-                    if (product.category_id && categoryIds.includes(product.category_id)) {
-                        productCounts[product.category_id] = (productCounts[product.category_id] || 0) + 1;
+            // Map the results
+            if (categoryProductCounts) {
+                categoryProductCounts.forEach((result: any) => {
+                    if (result.category_id && categoryIds.includes(result.category_id)) {
+                        productCounts[result.category_id] = result.product_count || 0;
                     }
                 });
             }
@@ -312,8 +367,62 @@ export class CategoriesService {
             return productCounts;
         } catch (error) {
             console.error('Error getting product counts for categories:', error);
-            return {};
+            return await this.getFallbackProductCounts(categoryIds);
         }
+    }
+
+    private async getFallbackProductCounts(categoryIds: string[]): Promise<{ [categoryId: string]: number }> {
+        const productCounts: { [categoryId: string]: number } = {};
+        
+        // Initialize all categories to 0
+        categoryIds.forEach(id => {
+            productCounts[id] = 0;
+        });
+
+        // For each category, get distinct product count using manual DISTINCT logic
+        for (const categoryId of categoryIds) {
+            try {
+                // Get all distinct product IDs for this category (both main and additional)
+                const { data: distinctProducts, error } = await this.supabaseService.client
+                    .from('products')
+                    .select(`
+                        id,
+                        category_id,
+                        product_categories!left(category_id)
+                    `)
+                    .eq('is_active', true)
+                    .or(`category_id.eq.${categoryId},product_categories.category_id.eq.${categoryId}`);
+
+                if (!error && distinctProducts) {
+                    // Use Set to ensure distinct product IDs
+                    const distinctProductIds = new Set<string>();
+                    
+                    distinctProducts.forEach((product: any) => {
+                        // Add if main category matches
+                        if (product.category_id === categoryId) {
+                            distinctProductIds.add(product.id);
+                        }
+                        // Add if additional category matches
+                        if (product.product_categories) {
+                            const additionalCategories = Array.isArray(product.product_categories) 
+                                ? product.product_categories 
+                                : [product.product_categories];
+                            
+                            if (additionalCategories.some((pc: any) => pc.category_id === categoryId)) {
+                                distinctProductIds.add(product.id);
+                            }
+                        }
+                    });
+                    
+                    productCounts[categoryId] = distinctProductIds.size;
+                }
+            } catch (categoryError) {
+                console.warn(`Error getting count for category ${categoryId}:`, categoryError);
+                productCounts[categoryId] = 0;
+            }
+        }
+
+        return productCounts;
     }
 
     private async getProductCountForCategory(categoryId: string): Promise<number> {

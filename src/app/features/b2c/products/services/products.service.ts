@@ -61,16 +61,30 @@ export class ProductsService {
                 return [];
             }
 
-            // Build query to find products in any of these categories
+            // Handle both legacy category_id and product_categories table
+            // Get products that have category_id in the list OR have entries in product_categories
+            const { data: productCategoryIds } = await this.supabaseService.client
+                .from('product_categories')
+                .select('product_id')
+                .in('category_id', categoryIds);
+            
+            const productIdsFromJunction = (productCategoryIds || []).map(pc => pc.product_id);
+            
             let query = this.supabaseService.client
                 .from('products')
                 .select(`
                     *,
-                    product_categories!inner(category_id),
-                    categories!inner(name, slug)
+                    categories(name, slug)
                 `)
-                .in('product_categories.category_id', categoryIds)
                 .limit(limit);
+            
+            if (productIdsFromJunction.length > 0) {
+                // Filter by either category_id OR product ID exists in junction table
+                query = query.or(`category_id.in.(${categoryIds.join(',')}),id.in.(${productIdsFromJunction.join(',')})`);
+            } else {
+                // Fallback to just legacy category_id
+                query = query.in('category_id', categoryIds);
+            }
 
             // Exclude the specified product if provided
             if (excludeProductId) {
@@ -93,7 +107,7 @@ export class ProductsService {
 
     private async fetchProductById(id: string): Promise<Product | null> {
         try {
-            // Use supabase query with proper joins to get product_categories data
+            // Get product with legacy category
             const { data: product, error } = await this.supabaseService.client
                 .from('products')
                 .select(`
@@ -102,14 +116,6 @@ export class ProductsService {
                         id,
                         name,
                         slug
-                    ),
-                    product_categories!product_categories_product_id_fkey (
-                        is_primary,
-                        categories!product_categories_category_id_fkey (
-                            id,
-                            name,
-                            slug
-                        )
                     )
                 `)
                 .eq('id', id)
@@ -120,6 +126,22 @@ export class ProductsService {
                 console.error('Error fetching product by ID:', error);
                 return null;
             }
+
+            // Get additional categories from product_categories junction table
+            const { data: additionalCategories } = await this.supabaseService.client
+                .from('product_categories')
+                .select(`
+                    is_primary,
+                    categories!product_categories_category_id_fkey (
+                        id,
+                        name,
+                        slug
+                    )
+                `)
+                .eq('product_id', id);
+
+            // Attach additional categories to product
+            product.product_categories = additionalCategories || [];
 
             return await this.convertSupabaseProductToLocal(product);
         } catch (error) {
@@ -160,25 +182,27 @@ export class ProductsService {
             // Get legacy single category name
             const categoryName = product.categories?.name || 'Unknown Category';
 
-            // Get multiple categories from product_categories junction table (already loaded)
+            // Get multiple categories from both sources
             let categoriesArray: Array<{ name: string; isPrimary: boolean }> = [];
             
-            // Use the product_categories data that's already loaded from the join
+            // First, add categories from product_categories junction table if available
             if (product.product_categories && product.product_categories.length > 0) {
                 categoriesArray = product.product_categories.map((pc: any) => ({
                     name: pc.categories?.name || 'Unknown',
                     isPrimary: pc.is_primary || false
                 }));
             }
-            // Fallback to single category if no product_categories data
-            else if (categoryName && categoryName !== 'Unknown Category') {
+            
+            // If no junction table categories, use legacy category_id
+            if (categoriesArray.length === 0 && categoryName && categoryName !== 'Unknown Category') {
                 categoriesArray = [{
                     name: categoryName,
                     isPrimary: true
                 }];
             }
-            // If no categories at all, set empty array (avoid Unknown Category)
-            else {
+            
+            // If still no categories, set empty array
+            if (categoriesArray.length === 0) {
                 categoriesArray = [];
             }
 

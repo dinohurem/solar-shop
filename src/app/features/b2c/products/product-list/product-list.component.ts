@@ -586,16 +586,13 @@ export class ProductListComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.store.dispatch(ProductsActions.loadProductCategories());
     
-    // Load initial products with default parameters
-    this.loadProductsWithCurrentState();
-
     // Load nested categories for hierarchical display
     this.loadNestedCategories();
 
     // Check if we should clear filters based on navigation source
     this.checkAndClearFiltersIfNeeded();
 
-    // Handle query parameters (for initial load and external navigation)
+    // Handle query parameters FIRST (before loading products)
     this.route.queryParams.pipe(
       takeUntil(this.destroy$)
     ).subscribe(params => {
@@ -647,6 +644,12 @@ export class ProductListComponent implements OnInit, OnDestroy {
           });
         }
       }
+      
+      // Load initial products AFTER processing query params
+      // Use setTimeout to ensure all filters are applied first
+      setTimeout(() => {
+        this.loadProductsWithCurrentState();
+      }, 0);
     });
 
     // Handle debounced search input (for user typing)
@@ -896,12 +899,12 @@ export class ProductListComponent implements OnInit, OnDestroy {
       take(1)
     ).subscribe(filters => {
       if (parentCategory.subcategories && parentCategory.subcategories.length > 0) {
-        // Parent is considered selected if the parent itself AND ALL its subcategories are selected
+        // Parent is considered selected if the parent itself OR ANY of its subcategories are selected
         const parentSelected = filters?.categories?.includes(parentCategory.name) || false;
-        const allSubcategoriesSelected = parentCategory.subcategories.every(sub => 
+        const anySubcategorySelected = parentCategory.subcategories.some(sub => 
           filters?.categories?.includes(sub.name) || false
         );
-        isSelected = parentSelected && allSubcategoriesSelected;
+        isSelected = parentSelected || anySubcategorySelected;
       } else {
         // For categories without subcategories, check if directly selected
         isSelected = filters?.categories?.includes(parentCategory.name) || false;
@@ -911,8 +914,9 @@ export class ProductListComponent implements OnInit, OnDestroy {
   }
 
   getTotalProductCount(parentCategory: ProductCategory): number {
-    // The CategoriesService.fetchNestedCategories() already calculated the total count
-    // (parent products + all subcategory products), so just return that
+    // For parent categories: shows distinct count of products that will be displayed when filtering
+    // This ensures the number shown in the category matches exactly what users see when they click it
+    // Products that appear in multiple subcategories are only counted once
     return parentCategory.productCount || 0;
   }
 

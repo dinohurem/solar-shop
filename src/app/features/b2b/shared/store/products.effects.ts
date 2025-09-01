@@ -67,15 +67,43 @@ export class ProductsEffects {
         }
 
         if (query.categories && query.categories.length > 0) {
+            console.log('🔍 B2B Filtering by categories:', query.categories);
+            
             // First, get the category IDs from category names
             const { data: categoryData } = await this.supabaseService.client
                 .from('categories')
                 .select('id, name')
                 .in('name', query.categories);
 
+            console.log('📋 B2B Found category data:', categoryData);
+
             if (categoryData && categoryData.length > 0) {
                 const categoryIds = categoryData.map(cat => cat.id);
-                supabaseQuery = supabaseQuery.in('category_id', categoryIds);
+                console.log('🏷️ B2B Category IDs:', categoryIds);
+                
+                // Handle both legacy category_id and product_categories table
+                const { data: productCategoryIds } = await this.supabaseService.client
+                    .from('product_categories')
+                    .select('product_id')
+                    .in('category_id', categoryIds);
+                
+                console.log('🔗 B2B Product-category junction data:', productCategoryIds);
+                
+                const productIdsFromJunction = (productCategoryIds || []).map(pc => pc.product_id);
+                console.log('📦 B2B Product IDs from junction table:', productIdsFromJunction);
+                
+                if (productIdsFromJunction.length > 0) {
+                    // Filter by either category_id OR product ID exists in junction table
+                    const filterQuery = `category_id.in.(${categoryIds.join(',')}),id.in.(${productIdsFromJunction.join(',')})`;
+                    console.log('🎯 B2B Applying OR filter:', filterQuery);
+                    supabaseQuery = supabaseQuery.or(filterQuery);
+                } else {
+                    // Fallback to just legacy category_id
+                    console.log('📝 B2B Applying legacy category_id filter:', categoryIds);
+                    supabaseQuery = supabaseQuery.in('category_id', categoryIds);
+                }
+            } else {
+                console.log('⚠️ B2B No matching categories found for:', query.categories);
             }
         }
 

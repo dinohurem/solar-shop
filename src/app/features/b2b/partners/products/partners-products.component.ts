@@ -717,8 +717,8 @@ export class PartnersProductsComponent implements OnInit, OnDestroy {
     // Load categories first
     this.store.dispatch(ProductsActions.loadCategories());
     
-    // Load initial products
-    this.loadProductsWithCurrentState();
+    // Load nested categories for hierarchical display
+    this.loadNestedCategories();
 
     // Subscribe to user changes
     this.currentUser$.pipe(takeUntil(this.destroy$)).subscribe(async (user) => {
@@ -734,9 +734,6 @@ export class PartnersProductsComponent implements OnInit, OnDestroy {
       }
     });
 
-    // Load nested categories for hierarchical display
-    this.loadNestedCategories();
-
     // Handle debounced search
     this.searchSubject.pipe(
       debounceTime(300),
@@ -746,16 +743,19 @@ export class PartnersProductsComponent implements OnInit, OnDestroy {
       this.store.dispatch(ProductsActions.setSearchQuery({ query }));
     });
 
-    // Handle query params
+    // Handle query params FIRST (before loading products)
     this.activatedRoute.queryParams.pipe(takeUntil(this.destroy$)).subscribe(params => {
       if (params['category']) {
+        console.log('🏷️ B2B Category param found:', params['category']);
         // Clear existing filters first
         this.store.dispatch(ProductsActions.clearFilters());
 
         // Check if we have multiple categories passed (from hierarchical navigation)
         if (params['categories']) {
+          console.log('📝 B2B Multiple categories found:', params['categories']);
           const categoryNames = params['categories'].split(',');
           categoryNames.forEach((categoryName: string) => {
+            console.log('✅ B2B Applying category filter:', categoryName.trim());
             this.store.dispatch(ProductsActions.toggleCategoryFilter({
               category: categoryName.trim(),
               checked: true
@@ -774,6 +774,7 @@ export class PartnersProductsComponent implements OnInit, OnDestroy {
             );
 
             if (matchingCategory) {
+              console.log('✅ B2B Applying matched category filter:', matchingCategory.name);
               this.store.dispatch(ProductsActions.toggleCategoryFilter({
                 category: matchingCategory.name,
                 checked: true
@@ -782,6 +783,12 @@ export class PartnersProductsComponent implements OnInit, OnDestroy {
           });
         }
       }
+      
+      // Load initial products AFTER processing query params
+      // Use setTimeout to ensure all filters are applied first
+      setTimeout(() => {
+        this.loadProductsWithCurrentState();
+      }, 0);
     });
 
     // Subscribe to filter and pagination changes to reload products
@@ -950,12 +957,12 @@ export class PartnersProductsComponent implements OnInit, OnDestroy {
       take(1)
     ).subscribe(filters => {
       if (parentCategory.subcategories && parentCategory.subcategories.length > 0) {
-        // Parent is considered selected if the parent itself AND ALL its subcategories are selected
+        // Parent is considered selected if the parent itself OR ANY of its subcategories are selected
         const parentSelected = filters?.categories?.includes(parentCategory.name) || false;
-        const allSubcategoriesSelected = parentCategory.subcategories.every(sub => 
+        const anySubcategorySelected = parentCategory.subcategories.some(sub => 
           filters?.categories?.includes(sub.name) || false
         );
-        isSelected = parentSelected && allSubcategoriesSelected;
+        isSelected = parentSelected || anySubcategorySelected;
       } else {
         // For categories without subcategories, check if directly selected
         isSelected = filters?.categories?.includes(parentCategory.name) || false;
@@ -965,6 +972,9 @@ export class PartnersProductsComponent implements OnInit, OnDestroy {
   }
 
   getTotalProductCount(parentCategory: ProductCategory): number {
+    // For parent categories: shows distinct count of products that will be displayed when filtering
+    // This ensures the number shown in the category matches exactly what users see when they click it
+    // Products that appear in multiple subcategories are only counted once
     return parentCategory.productCount || 0;
   }
 
