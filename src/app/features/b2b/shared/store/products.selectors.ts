@@ -114,6 +114,11 @@ export const selectCategoryFilters = createSelector(
     (filters) => filters.categories
 );
 
+export const selectManufacturerFilters = createSelector(
+    selectFilters,
+    (filters) => filters.manufacturers
+);
+
 export const selectAvailabilityFilter = createSelector(
     selectFilters,
     (filters) => filters.availability
@@ -181,4 +186,35 @@ export const selectPaginationInfo = createSelector(
             endIndex
         };
     }
+);
+
+// Dynamic filter selectors
+export const selectAllManufacturers = createSelector(
+    selectProductsFeature,
+    (state: ProductsState) => state.allManufacturers
+);
+
+export const selectCategoryCounts = createSelector(
+    selectProductsFeature,
+    (state: ProductsState) => state.categoryCounts
+);
+
+export const selectManufacturersLoading = createSelector(
+    selectProductsFeature,
+    (state: ProductsState) => state.manufacturersLoading
+);
+
+export const selectCategoryCountsLoading = createSelector(
+    selectProductsFeature,
+    (state: ProductsState) => state.categoryCountsLoading
+);
+
+export const selectManufacturerCounts = createSelector(
+    selectProductsFeature,
+    (state: ProductsState) => state.manufacturerCounts
+);
+
+export const selectManufacturerCountsLoading = createSelector(
+    selectProductsFeature,
+    (state: ProductsState) => state.manufacturerCountsLoading
 ); 

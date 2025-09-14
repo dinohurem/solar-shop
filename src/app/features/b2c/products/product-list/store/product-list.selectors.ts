@@ -112,4 +112,34 @@ export const selectCachedPages = createSelector(
 export const selectLastQuery = createSelector(
     selectProductListState,
     (state: ProductListState) => state.lastQuery
+);
+
+export const selectAllManufacturers = createSelector(
+    selectProductListState,
+    (state: ProductListState) => state.allManufacturers
+);
+
+export const selectCategoryCounts = createSelector(
+    selectProductListState,
+    (state: ProductListState) => state.categoryCounts
+);
+
+export const selectManufacturersLoading = createSelector(
+    selectProductListState,
+    (state: ProductListState) => state.manufacturersLoading
+);
+
+export const selectCategoryCountsLoading = createSelector(
+    selectProductListState,
+    (state: ProductListState) => state.categoryCountsLoading
+);
+
+export const selectManufacturerCounts = createSelector(
+    selectProductListState,
+    (state: ProductListState) => state.manufacturerCounts
+);
+
+export const selectManufacturerCountsLoading = createSelector(
+    selectProductListState,
+    (state: ProductListState) => state.manufacturerCountsLoading
 ); 

@@ -18,6 +18,12 @@ export interface ProductListState {
     pagination: PaginationState;
     cachedPages: { [pageKey: string]: CachedPage };
     lastQuery: string;
+    allManufacturers: string[];
+    categoryCounts: { [categoryName: string]: number };
+    manufacturerCounts: { [manufacturerName: string]: number };
+    manufacturersLoading: boolean;
+    categoryCountsLoading: boolean;
+    manufacturerCountsLoading: boolean;
 }
 
 const initialState: ProductListState = {
@@ -34,11 +40,17 @@ const initialState: ProductListState = {
     searchQuery: '',
     pagination: {
         currentPage: 1,
-        itemsPerPage: 10,
+        itemsPerPage: 12,
         totalItems: 0
     },
     cachedPages: {},
-    lastQuery: ''
+    lastQuery: '',
+    allManufacturers: [],
+    categoryCounts: {},
+    manufacturerCounts: {},
+    manufacturersLoading: false,
+    categoryCountsLoading: false,
+    manufacturerCountsLoading: false
 };
 
 export const productListReducer = createReducer(
@@ -207,5 +219,56 @@ export const productListReducer = createReducer(
             ...state.pagination,
             totalItems
         }
+    })),
+
+    on(ProductListActions.loadAllManufacturers, (state) => ({
+        ...state,
+        manufacturersLoading: true
+    })),
+
+    on(ProductListActions.loadAllManufacturersSuccess, (state, { manufacturers }) => ({
+        ...state,
+        allManufacturers: manufacturers,
+        manufacturersLoading: false
+    })),
+
+    on(ProductListActions.loadAllManufacturersFailure, (state, { error }) => ({
+        ...state,
+        manufacturersLoading: false,
+        error
+    })),
+
+    on(ProductListActions.loadCategoryCounts, (state) => ({
+        ...state,
+        categoryCountsLoading: true
+    })),
+
+    on(ProductListActions.loadCategoryCountsSuccess, (state, { categoryCounts }) => ({
+        ...state,
+        categoryCounts,
+        categoryCountsLoading: false
+    })),
+
+    on(ProductListActions.loadCategoryCountsFailure, (state, { error }) => ({
+        ...state,
+        categoryCountsLoading: false,
+        error
+    })),
+
+    on(ProductListActions.loadManufacturerCounts, (state) => ({
+        ...state,
+        manufacturerCountsLoading: true
+    })),
+
+    on(ProductListActions.loadManufacturerCountsSuccess, (state, { manufacturerCounts }) => ({
+        ...state,
+        manufacturerCounts,
+        manufacturerCountsLoading: false
+    })),
+
+    on(ProductListActions.loadManufacturerCountsFailure, (state, { error }) => ({
+        ...state,
+        manufacturerCountsLoading: false,
+        error
     }))
 ); 

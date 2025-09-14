@@ -1,6 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
@@ -12,7 +12,7 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 @Component({
     selector: 'app-b2b-order-review',
     standalone: true,
-    imports: [CommonModule, TranslatePipe],
+    imports: [CommonModule, RouterModule, TranslatePipe],
     template: `
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
       <h2 class="text-2xl font-bold text-gray-900 mb-6 font-['Poppins']">{{ 'b2bCheckout.reviewOrder' | translate }}</h2>
@@ -43,7 +43,12 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 
           <!-- Product Details -->
           <div class="flex-1 min-w-0">
-            <h3 class="text-lg font-semibold text-gray-900 mb-2 font-['Poppins']">{{ item.name }}</h3>
+            <a 
+              [routerLink]="['/partneri/proizvodi', item.productId]"
+              class="text-lg font-semibold text-gray-900 hover:text-solar-600 mb-2 font-['Poppins'] block cursor-pointer"
+            >
+              {{ item.name }}
+            </a>
             <p class="text-sm text-gray-600 mb-3 font-['DM_Sans']">SKU: {{ item.sku }} | {{ item.category }}</p>
             
             <!-- Quantity Controls -->

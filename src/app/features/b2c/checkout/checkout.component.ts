@@ -122,7 +122,12 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
                     class="w-12 h-12 object-cover rounded-lg bg-gray-100"
                   >
                   <div class="flex-1 min-w-0">
-                    <h4 class="text-sm font-medium text-gray-900 truncate font-['DM_Sans']">{{ item.name }}</h4>
+                    <a 
+                      [routerLink]="['/proizvodi', item.productId || item.id]"
+                      class="text-sm font-medium text-gray-900 hover:text-solar-600 truncate block cursor-pointer font-['DM_Sans']"
+                    >
+                      {{ item.name }}
+                    </a>
                     <p class="text-sm text-gray-500 font-['DM_Sans']">x{{ item.quantity }}</p>
                   </div>
                   <span class="text-sm font-medium text-gray-900 font-['DM_Sans']">

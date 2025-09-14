@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Cart, CartItem } from '../../../../../shared/models/cart.model';
 import * as CartActions from '../../store/cart.actions';
@@ -12,7 +12,7 @@ import { LucideAngularModule, ShoppingCart } from 'lucide-angular';
 @Component({
   selector: 'app-cart-sidebar',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe, LucideAngularModule],
+  imports: [CommonModule, FormsModule, RouterModule, TranslatePipe, LucideAngularModule],
   template: `
     <!-- Cart Overlay -->
     <div 
@@ -91,7 +91,13 @@ import { LucideAngularModule, ShoppingCart } from 'lucide-angular';
 
                   <!-- Product Details -->
                   <div class="flex-1 min-w-0">
-                    <h4 class="text-sm font-medium text-gray-900 truncate">{{ item.name }}</h4>
+                    <a 
+                      [routerLink]="['/proizvodi', item.productId || item.id]"
+                      (click)="closeCart()"
+                      class="text-sm font-medium text-gray-900 hover:text-solar-600 truncate block cursor-pointer"
+                    >
+                      {{ item.name }}
+                    </a>
                     <p class="text-xs text-gray-500 mt-1">{{ item.category }}</p>
                     
                     <!-- Price -->

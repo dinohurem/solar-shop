@@ -626,9 +626,7 @@ export class TranslationService {
                 postalCode: 'Poštanski broj',
                 country: 'Država',
                 selectCountry: 'Odaberite državu',
-                countryBosnia: 'Bosna i Hercegovina',
                 countryCroatia: 'Hrvatska',
-                countrySerbia: 'Srbija',
                 addressRequired: 'Adresa je obavezna',
                 cityRequired: 'Grad je obavezan',
                 postalCodeRequired: 'Poštanski broj je obavezan',
@@ -1958,9 +1956,7 @@ export class TranslationService {
                 postalCodeRequired: 'Poštanski broj je obavezan',
                 country: 'Država',
                 countryRequired: 'Država je obavezna',
-                countryBosnia: 'Bosna i Hercegovina',
                 countryCroatia: 'Hrvatska',
-                countrySerbia: 'Srbija',
                 selectCountry: 'Odaberi državu',
                 shippingOptions: 'Način dostave',
                 standardShipping: 'Standardna dostava',
@@ -2627,6 +2623,13 @@ export class TranslationService {
                 readyToPartner: 'Spremni ste da postanete naš partner?',
                 joinThousands: 'Pridružite se tisućama partnera širom svijeta i povećajte svoj solarnu efikasnost.',
                 contactSales: 'Kontaktirajte prodaju'
+            },
+            // Cookie Banner
+            cookieBanner: {
+                message: 'Koristimo kolačiće kako bismo poboljšali vaše iskustvo na našoj web stranici.',
+                learnMore: 'Saznajte više',
+                accept: 'Prihvati',
+                reject: 'Odbaci'
             }
         },
         en: {
@@ -4460,9 +4463,7 @@ export class TranslationService {
                 postalCodeRequired: 'Postal code is required',
                 country: 'Country',
                 countryRequired: 'Country is required',
-                countryBosnia: 'Bosnia and Herzegovina',
                 countryCroatia: 'Croatia',
-                countrySerbia: 'Serbia',
                 selectCountry: 'Select country',
                 shippingOptions: 'Shipping Options',
                 standardShipping: 'Standard Shipping',
@@ -5143,9 +5144,7 @@ export class TranslationService {
                 postalCode: 'Postal Code',
                 country: 'Country',
                 selectCountry: 'Select Country',
-                countryBosnia: 'Bosnia and Herzegovina',
                 countryCroatia: 'Croatia',
-                countrySerbia: 'Serbia',
                 addressRequired: 'Address is required',
                 cityRequired: 'City is required',
                 postalCodeRequired: 'Postal code is required',
@@ -5219,6 +5218,13 @@ export class TranslationService {
                 readyToPartner: 'Ready to partner with us?',
                 joinThousands: 'Join thousands of partners worldwide and grow your solar business with IBC SOLAR',
                 contactSales: 'Contact Sales'
+            },
+            // Cookie Banner
+            cookieBanner: {
+                message: 'We use cookies to improve your experience on our website.',
+                learnMore: 'Learn more',
+                accept: 'Accept',
+                reject: 'Reject'
             }
         }
     };

@@ -31,7 +31,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
           >
             <!-- Main Category Card -->
             <div 
-              class="relative h-[500px] rounded-3xl overflow-hidden group cursor-pointer shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2"
+              class="relative h-[500px] rounded-3xl overflow-hidden group cursor-pointer shadow-xl hover:shadow-2xl transition-shadow duration-500 transform hover:-translate-y-2"
               (click)="navigateToProductList(category)"
             >
               <!-- Background Image -->

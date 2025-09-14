@@ -154,9 +154,7 @@ import { Company } from '../../../../../shared/models/company.model';
                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-solar-500 focus:border-transparent font-['DM_Sans']"
                 >
                   <option value="">{{ 'b2bCheckout.selectCountry' | translate }}</option>
-                  <option value="Bosnia">{{ 'b2bCheckout.countryBosnia' | translate }}</option>
                   <option value="Croatia">{{ 'b2bCheckout.countryCroatia' | translate }}</option>
-                  <option value="Serbia">{{ 'b2bCheckout.countrySerbia' | translate }}</option>
                 </select>
                 <div *ngIf="shippingForm.get('deliveryCountry')?.invalid && shippingForm.get('deliveryCountry')?.touched" class="mt-1 text-sm text-red-600">
                   {{ 'b2bCheckout.countryRequired' | translate }}

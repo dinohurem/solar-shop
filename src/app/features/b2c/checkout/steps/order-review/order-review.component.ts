@@ -1,18 +1,18 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import * as CartSelectors from '../../../cart/store/cart.selectors';
 import * as CartActions from '../../../cart/store/cart.actions';
-import { CartItem } from '../../../../../shared/models/cart.model';
+import { CartItem, AppliedCoupon } from '../../../../../shared/models/cart.model';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-order-review',
   standalone: true,
-  imports: [CommonModule, TranslatePipe],
+  imports: [CommonModule, RouterModule, TranslatePipe],
   template: `
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
       <h2 class="text-2xl font-bold text-gray-900 mb-6 font-['Poppins']">{{ 'checkout.title' | translate }}</h2>
@@ -34,8 +34,12 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 
           <!-- Product Details -->
           <div class="flex-1 min-w-0">
-            <h3 class="text-lg font-semibold text-gray-900 mb-2 font-['Poppins']">{{ item.name }}</h3>
-            <p class="text-sm text-gray-600 mb-3 font-['DM_Sans']">{{ item.description }}</p>
+            <a 
+              [routerLink]="['/proizvodi', item.productId || item.id]"
+              class="text-lg font-semibold text-gray-900 hover:text-solar-600 mb-2 font-['Poppins'] block cursor-pointer"
+            >
+              {{ item.name }}
+            </a>
             
             <!-- Quantity Controls -->
             <div class="flex items-center space-x-3">
@@ -95,6 +99,52 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
         <p class="text-gray-600 font-['DM_Sans']">{{ 'cart.emptyText' | translate }}</p>
       </div>
 
+      <!-- Applied Coupons -->
+      <div *ngIf="appliedCoupons$ | async as coupons" class="mt-6">
+        <div *ngIf="coupons.length > 0" class="bg-green-50 border border-green-200 rounded-lg p-4">
+          <h4 class="text-sm font-medium text-green-800 mb-2 font-['DM_Sans']">{{ 'cart.appliedCoupons' | translate }}</h4>
+          <div class="space-y-2">
+            <div 
+              *ngFor="let coupon of coupons"
+              class="flex items-center justify-between text-sm text-green-700"
+            >
+              <span class="font-['DM_Sans']">{{ coupon.code }}</span>
+              <span class="font-semibold font-['DM_Sans']">-{{ coupon.discountAmount | currency:'EUR':'symbol':'1.2-2' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order Summary -->
+      <div class="mt-6 bg-gray-50 rounded-lg p-4">
+        <h4 class="text-lg font-semibold text-gray-900 mb-4 font-['Poppins']">{{ 'checkout.orderSummary' | translate }}</h4>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between">
+            <span class="text-gray-600 font-['DM_Sans']">{{ 'cart.subtotal' | translate }}</span>
+            <span class="font-['DM_Sans']">{{ (cartSummary$ | async)?.subtotal | currency:'EUR':'symbol':'1.2-2' }}</span>
+          </div>
+          <div 
+            *ngIf="(cartSummary$ | async)?.discount && (cartSummary$ | async)!.discount > 0"
+            class="flex justify-between text-green-600"
+          >
+            <span class="font-['DM_Sans']">{{ 'cart.discount' | translate }}</span>
+            <span class="font-['DM_Sans']">-{{ (cartSummary$ | async)?.discount | currency:'EUR':'symbol':'1.2-2' }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600 font-['DM_Sans']">{{ 'cart.tax' | translate }}</span>
+            <span class="font-['DM_Sans']">{{ (cartSummary$ | async)?.tax | currency:'EUR':'symbol':'1.2-2' }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600 font-['DM_Sans']">{{ 'cart.shipping' | translate }}</span>
+            <span class="font-['DM_Sans']">{{ (cartSummary$ | async)?.shipping | currency:'EUR':'symbol':'1.2-2' }}</span>
+          </div>
+          <div class="flex justify-between font-semibold text-lg border-t pt-2">
+            <span class="font-['Poppins']">{{ 'cart.total' | translate }}</span>
+            <span class="font-['Poppins']">{{ (cartSummary$ | async)?.total | currency:'EUR':'symbol':'1.2-2' }}</span>
+          </div>
+        </div>
+      </div>
+
       <!-- Continue Button -->
       <div class="mt-8 pt-6 border-t border-gray-200">
         <button 
@@ -117,9 +167,20 @@ export class OrderReviewComponent implements OnInit {
   private router = inject(Router);
 
   cartItems$: Observable<CartItem[]>;
+  appliedCoupons$: Observable<AppliedCoupon[]>;
+  cartSummary$: Observable<{
+    subtotal: number;
+    tax: number;
+    shipping: number;
+    discount: number;
+    total: number;
+    itemCount: number;
+  }>;
 
   constructor() {
     this.cartItems$ = this.store.select(CartSelectors.selectCartItems);
+    this.appliedCoupons$ = this.store.select(CartSelectors.selectAppliedCoupons);
+    this.cartSummary$ = this.store.select(CartSelectors.selectCartSummary);
   }
 
   ngOnInit() {

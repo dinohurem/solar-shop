@@ -71,6 +71,7 @@ export interface ProductsQuery {
     itemsPerPage?: number;
     searchQuery?: string;
     categories?: string[];
+    manufacturers?: string[];
     availability?: string;
     sortBy?: string;
 }
@@ -185,6 +186,11 @@ export const toggleCategoryFilter = createAction(
     props<{ category: string; checked: boolean }>()
 );
 
+export const toggleManufacturerFilter = createAction(
+    '[B2B Products] Toggle Manufacturer Filter',
+    props<{ manufacturer: string; checked: boolean }>()
+);
+
 export const setAvailabilityFilter = createAction(
     '[B2B Products] Set Availability Filter',
     props<{ availability: string }>()
@@ -213,4 +219,64 @@ export const setItemsPerPage = createAction(
 export const updatePaginationInfo = createAction(
     '[B2B Products] Update Pagination Info',
     props<{ totalItems: number; totalPages: number }>()
+);
+
+// Filter interfaces for dynamic counts
+export interface CategoryCountFilters {
+    searchQuery?: string;
+    manufacturers?: string[];
+    availability?: string;
+}
+
+export interface ManufacturerCountFilters {
+    searchQuery?: string;
+    categories?: string[];
+    availability?: string;
+}
+
+// Load all manufacturers
+export const loadAllManufacturers = createAction(
+    '[B2B Products] Load All Manufacturers'
+);
+
+export const loadAllManufacturersSuccess = createAction(
+    '[B2B Products] Load All Manufacturers Success',
+    props<{ manufacturers: string[] }>()
+);
+
+export const loadAllManufacturersFailure = createAction(
+    '[B2B Products] Load All Manufacturers Failure',
+    props<{ error: string }>()
+);
+
+// Load category counts
+export const loadCategoryCounts = createAction(
+    '[B2B Products] Load Category Counts',
+    props<{ filters?: CategoryCountFilters }>()
+);
+
+export const loadCategoryCountsSuccess = createAction(
+    '[B2B Products] Load Category Counts Success',
+    props<{ categoryCounts: { [categoryName: string]: number } }>()
+);
+
+export const loadCategoryCountsFailure = createAction(
+    '[B2B Products] Load Category Counts Failure',
+    props<{ error: string }>()
+);
+
+// Load manufacturer counts
+export const loadManufacturerCounts = createAction(
+    '[B2B Products] Load Manufacturer Counts',
+    props<{ filters?: ManufacturerCountFilters }>()
+);
+
+export const loadManufacturerCountsSuccess = createAction(
+    '[B2B Products] Load Manufacturer Counts Success',
+    props<{ manufacturerCounts: { [manufacturerName: string]: number } }>()
+);
+
+export const loadManufacturerCountsFailure = createAction(
+    '[B2B Products] Load Manufacturer Counts Failure',
+    props<{ error: string }>()
 ); 

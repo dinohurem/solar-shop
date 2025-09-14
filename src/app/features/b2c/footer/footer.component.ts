@@ -248,7 +248,7 @@ export interface FooterData {
             <div class="flex items-center gap-4">
               <span class="text-gray-300 text-sm font-medium">{{ 'footer.paymentMethods' | translate }}</span>
               <div class="flex gap-3 flex-wrap">
-                <a href="https://www.mastercard.ba/bs-ba.html" target="_blank" rel="noopener noreferrer" 
+                <a href="https://www.mastercard.hr/hr-hr.html" target="_blank" rel="noopener noreferrer" 
                    class="bg-white/10 rounded-lg p-2 hover:bg-white/20 transition-all duration-300" 
                    title="Mastercard">
                   <img src="assets/images/payment/mastercard.svg" alt="Mastercard" class="h-6 w-auto">

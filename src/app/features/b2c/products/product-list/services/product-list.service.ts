@@ -14,6 +14,20 @@ export interface ProductFilters {
     search?: string;
 }
 
+export interface CategoryCountFilters {
+    searchQuery?: string;
+    manufacturers?: string[];
+    priceRange?: { min: number; max: number };
+    availability?: string;
+}
+
+export interface ManufacturerCountFilters {
+    searchQuery?: string;
+    categories?: string[];
+    priceRange?: { min: number; max: number };
+    availability?: string;
+}
+
 @Injectable({
     providedIn: 'root'
 })
@@ -71,6 +85,33 @@ export class ProductListService {
             catchError(error => {
                 console.error('Error fetching products with pagination:', error);
                 return of({ products: [], totalItems: 0, totalPages: 0, currentPage: 1 });
+            })
+        );
+    }
+
+    getAllManufacturers(): Observable<string[]> {
+        return from(this.fetchAllManufacturers()).pipe(
+            catchError(error => {
+                console.error('Error fetching all manufacturers:', error);
+                return of([]);
+            })
+        );
+    }
+
+    getCategoryCounts(filters?: CategoryCountFilters | Partial<ProductFilters>): Observable<{ [categoryName: string]: number }> {
+        return from(this.fetchCategoryCounts(filters)).pipe(
+            catchError(error => {
+                console.error('Error fetching category counts:', error);
+                return of({});
+            })
+        );
+    }
+
+    getManufacturerCounts(filters?: ManufacturerCountFilters | Partial<ProductFilters>): Observable<{ [manufacturerName: string]: number }> {
+        return from(this.fetchManufacturerCounts(filters)).pipe(
+            catchError(error => {
+                console.error('Error fetching manufacturer counts:', error);
+                return of({});
             })
         );
     }
@@ -400,6 +441,325 @@ export class ProductListService {
         } catch (error) {
             console.error('Error converting product:', error);
             return null;
+        }
+    }
+
+    private async fetchAllManufacturers(): Promise<string[]> {
+        try {
+            const { data, error } = await this.supabaseService.client
+                .from('products')
+                .select('brand')
+                .eq('is_active', true)
+                .not('brand', 'is', null)
+                .not('brand', 'eq', '');
+
+            if (error) {
+                throw error;
+            }
+
+            // Get unique manufacturers
+            const manufacturers = [...new Set(data?.map(product => product.brand).filter(Boolean) || [])];
+            return manufacturers.sort();
+        } catch (error) {
+            console.error('Error fetching all manufacturers:', error);
+            return [];
+        }
+    }
+
+    private async fetchCategoryCounts(filters?: CategoryCountFilters | Partial<ProductFilters>): Promise<{ [categoryName: string]: number }> {
+        try {
+            // First, get ALL categories with hierarchy information to ensure we show 0 counts
+            const { data: allCategoriesData, error: categoriesError } = await this.supabaseService.client
+                .from('categories')
+                .select('id, name, parent_id')
+                .eq('is_active', true);
+
+            if (categoriesError) {
+                throw categoriesError;
+            }
+
+            // Initialize all categories with 0 count
+            const categoryCounts: { [categoryName: string]: number } = {};
+            const categoryHierarchy: { [categoryId: string]: { name: string; parentId?: string; children: string[] } } = {};
+            
+            allCategoriesData?.forEach(category => {
+                categoryCounts[category.name] = 0;
+                categoryHierarchy[category.id] = {
+                    name: category.name,
+                    parentId: category.parent_id,
+                    children: []
+                };
+            });
+
+            // Build parent-child relationships
+            allCategoriesData?.forEach(category => {
+                if (category.parent_id && categoryHierarchy[category.parent_id]) {
+                    categoryHierarchy[category.parent_id].children.push(category.id);
+                }
+            });
+
+            // Now build query to get full product data (without count) - like B2B
+            let supabaseQuery = this.supabaseService.client
+                .from('products')
+                .select(`
+                    id,
+                    name,
+                    description,
+                    sku,
+                    brand,
+                    price,
+                    category_id,
+                    categories!inner(id, name),
+                    product_categories!left(category_id)
+                `)
+                .eq('is_active', true);
+
+            // Apply the same filters as in the main query
+            const searchQuery = (filters as any)?.searchQuery || (filters as any)?.search;
+            if (searchQuery && searchQuery.trim()) {
+                const searchTerm = `%${searchQuery.trim()}%`;
+                supabaseQuery = supabaseQuery.or(`name.ilike.${searchTerm},description.ilike.${searchTerm},sku.ilike.${searchTerm}`);
+            }
+
+            if ((filters as any)?.manufacturers && (filters as any).manufacturers.length > 0) {
+                supabaseQuery = supabaseQuery.in('brand', (filters as any).manufacturers);
+            }
+
+            if (filters?.priceRange && (filters.priceRange.min > 0 || filters.priceRange.max > 0)) {
+                if (filters.priceRange.min > 0) {
+                    supabaseQuery = supabaseQuery.gte('price', filters.priceRange.min);
+                }
+                if (filters.priceRange.max > 0) {
+                    supabaseQuery = supabaseQuery.lte('price', filters.priceRange.max);
+                }
+            }
+
+            // Add availability filter like B2B
+            if (filters?.availability && filters.availability !== '') {
+                switch (filters.availability) {
+                    case 'in-stock':
+                        supabaseQuery = supabaseQuery.eq('stock_status', 'in_stock');
+                        break;
+                    case 'low-stock':
+                        supabaseQuery = supabaseQuery.eq('stock_status', 'low_stock');
+                        break;
+                    case 'out-of-stock':
+                        supabaseQuery = supabaseQuery.eq('stock_status', 'out_of_stock');
+                        break;
+                }
+            }
+
+            const { data, error } = await supabaseQuery;
+
+            if (error) {
+                throw error;
+            }
+
+            // Count products by individual categories first (including additional categories)
+            const individualCategoryCounts: { [categoryId: string]: Set<string> } = {};
+            
+            // Initialize all category IDs with empty sets for distinct product tracking
+            Object.keys(categoryHierarchy).forEach(categoryId => {
+                individualCategoryCounts[categoryId] = new Set<string>();
+            });
+
+            data?.forEach((product: any) => {
+                // Count for main category
+                if (product.category_id && individualCategoryCounts[product.category_id]) {
+                    individualCategoryCounts[product.category_id].add(product.id);
+                }
+
+                // Count for additional categories
+                if (product.product_categories) {
+                    const additionalCategories = Array.isArray(product.product_categories) 
+                        ? product.product_categories 
+                        : [product.product_categories];
+                    
+                    additionalCategories.forEach((pc: any) => {
+                        if (pc.category_id && individualCategoryCounts[pc.category_id]) {
+                            individualCategoryCounts[pc.category_id].add(product.id);
+                        }
+                    });
+                }
+            });
+
+            // Now calculate hierarchical counts: each parent gets its own count + all descendants
+            const hierarchicalCounts = this.calculateHierarchicalCounts(categoryHierarchy, individualCategoryCounts);
+
+            // Convert from category ID-based counts to category name-based counts
+            Object.entries(hierarchicalCounts).forEach(([categoryId, count]) => {
+                const categoryInfo = categoryHierarchy[categoryId];
+                if (categoryInfo) {
+                    categoryCounts[categoryInfo.name] = count;
+                }
+            });
+
+            return categoryCounts;
+        } catch (error) {
+            console.error('Error fetching category counts:', error);
+            return {};
+        }
+    }
+
+    /**
+     * Calculate hierarchical counts where each parent category includes counts from all its descendants
+     */
+    private calculateHierarchicalCounts(
+        categoryHierarchy: { [categoryId: string]: { name: string; parentId?: string; children: string[] } },
+        individualCounts: { [categoryId: string]: Set<string> }
+    ): { [categoryId: string]: number } {
+        const hierarchicalCounts: { [categoryId: string]: number } = {};
+
+        // Helper function to recursively collect all descendant product IDs
+        const collectDescendantProducts = (categoryId: string, visited: Set<string> = new Set()): Set<string> => {
+            if (visited.has(categoryId)) {
+                return new Set(); // Prevent infinite loops
+            }
+            visited.add(categoryId);
+
+            const allProducts = new Set<string>();
+            
+            // Add this category's own products
+            if (individualCounts[categoryId]) {
+                individualCounts[categoryId].forEach(productId => allProducts.add(productId));
+            }
+
+            // Add products from all descendants
+            const categoryInfo = categoryHierarchy[categoryId];
+            if (categoryInfo && categoryInfo.children.length > 0) {
+                categoryInfo.children.forEach(childId => {
+                    const childProducts = collectDescendantProducts(childId, new Set(visited));
+                    childProducts.forEach(productId => allProducts.add(productId));
+                });
+            }
+
+            return allProducts;
+        };
+
+        // Calculate hierarchical count for each category
+        Object.keys(categoryHierarchy).forEach(categoryId => {
+            const allProducts = collectDescendantProducts(categoryId);
+            hierarchicalCounts[categoryId] = allProducts.size;
+        });
+
+        return hierarchicalCounts;
+    }
+
+    private async fetchManufacturerCounts(filters?: ManufacturerCountFilters | Partial<ProductFilters>): Promise<{ [manufacturerName: string]: number }> {
+        try {
+            // First, get ALL manufacturers to ensure we show 0 counts
+            const { data: allManufacturersData, error: manufacturersError } = await this.supabaseService.client
+                .from('products')
+                .select('brand')
+                .eq('is_active', true)
+                .not('brand', 'is', null)
+                .not('brand', 'eq', '');
+
+            if (manufacturersError) {
+                throw manufacturersError;
+            }
+
+            // Initialize all manufacturers with 0 count
+            const manufacturerCounts: { [manufacturerName: string]: number } = {};
+            const uniqueManufacturers = [...new Set(allManufacturersData?.map(product => product.brand).filter(Boolean) || [])];
+            uniqueManufacturers.forEach(manufacturer => {
+                manufacturerCounts[manufacturer] = 0;
+            });
+
+            // Now build query to get full product data (without count) - like B2B
+            let supabaseQuery = this.supabaseService.client
+                .from('products')
+                .select(`
+                    id,
+                    name,
+                    description,
+                    sku,
+                    brand,
+                    price,
+                    category_id,
+                    categories!inner(name)
+                `)
+                .eq('is_active', true)
+                .not('brand', 'is', null)
+                .not('brand', 'eq', '');
+
+            // Apply the same filters as in the main query
+            const searchQuery = (filters as any)?.searchQuery || (filters as any)?.search;
+            if (searchQuery && searchQuery.trim()) {
+                const searchTerm = `%${searchQuery.trim()}%`;
+                supabaseQuery = supabaseQuery.or(`name.ilike.${searchTerm},description.ilike.${searchTerm},sku.ilike.${searchTerm}`);
+            }
+
+            if ((filters as any)?.categories && (filters as any).categories.length > 0) {
+                // First, get the category IDs from category names
+                const { data: categoryData } = await this.supabaseService.client
+                    .from('categories')
+                    .select('id, name')
+                    .in('name', (filters as any).categories);
+
+                if (categoryData && categoryData.length > 0) {
+                    const categoryIds = categoryData.map(cat => cat.id);
+                    
+                    // Handle both legacy category_id and product_categories table
+                    const { data: productCategoryIds } = await this.supabaseService.client
+                        .from('product_categories')
+                        .select('product_id')
+                        .in('category_id', categoryIds);
+                    
+                    const productIdsFromJunction = (productCategoryIds || []).map(pc => pc.product_id);
+                    
+                    if (productIdsFromJunction.length > 0) {
+                        // Filter by either category_id OR product ID exists in junction table
+                        const filterQuery = `category_id.in.(${categoryIds.join(',')}),id.in.(${productIdsFromJunction.join(',')})`;
+                        supabaseQuery = supabaseQuery.or(filterQuery);
+                    } else {
+                        // Fallback to just legacy category_id
+                        supabaseQuery = supabaseQuery.in('category_id', categoryIds);
+                    }
+                }
+            }
+
+            if (filters?.priceRange && (filters.priceRange.min > 0 || filters.priceRange.max > 0)) {
+                if (filters.priceRange.min > 0) {
+                    supabaseQuery = supabaseQuery.gte('price', filters.priceRange.min);
+                }
+                if (filters.priceRange.max > 0) {
+                    supabaseQuery = supabaseQuery.lte('price', filters.priceRange.max);
+                }
+            }
+
+            // Add availability filter like B2B
+            if (filters?.availability && filters.availability !== '') {
+                switch (filters.availability) {
+                    case 'in-stock':
+                        supabaseQuery = supabaseQuery.eq('stock_status', 'in_stock');
+                        break;
+                    case 'low-stock':
+                        supabaseQuery = supabaseQuery.eq('stock_status', 'low_stock');
+                        break;
+                    case 'out-of-stock':
+                        supabaseQuery = supabaseQuery.eq('stock_status', 'out_of_stock');
+                        break;
+                }
+            }
+
+            const { data, error } = await supabaseQuery;
+
+            if (error) {
+                throw error;
+            }
+
+            // Count products by manufacturer (overriding 0s with actual counts)
+            data?.forEach((product: any) => {
+                if (product.brand) {
+                    manufacturerCounts[product.brand] = (manufacturerCounts[product.brand] || 0) + 1;
+                }
+            });
+
+            return manufacturerCounts;
+        } catch (error) {
+            console.error('Error fetching manufacturer counts:', error);
+            return {};
         }
     }
 

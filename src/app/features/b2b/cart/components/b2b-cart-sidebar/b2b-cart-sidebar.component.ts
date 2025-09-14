@@ -109,7 +109,13 @@ import { LucideAngularModule, ShoppingCart } from 'lucide-angular';
 
                   <!-- Product Details -->
                   <div class="flex-1 min-w-0">
-                    <h4 class="text-sm font-medium text-gray-900 truncate">{{ item.name }}</h4>
+                    <a 
+                      [routerLink]="['/partneri/proizvodi', item.productId]"
+                      (click)="closeSidebar()"
+                      class="text-sm font-medium text-gray-900 hover:text-solar-600 truncate block cursor-pointer"
+                    >
+                      {{ item.name }}
+                    </a>
                     <p class="text-xs text-gray-500 mt-1">{{ 'b2bCart.sku' | translate }}: {{ item.sku }}</p>
                     
                     <!-- Price -->

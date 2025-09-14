@@ -4,13 +4,14 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule, } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { ToastComponent } from './shared/components/toast/toast.component';
+import { CookieBannerComponent } from './shared/components/cookie-banner/cookie-banner.component';
 import * as AuthActions from './core/auth/store/auth.actions';
 
 @Component({
   selector: 'app-root',
   standalone: true,
   templateUrl: './app.component.html',
-  imports: [CommonModule, RouterModule, FormsModule, ReactiveFormsModule, ToastComponent]
+  imports: [CommonModule, RouterModule, FormsModule, ReactiveFormsModule, ToastComponent, CookieBannerComponent]
 })
 export class AppComponent implements OnInit {
   title = 'solar-shop';

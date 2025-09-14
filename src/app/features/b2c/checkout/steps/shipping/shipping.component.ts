@@ -128,9 +128,7 @@ import { User } from '../../../../../shared/models/user.model';
                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0ACF83] focus:border-transparent font-['DM_Sans']"
                 >
                   <option value="">{{ 'checkout.selectCountry' | translate }}</option>
-                  <option value="Bosnia">{{ 'checkout.countryBosnia' | translate }}</option>
                   <option value="Croatia">{{ 'checkout.countryCroatia' | translate }}</option>
-                  <option value="Serbia">{{ 'checkout.countrySerbia' | translate }}</option>
                 </select>
                 <div *ngIf="shippingForm.get('country')?.invalid && shippingForm.get('country')?.touched" class="mt-1 text-sm text-red-600">
                   {{ 'checkout.countryRequired' | translate }}

@@ -4,7 +4,8 @@ import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable, Subject, combineLatest } from 'rxjs';
-import { takeUntil, debounceTime, distinctUntilChanged, filter, map, take, skip } from 'rxjs/operators';
+import { takeUntil, debounceTime, distinctUntilChanged, filter, map, take, skip, startWith } from 'rxjs/operators';
+import { ProductListUrlStateService, ProductListUrlState } from './services/product-list-url-state.service';
 import { ProductListActions } from './store/product-list.actions';
 import {
   selectProducts,
@@ -23,12 +24,19 @@ import {
   selectItemsPerPage,
   selectTotalPages,
   selectCachedPages,
-  selectLastQuery
+  selectLastQuery,
+  selectAllManufacturers,
+  selectCategoryCounts,
+  selectManufacturerCounts,
+  selectManufacturersLoading,
+  selectCategoryCountsLoading,
+  selectManufacturerCountsLoading
 } from './store/product-list.selectors';
 import { AddToCartButtonComponent } from '../../cart/components/add-to-cart-button/add-to-cart-button.component';
 import * as CartActions from '../../cart/store/cart.actions';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { ProductCategory, CategoriesService } from '../services/categories.service';
+import { CategoryCountFilters, ManufacturerCountFilters } from './services/product-list.service';
 import { selectProductCategories } from '../store/products.selectors';
 import { ProductsActions } from '../store/products.actions';
 
@@ -139,7 +147,7 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
                           {{ parentCategory.name }}
                         </span>
                         <span class="ml-2 text-xs text-gray-500">
-                          ({{ getTotalProductCount(parentCategory) }})
+                          ({{ (categoryCounts$ | async)?.[parentCategory.name] || 0 }})
                         </span>
                       </label>
                       <!-- Collapse/Expand Button -->
@@ -175,8 +183,8 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
                         <span class="ml-2 text-sm text-gray-700 font-['DM_Sans']">
                           {{ subCategory.name }}
                         </span>
-                        <span *ngIf="subCategory.productCount" class="ml-2 text-xs text-gray-500">
-                          ({{ subCategory.productCount }})
+                        <span class="ml-2 text-xs text-gray-500">
+                          ({{ (categoryCounts$ | async)?.[subCategory.name] || 0 }})
                         </span>
                       </label>
                     </div>
@@ -226,7 +234,7 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
               <div class="mb-6">
                 <h4 class="text-sm font-medium text-gray-900 mb-3 font-['DM_Sans']">{{ 'productList.manufacturer' | translate }}</h4>
                 <div class="space-y-2">
-                  <label *ngFor="let manufacturer of manufacturers$ | async" class="flex items-center">
+                  <label *ngFor="let manufacturer of allManufacturers$ | async" class="flex items-center">
                     <input 
                       type="checkbox" 
                       [value]="manufacturer"
@@ -235,6 +243,9 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
                       class="rounded border-gray-300 text-solar-600 focus:ring-solar-500"
                     >
                     <span class="ml-2 text-sm text-gray-700 font-['DM_Sans']">{{ manufacturer }}</span>
+                    <span class="ml-2 text-xs text-gray-500">
+                      ({{ (manufacturerCounts$ | async)?.[manufacturer] || 0 }})
+                    </span>
                   </label>
                 </div>
               </div>
@@ -254,7 +265,7 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
             <!-- Sort Options -->
             <div class="flex justify-between items-center mb-6">
               <p class="text-sm text-gray-600 font-['DM_Sans']">
-                {{ 'productList.productsFound' | translate:{ count: (filteredProducts$ | async)?.length || 0 } }}
+                {{ 'productList.productsFound' | translate:{ count: (paginationInfo$ | async)?.totalItems || 0 } }}
               </p>
               <div class="flex items-center space-x-2">
                 <label class="text-sm font-medium text-gray-700 font-['DM_Sans']">{{ 'productList.sortBy' | translate }}</label>
@@ -300,6 +311,7 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
                 *ngFor="let product of paginatedProducts$ | async; trackBy: trackByProductId"
                 class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow duration-300 group cursor-pointer"
                 [routerLink]="['/proizvodi', product.id]"
+                [queryParams]="getCurrentStateParams()"
               >
                 <!-- Product Image -->
                 <div class="relative aspect-square overflow-hidden">
@@ -539,7 +551,9 @@ export class ProductListComponent implements OnInit, OnDestroy {
   private store = inject(Store);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private urlStateService = inject(ProductListUrlStateService);
   private destroy$ = new Subject<void>();
+  private urlUpdateSubject = new Subject<void>();
 
   products$: Observable<Product[]>;
   filteredProducts$: Observable<Product[]>;
@@ -548,6 +562,12 @@ export class ProductListComponent implements OnInit, OnDestroy {
   sortOption$: Observable<SortOption>;
   categories$: Observable<ProductCategory[]>;
   manufacturers$: Observable<string[]>;
+  allManufacturers$!: Observable<string[]>;
+  categoryCounts$!: Observable<{ [categoryName: string]: number }>;
+  manufacturerCounts$!: Observable<{ [manufacturerName: string]: number }>;
+  manufacturersLoading$!: Observable<boolean>;
+  categoryCountsLoading$!: Observable<boolean>;
+  manufacturerCountsLoading$!: Observable<boolean>;
   certificates$: Observable<string[]>;
   searchQuery$: Observable<string>;
 
@@ -561,7 +581,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
   currentPage$: Observable<number>;
   itemsPerPage$: Observable<number>;
   totalPages$: Observable<number>;
-  itemsPerPageOptions = [10, 20, 50];
+  itemsPerPageOptions = [12, 30, 60];
 
   private searchSubject = new Subject<string>();
 
@@ -573,6 +593,12 @@ export class ProductListComponent implements OnInit, OnDestroy {
     this.sortOption$ = this.store.select(selectSortOption);
     this.categories$ = this.store.select(selectProductCategories);
     this.manufacturers$ = this.store.select(selectManufacturers);
+    this.allManufacturers$ = this.store.select(selectAllManufacturers);
+    this.categoryCounts$ = this.store.select(selectCategoryCounts);
+    this.manufacturerCounts$ = this.store.select(selectManufacturerCounts);
+    this.manufacturersLoading$ = this.store.select(selectManufacturersLoading);
+    this.categoryCountsLoading$ = this.store.select(selectCategoryCountsLoading);
+    this.manufacturerCountsLoading$ = this.store.select(selectManufacturerCountsLoading);
     this.certificates$ = this.store.select(selectCertificates);
     this.searchQuery$ = this.store.select(selectSearchQuery);
     
@@ -587,71 +613,17 @@ export class ProductListComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.store.dispatch(ProductsActions.loadProductCategories());
     
+    // Load all manufacturers for filter sidebar
+    this.store.dispatch(ProductListActions.loadAllManufacturers());
+    
     // Load nested categories for hierarchical display
     this.loadNestedCategories();
 
     // Check if we should clear filters based on navigation source
     this.checkAndClearFiltersIfNeeded();
 
-    // Handle query parameters FIRST (before loading products)
-    this.route.queryParams.pipe(
-      takeUntil(this.destroy$)
-    ).subscribe(params => {
-      // Handle search from navbar or direct URL access
-      if (params['search'] !== undefined) {
-        this.store.dispatch(ProductListActions.searchProducts({
-          query: params['search'] || ''
-        }));
-      }
-
-      // Handle category filtering from query parameters
-      if (params['category']) {
-        // Clear existing filters first (but not search if it was just set)
-        if (params['search'] === undefined) {
-          this.store.dispatch(ProductListActions.clearFilters());
-        }
-
-        // Check if we have multiple categories passed (from hierarchical navigation)
-        if (params['categories']) {
-          const categoryNames = params['categories'].split(',');
-          categoryNames.forEach((categoryName: string) => {
-            this.store.dispatch(ProductListActions.toggleCategoryFilter({
-              category: categoryName.trim(),
-              checked: true
-            }));
-          });
-        } else {
-          // Wait for categories to be loaded, then find the matching category
-          this.categories$.pipe(
-            takeUntil(this.destroy$),
-            // Only process when categories are actually loaded
-            filter((categories): categories is ProductCategory[] =>
-              categories !== null && categories.length > 0
-            )
-          ).subscribe((categories) => {
-            const matchingCategory = categories.find((cat) =>
-              cat.slug === params['category'] ||
-              cat.id === params['category'] ||
-              cat.name.toLowerCase() === params['category'].toLowerCase()
-            );
-
-            if (matchingCategory) {
-              // Apply category filter using the category name (what products use)
-              this.store.dispatch(ProductListActions.toggleCategoryFilter({
-                category: matchingCategory.name,
-                checked: true
-              }));
-            }
-          });
-        }
-      }
-      
-      // Load initial products AFTER processing query params
-      // Use setTimeout to ensure all filters are applied first
-      setTimeout(() => {
-        this.loadProductsWithCurrentState();
-      }, 0);
-    });
+    // Handle URL state restoration FIRST
+    this.restoreStateFromUrl();
 
     // Handle debounced search input (for user typing)
     this.searchSubject.pipe(
@@ -661,18 +633,14 @@ export class ProductListComponent implements OnInit, OnDestroy {
     ).subscribe(query => {
       // Update the store
       this.store.dispatch(ProductListActions.searchProducts({ query }));
-
-      // Update the URL to maintain the search parameter
-      this.router.navigate([], {
-        relativeTo: this.route,
-        queryParams: query ? { search: query } : {},
-        queryParamsHandling: 'merge',
-        replaceUrl: true // Use replaceUrl to avoid creating history entries for each keystroke
-      });
+      // URL update will be handled by the state change subscription
     });
 
     // Setup reactive product loading
     this.setupProductReloading();
+
+    // Setup URL state synchronization
+    this.setupUrlStateSynchronization();
   }
 
   private loadNestedCategories(): void {
@@ -706,13 +674,16 @@ export class ProductListComponent implements OnInit, OnDestroy {
     const state = navigation?.extras?.state;
 
     // Check if this navigation came from navbar search or hero explore buttons
-    // Don't clear filters if coming from products page (category navigation)
-    if (state?.['clearFilters'] === true ||
-      state?.['fromHero'] === true) {
+    // Don't clear filters if coming from products page (category navigation) or if URL has state to restore
+    const currentParams = this.route.snapshot.queryParams;
+    const hasUrlState = !this.urlStateService.isCleanState(currentParams);
+
+    // Only clear filters if navigation state explicitly requests it AND there's no URL state to restore
+    if (!hasUrlState && (state?.['clearFilters'] === true || state?.['fromHero'] === true)) {
       // Clear all existing filters when navigating from hero explore
       this.store.dispatch(ProductListActions.clearFilters());
       this.store.dispatch(ProductListActions.searchProducts({ query: '' }));
-    } else if (state?.['fromNavbar'] === true) {
+    } else if (!hasUrlState && state?.['fromNavbar'] === true) {
       // Clear only non-search filters when coming from navbar search
       this.store.dispatch(ProductListActions.clearFilters());
       // Don't clear search query as it will be set from query params
@@ -760,13 +731,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
   clearFilters(): void {
     this.store.dispatch(ProductListActions.clearFilters());
     this.store.dispatch(ProductListActions.searchProducts({ query: '' }));
-
-    // Clear search parameter from URL
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: {},
-      queryParamsHandling: 'replace'
-    });
+    // URL update will be handled by the state change subscription
   }
 
   trackByProductId(index: number, product: Product): string {
@@ -920,6 +885,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
     // Products that appear in multiple subcategories are only counted once
     return parentCategory.productCount || 0;
   }
+
 
   // Pagination methods using NgRx
   onPageChange(page: number): void {
@@ -1114,6 +1080,24 @@ export class ProductListComponent implements OnInit, OnDestroy {
       } else {
         this.store.dispatch(ProductListActions.loadProducts({ query }));
       }
+
+      // Load category counts with current filters (regardless of cache)
+      this.store.dispatch(ProductListActions.loadCategoryCounts({ 
+        filters: {
+          searchQuery: searchQuery,
+          manufacturers: filters.manufacturers,
+          priceRange: filters.priceRange
+        }
+      }));
+
+      // Load manufacturer counts with current filters (regardless of cache)
+      this.store.dispatch(ProductListActions.loadManufacturerCounts({ 
+        filters: {
+          searchQuery: searchQuery,
+          categories: filters.categories,
+          priceRange: filters.priceRange
+        }
+      }));
       
       // Only scroll to top when the page actually changes
       if (currentPage !== previousPage) {
@@ -1127,6 +1111,173 @@ export class ProductListComponent implements OnInit, OnDestroy {
     window.scrollTo({
       top: 0,
       behavior: 'smooth'
+    });
+  }
+
+  // Current state for URL preservation
+  getCurrentStateParams(): any {
+    let params: any = {};
+    
+    // Get current values synchronously from store
+    this.filters$.pipe(take(1)).subscribe(filters => {
+      if (filters) {
+        if (filters.categories?.length > 0) params['categories'] = filters.categories.join(',');
+        if (filters.manufacturers?.length > 0) params['manufacturers'] = filters.manufacturers.join(',');
+        if (filters.certificates?.length > 0) params['certificates'] = filters.certificates.join(',');
+        if (filters.priceRange?.min > 0) params['priceMin'] = filters.priceRange.min.toString();
+        if (filters.priceRange?.max > 0) params['priceMax'] = filters.priceRange.max.toString();
+      }
+    });
+    
+    this.searchQuery$.pipe(take(1)).subscribe(query => {
+      if (query?.trim()) params['search'] = query.trim();
+    });
+    
+    this.sortOption$.pipe(take(1)).subscribe(sort => {
+      if (sort && sort !== 'featured') params['sort'] = sort;
+    });
+    
+    this.currentPage$.pipe(take(1)).subscribe(page => {
+      if (page && page > 1) params['page'] = page.toString();
+    });
+    
+    this.itemsPerPage$.pipe(take(1)).subscribe(itemsPerPage => {
+      if (itemsPerPage && itemsPerPage !== 12) params['itemsPerPage'] = itemsPerPage.toString();
+    });
+    
+    return params;
+  }
+
+  /**
+   * Restore state from URL query parameters
+   */
+  private restoreStateFromUrl(): void {
+    this.route.queryParams.pipe(
+      takeUntil(this.destroy$),
+      take(1) // Only process initial params
+    ).subscribe(params => {
+      const urlState = this.urlStateService.deserializeFromQueryParams(params);
+      
+      // Apply restored state to store
+      if (urlState.searchQuery !== undefined) {
+        this.store.dispatch(ProductListActions.searchProducts({ 
+          query: urlState.searchQuery 
+        }));
+      }
+
+      if (urlState.filters) {
+        // Clear existing filters first
+        this.store.dispatch(ProductListActions.clearFilters());
+        
+        // Apply categories
+        if (urlState.filters.categories && urlState.filters.categories.length > 0) {
+          urlState.filters.categories.forEach(category => {
+            this.store.dispatch(ProductListActions.toggleCategoryFilter({
+              category,
+              checked: true
+            }));
+          });
+        }
+
+        // Apply manufacturers
+        if (urlState.filters.manufacturers && urlState.filters.manufacturers.length > 0) {
+          urlState.filters.manufacturers.forEach(manufacturer => {
+            this.store.dispatch(ProductListActions.toggleManufacturerFilter({
+              manufacturer,
+              checked: true
+            }));
+          });
+        }
+
+        // Apply certificates
+        if (urlState.filters.certificates && urlState.filters.certificates.length > 0) {
+          urlState.filters.certificates.forEach(certificate => {
+            this.store.dispatch(ProductListActions.toggleCertificateFilter({
+              certificate,
+              checked: true
+            }));
+          });
+        }
+
+        // Apply price range
+        if (urlState.filters.priceRange.min > 0 || urlState.filters.priceRange.max > 0) {
+          if (urlState.filters.priceRange.min > 0) {
+            this.store.dispatch(ProductListActions.updatePriceRange({
+              rangeType: 'min',
+              value: urlState.filters.priceRange.min
+            }));
+          }
+          if (urlState.filters.priceRange.max > 0) {
+            this.store.dispatch(ProductListActions.updatePriceRange({
+              rangeType: 'max',
+              value: urlState.filters.priceRange.max
+            }));
+          }
+        }
+      }
+
+      // Apply sort option
+      if (urlState.sortOption) {
+        this.store.dispatch(ProductListActions.updateSortOption({ 
+          sortOption: urlState.sortOption 
+        }));
+      }
+
+      // Apply pagination
+      if (urlState.itemsPerPage) {
+        this.store.dispatch(ProductListActions.setItemsPerPage({ 
+          itemsPerPage: urlState.itemsPerPage 
+        }));
+      }
+
+      if (urlState.currentPage) {
+        this.store.dispatch(ProductListActions.setCurrentPage({ 
+          page: urlState.currentPage 
+        }));
+      }
+
+      // Load products with restored state
+      setTimeout(() => {
+        this.loadProductsWithCurrentState();
+      }, 0);
+    });
+  }
+
+  /**
+   * Setup URL state synchronization - update URL when state changes
+   */
+  private setupUrlStateSynchronization(): void {
+    // Combine all state observables
+    combineLatest([
+      this.filters$,
+      this.searchQuery$,
+      this.sortOption$,
+      this.currentPage$,
+      this.itemsPerPage$
+    ]).pipe(
+      // Skip initial emission to avoid overriding URL on load
+      skip(1),
+      // Debounce to avoid too many URL updates
+      debounceTime(100),
+      takeUntil(this.destroy$)
+    ).subscribe(([filters, searchQuery, sortOption, currentPage, itemsPerPage]) => {
+      const currentState: ProductListUrlState = {
+        filters,
+        searchQuery,
+        sortOption,
+        currentPage,
+        itemsPerPage
+      };
+
+      const queryParams = this.urlStateService.serializeToQueryParams(currentState);
+      
+      // Update URL without triggering navigation
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams,
+        queryParamsHandling: 'replace',
+        replaceUrl: true
+      });
     });
   }
 } 

@@ -880,14 +880,15 @@ export class PartnersProductsComponent implements OnInit, OnDestroy {
             cat.name.toLowerCase() === params['category'].toLowerCase()
           );
 
-          if (matchingCategory) {
-            console.log('✅ B2B Applying matched category filter:', matchingCategory.name);
-            this.store.dispatch(ProductsActions.toggleCategoryFilter({
-              category: matchingCategory.name,
-              checked: true
-            }));
-          }
-        });
+            if (matchingCategory) {
+              console.log('✅ B2B Applying matched category filter:', matchingCategory.name);
+              this.store.dispatch(ProductsActions.toggleCategoryFilter({
+                category: matchingCategory.name,
+                checked: true
+              }));
+            }
+          });
+        }
       }
       
       // Load initial products AFTER processing query params
@@ -1435,4 +1436,4 @@ export class PartnersProductsComponent implements OnInit, OnDestroy {
       behavior: 'smooth'
     });
   }
-}
+} 

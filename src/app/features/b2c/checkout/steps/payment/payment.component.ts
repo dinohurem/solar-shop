@@ -158,8 +158,8 @@ import * as CartSelectors from '../../../cart/store/cart.selectors';
               class="mt-1 text-blue-600 focus:ring-blue-600 rounded"
             >
             <span class="text-sm text-gray-600 font-['DM_Sans']">
-              {{ 'checkout.termsAndConditions' | translate }} <a href="#" class="text-blue-600 hover:underline">{{ 'checkout.terms' | translate }}</a> {{ 'checkout.and' | translate }}
-              <a href="#" class="text-blue-600 hover:underline">{{ 'checkout.privacyPolicy' | translate }}</a> *
+              {{ 'checkout.termsAndConditions' | translate }} <a href="uvjeti" class="text-blue-600 hover:underline">{{ 'checkout.terms' | translate }}</a> {{ 'checkout.and' | translate }}
+              <a href="/privatnost" class="text-blue-600 hover:underline">{{ 'checkout.privacyPolicy' | translate }}</a> *
             </span>
           </label>
           <div *ngIf="paymentForm.get('acceptTerms')?.invalid && paymentForm.get('acceptTerms')?.touched" class="mt-1 text-sm text-red-600">

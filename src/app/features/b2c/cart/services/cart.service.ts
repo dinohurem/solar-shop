@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, from, map, catchError, of, take, switchMap } from 'rxjs';
 import { SupabaseService } from '../../../../services/supabase.service';
-import { CartItem, Cart } from '../../../../shared/models/cart.model';
+import { CartItem, Cart, AppliedCoupon } from '../../../../shared/models/cart.model';
 import { Coupon, CouponValidationResult } from '../../../../shared/models/coupon.model';
 import { CouponValidationService } from '../../../../shared/services/coupon-validation.service';
 import { Store } from '@ngrx/store';
@@ -21,6 +21,7 @@ export interface CartSummary {
 })
 export class CartService {
     private cartItems = new BehaviorSubject<CartItem[]>([]);
+    private appliedCoupons = new BehaviorSubject<AppliedCoupon[]>([]);
     private cartSummary = new BehaviorSubject<CartSummary>({
         subtotal: 0,
         tax: 0,
@@ -56,9 +57,11 @@ export class CartService {
 
             if (this.isAuthenticated && this.currentUserId) {
                 await this.loadCartFromSupabase();
+                await this.loadAppliedCoupons();
             } else {
                 // For guest users, start with empty cart
                 this.updateCartItems([]);
+                this.appliedCoupons.next([]);
             }
         } catch (error) {
             console.error('Error initializing cart:', error);
@@ -74,6 +77,7 @@ export class CartService {
 
             // Load user's existing cart from Supabase
             await this.loadCartFromSupabase();
+            await this.loadAppliedCoupons();
         } catch (error) {
             console.error('Error handling user login:', error);
             await this.loadCartFromSupabase();
@@ -85,6 +89,7 @@ export class CartService {
         this.isAuthenticated = false;
         this.currentUserId = null;
         this.updateCartItems([]);
+        this.appliedCoupons.next([]);
     }
 
     // Observable streams
@@ -338,10 +343,12 @@ export class CartService {
     async clearCartAsync(): Promise<void> {
         try {
             this.updateCartItems([]);
+            this.appliedCoupons.next([]);
 
             // Clear from Supabase if authenticated
             if (this.isAuthenticated && this.currentUserId) {
                 await this.clearCartFromSupabase();
+                await this.clearAppliedCouponsFromSupabase();
             }
         } catch (error) {
             console.error('Error clearing cart:', error);
@@ -518,6 +525,20 @@ export class CartService {
         }
     }
 
+    // Clear applied coupons from Supabase
+    private async clearAppliedCouponsFromSupabase(): Promise<void> {
+        try {
+            if (!this.currentUserId) return;
+
+            await this.supabaseService.client
+                .from('applied_coupons')
+                .delete()
+                .eq('user_id', this.currentUserId);
+        } catch (error) {
+            console.error('Error clearing applied coupons from Supabase:', error);
+        }
+    }
+
     // Get cart item count
     getCartItemCount(): Observable<number> {
         return this.cartItems.pipe(
@@ -557,9 +578,16 @@ export class CartService {
         );
     }
 
+    // Helper method to get total discount amount from applied coupons
+    private getTotalDiscountAmount(coupons: AppliedCoupon[]): number {
+        return coupons.reduce((total, coupon) => total + coupon.discountAmount, 0);
+    }
+
     // Create Cart object from items for NgRx compatibility
     private createCartFromItems(items: CartItem[]): Cart {
-        const summary = this.calculateCartSummary(items);
+        const coupons = this.appliedCoupons.value;
+        const totalDiscount = this.getTotalDiscountAmount(coupons);
+        const summary = this.calculateCartSummary(items, totalDiscount);
 
         return {
             id: this.isAuthenticated ? `user-${this.currentUserId}` : 'guest-cart',
@@ -570,7 +598,7 @@ export class CartService {
             discount: summary.discount,
             total: summary.total,
             currency: 'EUR',
-            appliedCoupons: [],
+            appliedCoupons: coupons,
             shippingAddress: undefined,
             billingAddress: undefined,
             paymentMethod: undefined,
@@ -610,8 +638,10 @@ export class CartService {
         this.updateCartSummary(items);
     }
 
-    private updateCartSummary(items: CartItem[], discount: number = 0): void {
-        const summary = this.calculateCartSummary(items, discount);
+    private updateCartSummary(items: CartItem[], discount?: number): void {
+        // If discount is not provided, calculate from current applied coupons
+        const discountAmount = discount !== undefined ? discount : this.getTotalDiscountAmount(this.appliedCoupons.value);
+        const summary = this.calculateCartSummary(items, discountAmount);
         this.cartSummary.next(summary);
     }
 
@@ -650,26 +680,48 @@ export class CartService {
     // Apply coupon async helper
     private async applyCouponAsync(code: string, discountAmount: number): Promise<void> {
         try {
-            // In a real implementation, you would:
-            // 1. Save the applied coupon to the database
-            // 2. Update the cart summary with discount
-            // 3. Track coupon usage
+            let appliedCouponId: string | null = null;
             
             if (this.isAuthenticated && this.currentUserId) {
                 // Save applied coupon to user's cart in database
-                await this.supabaseService.client
+                const { data, error } = await this.supabaseService.client
                     .from('applied_coupons')
                     .insert({
                         user_id: this.currentUserId,
                         coupon_code: code,
                         discount_amount: discountAmount,
                         applied_at: new Date().toISOString()
-                    });
+                    })
+                    .select('id')
+                    .single();
+
+                if (error) throw error;
+                appliedCouponId = data?.id;
+            } else {
+                // For guest users, generate a temporary ID
+                appliedCouponId = `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
             }
 
-            // Update cart summary with discount
+            // Add to local applied coupons state
+            const newCoupon: AppliedCoupon = {
+                id: appliedCouponId || `temp_${Date.now()}`,
+                code: code,
+                type: 'fixed_amount', // Default type, should be determined from coupon validation
+                value: discountAmount,
+                discountAmount: discountAmount,
+                appliedAt: new Date().toISOString()
+            };
+
+            const currentCoupons = this.appliedCoupons.value;
+            // Check if coupon is already applied
+            if (!currentCoupons.some(c => c.code === code)) {
+                this.appliedCoupons.next([...currentCoupons, newCoupon]);
+            }
+
+            // Update cart summary with all applied discounts
             const currentItems = this.getCartItemsArray();
-            this.updateCartSummary(currentItems, discountAmount);
+            const allCoupons = this.appliedCoupons.value;
+            this.updateCartSummary(currentItems, this.getTotalDiscountAmount(allCoupons));
             
         } catch (error) {
             console.error('Error applying coupon async:', error);
@@ -680,8 +732,8 @@ export class CartService {
     // Remove coupon async helper
     private async removeCouponAsync(couponId: string): Promise<void> {
         try {
-            if (this.isAuthenticated && this.currentUserId) {
-                // Remove applied coupon from database
+            if (this.isAuthenticated && this.currentUserId && !couponId.startsWith('guest_')) {
+                // Remove applied coupon from database (only for authenticated users)
                 await this.supabaseService.client
                     .from('applied_coupons')
                     .delete()
@@ -689,9 +741,14 @@ export class CartService {
                     .eq('user_id', this.currentUserId);
             }
 
-            // Update cart summary without discount
+            // Remove from local applied coupons state
+            const currentCoupons = this.appliedCoupons.value;
+            const updatedCoupons = currentCoupons.filter(c => c.id !== couponId);
+            this.appliedCoupons.next(updatedCoupons);
+
+            // Update cart summary with remaining discounts
             const currentItems = this.getCartItemsArray();
-            this.updateCartSummary(currentItems, 0);
+            this.updateCartSummary(currentItems, this.getTotalDiscountAmount(updatedCoupons));
             
         } catch (error) {
             console.error('Error removing coupon async:', error);
@@ -907,5 +964,41 @@ export class CartService {
         }
 
         return { addedCount, skippedCount };
+    }
+
+    // Load applied coupons from database
+    private async loadAppliedCoupons(): Promise<void> {
+        try {
+            if (!this.isAuthenticated || !this.currentUserId) {
+                this.appliedCoupons.next([]);
+                return;
+            }
+
+            const { data, error } = await this.supabaseService.client
+                .from('applied_coupons')
+                .select('*')
+                .eq('user_id', this.currentUserId)
+                .order('applied_at', { ascending: false });
+
+            if (error) {
+                console.error('Error loading applied coupons:', error);
+                return;
+            }
+
+            const appliedCoupons: AppliedCoupon[] = (data || []).map(item => ({
+                id: item.id,
+                code: item.coupon_code,
+                type: item.coupon_type || 'fixed_amount',
+                value: item.coupon_value || 0,
+                discountAmount: item.discount_amount,
+                appliedAt: item.applied_at,
+                expiresAt: item.expires_at
+            }));
+
+            this.appliedCoupons.next(appliedCoupons);
+        } catch (error) {
+            console.error('Error loading applied coupons:', error);
+            this.appliedCoupons.next([]);
+        }
     }
 } 
