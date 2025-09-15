@@ -132,7 +132,13 @@ import { LucideAngularModule, ShoppingCart } from 'lucide-angular';
                     <!-- Offer Savings -->
                     <div *ngIf="item.offerSavings && item.offerSavings > 0" class="mt-1">
                       <span class="text-xs text-green-600 font-medium">
-                        {{ 'cart.saveFromOffer' | translate }}: {{ item.offerSavings | currency:'EUR':'symbol':'1.2-2' }}
+                        {{ 'cart.saveFromOffer' | translate }}:
+                        <ng-container *ngIf="item.offerType === 'percentage'">
+                          {{ item.offerDiscount }}% OFF ({{ item.offerSavings | currency:'EUR':'symbol':'1.2-2' }})
+                        </ng-container>
+                        <ng-container *ngIf="item.offerType === 'fixed_amount'">
+                          {{ item.offerDiscount | currency:'EUR':'symbol':'1.2-2' }} OFF
+                        </ng-container>
                       </span>
                     </div>
 
@@ -180,12 +186,23 @@ import { LucideAngularModule, ShoppingCart } from 'lucide-angular';
                 
                 <!-- Applied Coupons -->
                 <div *ngIf="appliedCoupons$ | async as coupons" class="mb-3">
-                  <div 
+                  <div
                     *ngFor="let coupon of coupons"
                     class="flex items-center justify-between p-2 bg-green-100 text-green-800 rounded text-sm"
                   >
-                    <span>{{ coupon.code }} (-{{ coupon.discountAmount | currency:'EUR':'symbol':'1.2-2' }})</span>
-                    <button 
+                    <span>
+                      {{ coupon.code }} -
+                      <ng-container *ngIf="coupon.type === 'percentage'">
+                        {{ coupon.value }}% ({{ coupon.discountAmount | currency:'EUR':'symbol':'1.2-2' }})
+                      </ng-container>
+                      <ng-container *ngIf="coupon.type === 'fixed_amount'">
+                        {{ coupon.discountAmount | currency:'EUR':'symbol':'1.2-2' }}
+                      </ng-container>
+                      <ng-container *ngIf="coupon.type === 'free_shipping'">
+                        {{ 'cart.freeShipping' | translate }}
+                      </ng-container>
+                    </span>
+                    <button
                       (click)="removeCoupon(coupon.id)"
                       class="text-green-600 hover:text-green-800"
                     >

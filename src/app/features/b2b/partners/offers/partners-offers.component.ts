@@ -82,7 +82,8 @@ import { User } from '../../../../shared/models/user.model';
               <!-- Discount Badge -->
               <div class="absolute top-4 left-4">
                 <span class="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
-                  -{{ offer.discountPercentage }}%
+                  <span *ngIf="offer.discount_type === 'percentage' || !offer.discount_type">-{{ offer.discountPercentage }}%</span>
+                  <span *ngIf="offer.discount_type === 'fixed_amount'">{{ offer.discount_value | currency:'EUR':'symbol':'1.0-2' }} OFF</span>
                 </span>
               </div>
 
@@ -381,16 +382,27 @@ export class PartnersOffersComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Filter and prepare products for bulk add
+    // Filter and prepare products for bulk add with individual discounts
     const availableProducts = offerProducts
       .filter(offerProduct => {
         const product = offerProduct.products;
         return product && product.stock_quantity > 0;
       })
-      .map(offerProduct => ({
-        productId: offerProduct.products.id,
-        quantity: 1
-      }));
+      .map(offerProduct => {
+        // Determine individual discount type and value
+        const hasIndividualDiscount = (offerProduct.discount_percentage && offerProduct.discount_percentage > 0) ||
+                                      (offerProduct.discount_amount && offerProduct.discount_amount > 0);
+
+        return {
+          productId: offerProduct.products.id,
+          quantity: 1,
+          individualDiscount: hasIndividualDiscount ?
+            (offerProduct.discount_percentage || offerProduct.discount_amount) : undefined,
+          individualDiscountType: hasIndividualDiscount ?
+            (offerProduct.discount_amount > 0 ? 'fixed_amount' : 'percentage') as 'percentage' | 'fixed_amount' : undefined,
+          originalPrice: offerProduct.products.price
+        };
+      });
 
     if (availableProducts.length === 0) {
       this.toastService.showWarning(this.translationService.translate('b2b.offers.allProductsOutOfStock'));

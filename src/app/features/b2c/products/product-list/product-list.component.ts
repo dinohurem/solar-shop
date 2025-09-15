@@ -39,6 +39,7 @@ import { ProductCategory, CategoriesService } from '../services/categories.servi
 import { CategoryCountFilters, ManufacturerCountFilters } from './services/product-list.service';
 import { selectProductCategories } from '../store/products.selectors';
 import { ProductsActions } from '../store/products.actions';
+import { SearchSuggestionsService } from '../../../../shared/services/search-suggestions.service';
 
 export interface Product {
   id: string;
@@ -585,7 +586,10 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
   private searchSubject = new Subject<string>();
 
-  constructor(private categoriesService: CategoriesService) {
+  constructor(
+    private categoriesService: CategoriesService,
+    private searchSuggestionsService: SearchSuggestionsService
+  ) {
     this.products$ = this.store.select(selectProducts);
     this.filteredProducts$ = this.store.select(selectFilteredProducts);
     this.isLoading$ = this.store.select(selectIsLoading);
@@ -631,6 +635,11 @@ export class ProductListComponent implements OnInit, OnDestroy {
       distinctUntilChanged(),
       takeUntil(this.destroy$)
     ).subscribe(query => {
+      // Save non-empty searches to suggestions
+      if (query && query.trim()) {
+        this.searchSuggestionsService.addSearchSuggestion('search', query.trim());
+      }
+
       // Update the store
       this.store.dispatch(ProductListActions.searchProducts({ query }));
       // URL update will be handled by the state change subscription
@@ -701,7 +710,12 @@ export class ProductListComponent implements OnInit, OnDestroy {
   onCategoryChange(category: string, event: Event): void {
     const target = event.target as HTMLInputElement;
     const isChecked = target.checked;
-    
+
+    // Save category selection as suggestion when enabled
+    if (isChecked) {
+      this.searchSuggestionsService.addSearchSuggestion('category', category, category);
+    }
+
     // Toggle the specific child category only
     this.store.dispatch(ProductListActions.toggleCategoryFilter({ category, checked: isChecked }));
   }
@@ -814,18 +828,24 @@ export class ProductListComponent implements OnInit, OnDestroy {
     const isChecked = target.checked;
     
     if (isChecked) {
+      // Save parent category selection as suggestion
+      this.searchSuggestionsService.addSearchSuggestion('category', parentCategory.name, parentCategory.name);
+
       // Always include the parent category itself
-      this.store.dispatch(ProductListActions.toggleCategoryFilter({ 
-        category: parentCategory.name, 
-        checked: true 
+      this.store.dispatch(ProductListActions.toggleCategoryFilter({
+        category: parentCategory.name,
+        checked: true
       }));
 
       // When parent is selected, also select all its subcategories
       if (parentCategory.subcategories && parentCategory.subcategories.length > 0) {
         parentCategory.subcategories.forEach(subCategory => {
-          this.store.dispatch(ProductListActions.toggleCategoryFilter({ 
-            category: subCategory.name, 
-            checked: true 
+          // Save subcategory suggestions too
+          this.searchSuggestionsService.addSearchSuggestion('category', subCategory.name, subCategory.name);
+
+          this.store.dispatch(ProductListActions.toggleCategoryFilter({
+            category: subCategory.name,
+            checked: true
           }));
         });
       }
@@ -850,11 +870,16 @@ export class ProductListComponent implements OnInit, OnDestroy {
   onSubCategoryChange(parentCategory: ProductCategory, subCategoryName: string, event: Event): void {
     const target = event.target as HTMLInputElement;
     const isChecked = target.checked;
-    
+
+    // Save subcategory selection as suggestion when enabled
+    if (isChecked) {
+      this.searchSuggestionsService.addSearchSuggestion('category', subCategoryName, subCategoryName);
+    }
+
     // Toggle the specific subcategory
-    this.store.dispatch(ProductListActions.toggleCategoryFilter({ 
-      category: subCategoryName, 
-      checked: isChecked 
+    this.store.dispatch(ProductListActions.toggleCategoryFilter({
+      category: subCategoryName,
+      checked: isChecked
     }));
   }
 

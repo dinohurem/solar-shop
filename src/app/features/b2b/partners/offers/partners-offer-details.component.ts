@@ -40,6 +40,8 @@ interface PartnerProduct {
   category: string;
   sku: string;
   stock_quantity?: number;
+  discount_percentage?: number;
+  discount_amount?: number;
 }
 
 @Component({
@@ -62,7 +64,7 @@ interface PartnerProduct {
               <!-- Discount Badge -->
               <div class="absolute top-6 left-6 bg-accent-500 text-white text-lg font-bold px-4 py-3 rounded-full shadow-lg">
                 <span *ngIf="offer.discount_type === 'percentage' || !offer.discount_type">-{{ offer.discountPercentage }}%</span>
-                <span *ngIf="offer.discount_type === 'fixed_amount'">-{{ offer.discount_value | currency:'EUR':'symbol':'1.0-2' }}</span>
+                <span *ngIf="offer.discount_type === 'fixed_amount'">{{ offer.discount_value | currency:'EUR':'symbol':'1.0-2' }} OFF</span>
               </div>
               <!-- Partner Only Badge -->
               <div class="absolute top-6 right-6 bg-solar-100 text-solar-800 text-sm font-bold px-3 py-2 rounded-full shadow-lg">
@@ -195,7 +197,7 @@ interface PartnerProduct {
               <!-- Discount Badge -->
               <div class="absolute top-4 right-4 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
                 <span *ngIf="offer.discount_type === 'percentage' || !offer.discount_type">-{{ offer.discountPercentage }}%</span>
-                <span *ngIf="offer.discount_type === 'fixed_amount'">-{{ offer.discount_value | currency:'EUR':'symbol':'1.0-2' }}</span>
+                <span *ngIf="offer.discount_type === 'fixed_amount'">{{ offer.discount_value | currency:'EUR':'symbol':'1.0-2' }} OFF</span>
               </div>
             </div>
 
@@ -326,6 +328,7 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
   relatedProducts$: Observable<PartnerProduct[]> = of([]);
   copiedCoupon = false;
   private destroy$ = new Subject<void>();
+  private offerProductsData: any[] = [];
 
   // Partner discount percentage (additional discount on top of offer discount)
   readonly PARTNER_DISCOUNT_PERCENTAGE = 15;
@@ -439,6 +442,9 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
         }
 
         if (data && data.length > 0) {
+          // Store the raw offer products data for use in addAllToCart
+          this.offerProductsData = data;
+
           return data.map((offerProduct: any) => ({
             id: offerProduct.products.id,
             name: offerProduct.products.name,
@@ -447,7 +453,9 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
             price: offerProduct.products.price || 0,
             category: offerProduct.products.categories?.name || 'Solar Equipment',
             sku: offerProduct.products.sku || '',
-            stock_quantity: offerProduct.products.stock_quantity || 0
+            stock_quantity: offerProduct.products.stock_quantity || 0,
+            discount_percentage: offerProduct.discount_percentage || 0,
+            discount_amount: offerProduct.discount_amount || 0
           }));
         }
         return [];
@@ -647,11 +655,24 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
           return;
         }
 
-        // Prepare products for the action
-        const productsToAdd = availableProducts.map(product => ({
-          productId: product.id,
-          quantity: 1
-        }));
+        // Prepare products for the action with individual discounts
+        const productsToAdd = availableProducts.map(product => {
+          // Find the corresponding offer product data
+          const offerProduct = this.offerProductsData.find(op => op.products.id === product.id);
+          const hasIndividualDiscount = offerProduct &&
+            ((offerProduct.discount_percentage && offerProduct.discount_percentage > 0) ||
+             (offerProduct.discount_amount && offerProduct.discount_amount > 0));
+
+          return {
+            productId: product.id,
+            quantity: 1,
+            individualDiscount: hasIndividualDiscount ?
+              (offerProduct.discount_percentage || offerProduct.discount_amount) : undefined,
+            individualDiscountType: hasIndividualDiscount ?
+              (offerProduct.discount_amount > 0 ? 'fixed_amount' : 'percentage') as 'percentage' | 'fixed_amount' : undefined,
+            originalPrice: product.price
+          };
+        });
 
         // Get the offer discount type from the original database offer
         const offerType = (this.offer!.discount_type || 'percentage') as 'percentage' | 'fixed_amount' | 'tier_based' | 'bundle';

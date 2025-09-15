@@ -30,6 +30,7 @@ export interface CouponValidationResult {
     isValid: boolean;
     errorMessage?: string;
     discountAmount?: number;
+    coupon?: Coupon;
 }
 
 export interface AppliedCoupon {

@@ -16,10 +16,11 @@ import * as AuthActions from '../../../core/auth/store/auth.actions';
 import { User } from '../../../shared/models/user.model';
 import { filter, take } from 'rxjs/operators';
 import { TranslationService } from '../../../shared/services/translation.service';
+import { SearchSuggestionsService, SearchSuggestion } from '../../../shared/services/search-suggestions.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { Subject, takeUntil } from 'rxjs';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule, Search, User as UserIcon, CircleUserRound, Mail, Phone } from 'lucide-angular';
+import { LucideAngularModule, Search, User as UserIcon, CircleUserRound, Mail, Phone, Clock, TrendingUp, Tag } from 'lucide-angular';
 
 @Component({
   selector: 'app-navbar',
@@ -104,16 +105,74 @@ import { LucideAngularModule, Search, User as UserIcon, CircleUserRound, Mail, P
             </div>
           </form>
           
-          <!-- Quick Search Suggestions (Optional) -->
-          <div class="mt-4 text-sm text-gray-500">
-            <p class="font-medium mb-2">{{ 'search.suggestions' | translate }}</p>
-            <div class="flex flex-wrap gap-1 sm:gap-2">
-              <button 
-                *ngFor="let suggestion of searchSuggestions"
-                (click)="selectSearchSuggestion(suggestion)"
-                class="px-2 sm:px-3 py-1 bg-gray-100 hover:bg-solar-100 text-gray-700 hover:text-solar-700 rounded-full transition-colors text-xs">
-                {{ suggestion }}
-              </button>
+          <!-- Search Suggestions -->
+          <div class="mt-4 text-sm text-gray-500" *ngIf="displaySuggestions.length > 0">
+            <div class="mb-4" *ngIf="recentSuggestions.length > 0">
+              <div class="flex items-center gap-2 font-medium mb-2">
+                <lucide-angular
+                  name="clock"
+                  class="w-4 h-4 text-gray-400"
+                  [img]="ClockIcon">
+                </lucide-angular>
+                <span>{{ 'search.recent' | translate }}</span>
+              </div>
+              <div class="flex flex-wrap gap-1 sm:gap-2">
+                <button
+                  *ngFor="let suggestion of recentSuggestions"
+                  (click)="selectSearchSuggestion(suggestion.displayText)"
+                  class="px-2 sm:px-3 py-1 bg-gray-100 hover:bg-solar-100 text-gray-700 hover:text-solar-700 rounded-full transition-colors text-xs flex items-center gap-1">
+                  <lucide-angular
+                    *ngIf="suggestion.type === 'category'"
+                    name="tag"
+                    class="w-3 h-3"
+                    [img]="TagIcon">
+                  </lucide-angular>
+                  {{ suggestion.displayText }}
+                </button>
+              </div>
+            </div>
+
+            <div class="mb-4" *ngIf="popularSuggestions.length > 0">
+              <div class="flex items-center gap-2 font-medium mb-2">
+                <lucide-angular
+                  name="trending-up"
+                  class="w-4 h-4 text-gray-400"
+                  [img]="TrendingUpIcon">
+                </lucide-angular>
+                <span>{{ 'search.popular' | translate }}</span>
+              </div>
+              <div class="flex flex-wrap gap-1 sm:gap-2">
+                <button
+                  *ngFor="let suggestion of popularSuggestions"
+                  (click)="selectSearchSuggestion(suggestion.displayText)"
+                  class="px-2 sm:px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 hover:text-blue-800 rounded-full transition-colors text-xs flex items-center gap-1">
+                  <lucide-angular
+                    *ngIf="suggestion.type === 'category'"
+                    name="tag"
+                    class="w-3 h-3"
+                    [img]="TagIcon">
+                  </lucide-angular>
+                  {{ suggestion.displayText }}
+                  <span class="text-blue-500 text-xs ml-1">({{ suggestion.count }})</span>
+                </button>
+              </div>
+            </div>
+
+            <div *ngIf="defaultSuggestions.length > 0">
+              <p class="font-medium mb-2">{{ 'search.categories' | translate }}</p>
+              <div class="flex flex-wrap gap-1 sm:gap-2">
+                <button
+                  *ngFor="let suggestion of defaultSuggestions"
+                  (click)="selectSearchSuggestion(suggestion.displayText)"
+                  class="px-2 sm:px-3 py-1 bg-gray-100 hover:bg-solar-100 text-gray-700 hover:text-solar-700 rounded-full transition-colors text-xs flex items-center gap-1">
+                  <lucide-angular
+                    name="tag"
+                    class="w-3 h-3"
+                    [img]="TagIcon">
+                  </lucide-angular>
+                  {{ suggestion.displayText }}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -626,6 +685,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   private store = inject(Store);
   private router = inject(Router);
   private translationService = inject(TranslationService);
+  private searchSuggestionsService = inject(SearchSuggestionsService);
   private destroy$ = new Subject<void>();
 
   isMobileMenuOpen$: Observable<boolean>;
@@ -638,7 +698,12 @@ export class NavbarComponent implements OnInit, OnDestroy {
   showSearchOverlay = false;
   searchQuery = '';
   currentRoute = '';
-  searchSuggestions: string[] = [];
+
+  // Search suggestions
+  recentSuggestions: SearchSuggestion[] = [];
+  popularSuggestions: SearchSuggestion[] = [];
+  defaultSuggestions: SearchSuggestion[] = [];
+  displaySuggestions: SearchSuggestion[] = [];
 
   // Lucide Icons
   readonly SearchIcon = Search;
@@ -646,6 +711,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
   readonly RoundUserIcon = CircleUserRound;
   readonly PhoneIcon = Phone;
   readonly MailIcon = Mail;
+  readonly ClockIcon = Clock;
+  readonly TrendingUpIcon = TrendingUp;
+  readonly TagIcon = Tag;
 
   constructor() {
     this.isMobileMenuOpen$ = this.store.select(selectIsMobileMenuOpen);
@@ -731,6 +799,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   openSearchOverlay(): void {
     this.showSearchOverlay = true;
+
+    // Refresh search suggestions when overlay opens
+    this.updateSearchSuggestions();
+
     // Close mobile menu if it's open - use take(1) to get current value only
     this.isMobileMenuOpen$.pipe(
       take(1),
@@ -777,9 +849,17 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   performSearch(): void {
     if (this.searchQuery && this.searchQuery.trim()) {
+      const trimmedQuery = this.searchQuery.trim();
+
+      // Save the search to suggestions
+      this.searchSuggestionsService.addSearchSuggestion('search', trimmedQuery);
+
+      // Update suggestions immediately
+      this.updateSearchSuggestions();
+
       this.closeSearchOverlay();
       this.router.navigate(['/proizvodi'], {
-        queryParams: { search: this.searchQuery.trim() },
+        queryParams: { search: trimmedQuery },
         state: { fromNavbar: true, clearFilters: true }
       });
     }
@@ -796,12 +876,19 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   updateSearchSuggestions(): void {
-    this.searchSuggestions = [
-      this.translationService.translate('search.solarPanels'),
-      this.translationService.translate('search.inverters'),
-      this.translationService.translate('search.batteries'),
-      this.translationService.translate('search.mountingSystems'),
-      this.translationService.translate('search.cables')
+    // Get suggestions from localStorage
+    this.recentSuggestions = this.searchSuggestionsService.getRecentSuggestions(4);
+    this.popularSuggestions = this.searchSuggestionsService.getPopularSuggestions(4);
+    this.defaultSuggestions = this.searchSuggestionsService.getDefaultCategorySuggestions();
+
+    // Combine all suggestions for display logic
+    this.displaySuggestions = [
+      ...this.recentSuggestions,
+      ...this.popularSuggestions,
+      ...this.defaultSuggestions
     ];
+
+    // Clean up old suggestions periodically
+    this.searchSuggestionsService.clearOldSuggestions();
   }
 } 

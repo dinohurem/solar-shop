@@ -48,7 +48,7 @@ import { selectNewsletterState } from '../footer/store/footer.selectors';
               <!-- Discount Badge -->
               <div class="absolute top-4 left-4 bg-gradient-to-r from-accent-500 to-accent-600 text-white text-sm font-bold px-3 py-2 rounded-full shadow-lg">
                 <span *ngIf="offer.discount_type === 'percentage' || !offer.discount_type">-{{ offer.discountPercentage }}%</span>
-                <span *ngIf="offer.discount_type === 'fixed_amount'">-{{ offer.discount_value | currency:'EUR':'symbol':'1.0-2' }}</span>
+                <span *ngIf="offer.discount_type === 'fixed_amount'">{{ offer.discount_value | currency:'EUR':'symbol':'1.0-2' }} OFF</span>
               </div>
               <!-- Sale Badge -->
               <div class="absolute top-4 right-4 bg-solar-600 text-white text-xs font-bold px-2 py-1 rounded-full">

@@ -198,10 +198,13 @@ export const addToB2BCartFromOfferFailure = createAction(
 
 export const addAllToB2BCartFromOffer = createAction(
     '[B2B Cart] Add All To Cart From Partner Offer',
-    props<{ 
+    props<{
         products: Array<{
-            productId: string; 
+            productId: string;
             quantity: number;
+            individualDiscount?: number;
+            individualDiscountType?: 'percentage' | 'fixed_amount';
+            originalPrice?: number;
         }>;
         companyId: string;
         partnerOfferId: string;

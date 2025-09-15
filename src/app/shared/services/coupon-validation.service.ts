@@ -58,11 +58,12 @@ export class CouponValidationService {
       }
 
       // Step 5: Calculate discount amount
-      const discountAmount = this.calculateDiscountAmount(coupon, cartItems);
+      const discountAmount = await this.calculateDiscountAmount(coupon, cartItems);
 
       return {
         isValid: true,
-        discountAmount
+        discountAmount,
+        coupon
       };
 
     } catch (error) {
@@ -315,12 +316,22 @@ export class CouponValidationService {
     return { isValid: true };
   }
 
-  private calculateDiscountAmount(coupon: Coupon, cartItems: CartItem[]): number {
+  private async calculateDiscountAmount(coupon: Coupon, cartItems: CartItem[]): Promise<number> {
     // Calculate eligible items total (considering restrictions)
     const eligibleItems = this.getEligibleItems(coupon, cartItems);
-    const eligibleTotal = eligibleItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
     let discountAmount = 0;
+
+    // Check if this coupon is linked to an offer with individual product discounts
+    if (coupon.discountType === 'fixed_amount') {
+      const individualDiscountAmount = await this.calculateIndividualProductDiscounts(coupon.id, cartItems);
+      if (individualDiscountAmount > 0) {
+        return individualDiscountAmount;
+      }
+    }
+
+    // Fallback to standard coupon calculation
+    const eligibleTotal = eligibleItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
     switch (coupon.discountType) {
       case 'percentage':
@@ -372,6 +383,64 @@ export class CouponValidationService {
 
       return true;
     });
+  }
+
+  /**
+   * Calculate individual product discounts for a coupon linked to an offer
+   */
+  private async calculateIndividualProductDiscounts(couponId: string, cartItems: CartItem[]): Promise<number> {
+    try {
+      console.log('Calculating individual product discounts for coupon ID:', couponId);
+      console.log('Cart items:', cartItems.map(item => ({ id: item.productId, name: item.name, price: item.price, quantity: item.quantity })));
+
+      // Query offer_products to get individual product discounts for this offer
+      const { data: offerProducts, error } = await this.supabaseService.client
+        .from('offer_products')
+        .select('product_id, discount_type, discount_amount, discount_percentage')
+        .eq('offer_id', couponId);
+
+      if (error) {
+        console.error('Error fetching offer products:', error);
+        return 0;
+      }
+
+      if (!offerProducts || offerProducts.length === 0) {
+        console.log('No individual product discounts found for offer');
+        return 0;
+      }
+
+      console.log('Found offer products with individual discounts:', offerProducts);
+
+      let totalDiscount = 0;
+
+      // Calculate discount for each cart item that has an individual discount
+      for (const cartItem of cartItems) {
+        const productDiscount = offerProducts.find(op => op.product_id === cartItem.productId);
+
+        if (productDiscount) {
+          let itemDiscount = 0;
+
+          if (productDiscount.discount_type === 'fixed_amount' && productDiscount.discount_amount > 0) {
+            // Fixed amount discount per item
+            itemDiscount = productDiscount.discount_amount * cartItem.quantity;
+            console.log(`Fixed amount discount for ${cartItem.name}: €${productDiscount.discount_amount} x ${cartItem.quantity} = €${itemDiscount}`);
+          } else if (productDiscount.discount_type === 'percentage' && productDiscount.discount_percentage > 0) {
+            // Percentage discount
+            const itemTotal = cartItem.price * cartItem.quantity;
+            itemDiscount = itemTotal * (productDiscount.discount_percentage / 100);
+            console.log(`Percentage discount for ${cartItem.name}: ${productDiscount.discount_percentage}% of €${itemTotal} = €${itemDiscount}`);
+          }
+
+          totalDiscount += itemDiscount;
+        }
+      }
+
+      console.log('Total individual product discount calculated:', totalDiscount);
+      return Math.round(totalDiscount * 100) / 100;
+    } catch (error) {
+      console.error('Error calculating individual product discounts:', error);
+      return 0;
+    }
   }
 
   /**

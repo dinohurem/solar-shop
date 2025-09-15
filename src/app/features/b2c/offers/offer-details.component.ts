@@ -33,7 +33,7 @@ import { TranslationService } from '../../../shared/services/translation.service
               <!-- Discount Badge -->
               <div class="absolute top-6 left-6 bg-accent-500 text-white text-lg font-bold px-4 py-3 rounded-full shadow-lg">
                 <span *ngIf="offer.discount_type === 'percentage' || !offer.discount_type">-{{ offer.discountPercentage }}%</span>
-                <span *ngIf="offer.discount_type === 'fixed_amount'">-{{ offer.discount_value | currency:'EUR':'symbol':'1.0-2' }}</span>
+                <span *ngIf="offer.discount_type === 'fixed_amount'">{{ offer.discount_value | currency:'EUR':'symbol':'1.0-2' }} OFF</span>
               </div>
             </div>
 
@@ -147,6 +147,14 @@ import { TranslationService } from '../../../shared/services/translation.service
                 </span>
                 <span class="text-xl font-bold text-solar-600">
                   {{ calculateDiscountedPrice(product.price, offer, product) | currency:'EUR':'symbol':'1.2-2' }}
+                </span>
+              </div>
+
+              <!-- Individual Product Discount Badge (Only if product has specific discount) -->
+              <div *ngIf="hasProductSpecificDiscount(product)" class="mb-3">
+                <span class="inline-block bg-green-100 text-green-800 text-xs font-semibold px-2 py-1 rounded">
+                  <span *ngIf="product.discount_type === 'percentage'">{{ product.discount_percentage }}% discount</span>
+                  <span *ngIf="product.discount_type === 'fixed_amount'">{{ product.discount_amount | currency:'EUR':'symbol':'1.0-2' }} off</span>
                 </span>
               </div>
 
@@ -278,6 +286,20 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     // Scroll to top when component loads
     window.scrollTo(0, 0);
+
+    // Debug: Log the offer data
+    this.offer$.subscribe(offer => {
+      if (offer) {
+        console.log('Offer Details - Loaded offer:', {
+          id: offer.id,
+          title: offer.title,
+          discount_type: offer.discount_type,
+          discount_value: offer.discount_value,
+          discountPercentage: offer.discountPercentage,
+          code: (offer as any).code
+        });
+      }
+    });
   }
 
   ngOnDestroy(): void {
@@ -309,6 +331,8 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
         .order('sort_order')
     ).pipe(
       switchMap(({ data: offerProducts, error }) => {
+        console.log('Raw offer products from database:', offerProducts);
+
         if (error) {
           console.error('Error fetching related products:', error);
           // Fallback to featured products on error
@@ -321,7 +345,7 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
             // Determine discount type based on which field has a value
             const discountType = (op.discount_amount && op.discount_amount > 0) ? 'fixed_amount' : 'percentage';
             
-            return {
+            const productResult = {
               id: op.products.id,
               name: op.products.name,
               description: op.products.description,
@@ -334,6 +358,17 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
               discount_amount: op.discount_amount || 0,
               discount_type: discountType
             };
+
+            console.log('Offer Details - Product with discount info:', {
+              productId: productResult.id,
+              price: productResult.price,
+              discount_percentage: productResult.discount_percentage,
+              discount_amount: productResult.discount_amount,
+              discount_type: productResult.discount_type,
+              raw_op: op
+            });
+
+            return productResult;
           });
           return of(products);
         } else {
@@ -429,6 +464,11 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
     return this.getTotalOriginalPrice() - this.calculateTotalDiscountedPrice(offer);
   }
 
+  hasProductSpecificDiscount(product: any): boolean {
+    return (product.discount_percentage && product.discount_percentage > 0) ||
+           (product.discount_amount && product.discount_amount > 0);
+  }
+
   async addAllToCart(): Promise<void> {
     if (!this.currentProducts || this.currentProducts.length === 0) {
       this.toastService.showWarning(this.translationService.translate('offers.noProductsToAdd'));
@@ -452,12 +492,39 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
         return;
       }
 
-      // Prepare products for the action
-      const products = availableProducts.map(product => ({
-        productId: product.id,
-        quantity: 1,
-        variantId: undefined
-      }));
+      // Prepare products for the action with individual discounts
+      const products = availableProducts.map(product => {
+        // Get the correct individual discount based on type
+        let individualDiscount;
+        if (product.discount_type === 'fixed_amount' && product.discount_amount > 0) {
+          individualDiscount = product.discount_amount;
+        } else if (product.discount_type === 'percentage' && product.discount_percentage > 0) {
+          individualDiscount = product.discount_percentage;
+        } else {
+          individualDiscount = undefined;
+        }
+
+        const productData = {
+          productId: product.id,
+          quantity: 1,
+          variantId: undefined,
+          individualDiscount: individualDiscount,
+          individualDiscountType: product.discount_type || undefined,
+          originalPrice: product.price
+        };
+
+        console.log('Offer Details - Sending product to cart:', {
+          productId: productData.productId,
+          individualDiscount: productData.individualDiscount,
+          individualDiscountType: productData.individualDiscountType,
+          originalPrice: productData.originalPrice,
+          product_discount_amount: product.discount_amount,
+          product_discount_percentage: product.discount_percentage,
+          product_discount_type: product.discount_type
+        });
+
+        return productData;
+      });
 
       // Get the original offer from database to get discount_value
       let discountValue = offer.discountPercentage || 0;
@@ -471,14 +538,22 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
       }
 
       // Dispatch the offer-based add all to cart action
-      this.store.dispatch(addAllToCartFromOffer({
+      const actionPayload = {
         products,
         offerId: offer.id,
         offerName: offer.title,
         offerType: (offer.discount_type || 'percentage') as 'percentage' | 'fixed_amount' | 'buy_x_get_y' | 'bundle',
         offerDiscount: discountValue,
         offerValidUntil: offer.endDate
-      }));
+      };
+
+      console.log('Offer Details - Dispatching cart action:', {
+        offerType: actionPayload.offerType,
+        offerDiscount: actionPayload.offerDiscount,
+        products: actionPayload.products
+      });
+
+      this.store.dispatch(addAllToCartFromOffer(actionPayload));
 
       // Show success message
       this.toastService.showSuccess(
