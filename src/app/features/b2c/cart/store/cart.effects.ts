@@ -244,17 +244,19 @@ export class CartEffects {
     addToCartFromOffer$ = createEffect(() =>
         this.actions$.pipe(
             ofType(CartActions.addToCartFromOffer),
-            switchMap(({ productId, quantity, variantId, offerId, offerName, offerType, offerDiscount, offerOriginalPrice, offerValidUntil }) =>
+            switchMap(({ productId, quantity, variantId, offerId, offerName, offerType, offerDiscount, offerOriginalPrice, offerValidUntil, individualDiscount, individualDiscountType }) =>
                 this.cartService.addToCartFromOffer(
-                    productId, 
-                    quantity, 
-                    variantId, 
-                    offerId, 
-                    offerName, 
-                    offerType, 
-                    offerDiscount, 
-                    offerOriginalPrice, 
-                    offerValidUntil
+                    productId,
+                    quantity,
+                    variantId,
+                    offerId,
+                    offerName,
+                    offerType,
+                    offerDiscount,
+                    offerOriginalPrice,
+                    offerValidUntil,
+                    individualDiscount,
+                    individualDiscountType
                 ).pipe(
                     map(cart => CartActions.addToCartFromOfferSuccess({ cart })),
                     catchError(error => of(CartActions.addToCartFromOfferFailure({ error: error.message })))

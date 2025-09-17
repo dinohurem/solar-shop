@@ -130,9 +130,29 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
                     </a>
                     <p class="text-sm text-gray-500 font-['DM_Sans']">x{{ item.quantity }}</p>
                   </div>
-                  <span class="text-sm font-medium text-gray-900 font-['DM_Sans']">
-                    {{ (item.price * item.quantity) | currency:'EUR':'symbol':'1.2-2' }}
-                  </span>
+                  <div class="text-right">
+                    <span class="text-sm font-medium text-gray-900 font-['DM_Sans'] block">
+                      {{ (item.price * item.quantity) | currency:'EUR':'symbol':'1.2-2' }}
+                    </span>
+                    <span 
+                      *ngIf="item.offerOriginalPrice && item.offerOriginalPrice > item.price"
+                      class="text-xs text-gray-500 line-through font-['DM_Sans'] block"
+                    >
+                      {{ ((item.offerOriginalPrice || item.price) * item.quantity) | currency:'EUR':'symbol':'1.2-2' }}
+                    </span>
+                    <span 
+                      *ngIf="item.offerSavings && item.offerSavings > 0"
+                      class="text-xs text-green-600 font-medium font-['DM_Sans'] block"
+                    >
+                      {{ 'cart.saveFromOffer' | translate }}:
+                      <ng-container *ngIf="item.offerType === 'percentage'">
+                        {{ item.offerDiscount }}% OFF ({{ item.offerSavings | currency:'EUR':'symbol':'1.2-2' }})
+                      </ng-container>
+                      <ng-container *ngIf="item.offerType === 'fixed_amount'">
+                        {{ item.offerSavings | currency:'EUR':'symbol':'1.2-2' }} OFF
+                      </ng-container>
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -140,21 +160,30 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
               <div class="border-t border-gray-200 mb-4"></div>
 
               <!-- Summary -->
-              <div class="space-y-2 text-sm mb-4">
-                <div class="flex justify-between">
-                  <span class="text-gray-600 font-['DM_Sans']">{{ 'checkout.subtotal' | translate }}</span>
-                  <span class="font-['DM_Sans']">{{ (cartSummary$ | async)?.subtotal | currency:'EUR':'symbol':'1.2-2' }}</span>
+              <ng-container *ngIf="cartSummary$ | async as summary">
+                <div class="space-y-2 text-sm mb-4">
+                  <div class="flex justify-between">
+                    <span class="text-gray-600 font-['DM_Sans']">{{ 'checkout.subtotal' | translate }}</span>
+                    <span class="font-['DM_Sans']">{{ summary.subtotal | currency:'EUR':'symbol':'1.2-2' }}</span>
+                  </div>
+                  <div 
+                    *ngIf="summary.discount && summary.discount > 0"
+                    class="flex justify-between text-green-600"
+                  >
+                    <span class="font-['DM_Sans']">{{ 'cart.discount' | translate }}</span>
+                    <span class="font-['DM_Sans']">-{{ summary.discount | currency:'EUR':'symbol':'1.2-2' }}</span>
+                  </div>
                 </div>
-              </div>
 
-              <!-- Divider -->
-              <div class="border-t border-gray-200 mb-4"></div>
+                <!-- Divider -->
+                <div class="border-t border-gray-200 mb-4"></div>
 
-              <!-- Total -->
-              <div class="flex justify-between text-lg font-semibold">
-                <span class="font-['DM_Sans']">{{ 'checkout.total' | translate }}</span>
-                <span class="font-['DM_Sans']">{{ (cartSummary$ | async)?.subtotal | currency:'EUR':'symbol':'1.2-2' }}</span>
-              </div>
+                <!-- Total -->
+                <div class="flex justify-between text-lg font-semibold">
+                  <span class="font-['DM_Sans']">{{ 'checkout.total' | translate }}</span>
+                  <span class="font-['DM_Sans']">{{ summary.total | currency:'EUR':'symbol':'1.2-2' }}</span>
+                </div>
+              </ng-container>
             </div>
           </div>
         </div>

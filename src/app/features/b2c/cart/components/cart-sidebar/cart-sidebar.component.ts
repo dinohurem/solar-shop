@@ -137,7 +137,7 @@ import { LucideAngularModule, ShoppingCart } from 'lucide-angular';
                           {{ item.offerDiscount }}% OFF ({{ item.offerSavings | currency:'EUR':'symbol':'1.2-2' }})
                         </ng-container>
                         <ng-container *ngIf="item.offerType === 'fixed_amount'">
-                          {{ item.offerDiscount | currency:'EUR':'symbol':'1.2-2' }} OFF
+                          {{ item.offerSavings | currency:'EUR':'symbol':'1.2-2' }} OFF
                         </ng-container>
                       </span>
                     </div>

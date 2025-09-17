@@ -130,14 +130,6 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
             <span class="font-['DM_Sans']">{{ 'cart.discount' | translate }}</span>
             <span class="font-['DM_Sans']">-{{ (cartSummary$ | async)?.discount | currency:'EUR':'symbol':'1.2-2' }}</span>
           </div>
-          <div class="flex justify-between">
-            <span class="text-gray-600 font-['DM_Sans']">{{ 'cart.tax' | translate }}</span>
-            <span class="font-['DM_Sans']">{{ (cartSummary$ | async)?.tax | currency:'EUR':'symbol':'1.2-2' }}</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-gray-600 font-['DM_Sans']">{{ 'cart.shipping' | translate }}</span>
-            <span class="font-['DM_Sans']">{{ (cartSummary$ | async)?.shipping | currency:'EUR':'symbol':'1.2-2' }}</span>
-          </div>
           <div class="flex justify-between font-semibold text-lg border-t pt-2">
             <span class="font-['Poppins']">{{ 'cart.total' | translate }}</span>
             <span class="font-['Poppins']">{{ (cartSummary$ | async)?.total | currency:'EUR':'symbol':'1.2-2' }}</span>

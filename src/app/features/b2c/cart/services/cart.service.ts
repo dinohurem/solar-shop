@@ -724,6 +724,34 @@ export class CartService {
             // Replace all existing coupons with this single coupon
             this.appliedCoupons.next([newCoupon]);
 
+            // Increment usage count for the offer (if it's an offer-based coupon)
+            try {
+                const { data: offerData, error: offerError } = await this.supabaseService.client
+                    .from('offers')
+                    .select('id')
+                    .eq('code', code)
+                    .eq('is_active', true)
+                    .single();
+
+                if (!offerError && offerData) {
+                    console.log('Incrementing usage for offer:', offerData.id);
+                    // Use the couponValidationService to increment usage
+                    this.couponValidationService.incrementOfferUsage(offerData.id).subscribe({
+                        next: (success) => {
+                            if (success) {
+                                console.log('Successfully incremented offer usage');
+                            } else {
+                                console.warn('Failed to increment offer usage');
+                            }
+                        },
+                        error: (error) => console.error('Error incrementing offer usage:', error)
+                    });
+                }
+            } catch (error) {
+                console.warn('Could not increment offer usage:', error);
+                // Don't fail the whole operation if usage increment fails
+            }
+
             // Update cart items if individual discounts were applied
             if (updatedItems) {
                 this.updateCartItems(updatedItems);
@@ -917,17 +945,19 @@ export class CartService {
 
     // Add single product to cart from offer
     addToCartFromOffer(
-        productId: string, 
-        quantity: number, 
-        variantId?: string, 
+        productId: string,
+        quantity: number,
+        variantId?: string,
         offerId?: string,
-        offerName?: string, 
-        offerType?: 'percentage' | 'fixed_amount' | 'buy_x_get_y' | 'bundle', 
-        offerDiscount?: number, 
-        offerOriginalPrice?: number, 
-        offerValidUntil?: string
+        offerName?: string,
+        offerType?: 'percentage' | 'fixed_amount' | 'buy_x_get_y' | 'bundle',
+        offerDiscount?: number,
+        offerOriginalPrice?: number,
+        offerValidUntil?: string,
+        individualDiscount?: number,
+        individualDiscountType?: 'percentage' | 'fixed_amount'
     ): Observable<Cart> {
-        return from(this.addToCartFromOfferAsync(productId, quantity, variantId, offerId, offerName, offerType, offerDiscount, offerOriginalPrice, offerValidUntil)).pipe(
+        return from(this.addToCartFromOfferAsync(productId, quantity, variantId, offerId, offerName, offerType, offerDiscount, offerOriginalPrice, offerValidUntil, individualDiscount, individualDiscountType)).pipe(
             map(() => this.createCartFromItems(this.getCartItemsArray())),
             catchError(error => {
                 console.error('Error adding to cart from offer:', error);
@@ -1214,6 +1244,26 @@ export class CartService {
             } catch (error) {
                 console.error(`Error adding product ${productData.productId} from offer:`, error);
                 skippedCount++;
+            }
+        }
+
+        // Increment usage count for the offer if at least one product was added
+        if (addedCount > 0) {
+            try {
+                console.log('Incrementing usage for offer:', offerId);
+                this.couponValidationService.incrementOfferUsage(offerId).subscribe({
+                    next: (success) => {
+                        if (success) {
+                            console.log('Successfully incremented offer usage after adding products to cart');
+                        } else {
+                            console.warn('Failed to increment offer usage after adding products to cart');
+                        }
+                    },
+                    error: (error) => console.error('Error incrementing offer usage after adding products:', error)
+                });
+            } catch (error) {
+                console.warn('Could not increment offer usage after adding products:', error);
+                // Don't fail the operation if usage increment fails
             }
         }
 

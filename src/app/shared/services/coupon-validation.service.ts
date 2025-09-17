@@ -542,4 +542,68 @@ export class CouponValidationService {
 
     return true;
   }
+
+  /**
+   * Increment the usage count for an offer when it's successfully used
+   */
+  incrementOfferUsage(offerId: string): Observable<boolean> {
+    return from(this.incrementOfferUsageAsync(offerId)).pipe(
+      catchError(error => {
+        console.error('Error incrementing offer usage:', error);
+        return of(false);
+      })
+    );
+  }
+
+  private async incrementOfferUsageAsync(offerId: string): Promise<boolean> {
+    try {
+      console.log('Incrementing usage count for offer:', offerId);
+
+      // First get current usage
+      const { data: offerData, error: fetchError } = await this.supabaseService.client
+        .from('offers')
+        .select('current_usage, max_usage')
+        .eq('id', offerId)
+        .single();
+
+      if (fetchError) {
+        console.error('Error fetching current offer usage:', fetchError);
+        return false;
+      }
+
+      const currentUsage = offerData.current_usage || 0;
+      const maxUsage = offerData.max_usage;
+
+      // Check if usage limit would be exceeded
+      if (maxUsage && currentUsage >= maxUsage) {
+        console.warn('Offer usage limit would be exceeded:', { currentUsage, maxUsage });
+        return false;
+      }
+
+      // Increment usage count
+      const { error: updateError } = await this.supabaseService.client
+        .from('offers')
+        .update({
+          current_usage: currentUsage + 1,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', offerId);
+
+      if (updateError) {
+        console.error('Error updating offer usage:', updateError);
+        return false;
+      }
+
+      console.log('Successfully incremented offer usage:', {
+        offerId,
+        oldUsage: currentUsage,
+        newUsage: currentUsage + 1
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error in incrementOfferUsageAsync:', error);
+      return false;
+    }
+  }
 }

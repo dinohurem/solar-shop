@@ -145,7 +145,7 @@ export const selectCartSummary = createSelector(
         tax,
         shipping,
         discount,
-        total,
+        total: subtotal - discount, // Calculate total as subtotal minus discount (excluding tax and shipping)
         currency,
         freeShippingThreshold: 100, // This could come from config
         freeShippingRemaining: Math.max(0, 100 - subtotal)

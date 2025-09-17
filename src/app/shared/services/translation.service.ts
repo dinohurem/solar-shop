@@ -1173,6 +1173,9 @@ export class TranslationService {
                     globalDiscount: 'Globalni popust',
                     applyGlobalDiscountToAll: 'Primijeni globalni popust na sve',
                     applyToAllProducts: 'Primijeni na sve proizvode',
+                    distributeDiscountAcross: 'Distribuiraj {{amount}}€ popust na sve proizvode',
+                    distributeDiscount: 'Distribuiraj popust',
+                    totalProductDiscountsExceed: 'Ukupni popusti proizvoda ne mogu premašiti {{amount}}€',
                 },
                 reviewsForm: {
                     title: 'Recenzije',
@@ -3701,6 +3704,9 @@ export class TranslationService {
                     globalDiscount: 'Global discount',
                     applyGlobalDiscountToAll: 'Apply global discount to all',
                     applyToAllProducts: 'Apply to all products',
+                    distributeDiscountAcross: 'Distribute €{{amount}} discount across all products',
+                    distributeDiscount: 'Distribute Discount',
+                    totalProductDiscountsExceed: 'Total product discounts cannot exceed €{{amount}}',
                 },
                 reviewsForm: {
                     title: 'Reviews',

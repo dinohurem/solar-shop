@@ -115,6 +115,16 @@ export class AddToCartButtonComponent {
   @Input() fullWidth: boolean = false;
   @Input() availability: 'available' | 'limited' | 'out-of-stock' = 'available';
 
+  // Offer-related inputs for discounted pricing
+  @Input() offerId?: string;
+  @Input() offerName?: string;
+  @Input() offerType?: 'percentage' | 'fixed_amount' | 'buy_x_get_y' | 'bundle';
+  @Input() offerDiscount?: number;
+  @Input() offerOriginalPrice?: number;
+  @Input() offerValidUntil?: string;
+  @Input() individualDiscount?: number;
+  @Input() individualDiscountType?: 'percentage' | 'fixed_amount';
+
   isLoading$ = this.store.select(CartSelectors.selectIsCartLoading);
   isAnimating = false;
 
@@ -159,12 +169,30 @@ export class AddToCartButtonComponent {
   addToCart() {
     if (this.productId && !this.isOutOfStock) {
 
-      // Dispatch the add to cart action
-      this.store.dispatch(CartActions.addToCart({
-        productId: this.productId,
-        quantity: this.quantity,
-        variantId: this.variantId
-      }));
+      // Check if we have offer information to apply discounts
+      if (this.offerId && this.offerName && this.offerType && this.offerDiscount !== undefined && this.offerOriginalPrice !== undefined) {
+        // Use offer-based add to cart with individual discounts
+        this.store.dispatch(CartActions.addToCartFromOffer({
+          productId: this.productId,
+          quantity: this.quantity,
+          variantId: this.variantId,
+          offerId: this.offerId,
+          offerName: this.offerName,
+          offerType: this.offerType,
+          offerDiscount: this.individualDiscount !== undefined ? this.individualDiscount : this.offerDiscount,
+          offerOriginalPrice: this.offerOriginalPrice,
+          offerValidUntil: this.offerValidUntil,
+          individualDiscount: this.individualDiscount,
+          individualDiscountType: this.individualDiscountType
+        }));
+      } else {
+        // Regular add to cart without offer discount
+        this.store.dispatch(CartActions.addToCart({
+          productId: this.productId,
+          quantity: this.quantity,
+          variantId: this.variantId
+        }));
+      }
 
       // Add success animation to button
       this.addButtonSuccessAnimation();

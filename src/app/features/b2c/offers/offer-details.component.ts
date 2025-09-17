@@ -160,13 +160,21 @@ import { TranslationService } from '../../../shared/services/translation.service
 
               <!-- Add to Cart -->
               <div class="space-y-3">
-                <app-add-to-cart-button 
+                <app-add-to-cart-button
                   [availability]="product.availability"
-                  [productId]="product.id" 
-                  [quantity]="1" 
+                  [productId]="product.id"
+                  [quantity]="1"
                   buttonText="{{ 'offers.addToCart' | translate }}"
                   [fullWidth]="true"
-                  size="md">
+                  size="md"
+                  [offerId]="offer.id"
+                  [offerName]="offer.title"
+                  [offerType]="product.discount_type === 'fixed_amount' ? 'fixed_amount' : 'percentage'"
+                  [offerDiscount]="product.discount_type === 'fixed_amount' ? product.discount_amount : product.discount_percentage"
+                  [offerOriginalPrice]="product.price"
+                  [offerValidUntil]="offer.endDate"
+                  [individualDiscount]="product.discount_type === 'fixed_amount' ? product.discount_amount : product.discount_percentage"
+                  [individualDiscountType]="product.discount_type">
                 </app-add-to-cart-button>
                 
                 <button 
