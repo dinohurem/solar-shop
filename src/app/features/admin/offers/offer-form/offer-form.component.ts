@@ -188,7 +188,7 @@ import { TranslationService } from '../../../../shared/services/translation.serv
               <div>
                 <h4 class="text-sm font-medium text-blue-900">{{ 'admin.offersForm.globalDiscount' | translate }}</h4>
                 <p class="text-sm text-blue-700" *ngIf="offerForm.get('discount_type')?.value === 'percentage'">{{ 'admin.offersForm.applyGlobalDiscountToAll' | translate: { discount: offerForm.get('discount_value')?.value } }}</p>
-                <p class="text-sm text-blue-700" *ngIf="offerForm.get('discount_type')?.value === 'fixed_amount'">Distribute €{{ offerForm.get('discount_value')?.value }} discount across all products</p>
+                <p class="text-sm text-blue-700" *ngIf="offerForm.get('discount_type')?.value === 'fixed_amount'">{{ 'admin.offersForm.distributeDiscountAcross' | translate: { amount: offerForm.get('discount_value')?.value } }}</p>
               </div>
               <button
                 type="button"
@@ -198,7 +198,7 @@ import { TranslationService } from '../../../../shared/services/translation.serv
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                 </svg>
                 <span *ngIf="offerForm.get('discount_type')?.value === 'percentage'">{{ 'admin.offersForm.applyToAllProducts' | translate }}</span>
-                <span *ngIf="offerForm.get('discount_type')?.value === 'fixed_amount'">Distribute Discount</span>
+                <span *ngIf="offerForm.get('discount_type')?.value === 'fixed_amount'">{{ 'admin.offersForm.distributeDiscount' | translate }}</span>
               </button>
             </div>
 
@@ -208,7 +208,7 @@ import { TranslationService } from '../../../../shared/services/translation.serv
                 <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
                 </svg>
-                Total product discounts cannot exceed €{{ offerForm.get('discount_value')?.value }}
+                {{ 'admin.offersForm.totalProductDiscountsExceed' | translate: { amount: offerForm.get('discount_value')?.value } }}
               </p>
             </div>
           </div>
@@ -1484,7 +1484,8 @@ export class OfferFormComponent implements OnInit {
       if (totalDiscounts > globalDiscountValue) {
         const maxAllowed = globalDiscountValue - otherProductDiscounts;
         product.get('discount_amount')?.setValue(Math.max(0, maxAllowed));
-        alert(`Total product discounts cannot exceed €${globalDiscountValue}. Maximum for this product: €${maxAllowed.toFixed(2)}`);
+        const exceedMessage = this.translationService.translate('admin.offersForm.totalProductDiscountsExceed', { amount: globalDiscountValue });
+        alert(`${exceedMessage}. Maximum for this product: €${maxAllowed.toFixed(2)}`);
       }
     } else if (globalDiscountType === 'percentage') {
       // For percentage: each product discount cannot exceed global percentage
