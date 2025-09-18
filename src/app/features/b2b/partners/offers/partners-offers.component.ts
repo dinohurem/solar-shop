@@ -9,7 +9,7 @@ import { Offer } from '../../../../shared/models/offer.model';
 import { SupabaseService } from '../../../../services/supabase.service';
 import { ToastService } from '../../../../shared/services/toast.service';
 import { selectCurrentUser, selectIsAuthenticated } from '../../../../core/auth/store/auth.selectors';
-import { addToB2BCart, addAllToB2BCartFromOffer } from '../../cart/store/b2b-cart.actions';
+import { addAllToB2BCartFromOffer } from '../../cart/store/b2b-cart.actions';
 import { selectB2BCartHasCompanyId, selectB2BCartCompanyId } from '../../cart/store/b2b-cart.selectors';
 import { TranslationService } from '../../../../shared/services/translation.service';
 import { User } from '../../../../shared/models/user.model';

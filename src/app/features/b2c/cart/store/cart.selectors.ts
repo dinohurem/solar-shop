@@ -138,18 +138,23 @@ export const selectCartSummary = createSelector(
     selectCartDiscount,
     selectCartTotal,
     selectCartCurrency,
-    (itemCount, uniqueItemCount, subtotal, tax, shipping, discount, total, currency) => ({
-        itemCount,
-        uniqueItemCount,
-        subtotal,
-        tax,
-        shipping,
-        discount,
-        total: subtotal - discount, // Calculate total as subtotal minus discount (excluding tax and shipping)
-        currency,
-        freeShippingThreshold: 100, // This could come from config
-        freeShippingRemaining: Math.max(0, 100 - subtotal)
-    })
+    (itemCount, uniqueItemCount, subtotal, tax, shipping, discount, total, currency) => {
+        const calculatedTotal = subtotal + tax + shipping - discount;
+        const normalizedTotal = total && total > 0 ? total : calculatedTotal;
+
+        return {
+            itemCount,
+            uniqueItemCount,
+            subtotal,
+            tax,
+            shipping,
+            discount,
+            total: Math.max(normalizedTotal, 0),
+            currency,
+            freeShippingThreshold: 100, // This could come from config
+            freeShippingRemaining: Math.max(0, 100 - subtotal)
+        };
+    }
 );
 
 export const selectCartItemById = (itemId: string) => createSelector(

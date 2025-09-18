@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { of, forkJoin } from 'rxjs';
-import { map, catchError, switchMap, withLatestFrom, tap, mergeMap } from 'rxjs/operators';
+import { map, catchError, switchMap, withLatestFrom, tap } from 'rxjs/operators';
 import { ToastService } from '../../../../shared/services/toast.service';
 import { TranslationService } from '../../../../shared/services/translation.service';
 import { B2BCartService } from '../services/b2b-cart.service';
@@ -27,8 +27,8 @@ export class B2BCartEffects {
             ofType(B2BCartActions.loadB2BCart),
             switchMap(({ companyId }) =>
                 this.b2bCartService.loadCart(companyId).pipe(
-                    map(({ items, companyName }) =>
-                        B2BCartActions.loadB2BCartSuccess({ items, companyId, companyName })
+                    map(({ items, companyName, appliedCoupons, couponDiscount }) =>
+                        B2BCartActions.loadB2BCartSuccess({ items, companyId, companyName, appliedCoupons, couponDiscount })
                     ),
                     catchError(error =>
                         of(B2BCartActions.loadB2BCartFailure({
@@ -196,6 +196,95 @@ export class B2BCartEffects {
         { dispatch: false }
     );
 
+    applyCoupon$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(B2BCartActions.applyB2BCoupon),
+            withLatestFrom(
+                this.store.select(B2BCartSelectors.selectB2BCartItems),
+                this.store.select(B2BCartSelectors.selectB2BCartAppliedCoupons)
+            ),
+            switchMap(([{ code, companyId }, items, appliedCoupons]) => {
+                if (!companyId) {
+                    return of(B2BCartActions.applyB2BCouponFailure({
+                        error: this.translationService.translate('b2b.auth.companyIdNotFound')
+                    }));
+                }
+
+                if (appliedCoupons.length > 0) {
+                    return of(B2BCartActions.applyB2BCouponFailure({
+                        error: this.translationService.translate('cart.singleCouponOnly')
+                    }));
+                }
+
+                return this.b2bCartService.applyCoupon(code, items, companyId).pipe(
+                    map(({ coupon, discount }) =>
+                        B2BCartActions.applyB2BCouponSuccess({ coupon, discount })
+                    ),
+                    catchError(error =>
+                        of(B2BCartActions.applyB2BCouponFailure({
+                            error: error.message || this.translationService.translate('cart.couponValidationError')
+                        }))
+                    )
+                );
+            })
+        )
+    );
+
+    applyCouponSuccess$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(B2BCartActions.applyB2BCouponSuccess),
+            tap(({ coupon }) => {
+                this.toastService.showSuccess(
+                    this.translationService.translate('cart.couponAppliedSuccess', { code: coupon.code })
+                );
+            })
+        ),
+        { dispatch: false }
+    );
+
+    removeCoupon$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(B2BCartActions.removeB2BCoupon),
+            withLatestFrom(
+                this.store.select(B2BCartSelectors.selectB2BCartCompanyId),
+                this.store.select(B2BCartSelectors.selectB2BCartAppliedCoupons)
+            ),
+            switchMap(([{ couponId }, companyId, appliedCoupons]) => {
+                if (!companyId) {
+                    return of(B2BCartActions.removeB2BCouponFailure({
+                        error: this.translationService.translate('b2b.auth.companyIdNotFound')
+                    }));
+                }
+
+                const coupon = appliedCoupons.find(c => c.id === couponId);
+
+                return this.b2bCartService.removeCoupon(couponId, companyId).pipe(
+                    map(() =>
+                        B2BCartActions.removeB2BCouponSuccess({ couponId, couponCode: coupon?.code })
+                    ),
+                    catchError(error =>
+                        of(B2BCartActions.removeB2BCouponFailure({
+                            error: error.message || this.translationService.translate('cart.couponValidationError')
+                        }))
+                    )
+                );
+            })
+        )
+    );
+
+    removeCouponSuccess$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(B2BCartActions.removeB2BCouponSuccess),
+            tap(({ couponCode }) => {
+                const message = couponCode
+                    ? this.translationService.translate('cart.couponRemoved', { code: couponCode })
+                    : this.translationService.translate('cart.couponRemovedGeneric');
+                this.toastService.showSuccess(message);
+            })
+        ),
+        { dispatch: false }
+    );
+
     // Error toast notifications
     cartError$ = createEffect(() =>
         this.actions$.pipe(
@@ -206,7 +295,9 @@ export class B2BCartEffects {
                 B2BCartActions.removeFromB2BCartFailure,
                 B2BCartActions.clearB2BCartFailure,
                 B2BCartActions.syncB2BCartFailure,
-                B2BCartActions.addAllToB2BCartFromOfferFailure
+                B2BCartActions.addAllToB2BCartFromOfferFailure,
+                B2BCartActions.applyB2BCouponFailure,
+                B2BCartActions.removeB2BCouponFailure
             ),
             tap(({ error }) => {
                 this.toastService.showError(error);
@@ -221,8 +312,17 @@ export class B2BCartEffects {
             ofType(B2BCartActions.addAllToB2BCartFromOffer),
             switchMap(({ products, companyId, partnerOfferId, partnerOfferName, partnerOfferType, partnerOfferDiscount, partnerOfferValidUntil }) => {
                 // Create observables for each product add operation
-                const addObservables = products.map(({ productId, quantity }) =>
-                    this.b2bCartService.addToCart(productId, quantity, companyId).pipe(
+                const addObservables = products.map(({ productId, quantity, individualDiscount, individualDiscountType, originalPrice }) =>
+                    this.b2bCartService.addToCart(productId, quantity, companyId, {
+                        partnerOfferId,
+                        partnerOfferName,
+                        partnerOfferType,
+                        partnerOfferDiscount,
+                        partnerOfferValidUntil,
+                        individualDiscount,
+                        individualDiscountType,
+                        originalPrice
+                    }).pipe(
                         map((item: B2BCartItem) => ({ success: true as const, item })),
                         catchError(error => {
                             console.error(`Failed to add product ${productId} to cart:`, error);

@@ -6,7 +6,7 @@ import { takeUntil, switchMap, map, catchError } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { SupabaseService } from '../../../../services/supabase.service';
-import { addToB2BCart, applyB2BCoupon, addAllToB2BCartFromOffer } from '../../cart/store/b2b-cart.actions';
+import { applyB2BCoupon, addAllToB2BCartFromOffer } from '../../cart/store/b2b-cart.actions';
 import { selectB2BCartHasCompanyId, selectB2BCartCompanyId } from '../../cart/store/b2b-cart.selectors';
 import { ToastService } from '../../../../shared/services/toast.service';
 import { TranslationService } from '../../../../shared/services/translation.service';
@@ -562,53 +562,61 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
   }
 
   private addOfferProductsToCart(products: PartnerProduct[], offer: PartnerOffer, companyId: string): void {
-    let successCount = 0;
-    let errorCount = 0;
-    let outOfStockCount = 0;
+    const availableProducts = products.filter(product => (product.stock_quantity || 0) > 0);
+    const outOfStockCount = products.length - availableProducts.length;
 
-    for (const product of products) {
-      try {
-        // Check stock availability
-        if (product.stock_quantity !== undefined && product.stock_quantity <= 0) {
-          console.warn(`Product ${product.name} is out of stock`);
-          outOfStockCount++;
-          continue;
-        }
-
-        // Add to cart
-        this.store.dispatch(addToB2BCart({
-          companyId,
-          productId: product.id,
-          quantity: 1
-        }));
-
-        successCount++;
-      } catch (error) {
-        console.error(`Error adding product ${product.name} to cart:`, error);
-        errorCount++;
-      }
+    if (availableProducts.length === 0) {
+      this.toastService.showWarning(this.translationService.translate('b2b.offers.allProductsOutOfStock'));
+      return;
     }
 
-    // Provide detailed feedback
-    if (successCount > 0) {
-      let message = this.translationService.translate('b2b.offers.offerClaimedWithProducts', {
-        title: offer.title,
-        count: successCount
-      });
+    const productsToAdd = availableProducts.map(product => {
+      const offerProduct = this.offerProductsData?.find(op => op.products.id === product.id);
+      const hasIndividualDiscount = offerProduct &&
+        ((offerProduct.discount_percentage && offerProduct.discount_percentage > 0) ||
+         (offerProduct.discount_amount && offerProduct.discount_amount > 0));
 
-      if (offer.couponCode) {
-        message += ' ' + this.translationService.translate('b2b.offers.couponAppliedAutomatically', { code: offer.couponCode });
-      }
+      return {
+        productId: product.id,
+        quantity: 1,
+        individualDiscount: hasIndividualDiscount ? (offerProduct.discount_percentage || offerProduct.discount_amount) : undefined,
+        individualDiscountType: hasIndividualDiscount
+          ? (offerProduct.discount_amount > 0 ? 'fixed_amount' : 'percentage') as 'percentage' | 'fixed_amount'
+          : undefined,
+        originalPrice: product.price
+      };
+    });
 
-      if (outOfStockCount > 0) {
-        message += ' ' + this.translationService.translate('b2b.offers.itemsOutOfStock', { count: outOfStockCount });
-      }
+    const offerType = (offer.discount_type || 'percentage') as 'percentage' | 'fixed_amount' | 'tier_based' | 'bundle';
+    const discountValue = offer.discount_value || offer.discountPercentage || 0;
 
-      this.toastService.showSuccess(message);
-    } else if (outOfStockCount > 0) {
-      this.toastService.showWarning(this.translationService.translate('b2b.offers.offerClaimedButOutOfStock', { title: offer.title }));
-    } else {
-      this.toastService.showError(this.translationService.translate('b2b.offers.failedToAddProducts'));
+    this.store.dispatch(addAllToB2BCartFromOffer({
+      products: productsToAdd,
+      companyId,
+      partnerOfferId: offer.id,
+      partnerOfferName: offer.title,
+      partnerOfferType: offerType,
+      partnerOfferDiscount: discountValue,
+      partnerOfferValidUntil: offer.endDate
+    }));
+
+    let message = this.translationService.translate('b2b.offers.offerClaimedWithProducts', {
+      title: offer.title,
+      count: availableProducts.length
+    });
+
+    if (offer.couponCode) {
+      message += ' ' + this.translationService.translate('b2b.offers.couponAppliedAutomatically', { code: offer.couponCode });
+    }
+
+    if (outOfStockCount > 0) {
+      message += ' ' + this.translationService.translate('b2b.offers.itemsOutOfStock', { count: outOfStockCount });
+    }
+
+    this.toastService.showSuccess(message);
+
+    if (outOfStockCount > 0) {
+      this.toastService.showWarning(this.translationService.translate('b2b.offers.productsOutOfStock', { count: outOfStockCount }));
     }
   }
 
@@ -619,10 +627,44 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
         return;
       }
 
-      this.store.dispatch(addToB2BCart({
-        companyId,
+      if ((product.stock_quantity || 0) <= 0) {
+        this.toastService.showWarning(
+          this.translationService.translate('b2b.offers.productsOutOfStock', { count: 1 })
+        );
+        return;
+      }
+
+      if (!this.offer) {
+        this.toastService.showError(this.translationService.translate('b2b.offers.offerNotFound'));
+        return;
+      }
+
+      const offerProduct = this.offerProductsData?.find(op => op.products.id === product.id);
+      const hasIndividualDiscount = offerProduct &&
+        ((offerProduct.discount_percentage && offerProduct.discount_percentage > 0) ||
+         (offerProduct.discount_amount && offerProduct.discount_amount > 0));
+
+      const productPayload = {
         productId: product.id,
-        quantity: 1
+        quantity: 1,
+        individualDiscount: hasIndividualDiscount ? (offerProduct.discount_percentage || offerProduct.discount_amount) : undefined,
+        individualDiscountType: hasIndividualDiscount
+          ? (offerProduct.discount_amount > 0 ? 'fixed_amount' : 'percentage') as 'percentage' | 'fixed_amount'
+          : undefined,
+        originalPrice: product.price
+      };
+
+      const offerType = (this.offer.discount_type || 'percentage') as 'percentage' | 'fixed_amount' | 'tier_based' | 'bundle';
+      const discountValue = this.offer.discount_value || this.offer.discountPercentage || 0;
+
+      this.store.dispatch(addAllToB2BCartFromOffer({
+        products: [productPayload],
+        companyId,
+        partnerOfferId: this.offer.id,
+        partnerOfferName: this.offer.title,
+        partnerOfferType: offerType,
+        partnerOfferDiscount: discountValue,
+        partnerOfferValidUntil: this.offer.endDate
       }));
 
       this.toastService.showSuccess(this.translationService.translate('cart.itemAddedToCart'));

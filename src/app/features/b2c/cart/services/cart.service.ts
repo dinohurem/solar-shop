@@ -157,7 +157,14 @@ export class CartService {
                 }
 
                 // Apply the coupon to the cart
-                return from(this.applyCouponAsync(code, validationResult.discountAmount || 0, validationResult.coupon?.discountType || 'fixed_amount')).pipe(
+                return from(
+                    this.applyCouponAsync(
+                        code,
+                        validationResult.discountAmount || 0,
+                        validationResult.coupon?.discountType || 'fixed_amount',
+                        validationResult.coupon || null
+                    )
+                ).pipe(
                     map(() => this.createCartFromItems(this.getCartItemsArray()))
                 );
             }),
@@ -678,7 +685,12 @@ export class CartService {
     }
 
     // Apply coupon async helper
-    private async applyCouponAsync(code: string, discountAmount: number, discountType: 'percentage' | 'fixed_amount' | 'free_shipping' | 'buy_x_get_y'): Promise<void> {
+    private async applyCouponAsync(
+        code: string,
+        discountAmount: number,
+        discountType: 'percentage' | 'fixed_amount' | 'free_shipping' | 'buy_x_get_y',
+        couponDetails?: Coupon | null
+    ): Promise<void> {
         try {
             // RESTRICTION: Only allow one coupon at a time
             const currentCoupons = this.appliedCoupons.value;
@@ -687,6 +699,7 @@ export class CartService {
             }
 
             let appliedCouponId: string | null = null;
+            const couponValue = couponDetails?.discountValue ?? discountAmount;
 
             if (this.isAuthenticated && this.currentUserId) {
                 // Save applied coupon to user's cart in database
@@ -695,6 +708,8 @@ export class CartService {
                     .insert({
                         user_id: this.currentUserId,
                         coupon_code: code,
+                        coupon_type: discountType,
+                        coupon_value: couponValue,
                         discount_amount: discountAmount,
                         applied_at: new Date().toISOString()
                     })
@@ -716,7 +731,7 @@ export class CartService {
                 id: appliedCouponId || `temp_${Date.now()}`,
                 code: code,
                 type: discountType,
-                value: discountAmount,
+                value: couponValue,
                 discountAmount: discountAmount,
                 appliedAt: new Date().toISOString()
             };
