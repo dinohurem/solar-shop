@@ -1,5 +1,5 @@
 import { createReducer, on } from '@ngrx/store';
-import { B2BCartState, B2BCartItem } from '../models/b2b-cart.model';
+import { B2BCartState, B2BCartItem, B2BAppliedCoupon } from '../models/b2b-cart.model';
 import * as B2BCartActions from './b2b-cart.actions';
 
 export const initialB2BCartState: B2BCartState = {
@@ -29,7 +29,7 @@ export const b2bCartReducer = createReducer(
         error: null
     })),
 
-    on(B2BCartActions.loadB2BCartSuccess, (state, { items, companyId, companyName }) => ({
+    on(B2BCartActions.loadB2BCartSuccess, (state, { items, companyId, companyName, appliedCoupons, couponDiscount }) => ({
         ...state,
         items,
         companyId,
@@ -37,6 +37,8 @@ export const b2bCartReducer = createReducer(
         loading: false,
         error: null,
         lastUpdated: new Date(),
+        appliedCoupons,
+        couponDiscount,
         ...calculateCartTotals(items)
     })),
 
@@ -242,13 +244,26 @@ export const b2bCartReducer = createReducer(
         couponError: null
     })),
 
-    on(B2BCartActions.applyB2BCouponSuccess, (state, { coupon, discount }) => ({
-        ...state,
-        appliedCoupons: [...state.appliedCoupons, coupon],
-        couponDiscount: state.couponDiscount + discount,
-        isCouponLoading: false,
-        couponError: null
-    })),
+    on(B2BCartActions.applyB2BCouponSuccess, (state, { coupon, discount }) => {
+        const appliedCoupon: B2BAppliedCoupon = {
+            id: coupon.id,
+            code: coupon.code,
+            type: coupon.discountType,
+            value: coupon.discountValue,
+            discountAmount: discount,
+            appliedAt: new Date().toISOString(),
+            title: coupon.title,
+            description: coupon.description
+        };
+
+        return {
+            ...state,
+            appliedCoupons: [...state.appliedCoupons, appliedCoupon],
+            couponDiscount: Math.round((state.couponDiscount + discount) * 100) / 100,
+            isCouponLoading: false,
+            couponError: null
+        };
+    }),
 
     on(B2BCartActions.applyB2BCouponFailure, (state, { error }) => ({
         ...state,
@@ -264,15 +279,12 @@ export const b2bCartReducer = createReducer(
 
     on(B2BCartActions.removeB2BCouponSuccess, (state, { couponId }) => {
         const removedCoupon = state.appliedCoupons.find(c => c.id === couponId);
-        const couponDiscount = removedCoupon ? 
-            (removedCoupon.discount_type === 'percentage' ? 
-                Math.round((state.subtotal * removedCoupon.discount_value / 100) * 100) / 100 : 
-                removedCoupon.discount_value) : 0;
-        
+        const discountToRemove = removedCoupon?.discountAmount || 0;
+
         return {
             ...state,
             appliedCoupons: state.appliedCoupons.filter(c => c.id !== couponId),
-            couponDiscount: Math.max(0, state.couponDiscount - couponDiscount),
+            couponDiscount: Math.max(0, Math.round((state.couponDiscount - discountToRemove) * 100) / 100),
             isCouponLoading: false,
             couponError: null
         };

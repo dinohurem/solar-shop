@@ -3,12 +3,24 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { SupabaseService } from '../../../services/supabase.service';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 interface FAQItem {
   id: string;
   question: string;
   answer: string;
   isOpen: boolean;
+}
+
+interface ShopLocation {
+  id: string;
+  name: string;
+  address: string;
+  phone: string;
+  phoneLink: string;
+  workingHours: string;
+  latitude: number;
+  longitude: number;
 }
 
 @Component({
@@ -47,6 +59,67 @@ interface FAQItem {
               </div>
               <span class="font-['DM_Sans']">+385 (1) 6407 715</span>
             </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Locations Section -->
+      <section class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="text-center mb-12">
+            <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 font-['Poppins']">{{ 'contactSupport.locationsTitle' | translate }}</h2>
+            <p class="mt-3 text-gray-600 font-['DM_Sans']">{{ 'contactSupport.locationsSubtitle' | translate }}</p>
+          </div>
+
+          <div class="grid gap-8 md:grid-cols-2">
+            <div *ngFor="let location of locations" class="bg-gray-50 rounded-3xl shadow-sm overflow-hidden flex flex-col">
+              <div class="relative h-64">
+                <iframe
+                  [src]="getMapEmbedUrl(location)"
+                  class="w-full h-full"
+                  loading="lazy"
+                  referrerpolicy="no-referrer-when-downgrade"
+                  style="border:0;"
+                  [title]="location.name"
+                  allowfullscreen>
+                </iframe>
+              </div>
+
+              <div class="p-6 space-y-3 flex-1 flex flex-col justify-between">
+                <div>
+                  <h3 class="text-xl font-semibold text-gray-900 font-['Poppins']">{{ location.name }}</h3>
+                  <p class="text-gray-600 font-['DM_Sans']">{{ location.address }}</p>
+                  <p class="text-gray-600 font-['DM_Sans']">
+                    <span class="font-medium">{{ 'contactSupport.workingHours' | translate }}:</span>
+                    {{ location.workingHours }}
+                  </p>
+                </div>
+
+                <div class="pt-2 space-y-2">
+                  <a
+                    [href]="getPhoneHref(location)"
+                    class="flex items-center space-x-2 text-solar-600 hover:text-solar-700 font-medium font-['DM_Sans']"
+                  >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2 4.5A2.25 2.25 0 014.25 2h1.372c.51 0 .954.343 1.087.835l1.105 4.104a1.125 1.125 0 01-.417 1.2l-1.152.864a1.125 1.125 0 00-.417 1.2c.78 2.885 3.054 5.16 5.939 5.939a1.125 1.125 0 001.2-.417l.864-1.152a1.125 1.125 0 011.2-.417l4.104 1.105c.492.133.835.577.835 1.087V19.5A2.25 2.25 0 0119.5 21.75h-1.125C9.988 21.75 2.25 14.012 2.25 4.125V3.75A1.75 1.75 0 012 4.5z" />
+                    </svg>
+                    <span>{{ location.phone }}</span>
+                  </a>
+                  <a
+                    [href]="getMapLink(location)"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="flex items-center space-x-2 text-solar-600 hover:text-solar-700 font-medium font-['DM_Sans']"
+                  >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 21c-4.5-4.364-7.5-7.795-7.5-11.25a7.5 7.5 0 1115 0C19.5 13.205 16.5 16.636 12 21z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 11.25a1.875 1.875 0 100-3.75 1.875 1.875 0 000 3.75z" />
+                    </svg>
+                    <span>{{ 'contactSupport.viewOnMap' | translate }}</span>
+                  </a>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -293,7 +366,7 @@ export class ContactComponent implements OnInit {
   contactForm: FormGroup;
   isSubmitting = false;
   messageSent = false;
-  constructor(private fb: FormBuilder, private supabase: SupabaseService) {
+  constructor(private fb: FormBuilder, private supabase: SupabaseService, private sanitizer: DomSanitizer) {
     this.contactForm = this.fb.group({
       firstName: ['', [Validators.required]],
       lastName: ['', [Validators.required]],
@@ -301,6 +374,59 @@ export class ContactComponent implements OnInit {
       message: ['', [Validators.required, Validators.minLength(10)]]
     });
   }
+
+  locations: ShopLocation[] = [
+    {
+      id: 'zagreb',
+      name: 'SolarShop Zagreb',
+      address: 'Radnička cesta 80, Zagreb',
+      phone: '+385 1 6407 715',
+      phoneLink: '+38516407715',
+      workingHours: 'Pon - Pet 08:00 - 18:00',
+      latitude: 45.8016,
+      longitude: 15.999
+    },
+    {
+      id: 'split',
+      name: 'SolarShop Split',
+      address: 'Domovinskog rata 95, Split',
+      phone: '+385 21 555 123',
+      phoneLink: '+38521555123',
+      workingHours: 'Pon - Pet 08:00 - 17:00',
+      latitude: 43.5133,
+      longitude: 16.4632
+    },
+    {
+      id: 'osijek',
+      name: 'SolarShop Osijek',
+      address: 'Trg Ante Starčevića 3, Osijek',
+      phone: '+385 31 203 444',
+      phoneLink: '+38531203444',
+      workingHours: 'Pon - Pet 08:00 - 16:00',
+      latitude: 45.554,
+      longitude: 18.6955
+    },
+    {
+      id: 'rijeka',
+      name: 'SolarShop Rijeka',
+      address: 'Ulica Janka Polića Kamova 83A, Rijeka',
+      phone: '+385 51 263 112',
+      phoneLink: '+38551263112',
+      workingHours: 'Pon - Pet 08:00 - 17:00',
+      latitude: 45.3273,
+      longitude: 14.4559
+    },
+    {
+      id: 'zadar',
+      name: 'SolarShop Zadar',
+      address: 'Put Murvice 20, Zadar',
+      phone: '+385 23 777 910',
+      phoneLink: '+38523777910',
+      workingHours: 'Pon - Pet 08:00 - 16:00',
+      latitude: 44.1194,
+      longitude: 15.2314
+    }
+  ];
 
   faqs: FAQItem[] = [
     {
@@ -380,4 +506,22 @@ export class ContactComponent implements OnInit {
   trackByFaqId(index: number, faq: FAQItem): string {
     return faq.id;
   }
-} 
+
+  getMapEmbedUrl(location: ShopLocation): SafeResourceUrl {
+    const delta = 0.01;
+    const minLon = location.longitude - delta;
+    const minLat = location.latitude - delta;
+    const maxLon = location.longitude + delta;
+    const maxLat = location.latitude + delta;
+    const url = `https://www.openstreetmap.org/export/embed.html?bbox=${minLon}%2C${minLat}%2C${maxLon}%2C${maxLat}&layer=mapnik&marker=${location.latitude}%2C${location.longitude}`;
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+  }
+
+  getMapLink(location: ShopLocation): string {
+    return `https://www.openstreetmap.org/?mlat=${location.latitude}&mlon=${location.longitude}#map=16/${location.latitude}/${location.longitude}`;
+  }
+
+  getPhoneHref(location: ShopLocation): string {
+    return `tel:${location.phoneLink}`;
+  }
+}

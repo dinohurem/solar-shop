@@ -1926,7 +1926,12 @@ export class TranslationService {
                 couponExcludedFromProducts: 'Ovaj kupon se ne može koristiti s nekim proizvodima u vašoj košarici',
                 couponNotApplicableToCategories: 'Ovaj kupon se ne može primijeniti na kategorije proizvoda u vašoj košarici',
                 couponExcludedFromCategories: 'Ovaj kupon se ne može koristiti s nekim kategorijama proizvoda u vašoj košarici',
-                couponDiscount: 'Popust kupona'
+                couponDiscount: 'Popust kupona',
+                singleCouponOnly: 'Moguće je primijeniti samo jedan kupon odjednom',
+                couponAlreadyApplied: 'Ovaj kupon je već primijenjen',
+                couponAppliedSuccess: 'Kupon {{code}} je uspješno primijenjen',
+                couponRemoved: 'Kupon {{code}} je uklonjen',
+                couponRemovedGeneric: 'Kupon je uklonjen'
             },
             // Checkout
             checkout: {
@@ -2243,6 +2248,10 @@ export class TranslationService {
                 technicalSupportText: 'Ako želite direktniji kontakt, ili ako vaš projekt zahtijeva specifičnu tehničku podršku, možete posjetiti jedan od naših centara za pomoć, gdje možete razgovarati s našim stručnjacima i vidjeti proizvode izbliza.',
                 returnsShipping: 'Politika povrata i dostave',
                 returnsShippingText: 'Konzultirajte naš odjel posvećen Politici povrata i dostave da biste saznali o postupcima povrata, rokovima dostave i uvjetima za bilo kakve povrate novca. Uvijek smo transparentni, tako da možete kupovati s povjerenjem znajući da se možete osloniti na nas u slučaju promjena ili problema.',
+                locationsTitle: 'Naše lokacije',
+                locationsSubtitle: 'Posjetite nas u jednom od naših SolarShop centara diljem Hrvatske.',
+                workingHours: 'Radno vrijeme',
+                viewOnMap: 'Prikaži na karti',
                 learnMore: 'Saznajte više',
                 faq: 'Često postavljena pitanja',
                 faqQuestion1: 'Koje usluge nudi SolarShop?',
@@ -4439,7 +4448,12 @@ export class TranslationService {
                 couponExcludedFromProducts: 'This coupon cannot be used with some products in your cart',
                 couponNotApplicableToCategories: 'This coupon is not applicable to the product categories in your cart',
                 couponExcludedFromCategories: 'This coupon cannot be used with some product categories in your cart',
-                couponDiscount: 'Coupon discount'
+                couponDiscount: 'Coupon discount',
+                singleCouponOnly: 'Only one coupon can be applied at a time',
+                couponAlreadyApplied: 'This coupon has already been applied',
+                couponAppliedSuccess: 'Coupon {{code}} applied successfully',
+                couponRemoved: 'Coupon {{code}} removed',
+                couponRemovedGeneric: 'Coupon removed'
             },
             // Checkout
             checkout: {
@@ -4756,6 +4770,10 @@ export class TranslationService {
                 technicalSupportText: 'If you want a more direct contact, or if your project requires specific technical support, you may visit one of our showrooms or assistance centers, where you can talk to our experts and see the products up close.',
                 returnsShipping: 'Returns & Shipping Policy',
                 returnsShippingText: 'Consult our section dedicated to Returns and Shipping Policy to learn about the return procedures, delivery times and conditions for any refunds. We are always transparent, so you can shop with confidence knowing that you can count on us in case of changes or issues.',
+                locationsTitle: 'Our locations',
+                locationsSubtitle: 'Visit one of our SolarShop centers across Croatia.',
+                workingHours: 'Working hours',
+                viewOnMap: 'View on map',
                 learnMore: 'Learn more',
                 faq: 'FAQ',
                 faqQuestion1: 'What types of services does SolarShop offer?',

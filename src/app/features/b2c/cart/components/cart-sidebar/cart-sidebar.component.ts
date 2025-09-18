@@ -242,23 +242,25 @@ import { LucideAngularModule, ShoppingCart } from 'lucide-angular';
 
             <!-- Cart Summary -->
             <div class="border-t border-gray-200 p-4 flex-shrink-0">
-              <div class="space-y-2 text-sm">
-                <div class="flex justify-between">
-                  <span class="text-gray-600">{{ 'cart.subtotal' | translate }}</span>
-                  <span>{{ (cartSummary$ | async)?.subtotal | currency:'EUR':'symbol':'1.2-2' }}</span>
+              <ng-container *ngIf="cartSummary$ | async as summary">
+                <div class="space-y-2 text-sm">
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">{{ 'cart.subtotal' | translate }}</span>
+                    <span>{{ summary.subtotal | currency:'EUR':'symbol':'1.2-2' }}</span>
+                  </div>
+                  <div
+                    *ngIf="summary.discount && summary.discount > 0"
+                    class="flex justify-between text-green-600"
+                  >
+                    <span>{{ 'cart.discount' | translate }}</span>
+                    <span>-{{ summary.discount | currency:'EUR':'symbol':'1.2-2' }}</span>
+                  </div>
+                  <div class="flex justify-between font-semibold text-lg border-t pt-2">
+                    <span>{{ 'cart.total' | translate }}</span>
+                    <span>{{ summary.total | currency:'EUR':'symbol':'1.2-2' }}</span>
+                  </div>
                 </div>
-                <div 
-                  *ngIf="(cartSummary$ | async)?.discount && (cartSummary$ | async)!.discount > 0"
-                  class="flex justify-between text-green-600"
-                >
-                  <span>{{ 'cart.discount' | translate }}</span>
-                  <span>-{{ (cartSummary$ | async)?.discount | currency:'EUR':'symbol':'1.2-2' }}</span>
-                </div>
-                <div class="flex justify-between font-semibold text-lg border-t pt-2">
-                  <span>{{ 'cart.total' | translate }}</span>
-                  <span>{{ (((cartSummary$ | async)?.subtotal || 0) - ((cartSummary$ | async)?.discount || 0)) | currency:'EUR':'symbol':'1.2-2' }}</span>
-                </div>
-              </div>
+              </ng-container>
 
 
               <!-- Checkout Button -->
