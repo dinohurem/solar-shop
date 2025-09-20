@@ -4,6 +4,7 @@ import { SupabaseService } from '../../../../services/supabase.service';
 import { CartItem, Cart, AppliedCoupon } from '../../../../shared/models/cart.model';
 import { Coupon, CouponValidationResult } from '../../../../shared/models/coupon.model';
 import { CouponValidationService } from '../../../../shared/services/coupon-validation.service';
+import { TranslationService } from '../../../../shared/services/translation.service';
 import { Store } from '@ngrx/store';
 import * as CartActions from '../store/cart.actions';
 
@@ -35,8 +36,15 @@ export class CartService {
 
     private store = inject(Store);
     private couponValidationService = inject(CouponValidationService);
+    private translationService = inject(TranslationService);
 
     constructor(private supabaseService: SupabaseService) { }
+
+    // Generate translated coupon name
+    private getCouponOfferName(couponCode: string): string {
+        const couponText = this.translationService.translate('cart.coupon');
+        return `${couponText}: ${couponCode}`;
+    }
 
     // Initialize cart based on authentication status
     async initializeCart(): Promise<void> {
@@ -911,7 +919,7 @@ export class CartService {
                         price: Math.round(discountedPrice * 100) / 100,
                         originalPrice: item.originalPrice || basePrice,
                         offerId: offerData.id,
-                        offerName: `Coupon: ${couponCode}`,
+                        offerName: this.getCouponOfferName(couponCode),
                         offerType,
                         offerDiscount,
                         offerOriginalPrice: basePrice, // The price before this discount
@@ -999,7 +1007,7 @@ export class CartService {
             const currentItems = this.getCartItemsArray();
             const resetItems = currentItems.map(item => {
                 // If this item has an offer applied from the coupon, reset it
-                if (item.offerName && item.offerName.includes(`Coupon: ${couponCode}`)) {
+                if (item.offerName && item.offerName.includes(this.getCouponOfferName(couponCode))) {
                     console.log(`Resetting discount for ${item.name}`);
                     return {
                         ...item,

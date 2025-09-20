@@ -5,6 +5,7 @@ import { provideEffects } from '@ngrx/effects';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
 import { registerLocaleData } from '@angular/common';
 import localeDE from '@angular/common/locales/de';
+import localeHr from '@angular/common/locales/hr';
 
 import { routes } from './app.routes';
 import { AuthEffects } from './core/auth/store/auth.effects';
@@ -29,8 +30,9 @@ import { playerFactory } from './shared/components/loader/loader.component';
 import { environment } from '../environments/environment';
 import { provideHttpClient } from '@angular/common/http';
 
-// Register German locale data
+// Register locale data
 registerLocaleData(localeDE);
+registerLocaleData(localeHr);
 
 export const appConfig: ApplicationConfig = {
   providers: [

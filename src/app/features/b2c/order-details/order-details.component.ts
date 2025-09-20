@@ -14,6 +14,7 @@ import { Order } from '../../../shared/models/order.model';
   selector: 'app-order-details',
   standalone: true,
   imports: [CommonModule, RouterModule, TranslatePipe, DatePipe],
+  providers: [DatePipe],
   template: `
     <div class="min-h-screen bg-gray-50 py-8">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
