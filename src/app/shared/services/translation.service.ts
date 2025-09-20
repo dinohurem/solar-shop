@@ -1911,6 +1911,7 @@ export class TranslationService {
                 freeShippingRemaining: 'Dodajte {{amount}} za besplatnu dostavu!',
                 yourCart: 'Vaša košarica',
                 checkout: 'Naplata',
+                appliedCoupons: 'Primijenjeni kuponi',
                 saveFromOffer: 'Ušteda od ponude',
                 couponValidationError: 'Neuspješna provjera kupona. Molimo pokušajte ponovno.',
                 couponNotFound: 'Kod kupona nije pronađen',
@@ -1918,6 +1919,8 @@ export class TranslationService {
                 couponNotYetValid: 'Ovaj kupon još nije valjan',
                 couponExpired: 'Ovaj kupon je istekao',
                 couponUsageLimitReached: 'Ovaj kupon je dosegnuo svoj limit korištenja',
+                couponAlreadyUsedInSession: 'Ovaj kupon je već korišten u ovoj sesiji',
+                couponCannotApplyToDiscountedProducts: 'Ovaj kupon se ne može primijeniti na već snižene proizvode',
                 couponMinOrderNotMet: 'Potreban je minimalni iznos narudžbe od €{{amount}} za ovaj kupon',
                 couponMaxOrderExceeded: 'Prekoračen je maksimalni iznos narudžbe od €{{amount}} za ovaj kupon',
                 couponNotApplicableToOffers: 'Ovaj kupon se ne može primijeniti na ponude u vašoj košarici',
@@ -2008,7 +2011,7 @@ export class TranslationService {
                 customInvoicing: 'Posebno fakturiranje',
                 oneOrMoreItemsUnavailable: 'Jedan ili više proizvoda u vašoj košarici nije dostupan u traženoj količini. Molimo provjerite vašu košaricu i pokušajte ponovno.',
                 securePayment: 'Sigurno plaćanje',
-                securePaymentDescription: 'Detalji vaše kartice bit će sigurno uneseni na Monri platformi za plaćanje.'
+                securePaymentDescription: 'Detalji Vaše kartice bit će sigurno uneseni na Monri platformi za plaćanje.'
             },
             // Payment
             payment: {
@@ -4433,6 +4436,7 @@ export class TranslationService {
                 freeShippingRemaining: 'Add {{amount}} for free shipping!',
                 yourCart: 'Your cart',
                 checkout: 'Checkout',
+                appliedCoupons: 'Applied Coupons',
                 saveFromOffer: 'Save from offer',
                 couponValidationError: 'Unable to validate coupon. Please try again.',
                 couponNotFound: 'Coupon code not found',
@@ -4440,6 +4444,8 @@ export class TranslationService {
                 couponNotYetValid: 'This coupon is not yet valid',
                 couponExpired: 'This coupon has expired',
                 couponUsageLimitReached: 'This coupon has reached its usage limit',
+                couponAlreadyUsedInSession: 'This coupon has already been used in this session',
+                couponCannotApplyToDiscountedProducts: 'This coupon cannot be applied to already discounted products',
                 couponMinOrderNotMet: 'Minimum order amount of €{{amount}} required for this coupon',
                 couponMaxOrderExceeded: 'Maximum order amount of €{{amount}} exceeded for this coupon',
                 couponNotApplicableToOffers: 'This coupon is not applicable to the offers in your cart',

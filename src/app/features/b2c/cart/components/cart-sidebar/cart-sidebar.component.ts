@@ -105,13 +105,13 @@ import { LucideAngularModule, ShoppingCart } from 'lucide-angular';
                       <span class="text-sm font-semibold text-gray-900">
                         {{ item.price | currency:'EUR':'symbol':'1.2-2' }}
                       </span>
-                      <span 
+                      <span
                         *ngIf="item.offerOriginalPrice && item.offerOriginalPrice > item.price"
                         class="text-xs text-gray-500 line-through"
                       >
                         {{ item.offerOriginalPrice | currency:'EUR':'symbol':'1.2-2' }}
                       </span>
-                      <span 
+                      <span
                         *ngIf="!item.offerOriginalPrice && item.originalPrice && item.originalPrice > item.price"
                         class="text-xs text-gray-500 line-through"
                       >
@@ -134,10 +134,10 @@ import { LucideAngularModule, ShoppingCart } from 'lucide-angular';
                       <span class="text-xs text-green-600 font-medium">
                         {{ 'cart.saveFromOffer' | translate }}:
                         <ng-container *ngIf="item.offerType === 'percentage'">
-                          {{ item.offerDiscount }}% OFF ({{ item.offerSavings | currency:'EUR':'symbol':'1.2-2' }})
+                          {{ item.offerDiscount }}% ({{ item.offerSavings | currency:'EUR':'symbol':'1.2-2' }})
                         </ng-container>
                         <ng-container *ngIf="item.offerType === 'fixed_amount'">
-                          {{ item.offerSavings | currency:'EUR':'symbol':'1.2-2' }} OFF
+                          {{ item.offerSavings | currency:'EUR':'symbol':'1.2-2' }}
                         </ng-container>
                       </span>
                     </div>
@@ -247,6 +247,13 @@ import { LucideAngularModule, ShoppingCart } from 'lucide-angular';
                   <div class="flex justify-between">
                     <span class="text-gray-600">{{ 'cart.subtotal' | translate }}</span>
                     <span>{{ summary.subtotal | currency:'EUR':'symbol':'1.2-2' }}</span>
+                  </div>
+                  <div
+                    *ngIf="summary.shipping && summary.shipping > 0"
+                    class="flex justify-between text-gray-600"
+                  >
+                    <span>{{ 'cart.shipping' | translate }}</span>
+                    <span>{{ summary.shipping | currency:'EUR':'symbol':'1.2-2' }}</span>
                   </div>
                   <div
                     *ngIf="summary.discount && summary.discount > 0"

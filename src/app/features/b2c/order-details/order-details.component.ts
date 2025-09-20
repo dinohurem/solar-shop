@@ -1,10 +1,11 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { SupabaseService } from '../../../services/supabase.service';
 import { CartService } from '../cart/services/cart.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../shared/services/translation.service';
 import * as CartActions from '../cart/store/cart.actions';
 
 import { Order } from '../../../shared/models/order.model';
@@ -12,7 +13,7 @@ import { Order } from '../../../shared/models/order.model';
 @Component({
   selector: 'app-order-details',
   standalone: true,
-  imports: [CommonModule, RouterModule, TranslatePipe],
+  imports: [CommonModule, RouterModule, TranslatePipe, DatePipe],
   template: `
     <div class="min-h-screen bg-gray-50 py-8">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -22,7 +23,7 @@ import { Order } from '../../../shared/models/order.model';
             <div>
               <h1 class="text-3xl font-bold text-gray-900 font-['Poppins']">{{ 'orderDetails.title' | translate }}</h1>
               <p class="mt-2 text-gray-600 font-['DM_Sans']" *ngIf="order">
-                {{ 'orderDetails.orderPlacedOn' | translate }} {{ order.orderDate | date:'fullDate' }}
+                {{ 'orderDetails.orderPlacedOn' | translate }} {{ getFormattedDate(order.orderDate) }}
               </p>
             </div>
             <button 
@@ -118,15 +119,6 @@ import { Order } from '../../../shared/models/order.model';
           <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div class="flex items-center justify-between mb-6">
               <h2 class="text-xl font-semibold text-gray-900 font-['Poppins']">{{ 'orderDetails.orderItems' | translate }}</h2>
-              <button 
-                *ngIf="order.items && order.items.length > 0"
-                (click)="addAllToCart()"
-                class="px-4 py-2 bg-solar-600 text-white rounded-lg hover:bg-solar-700 transition-colors font-['DM_Sans'] flex items-center space-x-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m.6 8l-1 5h11M9 19a1 1 0 102 0 1 1 0 00-2 0m8 0a1 1 0 102 0 1 1 0 00-2 0"/>
-                </svg>
-                <span>{{ 'orderDetails.addAllToCart' | translate }}</span>
-              </button>
             </div>
             <div class="space-y-4" *ngIf="order.items && order.items.length > 0; else noItems">
               <div *ngFor="let item of order.items" 
@@ -274,6 +266,8 @@ export class OrderDetailsComponent implements OnInit {
   private supabaseService = inject(SupabaseService);
   private store = inject(Store);
   private cartService = inject(CartService);
+  private translationService = inject(TranslationService);
+  private datePipe = inject(DatePipe);
 
   order: Order | null = null;
   loading = true;
@@ -420,58 +414,9 @@ export class OrderDetailsComponent implements OnInit {
     }
   }
 
-  async addAllToCart(): Promise<void> {
-    if (!this.order || !this.order.items || this.order.items.length === 0) {
-      console.warn('No order or items available to add to cart');
-      return;
-    }
-
-    try {
-      let addedCount = 0;
-      let skippedCount = 0;
-
-      // Add each product from the order to the cart
-      for (const item of this.order.items) {
-        if (item.productId) {
-          try {
-            // Check if product still exists and is available
-            const product = await this.supabaseService.getTableById('products', item.productId);
-            
-            if (product && product.is_active && product.stock_quantity > 0) {
-              // Add to cart using the cart service
-              await this.cartService.addToCartAsync(item.productId, item.quantity);
-              addedCount++;
-              console.log(`Added ${item.productName} (${item.quantity}x) to cart`);
-            } else {
-              skippedCount++;
-              console.warn(`Skipped ${item.productName} - product not available or out of stock`);
-            }
-          } catch (error) {
-            console.error(`Error adding ${item.productName} to cart:`, error);
-            skippedCount++;
-          }
-        } else {
-          skippedCount++;
-          console.warn(`Skipped ${item.productName} - no product ID available`);
-        }
-      }
-
-      // Show success message
-      if (addedCount > 0) {
-        console.log(`Successfully added ${addedCount} products to cart`);
-        
-        // Open the cart sidebar to show the added items
-        this.store.dispatch(CartActions.openCart());
-        
-        if (skippedCount > 0) {
-          console.warn(`${skippedCount} products were skipped (not available or out of stock)`);
-        }
-      } else {
-        console.warn('No products could be added to cart - all items are unavailable');
-      }
-
-    } catch (error) {
-      console.error('Error adding products to cart:', error);
-    }
+  getFormattedDate(date: string): string {
+    const currentLanguage = this.translationService.getCurrentLanguage();
+    const locale = currentLanguage === 'hr' ? 'hr-HR' : 'en-US';
+    return this.datePipe.transform(date, 'fullDate', undefined, locale) || date;
   }
 } 

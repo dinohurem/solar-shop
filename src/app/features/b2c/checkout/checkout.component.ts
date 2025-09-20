@@ -147,10 +147,10 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
                     >
                       {{ 'cart.saveFromOffer' | translate }}:
                       <ng-container *ngIf="item.offerType === 'percentage'">
-                        {{ item.offerDiscount }}% OFF ({{ item.offerSavings | currency:'EUR':'symbol':'1.2-2' }})
+                        {{ item.offerDiscount }}% ({{ item.offerSavings | currency:'EUR':'symbol':'1.2-2' }})
                       </ng-container>
                       <ng-container *ngIf="item.offerType === 'fixed_amount'">
-                        {{ item.offerSavings | currency:'EUR':'symbol':'1.2-2' }} OFF
+                        {{ item.offerSavings | currency:'EUR':'symbol':'1.2-2' }}
                       </ng-container>
                     </span>
                   </div>

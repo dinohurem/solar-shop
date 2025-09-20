@@ -237,14 +237,24 @@ export class CartService {
             } else {
                 // Add new item
                 const now = new Date().toISOString();
+                // Fix price hierarchy: use actual selling price as main price, compareAt as original
+                const actualSellingPrice = product.price; // The real price customers pay (current/discounted price)
+                const compareAtPrice = product.original_price; // The higher "compare at" price for marketing
+
+                console.log(`🏷️ Price debugging for ${product.name}:`);
+                console.log(`   product.price: €${product.price}`);
+                console.log(`   product.original_price: €${product.original_price}`);
+                console.log(`   Using as cart price: €${actualSellingPrice}`);
+                console.log(`   Using as originalPrice: €${compareAtPrice}`);
+
                 const cartItem: CartItem = {
                     id: this.generateCartItemId(),
                     productId: product.id,
                     name: product.name,
                     description: product.short_description,
                     sku: product.sku,
-                    price: product.price,
-                    originalPrice: product.original_price || undefined,
+                    price: actualSellingPrice, // Use the lower/actual selling price
+                    originalPrice: compareAtPrice, // Use the higher "compare at" price
                     quantity: quantity,
                     minQuantity: 1,
                     maxQuantity: product.stock_quantity,
@@ -267,7 +277,7 @@ export class CartService {
                         taxable: true,
                         taxClass: 'standard',
                         taxRate: 0.10,
-                        taxAmount: product.price * 0.10 * quantity
+                        taxAmount: actualSellingPrice * 0.10 * quantity // Use actual selling price for tax
                     }
                 };
 
@@ -276,7 +286,7 @@ export class CartService {
 
                 // Sync to Supabase if authenticated
                 if (this.isAuthenticated && this.currentUserId) {
-                    await this.supabaseService.addToCart(productId, quantity, product.price, this.currentUserId);
+                    await this.supabaseService.addToCart(productId, quantity, actualSellingPrice, this.currentUserId);
                 }
             }
 
@@ -351,6 +361,9 @@ export class CartService {
         try {
             this.updateCartItems([]);
             this.appliedCoupons.next([]);
+
+            // Clear session coupon tracking
+            this.couponValidationService.clearSessionCouponTracking();
 
             // Clear from Supabase if authenticated
             if (this.isAuthenticated && this.currentUserId) {
@@ -587,7 +600,11 @@ export class CartService {
 
     // Helper method to get total discount amount from applied coupons
     private getTotalDiscountAmount(coupons: AppliedCoupon[]): number {
-        return coupons.reduce((total, coupon) => total + coupon.discountAmount, 0);
+        const totalDiscount = coupons.reduce((total, coupon) => total + coupon.discountAmount, 0);
+        console.log('💰 DISCOUNT CALCULATION DEBUG:');
+        console.log('Applied coupons:', coupons.map(c => ({ code: c.code, discountAmount: c.discountAmount })));
+        console.log('Total discount amount:', totalDiscount.toFixed(2));
+        return totalDiscount;
     }
 
     // Create Cart object from items for NgRx compatibility
@@ -624,11 +641,19 @@ export class CartService {
         }
 
         const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        const tax = subtotal * 0.10; // 10% tax
+        const tax = 0; // No tax
         const shipping = subtotal > 100 ? 0 : 10; // Free shipping over €100
         const discount = discountAmount;
-        const total = subtotal + tax + shipping - discount;
+        const total = subtotal + shipping - discount;
         const itemCount = items.reduce((count, item) => count + item.quantity, 0);
+
+        console.log('🧮 CART CALCULATION DEBUG:');
+        console.log('Items:', items.map(item => ({ name: item.name, price: item.price, qty: item.quantity, subtotal: item.price * item.quantity })));
+        console.log('Subtotal calculation:', subtotal.toFixed(2));
+        console.log('Shipping:', shipping.toFixed(2));
+        console.log('Discount amount:', discount.toFixed(2));
+        console.log('Total calculation:', `${subtotal.toFixed(2)} + ${shipping.toFixed(2)} - ${discount.toFixed(2)} = ${total.toFixed(2)}`);
+        console.log('Expected total:', (subtotal + shipping - discount).toFixed(2));
 
         return {
             subtotal,
@@ -726,6 +751,9 @@ export class CartService {
             // Check if this coupon corresponds to an offer with individual product discounts
             const updatedItems = await this.applyIndividualCouponDiscounts(code, discountType);
 
+            // Mark coupon as used in session
+            this.couponValidationService.markCouponAsUsedInSession(code);
+
             // Add to local applied coupons state
             const newCoupon: AppliedCoupon = {
                 id: appliedCouponId || `temp_${Date.now()}`,
@@ -745,7 +773,6 @@ export class CartService {
                     .from('offers')
                     .select('id')
                     .eq('code', code)
-                    .eq('is_active', true)
                     .single();
 
                 if (!offerError && offerData) {
@@ -786,82 +813,121 @@ export class CartService {
     // Apply individual product discounts from coupon
     private async applyIndividualCouponDiscounts(couponCode: string, discountType: string): Promise<CartItem[] | null> {
         try {
-            console.log('Checking for individual product discounts for coupon:', couponCode);
+            console.log('=== CART SERVICE: APPLYING INDIVIDUAL DISCOUNTS ===');
+            console.log('Coupon code:', couponCode);
+            console.log('Discount type:', discountType);
 
             // First, find the offer by coupon code
             const { data: offerData, error: offerError } = await this.supabaseService.client
                 .from('offers')
                 .select('id')
                 .eq('code', couponCode)
-                .eq('is_active', true)
                 .single();
 
             if (offerError || !offerData) {
-                console.log('No offer found for coupon code:', couponCode);
+                console.log('❌ No offer found for coupon code:', couponCode);
                 return null;
             }
 
-            console.log('Found offer for coupon:', offerData);
+            console.log('✅ Found offer for coupon:', offerData);
 
             // Get individual product discounts for this offer
+            // First try to get all columns to see what exists
             const { data: offerProducts, error: productsError } = await this.supabaseService.client
                 .from('offer_products')
-                .select('product_id, discount_type, discount_amount, discount_percentage')
+                .select('*')
                 .eq('offer_id', offerData.id);
 
             if (productsError || !offerProducts || offerProducts.length === 0) {
-                console.log('No individual product discounts found for offer');
+                console.log('❌ No individual product discounts found for offer');
                 return null;
             }
 
-            console.log('Found individual product discounts:', offerProducts);
+            console.log('📋 Available product discounts:', offerProducts.map(op => ({
+                productId: op.product_id,
+                type: op.discount_type,
+                amount: op.discount_amount,
+                percentage: op.discount_percentage
+            })));
 
             // Reset all cart items to original prices first
             const currentItems = this.getCartItemsArray();
+            console.log('🛒 Current cart items:', currentItems.map(item => ({
+                id: item.productId,
+                name: item.name,
+                price: item.price,
+                originalPrice: item.originalPrice
+            })));
+
             const resetItems = this.resetCartItemsToOriginalPrices(currentItems);
+            console.log('🔄 Reset items to original prices');
 
             // Apply individual discounts to appropriate items
             const updatedItems = resetItems.map(item => {
                 const productDiscount = offerProducts.find(op => op.product_id === item.productId);
 
                 if (productDiscount) {
-                    console.log(`Applying individual discount to ${item.name}:`, productDiscount);
+                    console.log(`✅ MATCH: Applying individual discount to ${item.name} (ID: ${item.productId})`);
+                    console.log(`   Current price: €${item.price}, Original price: €${item.originalPrice || item.price}`);
+                    console.log(`   Discount data:`, productDiscount);
 
-                    let discountedPrice = item.originalPrice || item.price;
+                    // Apply discount to the CURRENT/LOWEST price, not the original/highest price
+                    const basePrice = item.price; // Use current price (lowest)
+                    let discountedPrice = basePrice;
                     let offerDiscount = 0;
                     let offerType: 'percentage' | 'fixed_amount' = 'fixed_amount';
 
-                    if (productDiscount.discount_type === 'fixed_amount' && productDiscount.discount_amount > 0) {
-                        offerDiscount = productDiscount.discount_amount;
-                        discountedPrice = (item.originalPrice || item.price) - offerDiscount;
+                    // Handle discount types - same logic as validation service
+                    const discountType = productDiscount.discount_type ||
+                        (productDiscount.discount_amount > 0 ? 'fixed_amount' :
+                         productDiscount.discount_percentage > 0 ? 'percentage' : 'unknown');
+
+                    const discountAmount = productDiscount.discount_amount || 0;
+                    const discountPercentage = productDiscount.discount_percentage || 0;
+
+                    console.log(`   Determined type: ${discountType}, amount: ${discountAmount}, percentage: ${discountPercentage}`);
+
+                    if (discountType === 'fixed_amount' && discountAmount > 0) {
+                        offerDiscount = discountAmount;
+                        discountedPrice = Math.max(0, basePrice - offerDiscount); // Can't go below 0
                         offerType = 'fixed_amount';
-                        console.log(`Fixed amount discount: €${offerDiscount}, new price: €${discountedPrice}`);
-                    } else if (productDiscount.discount_type === 'percentage' && productDiscount.discount_percentage > 0) {
-                        offerDiscount = productDiscount.discount_percentage;
-                        discountedPrice = (item.originalPrice || item.price) * (1 - offerDiscount / 100);
+                        console.log(`   💰 Fixed discount: €${offerDiscount} from €${basePrice} = €${discountedPrice}`);
+                    } else if (discountType === 'percentage' && discountPercentage > 0) {
+                        offerDiscount = discountPercentage;
+                        discountedPrice = basePrice * (1 - offerDiscount / 100);
                         offerType = 'percentage';
-                        console.log(`Percentage discount: ${offerDiscount}%, new price: €${discountedPrice}`);
+                        console.log(`   📊 Percentage discount: ${offerDiscount}% from €${basePrice} = €${discountedPrice}`);
+                    } else {
+                        console.log(`   ❌ No valid discount applied`);
+                        return item; // Return unchanged if no valid discount
                     }
+
+                    const actualSavings = basePrice - discountedPrice; // Savings from current price
+
+                    console.log(`   ✅ Applied discount: €${basePrice} → €${discountedPrice} (saved €${actualSavings})`);
 
                     return {
                         ...item,
                         price: Math.round(discountedPrice * 100) / 100,
-                        originalPrice: item.originalPrice || item.price,
+                        originalPrice: item.originalPrice || basePrice,
                         offerId: offerData.id,
                         offerName: `Coupon: ${couponCode}`,
                         offerType,
                         offerDiscount,
-                        offerOriginalPrice: item.originalPrice || item.price,
+                        offerOriginalPrice: basePrice, // The price before this discount
                         offerValidUntil: undefined,
                         offerAppliedAt: new Date().toISOString(),
-                        offerSavings: Math.round(((item.originalPrice || item.price) - discountedPrice) * 100) / 100
+                        offerSavings: Math.round(actualSavings * 100) / 100
                     };
+                } else {
+                    console.log(`❌ NO MATCH: ${item.name} (ID: ${item.productId}) - keeping original price`);
                 }
 
                 return item;
             });
 
-            console.log('Updated cart items with individual discounts:', updatedItems);
+            console.log('🎯 FINAL: Updated cart items with individual discounts');
+            console.log('=== END CART SERVICE INDIVIDUAL DISCOUNTS ===');
             return updatedItems;
 
         } catch (error) {
@@ -874,8 +940,8 @@ export class CartService {
     private resetCartItemsToOriginalPrices(items: CartItem[]): CartItem[] {
         return items.map(item => ({
             ...item,
-            price: item.originalPrice || item.price,
-            originalPrice: undefined,
+            // DON'T change the price - keep it as the actual selling price
+            // Only reset offer-related fields
             offerId: undefined,
             offerName: undefined,
             offerType: undefined,
@@ -906,6 +972,8 @@ export class CartService {
             // Remove individual product discounts if this was a coupon with individual discounts
             if (removedCoupon) {
                 await this.removeIndividualCouponDiscounts(removedCoupon.code);
+                // Remove from session tracking
+                this.couponValidationService.removeCouponFromSession(removedCoupon.code);
             }
 
             // Remove from local applied coupons state

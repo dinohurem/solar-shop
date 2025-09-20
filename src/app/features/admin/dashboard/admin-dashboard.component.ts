@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { SupabaseService } from '../../../services/supabase.service';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { Observable, from } from 'rxjs';
 interface DashboardStats {
   totalProducts: number;
@@ -17,15 +18,15 @@ interface DashboardStats {
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, TranslatePipe],
   template: `
     <div class="space-y-6">
       <div class="flex items-center justify-between">
-        <h1 class="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-        <button 
+        <h1 class="text-3xl font-bold text-gray-900">Admin</h1>
+        <button
           (click)="refreshStats()"
           class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-          Refresh Data
+          {{ 'admin.refreshData' | translate }}
         </button>
       </div>
 

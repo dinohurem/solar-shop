@@ -1,14 +1,15 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { SupabaseService } from '../../../services/supabase.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../shared/services/translation.service';
 import { Order } from '../../../shared/models/order.model';
 
 @Component({
   selector: 'app-b2b-order-details',
   standalone: true,
-  imports: [CommonModule, RouterModule, TranslatePipe],
+  imports: [CommonModule, RouterModule, TranslatePipe, DatePipe],
   template: `
     <div class="min-h-screen bg-gray-50 py-8">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -18,7 +19,7 @@ import { Order } from '../../../shared/models/order.model';
             <div>
               <h1 class="text-3xl font-bold text-gray-900 font-['Poppins']">{{ 'orderDetails.title' | translate }}</h1>
               <p class="mt-2 text-gray-600 font-['DM_Sans']" *ngIf="order">
-                {{ 'orderDetails.orderPlacedOn' | translate }} {{ order.orderDate | date:'fullDate' }}
+                {{ 'orderDetails.orderPlacedOn' | translate }} {{ getFormattedDate(order.orderDate) }}
               </p>
             </div>
             <button 
@@ -226,6 +227,8 @@ import { Order } from '../../../shared/models/order.model';
 export class B2bOrderDetailsComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private supabaseService = inject(SupabaseService);
+  private translationService = inject(TranslationService);
+  private datePipe = inject(DatePipe);
 
   order: Order | null = null;
   loading = true;
@@ -374,5 +377,11 @@ export class B2bOrderDetailsComponent implements OnInit {
       // Hide the broken image and let the fallback icon show
       img.style.display = 'none';
     }
+  }
+
+  getFormattedDate(date: string): string {
+    const currentLanguage = this.translationService.getCurrentLanguage();
+    const locale = currentLanguage === 'hr' ? 'hr-HR' : 'en-US';
+    return this.datePipe.transform(date, 'fullDate', undefined, locale) || date;
   }
 }

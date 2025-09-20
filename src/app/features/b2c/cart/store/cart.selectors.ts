@@ -139,8 +139,15 @@ export const selectCartSummary = createSelector(
     selectCartTotal,
     selectCartCurrency,
     (itemCount, uniqueItemCount, subtotal, tax, shipping, discount, total, currency) => {
-        const calculatedTotal = subtotal + tax + shipping - discount;
-        const normalizedTotal = total && total > 0 ? total : calculatedTotal;
+        // Always calculate total here for consistency - don't trust service calculation
+        const calculatedTotal = subtotal + shipping - discount;
+
+        console.log('🧮 SELECTOR CALCULATION DEBUG:');
+        console.log('Subtotal:', subtotal.toFixed(2));
+        console.log('Shipping:', shipping.toFixed(2));
+        console.log('Discount:', discount.toFixed(2));
+        console.log('Service total (ignored):', total.toFixed(2));
+        console.log('Selector calculated total:', calculatedTotal.toFixed(2));
 
         return {
             itemCount,
@@ -149,7 +156,7 @@ export const selectCartSummary = createSelector(
             tax,
             shipping,
             discount,
-            total: Math.max(normalizedTotal, 0),
+            total: Math.max(calculatedTotal, 0),
             currency,
             freeShippingThreshold: 100, // This could come from config
             freeShippingRemaining: Math.max(0, 100 - subtotal)
