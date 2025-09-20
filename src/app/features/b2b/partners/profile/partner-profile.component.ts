@@ -774,7 +774,7 @@ export class PartnerProfileComponent implements OnInit, OnDestroy {
   }
 
   viewOrderDetails(order: Order): void {
-    this.router.navigate(['/partneri/order-details', order.id]);
+    this.router.navigate(['/partneri/detalji-narudzbe', order.id]);
   }
 
   reorderItems(order: Order): void {
@@ -783,15 +783,15 @@ export class PartnerProfileComponent implements OnInit, OnDestroy {
   }
 
   contactSupport(): void {
-    this.router.navigate(['/partneri/contact']);
+    this.router.navigate(['/partneri/kontakt']);
   }
 
   navigateToProducts(): void {
-    this.router.navigate(['/partneri/products']);
+    this.router.navigate(['/partneri/proizvodi']);
   }
 
   navigateToOffers(): void {
-    this.router.navigate(['/partneri/offers']);
+    this.router.navigate(['/partneri/ponude']);
   }
 
   navigateToHome(): void {

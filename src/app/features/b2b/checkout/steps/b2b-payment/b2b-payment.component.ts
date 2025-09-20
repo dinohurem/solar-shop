@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Subject, takeUntil, combineLatest } from 'rxjs';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
@@ -16,7 +16,7 @@ import { B2BCartItem } from '../../../cart/models/b2b-cart.model';
 @Component({
   selector: 'app-b2b-payment',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, TranslatePipe],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, TranslatePipe],
   template: `
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
       <h2 class="text-2xl font-bold text-gray-900 mb-6 font-['Poppins']">{{ 'b2bCheckout.paymentMethod' | translate }}</h2>
@@ -127,7 +127,12 @@ import { B2BCartItem } from '../../../cart/models/b2b-cart.model';
                   </svg>
                 </div>
                 <div class="flex-1 min-w-0">
-                  <p class="text-sm font-medium text-gray-900 truncate">{{ item.name }}</p>
+                  <a
+                    [routerLink]="['/partneri/proizvodi', item.productId]"
+                    class="text-sm font-medium text-gray-900 hover:text-solar-600 transition-colors cursor-pointer truncate block"
+                  >
+                    {{ item.name }}
+                  </a>
                   <p class="text-xs text-gray-500">{{ 'b2bCheckout.quantity' | translate }}: {{ item.quantity }}</p>
                 </div>
                 <div class="text-sm font-medium text-gray-900">
@@ -270,16 +275,18 @@ export class B2bPaymentComponent implements OnInit, OnDestroy {
       const subtotal = this.cartTotal;
       const totalAmount = subtotal; // No tax for B2B
 
-      // Generate order number
-      const orderNumber = 'B2B-' + Date.now() + '-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+      // Generate order number (max 20 chars)
+      const timestamp = Date.now().toString().slice(-8); // Last 8 digits of timestamp
+      const randomId = Math.random().toString(36).substr(2, 4).toUpperCase(); // 4 char random
+      const orderNumber = `B2B${timestamp}${randomId}`; // Format: B2B12345678ABCD (15 chars)
 
       // Create order
       const orderData = {
         order_number: orderNumber,
         user_id: this.currentUser.id,
         customer_email: this.currentUser.email,
-        customer_name: `${this.currentUser.firstName} ${this.currentUser.lastName}`,
-        customer_phone: this.currentUser.phone || '',
+        customer_name: `${this.currentUser.firstName} ${this.currentUser.lastName}`.substring(0, 50), // Limit to 50 chars
+        customer_phone: (this.currentUser.phone || '').substring(0, 20), // Limit to 20 chars
         total_amount: totalAmount,
         subtotal: subtotal,
         tax_amount: 0,
@@ -287,28 +294,28 @@ export class B2bPaymentComponent implements OnInit, OnDestroy {
         discount_amount: 0,
         status: 'pending',
         payment_status: paymentData.paymentMethod === 'credit_30_days' ? 'pending' : 'pending',
-        payment_method: paymentData.paymentMethod,
+        payment_method: paymentData.paymentMethod === 'payment_upon_collection' ? 'cash_on_delivery' : (paymentData.paymentMethod || '').substring(0, 20),
         shipping_address: {
-          contactName: shippingInfo.contactName || '',
-          contactEmail: shippingInfo.contactEmail || '',
-          contactPhone: shippingInfo.contactPhone || '',
-          address: shippingInfo.deliveryAddress || '',
-          city: shippingInfo.deliveryCity || '',
-          postalCode: shippingInfo.deliveryPostalCode || '',
-          country: shippingInfo.deliveryCountry || '',
-          shippingMethod: shippingInfo.shippingMethod || 'standard',
-          deliveryInstructions: shippingInfo.deliveryInstructions || '',
-          purchaseOrderNumber: shippingInfo.purchaseOrderNumber || ''
+          contactName: (shippingInfo.contactName || '').substring(0, 100),
+          contactEmail: (shippingInfo.contactEmail || '').substring(0, 100),
+          contactPhone: (shippingInfo.contactPhone || '').substring(0, 20),
+          address: (shippingInfo.deliveryAddress || '').substring(0, 200),
+          city: (shippingInfo.deliveryCity || '').substring(0, 50),
+          postalCode: (shippingInfo.deliveryPostalCode || '').substring(0, 20),
+          country: (shippingInfo.deliveryCountry || '').substring(0, 50),
+          shippingMethod: (shippingInfo.shippingMethod || 'standard').substring(0, 20),
+          deliveryInstructions: (shippingInfo.deliveryInstructions || '').substring(0, 500),
+          purchaseOrderNumber: (shippingInfo.purchaseOrderNumber || '').substring(0, 50)
         },
         billing_address: {
           companyId: this.company.id,
-          companyName: this.company.companyName,
-          address: this.company.companyAddress,
-          email: this.company.companyEmail,
-          phone: this.company.companyPhone,
-          taxNumber: this.company.taxNumber
+          companyName: (this.company.companyName || '').substring(0, 100),
+          address: (this.company.companyAddress || '').substring(0, 200),
+          email: (this.company.companyEmail || '').substring(0, 100),
+          phone: (this.company.companyPhone || '').substring(0, 20),
+          taxNumber: (this.company.taxNumber || '').substring(0, 50)
         },
-        notes: paymentData.specialInstructions || '',
+        notes: (paymentData.specialInstructions || '').substring(0, 1000),
         is_b2b: true,
         order_date: new Date().toISOString()
       };
@@ -329,12 +336,12 @@ export class B2bPaymentComponent implements OnInit, OnDestroy {
       const orderItems = this.cartItems.map(item => ({
         order_id: order.id,
         product_id: item.productId,
-        product_name: item.name,
-        product_sku: item.sku || '',
+        product_name: (item.name || '').substring(0, 200),
+        product_sku: (item.sku || '').substring(0, 50),
         quantity: item.quantity,
         unit_price: item.unitPrice,
         total_price: item.unitPrice * item.quantity,
-        product_image_url: item.imageUrl || '',
+        product_image_url: (item.imageUrl || '').substring(0, 500),
         product_specifications: {}
       }));
 
