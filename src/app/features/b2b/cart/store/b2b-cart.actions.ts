@@ -52,6 +52,11 @@ export const updateB2BCartItemSuccess = createAction(
     props<{ productId: string; quantity: number }>()
 );
 
+export const updateB2BCartItemWithPricing = createAction(
+    '[B2B Cart] Update Cart Item With Pricing',
+    props<{ updatedItem: B2BCartItem }>()
+);
+
 export const updateB2BCartItemFailure = createAction(
     '[B2B Cart] Update Cart Item Failure',
     props<{ error: string }>()

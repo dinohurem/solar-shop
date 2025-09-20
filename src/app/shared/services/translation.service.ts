@@ -572,7 +572,11 @@ export class TranslationService {
                 noProductsAdded: 'Nijedan proizvod nije dodan u košaricu',
                 failedToAddProducts: 'Neuspješno dodavanje proizvoda u košaricu',
                 minimumOrderRequired: 'Minimalna narudžba: {{minimum}} komada (trenutno: {{current}})',
-                productAdded: 'Dodan {{name}} u vašu košaricu!'
+                productAdded: 'Dodan {{name}} u vašu košaricu!',
+                additionalOfferSavings: 'Dodatna ušteda ponude',
+                tier: 'Razina',
+                qty: 'Kom',
+                addMoreForTier: 'Dodajte još {{qty}} kom za cijenu €{{price}} (ušteda €{{savings}})'
             },
             // B2B Shipping translations
             b2bShipping: {
@@ -3206,7 +3210,11 @@ export class TranslationService {
                 productsAddedToCart: 'Added {{count}} products to cart',
                 productsSkipped: '{{count}} products skipped',
                 noProductsAdded: 'No products were added to cart',
-                failedToAddProducts: 'Failed to add products to cart'
+                failedToAddProducts: 'Failed to add products to cart',
+                additionalOfferSavings: 'Additional Offer Savings',
+                tier: 'Tier',
+                qty: 'Qty',
+                addMoreForTier: 'Add {{qty}} more for €{{price}} each (save €{{savings}})'
             },
             // B2B Shipping translations
             b2bShipping: {

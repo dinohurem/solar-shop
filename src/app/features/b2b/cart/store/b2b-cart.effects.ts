@@ -46,7 +46,20 @@ export class B2BCartEffects {
             ofType(B2BCartActions.addToB2BCart),
             switchMap(({ productId, quantity, companyId }) =>
                 this.b2bCartService.addToCart(productId, quantity, companyId).pipe(
-                    map((item: B2BCartItem) => B2BCartActions.addToB2BCartSuccess({ item })),
+                    switchMap(() =>
+                        // Reload the cart to get all items with updated pricing
+                        this.b2bCartService.loadCart(companyId).pipe(
+                            map(({ items, companyName, appliedCoupons, couponDiscount }) =>
+                                B2BCartActions.loadB2BCartSuccess({
+                                    items,
+                                    companyId,
+                                    companyName,
+                                    appliedCoupons,
+                                    couponDiscount
+                                })
+                            )
+                        )
+                    ),
                     catchError(error =>
                         of(B2BCartActions.addToB2BCartFailure({
                             error: error.message || this.translationService.translate('b2bCart.failedToAdd')
@@ -57,7 +70,7 @@ export class B2BCartEffects {
         )
     );
 
-    // Update cart item effect
+    // Update cart item effect - optimized to refresh only specific product price
     updateB2BCartItem$ = createEffect(() =>
         this.actions$.pipe(
             ofType(B2BCartActions.updateB2BCartItem),
@@ -69,8 +82,16 @@ export class B2BCartEffects {
                     }));
                 }
 
-                return this.b2bCartService.updateCartItem(productId, quantity, companyInfo.companyId).pipe(
-                    map(() => B2BCartActions.updateB2BCartItemSuccess({ productId, quantity })),
+                return this.b2bCartService.updateCartItemWithPricing(productId, quantity, companyInfo.companyId).pipe(
+                    switchMap((updatedItem) => {
+                        if (updatedItem) {
+                            // Item was updated with new pricing
+                            return of(B2BCartActions.updateB2BCartItemWithPricing({ updatedItem }));
+                        } else {
+                            // Item was removed (quantity = 0), dispatch success action
+                            return of(B2BCartActions.updateB2BCartItemSuccess({ productId, quantity: 0 }));
+                        }
+                    }),
                     catchError(error =>
                         of(B2BCartActions.updateB2BCartItemFailure({
                             error: error.message || this.translationService.translate('b2bCart.failedToUpdate')
@@ -94,7 +115,20 @@ export class B2BCartEffects {
                 }
 
                 return this.b2bCartService.removeFromCart(productId, companyInfo.companyId).pipe(
-                    map(() => B2BCartActions.removeFromB2BCartSuccess({ productId })),
+                    switchMap(() =>
+                        // Reload the cart to get remaining items with updated pricing
+                        this.b2bCartService.loadCart(companyInfo.companyId!).pipe(
+                            map(({ items, companyName, appliedCoupons, couponDiscount }) =>
+                                B2BCartActions.loadB2BCartSuccess({
+                                    items,
+                                    companyId: companyInfo.companyId!,
+                                    companyName,
+                                    appliedCoupons,
+                                    couponDiscount
+                                })
+                            )
+                        )
+                    ),
                     catchError(error =>
                         of(B2BCartActions.removeFromB2BCartFailure({
                             error: error.message || this.translationService.translate('b2bCart.failedToRemove')
@@ -167,6 +201,17 @@ export class B2BCartEffects {
                 this.toastService.showSuccess(
                     this.translationService.translate('b2bCart.cartUpdated')
                 );
+            })
+        ),
+        { dispatch: false }
+    );
+
+    // Silent success for optimized updates - no toast to avoid UI disruption
+    updateCartWithPricingSuccess$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(B2BCartActions.updateB2BCartItemWithPricing),
+            tap(() => {
+                // Silent update - no toast notification for seamless UX
             })
         ),
         { dispatch: false }

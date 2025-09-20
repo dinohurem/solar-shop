@@ -124,22 +124,30 @@ import { LucideAngularModule, ShoppingCart } from 'lucide-angular';
                       <span class="text-sm font-semibold text-gray-900">
                         {{ item.unitPrice | currency:'EUR':'symbol':'1.2-2' }}
                       </span>
-                      <span 
+                      <span
                         *ngIf="item.partnerOfferOriginalPrice && item.partnerOfferOriginalPrice > item.unitPrice"
                         class="text-xs text-gray-500 line-through"
                       >
                         {{ item.partnerOfferOriginalPrice | currency:'EUR':'symbol':'1.2-2' }}
                       </span>
-                      <span 
+                      <span
                         *ngIf="!item.partnerOfferOriginalPrice && item.retailPrice && item.retailPrice > item.unitPrice"
                         class="text-xs text-gray-500 line-through"
                       >
                         {{ item.retailPrice | currency:'EUR':'symbol':'1.2-2' }}
                       </span>
-                      <span *ngIf="item.savings && item.savings > 0" 
+                      <span *ngIf="item.savings && item.savings > 0"
                             class="text-xs text-green-600 font-medium">
                         {{ 'b2bCart.save' | translate }} {{ (item.savings / item.quantity) | currency:'EUR':'symbol':'1.2-2' }}
                       </span>
+                    </div>
+
+                    <!-- Next Tier Hint -->
+                    <div *ngIf="getNextTierHint(item)" class="mt-1 text-xs text-amber-600">
+                      <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                      </svg>
+                      {{ getNextTierHint(item) }}
                     </div>
 
                     <!-- Partner Offer Badge -->
@@ -592,5 +600,36 @@ export class B2BCartSidebarComponent implements OnInit, OnDestroy {
 
     // Suppress console errors by preventing default behavior
     event.preventDefault();
+  }
+
+  getNextTierHint(item: B2BCartItem): string {
+    if (!item.priceTier1) {
+      return '';
+    }
+
+    // Check if there's a next tier available
+    if (item.appliedTier === 1 && item.quantityTier2 && item.priceTier2) {
+      const neededQty = item.quantityTier2 - item.quantity;
+      if (neededQty > 0 && neededQty <= 5) {
+        const savings = ((item.unitPrice - item.priceTier2) * item.quantityTier2).toFixed(2);
+        return this.translationService.translate('b2bCart.addMoreForTier', {
+          qty: neededQty,
+          price: item.priceTier2.toFixed(2),
+          savings: savings
+        });
+      }
+    } else if (item.appliedTier === 2 && item.quantityTier3 && item.priceTier3) {
+      const neededQty = item.quantityTier3 - item.quantity;
+      if (neededQty > 0 && neededQty <= 10) {
+        const savings = ((item.unitPrice - item.priceTier3) * item.quantityTier3).toFixed(2);
+        return this.translationService.translate('b2bCart.addMoreForTier', {
+          qty: neededQty,
+          price: item.priceTier3.toFixed(2),
+          savings: savings
+        });
+      }
+    }
+
+    return '';
   }
 } 

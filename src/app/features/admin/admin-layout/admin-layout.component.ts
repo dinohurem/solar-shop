@@ -8,6 +8,7 @@ import { User } from '../../../shared/models/user.model';
 import * as AuthActions from '../../../core/auth/store/auth.actions';
 import { TranslationService, SupportedLanguage } from '../../../shared/services/translation.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { AdminNotificationsService, NotificationCounts } from '../shared/services/admin-notifications.service';
 
 @Component({
   selector: 'app-admin-layout',
@@ -27,12 +28,21 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
             <div class="text-sm text-gray-700">
               {{ 'admin.welcome' | translate }}, <span class="font-semibold">{{ (currentUser$ | async)?.firstName }}</span>
             </div>
-            <button 
+            <button
+              (click)="refreshNotifications()"
+              class="px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+              title="Refresh notifications">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+              </svg>
+              <span>{{ 'admin.refreshData' | translate }}</span>
+            </button>
+            <button
               (click)="viewSite()"
               class="px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
               {{ 'admin.viewSite' | translate }}
             </button>
-            <button 
+            <button
               (click)="logout()"
               class="px-4 py-2 text-sm bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
               {{ 'admin.logout' | translate }}
@@ -103,22 +113,34 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
               <div class="pt-4">
                 <h3 class="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{{ 'admin.systemManagement' | translate }}</h3>
                 
-                <a routerLink="/admin/narudzbe" 
+                <a routerLink="/admin/narudzbe"
                    routerLinkActive="bg-blue-50 text-blue-700 border-blue-300"
-                   class="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 transition-colors border border-transparent">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                  </svg>
-                  <span>{{ 'admin.orders' | translate }}</span>
+                   class="flex items-center justify-between px-4 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 transition-colors border border-transparent">
+                  <div class="flex items-center space-x-3">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                    <span>{{ 'admin.orders' | translate }}</span>
+                  </div>
+                  <span *ngIf="(notificationCounts$ | async)?.orders && (notificationCounts$ | async)!.orders > 0"
+                        class="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
+                    {{ (notificationCounts$ | async)?.orders }}
+                  </span>
                 </a>
 
-                <a routerLink="/admin/korisnici" 
+                <a routerLink="/admin/korisnici"
                    routerLinkActive="bg-blue-50 text-blue-700 border-blue-300"
-                   class="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 transition-colors border border-transparent">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-.5a4 4 0 11-8 0 4 4 0 018 0z"/>
-                  </svg>
-                  <span>{{ 'admin.users' | translate }}</span>
+                   class="flex items-center justify-between px-4 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 transition-colors border border-transparent">
+                  <div class="flex items-center space-x-3">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-.5a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    </svg>
+                    <span>{{ 'admin.users' | translate }}</span>
+                  </div>
+                  <span *ngIf="(notificationCounts$ | async)?.users && (notificationCounts$ | async)!.users > 0"
+                        class="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
+                    {{ (notificationCounts$ | async)?.users }}
+                  </span>
                 </a>
 
                 <a routerLink="/admin/recenzije" 
@@ -132,20 +154,32 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
                 <a routerLink="/admin/lista-zelja"
                    routerLinkActive="bg-blue-50 text-blue-700 border-blue-300"
-                   class="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 transition-colors border border-transparent">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-                  </svg>
-                  <span>{{ 'admin.wishlist' | translate }}</span>
+                   class="flex items-center justify-between px-4 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 transition-colors border border-transparent">
+                  <div class="flex items-center space-x-3">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                    </svg>
+                    <span>{{ 'admin.wishlist' | translate }}</span>
+                  </div>
+                  <span *ngIf="(notificationCounts$ | async)?.wishlists && (notificationCounts$ | async)!.wishlists > 0"
+                        class="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
+                    {{ (notificationCounts$ | async)?.wishlists }}
+                  </span>
                 </a>
 
                 <a routerLink="/admin/kontakti"
                    routerLinkActive="bg-blue-50 text-blue-700 border-blue-300"
-                   class="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 transition-colors border border-transparent">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                  </svg>
-                  <span>{{ 'admin.contacts' | translate }}</span>
+                   class="flex items-center justify-between px-4 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 transition-colors border border-transparent">
+                  <div class="flex items-center space-x-3">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                    </svg>
+                    <span>{{ 'admin.contacts' | translate }}</span>
+                  </div>
+                  <span *ngIf="(notificationCounts$ | async)?.contacts && (notificationCounts$ | async)!.contacts > 0"
+                        class="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
+                    {{ (notificationCounts$ | async)?.contacts }}
+                  </span>
                 </a>
 
                 <a *ngIf="showEmailTest"
@@ -163,22 +197,34 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
               <div class="pt-4">
                 <h3 class="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{{ 'admin.companyManagement' | translate }}</h3>
                 
-                <a routerLink="/admin/narudzbe-partneri" 
+                <a routerLink="/admin/narudzbe-partneri"
                    routerLinkActive="bg-blue-50 text-blue-700 border-blue-300"
-                   class="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 transition-colors border border-transparent">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                  </svg>
-                  <span>{{ 'admin.partnerOrders' | translate }}</span>
+                   class="flex items-center justify-between px-4 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 transition-colors border border-transparent">
+                  <div class="flex items-center space-x-3">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                    <span>{{ 'admin.partnerOrders' | translate }}</span>
+                  </div>
+                  <span *ngIf="(notificationCounts$ | async)?.partnerOrders && (notificationCounts$ | async)!.partnerOrders > 0"
+                        class="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
+                    {{ (notificationCounts$ | async)?.partnerOrders }}
+                  </span>
                 </a>
 
-                <a routerLink="/admin/tvrtke" 
+                <a routerLink="/admin/tvrtke"
                    routerLinkActive="bg-blue-50 text-blue-700 border-blue-300"
-                   class="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 transition-colors border border-transparent">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                  </svg>
-                  <span>{{ 'admin.companies' | translate }}</span>
+                   class="flex items-center justify-between px-4 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 transition-colors border border-transparent">
+                  <div class="flex items-center space-x-3">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                    </svg>
+                    <span>{{ 'admin.companies' | translate }}</span>
+                  </div>
+                  <span *ngIf="(notificationCounts$ | async)?.companies && (notificationCounts$ | async)!.companies > 0"
+                        class="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
+                    {{ (notificationCounts$ | async)?.companies }}
+                  </span>
                 </a>
 
                 <a routerLink="/admin/cijene-tvrtki"
@@ -231,13 +277,16 @@ export class AdminLayoutComponent implements OnInit {
   private store = inject(Store);
   private router = inject(Router);
   private translationService = inject(TranslationService);
+  private notificationsService = inject(AdminNotificationsService);
 
   currentUser$: Observable<User | null>;
+  notificationCounts$: Observable<NotificationCounts>;
   currentLanguage: SupportedLanguage = 'hr';
   showEmailTest = false;
 
   constructor() {
     this.currentUser$ = this.store.select(selectCurrentUser);
+    this.notificationCounts$ = this.notificationsService.getNotificationCounts();
     this.currentLanguage = this.translationService.getCurrentLanguage();
   }
 
@@ -266,5 +315,9 @@ export class AdminLayoutComponent implements OnInit {
     const language = target.value as SupportedLanguage;
     this.translationService.setLanguage(language);
     this.currentLanguage = language;
+  }
+
+  refreshNotifications(): void {
+    this.notificationsService.refreshCounts();
   }
 } 

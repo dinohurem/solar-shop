@@ -40,8 +40,8 @@ export class B2BCartService {
         const storedItems = this.loadStoredCart(companyId);
         let parsedItems = storedItems.map(item => this.parseStoredCartItem(item));
 
-        // Apply tiered pricing based on total quantity
-        parsedItems = this.applyTieredPricing(parsedItems);
+        // Apply tiered pricing based on quantity
+        parsedItems = this.recalculateTieredPricing(parsedItems);
 
         const appliedCoupons = this.loadStoredCoupons(companyId);
         const couponDiscount = this.calculateCouponDiscount(appliedCoupons);
@@ -64,14 +64,18 @@ export class B2BCartService {
 
                 const retailPrice = options.originalPrice ?? product.price ?? 0;
                 const baseCompanyPrice = product.company_price ?? product.partner_price ?? product.price ?? retailPrice;
+
+                // Calculate tiered pricing
+                const tierInfo = this.calculateTieredPrice(quantity, product, baseCompanyPrice);
+
                 const offerPrice = options.partnerOfferId
                     ? this.calculateOfferUnitPrice(retailPrice, options.partnerOfferType, options.partnerOfferDiscount, options.individualDiscount, options.individualDiscountType)
-                    : baseCompanyPrice;
+                    : tierInfo.unitPrice;
 
-                const unitPrice = options.partnerOfferId ? Math.min(baseCompanyPrice, offerPrice) : baseCompanyPrice;
+                const unitPrice = options.partnerOfferId ? Math.min(tierInfo.unitPrice, offerPrice) : tierInfo.unitPrice;
                 const totalPrice = unitPrice * quantity;
                 const totalSavingsPerUnit = retailPrice - unitPrice;
-                const standardSavingsPerUnit = Math.max(0, retailPrice - baseCompanyPrice);
+                const standardSavingsPerUnit = Math.max(0, retailPrice - tierInfo.unitPrice);
                 const additionalSavingsPerUnit = Math.max(0, totalSavingsPerUnit - standardSavingsPerUnit);
 
                 const newItem: B2BCartItem = {
@@ -98,7 +102,16 @@ export class B2BCartService {
                     partnerOfferOriginalPrice: options.partnerOfferId ? retailPrice : undefined,
                     partnerOfferValidUntil: options.partnerOfferValidUntil,
                     partnerOfferAppliedAt: options.partnerOfferId ? new Date() : undefined,
-                    additionalSavings: additionalSavingsPerUnit * quantity
+                    additionalSavings: additionalSavingsPerUnit * quantity,
+                    // Add pricing tier information
+                    priceTier1: product.price_tier_1,
+                    quantityTier1: product.quantity_tier_1,
+                    priceTier2: product.price_tier_2,
+                    quantityTier2: product.quantity_tier_2,
+                    priceTier3: product.price_tier_3,
+                    quantityTier3: product.quantity_tier_3,
+                    originalUnitPrice: baseCompanyPrice,
+                    appliedTier: tierInfo.appliedTier
                 };
 
                 this.saveCartItem(companyId, newItem);
@@ -106,7 +119,7 @@ export class B2BCartService {
                 // After adding item, recalculate tiered pricing for entire cart
                 const updatedCart = this.loadStoredCart(companyId);
                 const parsedItems = updatedCart.map(item => this.parseStoredCartItem(item));
-                const tieredItems = this.applyTieredPricing(parsedItems);
+                const tieredItems = this.recalculateTieredPricing(parsedItems);
 
                 // Save the updated cart with tiered pricing
                 this.saveEntireCart(companyId, tieredItems);
@@ -135,31 +148,60 @@ export class B2BCartService {
         if (quantity === 0) {
             items = items.filter(item => item.productId !== productId);
         } else {
-            const retailPrice = items[itemIndex].retailPrice;
-            const unitPrice = items[itemIndex].unitPrice;
-            const companyPrice = items[itemIndex].companyPrice ?? items[itemIndex].partnerPrice ?? retailPrice;
-            const totalSavingsPerUnit = retailPrice - unitPrice;
-            const standardSavingsPerUnit = Math.max(0, retailPrice - companyPrice);
-            const additionalSavingsPerUnit = Math.max(0, totalSavingsPerUnit - standardSavingsPerUnit);
-
+            // Update quantity first
             items[itemIndex] = {
                 ...items[itemIndex],
                 quantity,
-                totalPrice: unitPrice * quantity,
-                savings: totalSavingsPerUnit * quantity,
-                additionalSavings: additionalSavingsPerUnit * quantity,
                 addedAt: new Date()
             };
         }
 
-        // Apply tiered pricing to the updated cart
+        // Recalculate tiered pricing for all items
         const parsedItems = items.map(item => this.parseStoredCartItem(item));
-        const tieredItems = this.applyTieredPricing(parsedItems);
+        const tieredItems = this.recalculateTieredPricing(parsedItems);
 
         // Save the cart with tiered pricing applied
         this.saveEntireCart(companyId, tieredItems);
 
         return of(true).pipe(delay(200));
+    }
+
+    /**
+     * Update cart item quantity and return the updated item with pricing
+     */
+    updateCartItemWithPricing(productId: string, quantity: number, companyId: string): Observable<B2BCartItem | null> {
+        const storageKey = this.STORAGE_KEY + companyId;
+        const storedCart = localStorage.getItem(storageKey);
+        let items: B2BCartItem[] = storedCart ? JSON.parse(storedCart) : [];
+
+        const itemIndex = items.findIndex(item => item.productId === productId);
+        if (itemIndex === -1) {
+            throw new Error('Item not found in cart');
+        }
+
+        if (quantity === 0) {
+            items = items.filter(item => item.productId !== productId);
+            this.saveEntireCart(companyId, items);
+            return of(null); // Instant, no delay
+        } else {
+            // Update quantity first
+            items[itemIndex] = {
+                ...items[itemIndex],
+                quantity,
+                addedAt: new Date()
+            };
+        }
+
+        // Recalculate tiered pricing for all items
+        const parsedItems = items.map(item => this.parseStoredCartItem(item));
+        const tieredItems = this.recalculateTieredPricing(parsedItems);
+
+        // Save the cart with tiered pricing applied
+        this.saveEntireCart(companyId, tieredItems);
+
+        // Return the specific updated item
+        const updatedItem = tieredItems.find(item => item.productId === productId);
+        return of(updatedItem || null); // Instant, no delay
     }
 
     /**
@@ -174,7 +216,7 @@ export class B2BCartService {
 
         // Apply tiered pricing to the updated cart
         const parsedItems = items.map(item => this.parseStoredCartItem(item));
-        const tieredItems = this.applyTieredPricing(parsedItems);
+        const tieredItems = this.recalculateTieredPricing(parsedItems);
 
         // Save the cart with tiered pricing applied
         this.saveEntireCart(companyId, tieredItems);
@@ -283,6 +325,93 @@ export class B2BCartService {
     /**
      * Generate unique ID for cart items
      */
+    /**
+     * Calculate the appropriate price based on quantity tiers
+     */
+    private calculateTieredPrice(quantity: number, product: any, basePrice: number): { unitPrice: number; appliedTier: 1 | 2 | 3 } {
+        // Check if there are pricing tiers
+        if (!product.price_tier_1) {
+            return { unitPrice: basePrice, appliedTier: 1 };
+        }
+
+        // Check tier 3 (highest quantity)
+        if (product.quantity_tier_3 && product.price_tier_3 && quantity >= product.quantity_tier_3) {
+            return { unitPrice: product.price_tier_3, appliedTier: 3 };
+        }
+
+        // Check tier 2
+        if (product.quantity_tier_2 && product.price_tier_2 && quantity >= product.quantity_tier_2) {
+            return { unitPrice: product.price_tier_2, appliedTier: 2 };
+        }
+
+        // Check tier 1
+        if (product.quantity_tier_1 && product.price_tier_1 && quantity >= product.quantity_tier_1) {
+            return { unitPrice: product.price_tier_1, appliedTier: 1 };
+        }
+
+        // Default to base price
+        return { unitPrice: basePrice, appliedTier: 1 };
+    }
+
+    /**
+     * Recalculate prices for all items in cart based on their quantities
+     */
+    private recalculateTieredPricing(items: B2BCartItem[]): B2BCartItem[] {
+        return items.map(item => {
+            if (!item.priceTier1) {
+                return item;
+            }
+
+            const basePrice = item.originalUnitPrice || item.companyPrice || item.retailPrice;
+            let unitPrice = basePrice;
+            let appliedTier: 1 | 2 | 3 = 1;
+
+            // Check tier 3 (highest quantity)
+            if (item.quantityTier3 && item.priceTier3 && item.quantity >= item.quantityTier3) {
+                unitPrice = item.priceTier3;
+                appliedTier = 3;
+            }
+            // Check tier 2
+            else if (item.quantityTier2 && item.priceTier2 && item.quantity >= item.quantityTier2) {
+                unitPrice = item.priceTier2;
+                appliedTier = 2;
+            }
+            // Check tier 1
+            else if (item.quantityTier1 && item.priceTier1 && item.quantity >= item.quantityTier1) {
+                unitPrice = item.priceTier1;
+                appliedTier = 1;
+            }
+
+            // Apply partner offer if it gives better price
+            if (item.partnerOfferId && item.partnerOfferOriginalPrice) {
+                const offerPrice = this.calculateOfferUnitPrice(
+                    item.partnerOfferOriginalPrice,
+                    item.partnerOfferType,
+                    item.partnerOfferDiscount,
+                    undefined,
+                    undefined
+                );
+                if (offerPrice < unitPrice) {
+                    unitPrice = offerPrice;
+                }
+            }
+
+            const retailPrice = item.retailPrice;
+            const totalSavingsPerUnit = retailPrice - unitPrice;
+            const standardSavingsPerUnit = Math.max(0, retailPrice - (item.originalUnitPrice || basePrice));
+            const additionalSavingsPerUnit = Math.max(0, totalSavingsPerUnit - standardSavingsPerUnit);
+
+            return {
+                ...item,
+                unitPrice,
+                totalPrice: unitPrice * item.quantity,
+                savings: totalSavingsPerUnit * item.quantity,
+                additionalSavings: additionalSavingsPerUnit * item.quantity,
+                appliedTier
+            };
+        });
+    }
+
     private generateId(): string {
         return 'cart_item_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
     }
@@ -356,7 +485,7 @@ export class B2BCartService {
         try {
             const { data, error } = await this.supabaseService.client
                 .from('company_pricing')
-                .select('price, minimum_order')
+                .select('*')
                 .eq('company_id', companyId)
                 .eq('product_id', productId)
                 .single();
@@ -371,9 +500,16 @@ export class B2BCartService {
 
         return {
             ...product,
-            company_price: companyPricing?.price,
+            company_price: companyPricing?.price_tier_1 || companyPricing?.price,
             minimum_order: companyPricing?.minimum_order || 1,
-            partner_price: undefined // TODO: Add partner pricing logic
+            partner_price: undefined, // TODO: Add partner pricing logic
+            // Include pricing tiers
+            price_tier_1: companyPricing?.price_tier_1,
+            quantity_tier_1: companyPricing?.quantity_tier_1 || 1,
+            price_tier_2: companyPricing?.price_tier_2,
+            quantity_tier_2: companyPricing?.quantity_tier_2,
+            price_tier_3: companyPricing?.price_tier_3,
+            quantity_tier_3: companyPricing?.quantity_tier_3
         };
     }
 
@@ -394,7 +530,16 @@ export class B2BCartService {
             savings: Number(item.savings ?? 0),
             quantity: Number(item.quantity ?? 0),
             minimumOrder: Number(item.minimumOrder ?? 1),
-            additionalSavings: Number(item.additionalSavings ?? 0)
+            additionalSavings: Number(item.additionalSavings ?? 0),
+            // Preserve pricing tier information
+            priceTier1: item.priceTier1 ? Number(item.priceTier1) : undefined,
+            quantityTier1: item.quantityTier1 ? Number(item.quantityTier1) : undefined,
+            priceTier2: item.priceTier2 ? Number(item.priceTier2) : undefined,
+            quantityTier2: item.quantityTier2 ? Number(item.quantityTier2) : undefined,
+            priceTier3: item.priceTier3 ? Number(item.priceTier3) : undefined,
+            quantityTier3: item.quantityTier3 ? Number(item.quantityTier3) : undefined,
+            originalUnitPrice: item.originalUnitPrice ? Number(item.originalUnitPrice) : undefined,
+            appliedTier: item.appliedTier
         };
     }
 
@@ -424,49 +569,6 @@ export class B2BCartService {
         return Math.max(0, price);
     }
 
-    /**
-     * Calculate tiered pricing discount based on total quantity in cart
-     */
-    private calculateTieredDiscount(cartItems: B2BCartItem[]): number {
-        const totalQuantity = cartItems.reduce((total, item) => total + item.quantity, 0);
-
-        // Tiered pricing: €10 for 3+, €8 for 10+, €6 for 20+
-        if (totalQuantity >= 20) {
-            return 6; // €6 discount per item
-        } else if (totalQuantity >= 10) {
-            return 8; // €8 discount per item
-        } else if (totalQuantity >= 3) {
-            return 10; // €10 discount per item
-        }
-
-        return 0; // No tiered discount
-    }
-
-    /**
-     * Apply tiered pricing to cart items
-     */
-    private applyTieredPricing(cartItems: B2BCartItem[]): B2BCartItem[] {
-        const tieredDiscount = this.calculateTieredDiscount(cartItems);
-
-        if (tieredDiscount === 0) {
-            return cartItems; // No discount to apply
-        }
-
-        console.log(`Applying B2B tiered discount: €${tieredDiscount} per item for ${cartItems.reduce((sum, item) => sum + item.quantity, 0)} total items`);
-
-        return cartItems.map(item => {
-            const discountedPrice = Math.max(0, item.unitPrice - tieredDiscount);
-            const additionalSavings = (item.unitPrice - discountedPrice) * item.quantity;
-
-            return {
-                ...item,
-                unitPrice: discountedPrice,
-                totalPrice: discountedPrice * item.quantity,
-                additionalSavings: (item.additionalSavings || 0) + additionalSavings,
-                savings: item.savings + additionalSavings
-            };
-        });
-    }
 
     private async applyCouponAsync(code: string, cartItems: B2BCartItem[], companyId: string): Promise<{ coupon: Coupon; discount: number }> {
         try {

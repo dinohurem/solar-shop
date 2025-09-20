@@ -26,6 +26,15 @@ export interface B2BCartItem {
     partnerOfferValidUntil?: string;
     partnerOfferAppliedAt?: Date;
     additionalSavings?: number;
+    // Pricing tier fields
+    priceTier1?: number;
+    quantityTier1?: number;
+    priceTier2?: number;
+    quantityTier2?: number;
+    priceTier3?: number;
+    quantityTier3?: number;
+    originalUnitPrice?: number; // Store the original price before tier adjustment
+    appliedTier?: 1 | 2 | 3; // Which tier is currently applied
 }
 
 export interface B2BAppliedCoupon extends AppliedCoupon {

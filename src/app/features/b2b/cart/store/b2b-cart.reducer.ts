@@ -92,10 +92,9 @@ export const b2bCartReducer = createReducer(
         error
     })),
 
-    // Update cart item
+    // Update cart item - don't set loading to avoid UI refresh
     on(B2BCartActions.updateB2BCartItem, (state) => ({
         ...state,
-        loading: true,
         error: null
     })),
 
@@ -117,6 +116,21 @@ export const b2bCartReducer = createReducer(
             ...state,
             items: updatedItems,
             loading: false,
+            error: null,
+            lastUpdated: new Date(),
+            ...calculateCartTotals(updatedItems)
+        };
+    }),
+
+    on(B2BCartActions.updateB2BCartItemWithPricing, (state, { updatedItem }) => {
+        const updatedItems = state.items.map(item =>
+            item.productId === updatedItem.productId ? updatedItem : item
+        );
+
+        return {
+            ...state,
+            items: updatedItems,
+            // Don't change loading state - keep it as is to avoid UI refresh
             error: null,
             lastUpdated: new Date(),
             ...calculateCartTotals(updatedItems)
