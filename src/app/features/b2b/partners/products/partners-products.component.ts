@@ -1191,7 +1191,7 @@ export class PartnersProductsComponent implements OnInit, OnDestroy {
       event.stopPropagation();
     }
     // Navigate to partner contact page
-    this.router.navigate(['/partneri/contact'], {
+    this.router.navigate(['/partneri/kontakt'], {
       queryParams: {
         subject: 'pricingInquiry',
         productId: product.id,

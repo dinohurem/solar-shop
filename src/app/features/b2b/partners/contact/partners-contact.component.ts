@@ -264,10 +264,10 @@ import { SupabaseService } from '../../../../services/supabase.service';
                   <!-- Product Information (shown for pricing inquiries) -->
                   <div *ngIf="contactForm.get('subject')?.value === 'pricingInquiry'" class="col-span-1 md:col-span-2">
                     <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                      <h4 class="text-sm font-medium text-yellow-800 mb-2">Product Information</h4>
+                      <h4 class="text-sm font-medium text-yellow-800 mb-2">{{ 'b2bCheckout.additionalInfo' | translate }}</h4>
                       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-yellow-700">
                         <div *ngIf="productName">
-                          <span class="font-medium">Product:</span> {{ productName }}
+                          <span class="font-medium">{{ 'b2b.products.product' | translate }}:</span> {{ productName }}
                         </div>
                         <div *ngIf="productSku">
                           <span class="font-medium">SKU:</span> {{ productSku }}
