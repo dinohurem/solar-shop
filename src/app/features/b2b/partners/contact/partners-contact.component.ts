@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../shared/services/translation.service';
 import { SupabaseService } from '../../../../services/supabase.service';
 
 @Component({
@@ -317,6 +318,8 @@ export class PartnersContactComponent implements OnInit {
   productName: string | null = null;
   productSku: string | null = null;
 
+  private translationService = inject(TranslationService);
+
   constructor(
     private fb: FormBuilder,
     private supabase: SupabaseService,
@@ -348,7 +351,10 @@ export class PartnersContactComponent implements OnInit {
 
         // Pre-fill the message with product details
         if (this.productName && this.productSku) {
-          const message = `I would like to request a quote for the following product:\n\nProduct: ${this.productName}\nSKU: ${this.productSku}\n\nPlease provide pricing information and availability.`;
+          const message = this.translationService.translate('b2b.contact.pricingInquiryMessage', {
+            productName: this.productName,
+            productSku: this.productSku
+          });
           this.contactForm.patchValue({
             message: message
           });

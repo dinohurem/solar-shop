@@ -757,11 +757,11 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
   }
 
   navigateToProduct(productId: string): void {
-    this.router.navigate(['/partneri/products', productId]);
+    this.router.navigate(['/partneri/proizvodi', productId]);
   }
 
   navigateToProducts(): void {
-    this.router.navigate(['/partneri/products']);
+    this.router.navigate(['/partneri/proizvodi']);
   }
 
   formatDate(dateString: string): string {

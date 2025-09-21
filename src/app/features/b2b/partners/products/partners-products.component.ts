@@ -205,7 +205,7 @@ import { B2BProductsUrlStateService, B2BProductListUrlState } from './services/b
               <!-- Manufacturers Filter -->
               <div class="mb-6">
                 <h4 class="text-sm font-medium text-gray-900 mb-3 font-['DM_Sans']">
-                  {{ 'b2b.products.manufacturer' | translate }}
+                  {{ 'productList.manufacturer' | translate }}
                   <span *ngIf="manufacturersLoading$ | async" class="ml-2 text-xs text-gray-500">Loading...</span>
                 </h4>
                 <div class="space-y-1 max-h-48 overflow-y-auto">
