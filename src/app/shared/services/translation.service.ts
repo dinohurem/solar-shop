@@ -673,6 +673,7 @@ export class TranslationService {
                 tax: 'Porez',
                 total: 'Ukupno',
                 billingTo: 'Naplatiti na',
+                orderPlacedSuccessfully: 'Narudžba je uspješno zaprimljena!',
                 free: 'Besplatno',
                 creditTerms: 'Kreditni uvjeti',
                 net30: 'NET 30',
@@ -5248,7 +5249,8 @@ export class TranslationService {
                 shipping: 'Shipping',
                 tax: 'Tax',
                 total: 'Total',
-                billingTo: 'Billing To'
+                billingTo: 'Billing To',
+                orderPlacedSuccessfully: 'Order placed successfully!'
             },
             // Partners Footer
             b2bFooter: {

@@ -934,6 +934,7 @@ export class OfferFormComponent implements OnInit {
         discounted_price: totalDiscountedPrice,
         start_date: offerData.start_date ? new Date(offerData.start_date).toISOString() : null,
         end_date: offerData.end_date ? new Date(offerData.end_date).toISOString() : null,
+        max_usage: offerData.max_usage === '' || offerData.max_usage === null || offerData.max_usage === undefined ? null : Number(offerData.max_usage),
         updated_at: new Date().toISOString()
       };
 

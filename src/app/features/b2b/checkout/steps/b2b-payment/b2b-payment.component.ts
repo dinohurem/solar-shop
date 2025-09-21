@@ -5,6 +5,7 @@ import { Router, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Subject, takeUntil, combineLatest } from 'rxjs';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../../shared/services/translation.service';
 import { selectCurrentUser } from '../../../../../core/auth/store/auth.selectors';
 import { SupabaseService } from '../../../../../services/supabase.service';
 import { User } from '../../../../../shared/models/user.model';
@@ -179,6 +180,7 @@ export class B2bPaymentComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private store = inject(Store);
   private supabaseService = inject(SupabaseService);
+  private translationService = inject(TranslationService);
   private destroy$ = new Subject<void>();
 
   paymentForm: FormGroup;
@@ -363,9 +365,9 @@ export class B2bPaymentComponent implements OnInit, OnDestroy {
       // Show success message and redirect
       this.showSuccessToast();
 
-      // Redirect to order confirmation or profile
+      // Redirect to products page after successful order
       setTimeout(() => {
-        this.router.navigate(['/partneri/profil'], {
+        this.router.navigate(['/partneri/proizvodi'], {
           queryParams: { orderSuccess: true, orderNumber: orderNumber }
         });
       }, 2000);
@@ -379,6 +381,7 @@ export class B2bPaymentComponent implements OnInit, OnDestroy {
 
   private showSuccessToast(): void {
     // Create and show success toast
+    const successMessage = this.translationService.translate('b2bCheckout.orderPlacedSuccessfully');
     const toast = document.createElement('div');
     toast.className = 'fixed top-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform duration-300';
     toast.innerHTML = `
@@ -386,7 +389,7 @@ export class B2bPaymentComponent implements OnInit, OnDestroy {
                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                 </svg>
-                <span>Order placed successfully!</span>
+                <span>${successMessage}</span>
             </div>
         `;
 

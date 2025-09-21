@@ -137,7 +137,7 @@ export class CouponValidationService {
         excludedOfferIds: [], // Not available in offers table
         applicableCategories: couponData.applicable_category_ids || [],
         excludedCategories: couponData.excluded_category_ids || [],
-        maxUsage: couponData.max_usage || couponData.usage_limit,
+        maxUsage: couponData.max_usage !== null && couponData.max_usage !== undefined ? couponData.max_usage : (couponData.usage_limit !== null && couponData.usage_limit !== undefined ? couponData.usage_limit : null),
         currentUsage: couponData.current_usage || couponData.times_used || 0,
         maxUsagePerCustomer: couponData.max_usage_per_customer,
         startDate: new Date(couponData.start_date),
@@ -200,13 +200,14 @@ export class CouponValidationService {
 
     // Check usage limits
     // Note: maxUsage represents "uses left", not total limit
-    const usagesLeft = Number(coupon.maxUsage) || 0;
+    // If maxUsage is null, the offer has unlimited usage
+    const usagesLeft = coupon.maxUsage;
     const currentUsage = Number(coupon.currentUsage) || 0;
 
     console.log('Usage validation - Uses left:', usagesLeft, 'Times used:', currentUsage);
 
-    // Check if there are any uses left
-    if (usagesLeft <= 0) {
+    // Check if there are any uses left (null means unlimited)
+    if (usagesLeft !== null && usagesLeft !== undefined && Number(usagesLeft) <= 0) {
       console.log('Coupon has no uses left:', { usagesLeft, currentUsage });
       return {
         isValid: false,
@@ -607,7 +608,7 @@ export class CouponValidationService {
         excludedOfferIds: [], // Not available in offers table
         applicableCategories: item.applicable_category_ids || [],
         excludedCategories: item.excluded_category_ids || [],
-        maxUsage: item.max_usage || item.usage_limit,
+        maxUsage: item.max_usage !== null && item.max_usage !== undefined ? item.max_usage : (item.usage_limit !== null && item.usage_limit !== undefined ? item.usage_limit : null),
         currentUsage: item.current_usage || item.times_used || 0,
         maxUsagePerCustomer: item.max_usage_per_customer,
         startDate: new Date(item.start_date),
@@ -690,22 +691,28 @@ export class CouponValidationService {
       }
 
       const currentUsage = offerData.current_usage || 0;
-      const usagesLeft = offerData.max_usage || 0;
+      const usagesLeft = offerData.max_usage;
 
-      // Check if there are any uses left
-      if (usagesLeft <= 0) {
+      // Check if there are any uses left (null means unlimited)
+      if (usagesLeft !== null && usagesLeft !== undefined && Number(usagesLeft) <= 0) {
         console.warn('No uses left for offer:', { currentUsage, usagesLeft });
         return false;
       }
 
-      // Increment current_usage and decrement max_usage (uses left)
+      // Increment current_usage and decrement max_usage (uses left) only if not unlimited
+      const updateData: any = {
+        current_usage: currentUsage + 1,
+        updated_at: new Date().toISOString()
+      };
+
+      // Only decrement max_usage if it's not null (unlimited)
+      if (usagesLeft !== null && usagesLeft !== undefined) {
+        updateData.max_usage = Number(usagesLeft) - 1;
+      }
+
       const { error: updateError } = await this.supabaseService.client
         .from('offers')
-        .update({
-          current_usage: currentUsage + 1,
-          max_usage: usagesLeft - 1,
-          updated_at: new Date().toISOString()
-        })
+        .update(updateData)
         .eq('id', offerId);
 
       if (updateError) {
@@ -718,7 +725,7 @@ export class CouponValidationService {
         oldCurrentUsage: currentUsage,
         newCurrentUsage: currentUsage + 1,
         oldUsagesLeft: usagesLeft,
-        newUsagesLeft: usagesLeft - 1
+        newUsagesLeft: usagesLeft !== null && usagesLeft !== undefined ? Number(usagesLeft) - 1 : 'unlimited'
       });
 
       return true;
