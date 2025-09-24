@@ -1,15 +1,17 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subject, Observable, from, of } from 'rxjs';
-import { takeUntil, switchMap, map, catchError } from 'rxjs/operators';
+import { Subject, Observable, from, of, firstValueFrom, BehaviorSubject } from 'rxjs';
+import { takeUntil, switchMap, map, catchError, filter } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
+import { Actions, ofType } from '@ngrx/effects';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { SupabaseService } from '../../../../services/supabase.service';
-import { applyB2BCoupon, addAllToB2BCartFromOffer } from '../../cart/store/b2b-cart.actions';
+import { applyB2BCoupon, addAllToB2BCartFromOffer, addAllToB2BCartFromOfferSuccess } from '../../cart/store/b2b-cart.actions';
 import { selectB2BCartHasCompanyId, selectB2BCartCompanyId } from '../../cart/store/b2b-cart.selectors';
 import { ToastService } from '../../../../shared/services/toast.service';
 import { TranslationService } from '../../../../shared/services/translation.service';
+import { B2BCartService } from '../../cart/services/b2b-cart.service';
 
 interface PartnerOffer {
   id: string;
@@ -17,7 +19,7 @@ interface PartnerOffer {
   originalPrice: number;
   discountedPrice: number;
   discountPercentage: number;
-  discount_type?: string;
+  discount_type?: 'percentage' | 'fixed_amount';
   discount_value?: number;
   imageUrl: string;
   description: string;
@@ -29,6 +31,7 @@ interface PartnerOffer {
   endDate: string;
   featured: boolean;
   isB2B: boolean;
+  applicable_category_ids?: string[];
 }
 
 interface PartnerProduct {
@@ -42,6 +45,10 @@ interface PartnerProduct {
   stock_quantity?: number;
   discount_percentage?: number;
   discount_amount?: number;
+  has_partner_pricing?: boolean;
+  partner_price?: number;
+  partner_discounted_price?: number;
+  partner_savings?: number;
 }
 
 @Component({
@@ -56,15 +63,15 @@ interface PartnerProduct {
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <!-- Offer Image -->
             <div class="relative">
-              <img 
-                [src]="offer.imageUrl" 
+              <img
+                [src]="offer.imageUrl"
                 [alt]="offer.title"
                 class="w-full h-96 object-cover rounded-2xl shadow-2xl"
               >
               <!-- Discount Badge -->
               <div class="absolute top-6 left-6 bg-accent-500 text-white text-lg font-bold px-4 py-3 rounded-full shadow-lg">
-                <span *ngIf="offer.discount_type === 'percentage' || !offer.discount_type">-{{ offer.discountPercentage }}%</span>
-                <span *ngIf="offer.discount_type === 'fixed_amount'">{{ offer.discount_value | currency:'EUR':'symbol':'1.0-2' }} OFF</span>
+                <span *ngIf="isPercentageDiscount()">-{{ offer.discount_value || offer.discountPercentage }}%</span>
+                <span *ngIf="isFixedAmountDiscount()">{{ offer.discount_value | currency:'EUR':'symbol':'1.0-2' }} OFF</span>
               </div>
               <!-- Partner Only Badge -->
               <div class="absolute top-6 right-6 bg-solar-100 text-solar-800 text-sm font-bold px-3 py-2 rounded-full shadow-lg">
@@ -75,7 +82,6 @@ interface PartnerProduct {
             <!-- Offer Info -->
             <div>
               <div class="mb-6">
-
                 <h1 class="text-5xl lg:text-6xl font-bold mb-6 font-['Poppins']">
                   {{ offer.title }}
                 </h1>
@@ -86,28 +92,89 @@ interface PartnerProduct {
 
               <!-- Partner Pricing -->
               <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-8">
-                <div class="text-center mb-4">
-                  <h3 class="text-lg font-semibold text-white mb-2">{{ 'b2b.products.partnerPrice' | translate }}</h3>
+                <!-- Loading state -->
+                <div *ngIf="isLoading" class="text-center">
+                  <div class="animate-spin rounded-full h-8 w-8 border-2 border-white border-t-transparent mx-auto mb-2"></div>
+                  <p class="text-white/70">{{ 'common.loading' | translate }}</p>
                 </div>
-                <div class="flex items-center gap-4 mb-4">
-                  <span class="text-2xl text-white/70 line-through font-medium">
-                    {{ offer.originalPrice | currency:'EUR':'symbol':'1.2-2' }}
-                  </span>
-                  <span class="text-4xl font-bold text-white">
-                    {{ offer.discountedPrice | currency:'EUR':'symbol':'1.2-2' }}
-                  </span>
-                </div>
-                <div class="grid grid-cols-2 gap-4 text-sm">
-                  <div class="text-center">
-                    <div class="text-white/70">{{ 'b2b.offers.savings' | translate }}</div>
-                    <div class="text-lg font-bold text-accent-200">
-                      {{ (offer.originalPrice - offer.discountedPrice) | currency:'EUR':'symbol':'1.2-2' }}
-                    </div>
+
+                <!-- Category offer (no specific products) -->
+                <div *ngIf="!isLoading && isCategoryOffer" class="text-center">
+                  <h3 class="text-lg font-semibold text-white mb-2">{{ 'b2b.offers.categoryDiscount' | translate }}</h3>
+                  <div class="text-4xl font-bold text-white mb-2">
+                    <span *ngIf="isPercentageDiscount()">{{ offer.discount_value || offer.discountPercentage }}%</span>
+                    <span *ngIf="isFixedAmountDiscount()">{{ offer.discount_value | currency:'EUR':'symbol':'1.0-2' }}</span>
+                    <span class="text-lg text-white/70 ml-2">{{ 'b2b.offers.discount' | translate }}</span>
                   </div>
-                  <div class="text-center">
-                    <div class="text-white/70">{{ 'admin.offersForm.totalDiscount' | translate }}</div>
-                    <div class="text-lg font-bold text-accent-200">
-                      {{ ((offer.originalPrice - offer.discountedPrice) / offer.originalPrice * 100).toFixed(2) }}%
+                  <div class="text-xl text-white/90 mb-3" *ngIf="offerCategoryName">
+                    {{ 'b2b.offers.forCategory' | translate }}: <span class="font-semibold">{{ offerCategoryName }}</span>
+                  </div>
+                  <p class="text-white/70">{{ 'b2b.offers.categoryDiscountDescription' | translate }}</p>
+                </div>
+
+                <!-- Product offer section -->
+                <div *ngIf="!isLoading && !isCategoryOffer">
+                  <!-- Percentage discount -->
+                  <div *ngIf="isPercentageDiscount()" class="text-center">
+                    <h3 class="text-lg font-semibold text-white mb-2">{{ 'b2b.offers.productDiscount' | translate }}</h3>
+                    <div class="text-4xl font-bold text-white mb-2">
+                      {{ offer.discount_value || offer.discountPercentage }}%
+                      <span class="text-lg text-white/70 ml-2">{{ 'b2b.offers.discount' | translate }}</span>
+                    </div>
+                    <p class="text-white/70">{{ 'b2b.offers.percentageDiscountDescription' | translate }}</p>
+                  </div>
+
+                  <!-- Fixed amount discount -->
+                  <div *ngIf="isFixedAmountDiscount()">
+                    <!-- Show partner pricing if available -->
+                    <div *ngIf="hasPartnerPricing" class="text-center">
+                      <h3 class="text-lg font-semibold text-white mb-2">{{ 'b2b.products.partnerPrice' | translate }}</h3>
+
+                      <!-- Partner Price vs Final Price -->
+                      <div class="flex items-center gap-4 mb-4 justify-center">
+                        <div class="text-center">
+                          <div class="text-sm text-white/70">{{ 'b2b.products.partnerPrice' | translate }}</div>
+                          <span class="text-2xl text-white/70 line-through font-medium">
+                            {{ totalPartnerPrice | currency:'EUR':'symbol':'1.2-2' }}
+                          </span>
+                        </div>
+                        <div class="text-center">
+                          <div class="text-sm text-white/70">{{ 'b2b.offers.finalPrice' | translate }}</div>
+                          <span class="text-4xl font-bold text-white">
+                            {{ totalDiscountedPrice | currency:'EUR':'symbol':'1.2-2' }}
+                          </span>
+                        </div>
+                      </div>
+
+                      <!-- Offer Discount Applied -->
+                      <div class="bg-white/10 rounded-lg p-3 mb-4">
+                        <div class="text-sm text-white/70">{{ 'admin.offersForm.offerDiscount' | translate }}</div>
+                        <div class="text-lg font-bold text-accent-200">
+                          <span *ngIf="isPercentageDiscount()">-{{ offer.discount_value || offer.discountPercentage }}%</span>
+                          <span *ngIf="isFixedAmountDiscount()">-{{ offer.discount_value | currency:'EUR':'symbol':'1.0-2' }} {{ 'b2b.offers.perProduct' | translate }}</span>
+                        </div>
+                      </div>
+
+                      <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div class="text-center">
+                          <div class="text-white/70">{{ 'b2b.offers.totalSavings' | translate }}</div>
+                          <div class="text-lg font-bold text-accent-200">
+                            {{ totalSavings | currency:'EUR':'symbol':'1.2-2' }}
+                          </div>
+                        </div>
+                        <div class="text-center">
+                          <div class="text-white/70">{{ 'admin.offersForm.totalDiscount' | translate }}</div>
+                          <div class="text-lg font-bold text-accent-200">
+                            {{ totalDiscountPercentage }}%
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- No partner pricing message -->
+                    <div *ngIf="!hasPartnerPricing" class="text-center">
+                      <h3 class="text-lg font-semibold text-white mb-2">{{ 'b2b.offers.contactSupport' | translate }}</h3>
+                      <p class="text-white/70">{{ 'b2b.offers.contactSupportDescription' | translate }}</p>
                     </div>
                   </div>
                 </div>
@@ -120,11 +187,11 @@ interface PartnerProduct {
                     <span class="text-sm text-white/70">{{ 'b2b.offers.couponCode' | translate }}:</span>
                     <div class="text-xl font-bold text-white font-mono">{{ offer.couponCode }}</div>
                   </div>
-                  <button 
+                  <button
                     (click)="copyCouponCode(offer.couponCode!)"
                     class="bg-white text-solar-600 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
                   >
-                    {{ copiedCoupon ? 'Copied!' : ('b2b.offers.copy' | translate) }}
+                    {{ copiedCoupon ? ('offers.copied' | translate) : ('b2b.offers.copy' | translate) }}
                   </button>
                 </div>
               </div>
@@ -143,13 +210,22 @@ interface PartnerProduct {
 
               <!-- Action Button -->
               <div class="flex space-x-4">
-                <button 
-                  *ngIf="!isOfferExpired(offer.endDate)"
+                <!-- Show Claim Offer only if partner pricing is available and offer not expired -->
+                <button
+                  *ngIf="!isOfferExpired(offer.endDate) && hasPartnerPricing"
                   (click)="claimOffer(offer)"
                   class="flex-1 bg-white text-solar-600 py-3 px-6 rounded-lg font-bold text-lg hover:bg-gray-100 transition-colors shadow-lg">
                   {{ 'b2b.offers.claimOffer' | translate }}
                 </button>
-                <button 
+                <!-- Show Contact Support if no partner pricing -->
+                <button
+                  *ngIf="!hasPartnerPricing"
+                  (click)="contactSupport()"
+                  class="flex-1 bg-yellow-500 text-white py-3 px-6 rounded-lg font-bold text-lg hover:bg-yellow-600 transition-colors shadow-lg">
+                  {{ 'b2b.offers.contactSupport' | translate }}
+                </button>
+                <!-- Show expired button -->
+                <button
                   *ngIf="isOfferExpired(offer.endDate)"
                   disabled
                   class="flex-1 bg-gray-400 text-white py-3 px-6 rounded-lg font-bold text-lg cursor-not-allowed shadow-lg">
@@ -162,14 +238,14 @@ interface PartnerProduct {
       </div>
 
       <!-- Products Included Section -->
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16" *ngIf="!isCategoryOffer">
         <h2 class="text-3xl font-bold text-gray-900 mb-8 font-['Poppins']">
           {{ 'b2b.offers.productsIncluded' | translate }}
         </h2>
 
-        <!-- Add All to Cart Button -->
-        <div *ngIf="(relatedProducts$ | async)?.length" class="mb-8">
-          <button 
+        <!-- Add All to Cart Button - only show if partner pricing is available -->
+        <div *ngIf="products.length && hasPartnerPricing" class="mb-8">
+          <button
             (click)="addAllToCart()"
             class="w-full md:w-auto px-8 py-3 bg-solar-600 text-white font-semibold rounded-lg hover:bg-solar-700 transition-colors font-['DM_Sans'] mb-6"
           >
@@ -177,15 +253,29 @@ interface PartnerProduct {
           </button>
         </div>
 
-        <!-- Product Cards with Partner Pricing -->
-        <div *ngIf="relatedProducts$ | async as relatedProducts" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <div 
-            *ngFor="let product of relatedProducts; trackBy: trackByProductId"
+        <!-- Contact Support Message - show if no partner pricing -->
+        <div *ngIf="products.length && !hasPartnerPricing" class="mb-8">
+          <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
+            <h3 class="text-lg font-semibold text-yellow-800 mb-2">{{ 'b2b.offers.contactSupport' | translate }}</h3>
+            <p class="text-yellow-700 mb-4">{{ 'b2b.offers.contactSupportForPricingDescription' | translate }}</p>
+            <button
+              (click)="contactSupport()"
+              class="px-6 py-2 bg-yellow-500 text-white font-semibold rounded-lg hover:bg-yellow-600 transition-colors"
+            >
+              {{ 'b2b.offers.contactSupport' | translate }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Product Cards -->
+        <div *ngIf="products.length" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div
+            *ngFor="let product of products; trackBy: trackByProductId"
             class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2"
           >
             <!-- Product Image -->
             <div class="relative h-64 bg-gray-50 overflow-hidden">
-              <img 
+              <img
                 [src]="product.imageUrl"
                 [alt]="product.name"
                 class="w-full h-full object-cover"
@@ -196,8 +286,8 @@ interface PartnerProduct {
               </div>
               <!-- Discount Badge -->
               <div class="absolute top-4 right-4 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                <span *ngIf="offer.discount_type === 'percentage' || !offer.discount_type">-{{ offer.discountPercentage }}%</span>
-                <span *ngIf="offer.discount_type === 'fixed_amount'">{{ offer.discount_value | currency:'EUR':'symbol':'1.0-2' }} OFF</span>
+                <span *ngIf="isPercentageDiscount()">-{{ offer.discount_value || offer.discountPercentage }}%</span>
+                <span *ngIf="isFixedAmountDiscount()">{{ offer.discount_value | currency:'EUR':'symbol':'1.0-2' }} OFF</span>
               </div>
             </div>
 
@@ -212,41 +302,87 @@ interface PartnerProduct {
 
               <!-- Pricing Comparison -->
               <div class="space-y-3 mb-4">
-                <!-- Retail Price -->
+                <!-- Retail Price (Always crossed out) -->
                 <div class="flex items-center justify-between">
                   <span class="text-sm text-gray-500">{{ 'b2b.products.retailPrice' | translate }}:</span>
                   <span class="text-lg text-gray-500 line-through">
                     {{ product.price | currency:'EUR':'symbol':'1.2-2' }}
                   </span>
                 </div>
-                
-                <!-- Partner Price -->
-                <div class="flex items-center justify-between bg-solar-50 p-2 rounded-lg">
-                  <span class="text-sm font-medium text-solar-700">{{ 'b2b.products.partnerPrice' | translate }}:</span>
-                  <span class="text-xl font-bold text-solar-600">
-                    {{ getProductPartnerPrice(product, offer) | currency:'EUR':'symbol':'1.2-2' }}
+
+                <!-- Partner Price (Before Offer Discount) - Only show for fixed amount or when different from final price -->
+                <div *ngIf="product.has_partner_pricing && (isFixedAmountDiscount() || product.partner_price !== product.partner_discounted_price)" class="flex items-center justify-between bg-gray-50 p-2 rounded-lg">
+                  <span class="text-sm font-medium text-gray-700">{{ 'b2b.products.partnerPrice' | translate }}:</span>
+                  <span class="text-lg text-gray-500 line-through">
+                    {{ product.partner_price | currency:'EUR':'symbol':'1.2-2' }}
                   </span>
                 </div>
-                
-                <!-- Total Savings -->
-                <div class="flex items-center justify-between border-t pt-2">
-                  <span class="text-sm font-medium text-green-700">{{ 'b2b.products.savings' | translate }}:</span>
-                  <span class="text-lg font-bold text-green-600">
-                    {{ getProductTotalSavings(product, offer) | currency:'EUR':'symbol':'1.2-2' }}
+
+                <!-- Final Partner Price (After All Discounts) - HIGHLIGHTED -->
+                <div *ngIf="product.has_partner_pricing" class="flex items-center justify-between bg-gradient-to-r from-solar-50 to-green-50 p-3 rounded-lg border-2 border-solar-200 shadow-sm">
+                  <div class="flex flex-col">
+                    <span class="text-sm font-medium text-solar-700">{{ 'b2b.offers.yourPrice' | translate }}:</span>
+                    <span class="text-xs text-gray-600">({{ 'b2b.offers.afterAllDiscounts' | translate }})</span>
+                  </div>
+                  <div class="text-right">
+                    <span class="text-2xl font-bold text-solar-600">
+                      {{ product.partner_discounted_price | currency:'EUR':'symbol':'1.2-2' }}
+                    </span>
+                    <!-- Show discount percentage if applied -->
+                    <div *ngIf="offer.discount_type" class="text-xs text-green-600 font-medium">
+                      <span *ngIf="isPercentageDiscount()">-{{ offer.discount_value || offer.discountPercentage }}% {{ 'b2b.offers.offerDiscount' | translate }}</span>
+                      <span *ngIf="isFixedAmountDiscount()">-{{ offer.discount_value | currency:'EUR':'symbol':'1.0-2' }} {{ 'b2b.offers.offerDiscount' | translate }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- No Partner Price -->
+                <div *ngIf="!product.has_partner_pricing" class="flex items-center justify-between bg-gray-50 p-2 rounded-lg">
+                  <span class="text-sm font-medium text-gray-700">{{ 'b2b.products.partnerPrice' | translate }}:</span>
+                  <span class="text-lg font-medium text-gray-500">
+                    {{ 'b2b.offers.contactSupport' | translate }}
                   </span>
+                </div>
+
+                <!-- Total Savings Breakdown -->
+                <div *ngIf="product.has_partner_pricing" class="bg-green-50 p-3 rounded-lg border border-green-200">
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium text-green-700">{{ 'b2b.products.totalSavings' | translate }}:</span>
+                    <span class="text-lg font-bold text-green-600">
+                      {{ product.partner_savings | currency:'EUR':'symbol':'1.2-2' }}
+                    </span>
+                  </div>
+                  <!-- Savings breakdown -->
+                  <div class="text-xs text-green-600 space-y-1">
+                    <div class="flex justify-between">
+                      <span>{{ 'b2b.offers.fromRetailPrice' | translate }}:</span>
+                      <span>{{ (product.price - (product.partner_discounted_price || 0)) | currency:'EUR':'symbol':'1.2-2' }}</span>
+                    </div>
+                    <div *ngIf="(product.partner_price || 0) !== (product.partner_discounted_price || 0)" class="flex justify-between">
+                      <span>{{ 'b2b.offers.additionalOfferDiscount' | translate }}:</span>
+                      <span>{{ ((product.partner_price || 0) - (product.partner_discounted_price || 0)) | currency:'EUR':'symbol':'1.2-2' }}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
               <!-- Add to Cart -->
               <div class="space-y-3">
-                <button 
+                <!-- Add to Cart button - only show if partner pricing is available -->
+                <button
+                  *ngIf="product.has_partner_pricing"
                   (click)="addToCart(product)"
                   class="w-full px-4 py-3 bg-solar-600 text-white rounded-lg hover:bg-solar-700 transition-colors font-semibold font-['DM_Sans']"
                 >
                   {{ 'b2b.offers.addToCartPartnerPrice' | translate }}
                 </button>
-                
-                <button 
+
+                <!-- No partner pricing message -->
+                <div *ngIf="!product.has_partner_pricing" class="w-full px-4 py-3 bg-gray-100 text-gray-600 rounded-lg text-center font-medium">
+                  {{ 'b2b.offers.contactSupportForPricing' | translate }}
+                </div>
+
+                <button
                   (click)="navigateToProduct(product.id)"
                   class="w-full px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-semibold font-['DM_Sans']"
                 >
@@ -256,9 +392,9 @@ interface PartnerProduct {
             </div>
           </div>
         </div>
-        
+
         <!-- No Products Message -->
-        <div *ngIf="!(relatedProducts$ | async) || (relatedProducts$ | async)?.length === 0" class="text-center py-12">
+        <div *ngIf="!products.length" class="text-center py-12">
           <div class="bg-white rounded-2xl p-12 shadow-lg">
             <div class="text-gray-400 mb-4">
               <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -267,7 +403,7 @@ interface PartnerProduct {
             </div>
             <h3 class="text-xl font-bold text-gray-900 mb-2 font-['Poppins']">{{ 'b2b.offers.generalOffer' | translate }}</h3>
             <p class="text-gray-600 font-['DM_Sans']">{{ 'b2b.offers.generalOfferDescription' | translate }}</p>
-            <button 
+            <button
               (click)="navigateToProducts()"
               class="mt-6 px-6 py-3 bg-solar-600 text-white font-semibold rounded-lg hover:bg-solar-700 transition-colors font-['DM_Sans']"
             >
@@ -321,38 +457,42 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private supabaseService = inject(SupabaseService);
   private store = inject(Store);
+  private actions$ = inject(Actions);
   private toastService = inject(ToastService);
   private translationService = inject(TranslationService);
+  private b2bCartService = inject(B2BCartService);
 
   offer: PartnerOffer | null = null;
-  relatedProducts$: Observable<PartnerProduct[]> = of([]);
+  products: PartnerProduct[] = [];
   copiedCoupon = false;
+  isLoading = true;
+  isCategoryOffer = false;
+  offerCategoryName = '';
+  hasPartnerPricing = false;
+  totalPartnerPrice = 0;
+  totalDiscountedPrice = 0;
+  totalSavings = 0;
+  totalDiscountPercentage = 0;
+
   private destroy$ = new Subject<void>();
   private offerProductsData: any[] = [];
-
-  // Partner discount percentage (additional discount on top of offer discount)
-  readonly PARTNER_DISCOUNT_PERCENTAGE = 15;
 
   // Observables
   userCompanyId$ = this.store.select(selectB2BCartCompanyId);
   hasCompanyId$ = this.store.select(selectB2BCartHasCompanyId);
 
-  ngOnInit(): void {
-    this.relatedProducts$ = this.route.params.pipe(
-      switchMap(params => {
-        const offerId = params['id'];
-        return this.loadOfferProducts(offerId);
-      }),
-      takeUntil(this.destroy$)
-    );
+  // Helper methods for discount type checking
+  isPercentageDiscount(): boolean {
+    return !this.offer?.discount_type || this.offer.discount_type === 'percentage';
+  }
 
-    this.route.params.pipe(
-      takeUntil(this.destroy$)
-    ).subscribe(async params => {
-      const offerId = params['id'];
-      await this.loadOffer(offerId);
-    });
+  isFixedAmountDiscount(): boolean {
+    return this.offer?.discount_type === 'fixed_amount';
+  }
 
+  async ngOnInit(): Promise<void> {
+    const offerId = this.route.snapshot.params['id'];
+    await this.loadOfferData(offerId);
     window.scrollTo(0, 0);
   }
 
@@ -361,9 +501,42 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  private async loadOfferData(offerId: string): Promise<void> {
+    try {
+      this.isLoading = true;
+
+      // Load offer
+      await this.loadOffer(offerId);
+
+      if (!this.offer) {
+        return;
+      }
+
+      // Get company ID
+      const companyId = await firstValueFrom(this.userCompanyId$);
+
+      // Load products
+      await this.loadProducts(offerId, companyId);
+
+      // Determine if this is a category offer
+      this.isCategoryOffer = this.products.length === 0 &&
+                           !!this.offer.applicable_category_ids &&
+                           this.offer.applicable_category_ids.length > 0;
+
+      // Calculate totals if fixed amount discount
+      if (this.isFixedAmountDiscount() && this.products.length > 0) {
+        this.calculateTotals();
+      }
+
+    } catch (error) {
+      console.error('Error loading offer data:', error);
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
   private async loadOffer(offerId: string): Promise<void> {
     try {
-      // Load the specific B2B offer
       const offer = await this.supabaseService.getTableById('offers', offerId);
 
       if (!offer || !offer.is_b2b) {
@@ -371,14 +544,12 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
         return;
       }
 
-      // Convert database offer to PartnerOffer interface
       const originalPrice = offer.original_price || 0;
-      const discountPercentage = offer.discount_type === 'percentage' ? offer.discount_value : 0;
+      const discountPercentage = (offer.discount_type === 'percentage' || !offer.discount_type) ? offer.discount_value : 0;
       let discountedPrice = offer.discounted_price || 0;
 
-      // Calculate discounted price based on discount type
       if (discountedPrice === 0 && originalPrice > 0) {
-        if (offer.discount_type === 'percentage' && offer.discount_value > 0) {
+        if ((offer.discount_type === 'percentage' || !offer.discount_type) && offer.discount_value > 0) {
           discountedPrice = originalPrice * (1 - offer.discount_value / 100);
         } else if (offer.discount_type === 'fixed_amount' && offer.discount_value > 0) {
           discountedPrice = Math.max(0, originalPrice - offer.discount_value);
@@ -396,25 +567,44 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
         imageUrl: offer.image_url || 'assets/images/product-placeholder.svg',
         description: offer.description || '',
         shortDescription: offer.short_description || '',
-        type: 'partner-exclusive', // Default type for B2B offers
+        type: 'partner-exclusive',
         status: offer.status || 'active',
         couponCode: offer.code,
         startDate: offer.start_date || '',
         endDate: offer.end_date || '',
         featured: offer.featured || false,
-        isB2B: offer.is_b2b
+        isB2B: offer.is_b2b,
+        applicable_category_ids: offer.applicable_category_ids || []
       };
 
-      // Load related products for this offer
-      this.loadOfferProducts(offerId);
+      // Load category name if applicable
+      if (this.offer.applicable_category_ids && this.offer.applicable_category_ids.length > 0) {
+        await this.loadOfferCategoryName(this.offer.applicable_category_ids[0]);
+      }
     } catch (error) {
       console.error('Error loading offer:', error);
     }
   }
 
-  private loadOfferProducts(offerId: string): Observable<PartnerProduct[]> {
-    return from(
-      this.supabaseService.client
+  private async loadOfferCategoryName(categoryId: string): Promise<void> {
+    try {
+      const { data, error } = await this.supabaseService.client
+        .from('categories')
+        .select('name')
+        .eq('id', categoryId)
+        .single();
+
+      if (data && !error) {
+        this.offerCategoryName = data.name;
+      }
+    } catch (error) {
+      console.error('Error loading category name:', error);
+    }
+  }
+
+  private async loadProducts(offerId: string, companyId: string | null): Promise<void> {
+    try {
+      const { data, error } = await this.supabaseService.client
         .from('offer_products')
         .select(`
           *,
@@ -433,20 +623,54 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
           )
         `)
         .eq('offer_id', offerId)
-        .order('sort_order')
-    ).pipe(
-      map(({ data, error }) => {
-        if (error) {
-          console.error('Error loading offer products:', error);
-          return [];
-        }
+        .order('sort_order');
 
-        if (data && data.length > 0) {
-          // Store the raw offer products data for use in addAllToCart
-          this.offerProductsData = data;
+      if (error) {
+        console.error('Error loading offer products:', error);
+        return;
+      }
 
-          return data.map((offerProduct: any) => ({
-            id: offerProduct.products.id,
+      this.offerProductsData = data || [];
+
+      if (!data || data.length === 0) {
+        this.products = [];
+        return;
+      }
+
+      // Process products with partner pricing
+      this.products = await Promise.all(
+        data.map(async (offerProduct: any) => {
+          const productId = offerProduct.products.id;
+          let partnerPrice = 0;
+          let hasPartnerPricing = false;
+
+          // Check partner pricing if company ID exists
+          if (companyId) {
+            try {
+              const partnerPricing = await this.b2bCartService.getPartnerPricingDetails(productId, companyId);
+              if (partnerPricing && partnerPricing.price_tier_1 > 0) {
+                partnerPrice = partnerPricing.price_tier_1;
+                hasPartnerPricing = true;
+              }
+            } catch (error) {
+              console.warn(`Error getting partner pricing for product ${productId}:`, error);
+            }
+          }
+
+          // Calculate discounted price
+          let partnerDiscountedPrice = partnerPrice;
+          if (hasPartnerPricing && this.offer) {
+            if (this.isPercentageDiscount()) {
+              partnerDiscountedPrice = partnerPrice * (1 - (this.offer.discount_value || 0) / 100);
+            } else if (this.isFixedAmountDiscount()) {
+              partnerDiscountedPrice = Math.max(0, partnerPrice - (this.offer.discount_value || 0));
+            }
+          }
+
+          const savings = hasPartnerPricing ? (offerProduct.products.price - partnerDiscountedPrice) : 0;
+
+          return {
+            id: productId,
             name: offerProduct.products.name,
             description: offerProduct.products.description,
             imageUrl: this.getProductImageUrl(offerProduct.products.images),
@@ -455,16 +679,37 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
             sku: offerProduct.products.sku || '',
             stock_quantity: offerProduct.products.stock_quantity || 0,
             discount_percentage: offerProduct.discount_percentage || 0,
-            discount_amount: offerProduct.discount_amount || 0
-          }));
-        }
-        return [];
-      }),
-      catchError(error => {
-        console.error('Error loading offer products:', error);
-        return of([]);
-      })
-    );
+            discount_amount: offerProduct.discount_amount || 0,
+            has_partner_pricing: hasPartnerPricing,
+            partner_price: partnerPrice,
+            partner_discounted_price: partnerDiscountedPrice,
+            partner_savings: savings
+          };
+        })
+      );
+
+      // Calculate hasPartnerPricing - true only if ALL products have partner pricing
+      const productsWithPricing = this.products.filter(p => p.has_partner_pricing);
+      this.hasPartnerPricing = this.products.length > 0 && productsWithPricing.length === this.products.length;
+
+    } catch (error) {
+      console.error('Error loading products:', error);
+    }
+  }
+
+  private calculateTotals(): void {
+    const productsWithPricing = this.products.filter(p => p.has_partner_pricing);
+
+    // hasPartnerPricing should be true only if ALL products have partner pricing
+    this.hasPartnerPricing = this.products.length > 0 && productsWithPricing.length === this.products.length;
+
+    if (this.hasPartnerPricing) {
+      this.totalPartnerPrice = productsWithPricing.reduce((sum, p) => sum + (p.partner_price || 0), 0);
+      this.totalDiscountedPrice = productsWithPricing.reduce((sum, p) => sum + (p.partner_discounted_price || 0), 0);
+      this.totalSavings = this.totalPartnerPrice - this.totalDiscountedPrice;
+      this.totalDiscountPercentage = this.totalPartnerPrice > 0 ?
+        Math.round((this.totalSavings / this.totalPartnerPrice) * 100) : 0;
+    }
   }
 
   private getProductImageUrl(images: any): string {
@@ -472,42 +717,6 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
       return images[0].url || images[0];
     }
     return 'assets/images/product-placeholder.svg';
-  }
-
-  calculateDiscountedPrice(originalPrice: number, offer: PartnerOffer): number {
-    if (!offer.discount_type || offer.discount_type === 'percentage') {
-      const discountPercentage = offer.discountPercentage || 0;
-      return originalPrice * (1 - discountPercentage / 100);
-    } else if (offer.discount_type === 'fixed_amount') {
-      const discountAmount = offer.discount_value || 0;
-      return Math.max(0, originalPrice - discountAmount);
-    }
-    return originalPrice;
-  }
-
-  getPartnerPrice(offer: PartnerOffer): number {
-    // TODO: get partner price from company pricing table per company id and then filter by products in the offer
-
-    // if no company pricing, return the discounted price
-    return offer.discountedPrice;
-  }
-
-  getPartnerSavings(offer: PartnerOffer): number {
-    return offer.originalPrice - this.getPartnerPrice(offer);
-  }
-
-  getTotalDiscountPercentage(offer: PartnerOffer): number {
-    const partnerPrice = this.getPartnerPrice(offer);
-    return Math.round(((offer.originalPrice - partnerPrice) / offer.originalPrice) * 100);
-  }
-
-  getProductPartnerPrice(product: PartnerProduct, offer: PartnerOffer): number {
-    const offerDiscountedPrice = this.calculateDiscountedPrice(product.price, offer);
-    return offerDiscountedPrice * (1 - this.PARTNER_DISCOUNT_PERCENTAGE / 100);
-  }
-
-  getProductTotalSavings(product: PartnerProduct, offer: PartnerOffer): number {
-    return product.price - this.getProductPartnerPrice(product, offer);
   }
 
   copyCouponCode(code: string): void {
@@ -522,48 +731,46 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
   }
 
   claimOffer(offer: PartnerOffer): void {
-    // Check if user is authenticated and has company ID
     this.userCompanyId$.pipe(takeUntil(this.destroy$)).subscribe(companyId => {
       if (!companyId) {
         this.toastService.showError(this.translationService.translate('b2b.auth.pleaseLoginAsPartner'));
         return;
       }
 
-      // Check if offer is expired
       if (this.isOfferExpired(offer.endDate)) {
         this.toastService.showError(this.translationService.translate('b2b.offers.offerExpired'));
         return;
       }
 
-      // Load offer products and add them to cart
-      this.loadOfferProducts(offer.id).pipe(
-        takeUntil(this.destroy$)
-      ).subscribe(products => {
-        if (!products || products.length === 0) {
-          // If no products, just show success message (general offer)
-          let message = this.translationService.translate('b2b.offers.offerClaimed', { title: offer.title });
-          if (offer.couponCode) {
-            message += ' ' + this.translationService.translate('b2b.offers.couponAppliedAutomatically', { code: offer.couponCode });
-            this.applyCouponCode(offer.couponCode, companyId);
-          }
-          this.toastService.showSuccess(message);
-          return;
-        }
-
-        // Add products to B2B cart
-        this.addOfferProductsToCart(products, offer, companyId);
-
-        // Apply coupon code if offer has one
+      if (this.products.length === 0) {
+        // Category offer
+        let message = this.translationService.translate('b2b.offers.offerClaimed', { title: offer.title });
         if (offer.couponCode) {
+          message += ' ' + this.translationService.translate('b2b.offers.couponAppliedAutomatically', { code: offer.couponCode });
           this.applyCouponCode(offer.couponCode, companyId);
         }
-      });
+        this.toastService.showSuccess(message);
+        return;
+      }
+
+      // Product offer
+      this.addOfferProductsToCart(this.products, offer, companyId);
+
+      if (offer.couponCode) {
+        // Wait for cart items to be successfully added before applying coupon
+        this.actions$.pipe(
+          ofType(addAllToB2BCartFromOfferSuccess),
+          filter(action => action.addedCount > 0),
+          takeUntil(this.destroy$)
+        ).subscribe(() => {
+          this.applyCouponCode(offer.couponCode!, companyId);
+        });
+      }
     });
   }
 
   private addOfferProductsToCart(products: PartnerProduct[], offer: PartnerOffer, companyId: string): void {
-    const availableProducts = products.filter(product => (product.stock_quantity || 0) > 0);
-    const outOfStockCount = products.length - availableProducts.length;
+    const availableProducts = products.filter(product => (product.stock_quantity || 0) > 0 && product.has_partner_pricing);
 
     if (availableProducts.length === 0) {
       this.toastService.showWarning(this.translationService.translate('b2b.offers.allProductsOutOfStock'));
@@ -583,7 +790,7 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
         individualDiscountType: hasIndividualDiscount
           ? (offerProduct.discount_amount > 0 ? 'fixed_amount' : 'percentage') as 'percentage' | 'fixed_amount'
           : undefined,
-        originalPrice: product.price
+        originalPrice: product.partner_price || product.price // Use partner price as the base, fall back to retail price if no partner pricing
       };
     });
 
@@ -609,15 +816,12 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
       message += ' ' + this.translationService.translate('b2b.offers.couponAppliedAutomatically', { code: offer.couponCode });
     }
 
+    const outOfStockCount = products.length - availableProducts.length;
     if (outOfStockCount > 0) {
       message += ' ' + this.translationService.translate('b2b.offers.itemsOutOfStock', { count: outOfStockCount });
     }
 
     this.toastService.showSuccess(message);
-
-    if (outOfStockCount > 0) {
-      this.toastService.showWarning(this.translationService.translate('b2b.offers.productsOutOfStock', { count: outOfStockCount }));
-    }
   }
 
   addToCart(product: PartnerProduct): void {
@@ -651,7 +855,7 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
         individualDiscountType: hasIndividualDiscount
           ? (offerProduct.discount_amount > 0 ? 'fixed_amount' : 'percentage') as 'percentage' | 'fixed_amount'
           : undefined,
-        originalPrice: product.price
+        originalPrice: product.partner_price || product.price // Use partner price as the base, fall back to retail price if no partner pricing
       };
 
       const offerType = (this.offer.discount_type || 'percentage') as 'percentage' | 'fixed_amount' | 'tier_based' | 'bundle';
@@ -683,67 +887,58 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
         return;
       }
 
-      this.relatedProducts$.pipe(takeUntil(this.destroy$)).subscribe(products => {
-        if (!products || products.length === 0) {
-          this.toastService.showWarning(this.translationService.translate('b2b.offers.noProductsToAdd'));
-          return;
-        }
+      if (!this.products.length) {
+        this.toastService.showWarning(this.translationService.translate('b2b.offers.noProductsToAdd'));
+        return;
+      }
 
-        // Filter out out-of-stock products
-        const availableProducts = products.filter(product => (product.stock_quantity || 0) > 0);
+      const availableProducts = this.products.filter(product => (product.stock_quantity || 0) > 0 && product.has_partner_pricing);
 
-        if (availableProducts.length === 0) {
-          this.toastService.showWarning(this.translationService.translate('b2b.offers.allProductsOutOfStock'));
-          return;
-        }
+      if (availableProducts.length === 0) {
+        this.toastService.showWarning(this.translationService.translate('b2b.offers.allProductsOutOfStock'));
+        return;
+      }
 
-        // Prepare products for the action with individual discounts
-        const productsToAdd = availableProducts.map(product => {
-          // Find the corresponding offer product data
-          const offerProduct = this.offerProductsData.find(op => op.products.id === product.id);
-          const hasIndividualDiscount = offerProduct &&
-            ((offerProduct.discount_percentage && offerProduct.discount_percentage > 0) ||
-             (offerProduct.discount_amount && offerProduct.discount_amount > 0));
+      const productsToAdd = availableProducts.map(product => {
+        const offerProduct = this.offerProductsData.find(op => op.products.id === product.id);
+        const hasIndividualDiscount = offerProduct &&
+          ((offerProduct.discount_percentage && offerProduct.discount_percentage > 0) ||
+           (offerProduct.discount_amount && offerProduct.discount_amount > 0));
 
-          return {
-            productId: product.id,
-            quantity: 1,
-            individualDiscount: hasIndividualDiscount ?
-              (offerProduct.discount_percentage || offerProduct.discount_amount) : undefined,
-            individualDiscountType: hasIndividualDiscount ?
-              (offerProduct.discount_amount > 0 ? 'fixed_amount' : 'percentage') as 'percentage' | 'fixed_amount' : undefined,
-            originalPrice: product.price
-          };
-        });
-
-        // Get the offer discount type from the original database offer
-        const offerType = (this.offer!.discount_type || 'percentage') as 'percentage' | 'fixed_amount' | 'tier_based' | 'bundle';
-        const discountValue = this.offer!.discount_value || this.offer!.discountPercentage || 0;
-
-        // Dispatch the partner offer-based add all to cart action
-        this.store.dispatch(addAllToB2BCartFromOffer({
-          products: productsToAdd,
-          companyId,
-          partnerOfferId: this.offer!.id,
-          partnerOfferName: this.offer!.title,
-          partnerOfferType: offerType,
-          partnerOfferDiscount: discountValue,
-          partnerOfferValidUntil: this.offer!.endDate
-        }));
-
-        // Show success message
-        this.toastService.showSuccess(
-          this.translationService.translate('offers.addedProductsToCart', { count: availableProducts.length })
-        );
-
-        // Show warning for out-of-stock products if any
-        const outOfStockCount = products.length - availableProducts.length;
-        if (outOfStockCount > 0) {
-          this.toastService.showWarning(
-            this.translationService.translate('b2b.offers.productsOutOfStock', { count: outOfStockCount })
-          );
-        }
+        return {
+          productId: product.id,
+          quantity: 1,
+          individualDiscount: hasIndividualDiscount ?
+            (offerProduct.discount_percentage || offerProduct.discount_amount) : undefined,
+          individualDiscountType: hasIndividualDiscount ?
+            (offerProduct.discount_amount > 0 ? 'fixed_amount' : 'percentage') as 'percentage' | 'fixed_amount' : undefined,
+          originalPrice: product.partner_price || product.price // Use partner price as the base, fall back to retail price if no partner pricing
+        };
       });
+
+      const offerType = (this.offer!.discount_type || 'percentage') as 'percentage' | 'fixed_amount' | 'tier_based' | 'bundle';
+      const discountValue = this.offer!.discount_value || this.offer!.discountPercentage || 0;
+
+      this.store.dispatch(addAllToB2BCartFromOffer({
+        products: productsToAdd,
+        companyId,
+        partnerOfferId: this.offer!.id,
+        partnerOfferName: this.offer!.title,
+        partnerOfferType: offerType,
+        partnerOfferDiscount: discountValue,
+        partnerOfferValidUntil: this.offer!.endDate
+      }));
+
+      this.toastService.showSuccess(
+        this.translationService.translate('offers.addedProductsToCart', { count: availableProducts.length })
+      );
+
+      const outOfStockCount = this.products.length - availableProducts.length;
+      if (outOfStockCount > 0) {
+        this.toastService.showWarning(
+          this.translationService.translate('b2b.offers.productsOutOfStock', { count: outOfStockCount })
+        );
+      }
     });
   }
 
@@ -779,4 +974,9 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
       companyId: companyId
     }));
   }
-} 
+
+  contactSupport(): void {
+    // Navigate to contact page or open contact modal
+    this.router.navigate(['/partneri/kontakt']);
+  }
+}

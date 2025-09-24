@@ -164,23 +164,6 @@ import { Company } from '../../../../../shared/models/company.model';
           </div>
         </div>
 
-        <!-- Additional Information -->
-        <div class="mb-8">
-          <h3 class="text-lg font-semibold text-gray-900 mb-4 font-['Poppins']">{{ 'b2bCheckout.additionalInfo' | translate }}</h3>
-          <div class="space-y-4">
-            <div>
-              <label for="deliveryInstructions" class="block text-sm font-medium text-gray-700 mb-2 font-['DM_Sans']">{{ 'b2bCheckout.deliveryInstructions' | translate }}</label>
-              <textarea
-                id="deliveryInstructions"
-                formControlName="deliveryInstructions"
-                rows="3"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-solar-500 focus:border-transparent font-['DM_Sans']"
-                [placeholder]="'b2bCheckout.deliveryInstructions' | translate"
-              ></textarea>
-            </div>
-          </div>
-        </div>
-
         <!-- Shipping Options -->
         <div class="mb-8">
           <h3 class="text-lg font-semibold text-gray-900 mb-4 font-['Poppins']">{{ 'b2bCheckout.shippingOptions' | translate }}</h3>

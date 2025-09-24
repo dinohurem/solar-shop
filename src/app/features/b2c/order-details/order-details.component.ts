@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { SupabaseService } from '../../../services/supabase.service';
@@ -13,8 +13,7 @@ import { Order } from '../../../shared/models/order.model';
 @Component({
   selector: 'app-order-details',
   standalone: true,
-  imports: [CommonModule, RouterModule, TranslatePipe, DatePipe],
-  providers: [DatePipe],
+  imports: [CommonModule, RouterModule, TranslatePipe],
   template: `
     <div class="min-h-screen bg-gray-50 py-8">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -268,7 +267,6 @@ export class OrderDetailsComponent implements OnInit {
   private store = inject(Store);
   private cartService = inject(CartService);
   private translationService = inject(TranslationService);
-  private datePipe = inject(DatePipe);
 
   order: Order | null = null;
   loading = true;
@@ -418,6 +416,10 @@ export class OrderDetailsComponent implements OnInit {
   getFormattedDate(date: string): string {
     const currentLanguage = this.translationService.getCurrentLanguage();
     const locale = currentLanguage === 'hr' ? 'hr-HR' : 'en-US';
-    return this.datePipe.transform(date, 'fullDate', undefined, locale) || date;
+    return new Date(date).toLocaleDateString(locale, {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
   }
 } 

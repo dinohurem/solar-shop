@@ -68,11 +68,21 @@ export class B2BCartService {
                 // Calculate tiered pricing
                 const tierInfo = this.calculateTieredPrice(quantity, product, baseCompanyPrice);
 
-                const offerPrice = options.partnerOfferId
-                    ? this.calculateOfferUnitPrice(retailPrice, options.partnerOfferType, options.partnerOfferDiscount, options.individualDiscount, options.individualDiscountType)
-                    : tierInfo.unitPrice;
+                // For offers: First apply partner pricing and quantity tiers, then apply offer discount
+                let finalUnitPrice = tierInfo.unitPrice;
 
-                const unitPrice = options.partnerOfferId ? Math.min(tierInfo.unitPrice, offerPrice) : tierInfo.unitPrice;
+                if (options.partnerOfferId) {
+                    // Apply offer discount to the quantity-tiered partner price
+                    finalUnitPrice = this.calculateOfferDiscountOnPartnerPrice(
+                        tierInfo.unitPrice,
+                        options.partnerOfferType,
+                        options.partnerOfferDiscount,
+                        options.individualDiscount,
+                        options.individualDiscountType
+                    );
+                }
+
+                const unitPrice = finalUnitPrice;
                 const totalPrice = unitPrice * quantity;
                 const totalSavingsPerUnit = retailPrice - unitPrice;
                 const standardSavingsPerUnit = Math.max(0, retailPrice - tierInfo.unitPrice);
@@ -502,14 +512,15 @@ export class B2BCartService {
             ...product,
             company_price: companyPricing?.price_tier_1 || companyPricing?.price,
             minimum_order: companyPricing?.minimum_order || 1,
-            partner_price: undefined, // TODO: Add partner pricing logic
-            // Include pricing tiers
+            partner_price: companyPricing?.price_tier_1 || companyPricing?.price, // Use tier 1 as base partner price
+            // Include pricing tiers for quantity-based pricing
             price_tier_1: companyPricing?.price_tier_1,
             quantity_tier_1: companyPricing?.quantity_tier_1 || 1,
             price_tier_2: companyPricing?.price_tier_2,
             quantity_tier_2: companyPricing?.quantity_tier_2,
             price_tier_3: companyPricing?.price_tier_3,
-            quantity_tier_3: companyPricing?.quantity_tier_3
+            quantity_tier_3: companyPricing?.quantity_tier_3,
+            has_partner_pricing: !!companyPricing // Track if partner pricing exists
         };
     }
 
@@ -543,6 +554,41 @@ export class B2BCartService {
         };
     }
 
+    /**
+     * Calculate offer discount on already tiered partner price
+     * Flow: Partner Price → Quantity Tier → Offer Discount
+     */
+    private calculateOfferDiscountOnPartnerPrice(
+        tieredPartnerPrice: number,
+        offerType?: 'percentage' | 'fixed_amount' | 'tier_based' | 'bundle' | 'buy_x_get_y',
+        offerDiscount?: number,
+        individualDiscount?: number,
+        individualDiscountType?: 'percentage' | 'fixed_amount'
+    ): number {
+        let price = tieredPartnerPrice;
+
+        // Apply general offer discount first
+        if (offerType === 'percentage') {
+            price = tieredPartnerPrice * (1 - (offerDiscount ?? 0) / 100);
+        } else if (offerType === 'fixed_amount') {
+            price = Math.max(0, tieredPartnerPrice - (offerDiscount ?? 0));
+        }
+
+        // Apply individual product discount on top of the offer discount
+        if (individualDiscount) {
+            if (individualDiscountType === 'percentage') {
+                price = Math.max(0, price * (1 - individualDiscount / 100));
+            } else if (individualDiscountType === 'fixed_amount') {
+                price = Math.max(0, price - individualDiscount);
+            }
+        }
+
+        return Math.max(0, price);
+    }
+
+    /**
+     * Legacy method for backward compatibility - now calculates on retail price
+     */
     private calculateOfferUnitPrice(
         retailPrice: number,
         offerType?: 'percentage' | 'fixed_amount' | 'tier_based' | 'bundle' | 'buy_x_get_y',
@@ -569,6 +615,43 @@ export class B2BCartService {
         return Math.max(0, price);
     }
 
+    /**
+     * Check if a product has partner pricing for a specific company
+     */
+    async hasPartnerPricing(productId: string, companyId: string): Promise<boolean> {
+        try {
+            const { data, error } = await this.supabaseService.client
+                .from('company_pricing')
+                .select('id')
+                .eq('company_id', companyId)
+                .eq('product_id', productId)
+                .single();
+
+            return !error && !!data;
+        } catch (error) {
+            console.warn('Error checking partner pricing:', error);
+            return false;
+        }
+    }
+
+    /**
+     * Get partner pricing details for a product
+     */
+    async getPartnerPricingDetails(productId: string, companyId: string): Promise<any | null> {
+        try {
+            const { data, error } = await this.supabaseService.client
+                .from('company_pricing')
+                .select('*')
+                .eq('company_id', companyId)
+                .eq('product_id', productId)
+                .single();
+
+            return error ? null : data;
+        } catch (error) {
+            console.warn('Error getting partner pricing details:', error);
+            return null;
+        }
+    }
 
     private async applyCouponAsync(code: string, cartItems: B2BCartItem[], companyId: string): Promise<{ coupon: Coupon; discount: number }> {
         try {

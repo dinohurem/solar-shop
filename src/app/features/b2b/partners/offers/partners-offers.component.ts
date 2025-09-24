@@ -114,8 +114,8 @@ import { User } from '../../../../shared/models/user.model';
                 {{ offer.description }}
               </p>
 
-              <!-- Pricing -->
-              <div *ngIf="isAuthenticated && hasCompanyId" class="mb-4">
+              <!-- Pricing for offers with products and full partner pricing -->
+              <div *ngIf="isAuthenticated && hasCompanyId && offer.hasProducts && offer.hasAllPartnerPricing" class="mb-4">
                 <div class="flex items-center justify-between">
                   <div>
                     <span class="text-2xl font-bold text-solar-600">
@@ -132,6 +132,27 @@ import { User } from '../../../../shared/models/user.model';
                     </div>
                   </div>
                 </div>
+                <div class="text-xs text-gray-500 mt-1">
+                  {{ 'b2b.offers.sumOfPartnerPrices' | translate }} ({{ offer.productCount }} {{ 'b2b.offers.products' | translate }})
+                </div>
+              </div>
+
+              <!-- Pricing for offers with products but missing partner pricing -->
+              <div *ngIf="isAuthenticated && hasCompanyId && offer.hasProducts && !offer.hasAllPartnerPricing" class="mb-4 text-center py-4 bg-orange-50 border border-orange-200 rounded-lg">
+                <svg class="w-8 h-8 text-orange-500 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                </svg>
+                <p class="text-sm text-orange-700 font-medium mb-1">{{ 'b2b.offers.incompletePricing' | translate }}</p>
+                <p class="text-xs text-orange-600">{{ 'b2b.offers.contactSupportForPricing' | translate }}</p>
+              </div>
+
+              <!-- Pricing for general offers (no products) -->
+              <div *ngIf="isAuthenticated && hasCompanyId && !offer.hasProducts" class="mb-4 text-center py-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div class="text-lg font-bold text-blue-800 mb-1">
+                  <span *ngIf="offer.discount_type === 'percentage'">{{ offer.discount_value }}% {{ 'b2b.offers.discount' | translate }}</span>
+                  <span *ngIf="offer.discount_type === 'fixed_amount'">€{{ offer.discount_value | number:'1.2-2' }} {{ 'b2b.offers.discount' | translate }}</span>
+                </div>
+                <p class="text-xs text-blue-600">{{ 'b2b.offers.generalOffer' | translate }}</p>
               </div>
 
               <!-- Login Required Pricing -->
@@ -165,27 +186,35 @@ import { User } from '../../../../shared/models/user.model';
 
               <!-- Actions -->
               <div class="space-y-2">
-                <button *ngIf="isAuthenticated && hasCompanyId" 
+                <!-- Claim offer button - only show if authenticated, has company, and either no products OR has all partner pricing -->
+                <button *ngIf="isAuthenticated && hasCompanyId && (!offer.hasProducts || offer.hasAllPartnerPricing)"
                         (click)="claimOffer(offer)"
                         [disabled]="isOfferExpired(offer.endDate)"
                         class="w-full bg-solar-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-solar-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors">
                   <span *ngIf="!isOfferExpired(offer.endDate)">{{ 'b2b.offers.claimOffer' | translate }}</span>
                   <span *ngIf="isOfferExpired(offer.endDate)">{{ 'b2b.offers.expired' | translate }}</span>
                 </button>
-                
-                <button *ngIf="!isAuthenticated" 
+
+                <!-- Contact support button - show when authenticated, has company, has products, but missing partner pricing -->
+                <button *ngIf="isAuthenticated && hasCompanyId && offer.hasProducts && !offer.hasAllPartnerPricing"
+                        (click)="navigateToPartnerContact()"
+                        class="w-full bg-orange-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-orange-700 transition-colors">
+                  {{ 'b2b.offers.contactSupport' | translate }}
+                </button>
+
+                <button *ngIf="!isAuthenticated"
                         (click)="navigateToLogin()"
                         class="w-full bg-solar-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-solar-700 transition-colors">
                   {{ 'b2b.offers.signInToClaim' | translate }}
                 </button>
 
-                <button *ngIf="isAuthenticated && !hasCompanyId" 
+                <button *ngIf="isAuthenticated && !hasCompanyId"
                         (click)="navigateToPartnerRegistration()"
                         class="w-full bg-solar-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-solar-700 transition-colors">
                   {{ 'b2b.offers.claimOffer' | translate }}
                 </button>
-                
-                <button (click)="viewOfferDetails(offer)" 
+
+                <button (click)="viewOfferDetails(offer)"
                         class="w-full border border-gray-300 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-50 transition-colors">
                   {{ 'b2b.offers.viewDetails' | translate }}
                 </button>
@@ -227,7 +256,7 @@ export class PartnersOffersComponent implements OnInit, OnDestroy {
   userCompanyId: string | null = null;
 
   // B2B offers loaded from database
-  b2bOffers: Offer[] = [];
+  b2bOffers: any[] = [];
 
   constructor(private router: Router) { }
 
@@ -248,6 +277,10 @@ export class PartnersOffersComponent implements OnInit, OnDestroy {
 
     this.userCompanyId$.pipe(takeUntil(this.destroy$)).subscribe(companyId => {
       this.userCompanyId = companyId;
+      // Reload offers when company ID changes to update pricing
+      if (companyId && this.b2bOffers.length > 0) {
+        this.loadB2BOffers();
+      }
     });
 
     // Load B2B offers from database
@@ -268,11 +301,27 @@ export class PartnersOffersComponent implements OnInit, OnDestroy {
         status: 'active'
       });
 
-      // Transform database offers to Offer model
-      this.b2bOffers = offers.map(offer => {
-        const originalPrice = offer.original_price || 0;
+      // Transform database offers to Offer model and calculate partner pricing
+      const transformedOffers = await Promise.all(offers.map(async (offer) => {
+        let originalPrice = offer.original_price || 0;
         const discountPercentage = offer.discount_type === 'percentage' ? offer.discount_value : 0;
         let discountedPrice = offer.discounted_price || 0;
+
+        // If user has a company, calculate partner pricing
+        let hasAllPartnerPricing = true;
+        let hasProducts = false;
+        let productCount = 0;
+
+        if (this.userCompanyId) {
+          const partnerPricing = await this.calculateOfferPartnerPricing(offer.id, this.userCompanyId);
+          if (partnerPricing) {
+            originalPrice = partnerPricing.originalPrice;
+            discountedPrice = partnerPricing.discountedPrice;
+            hasAllPartnerPricing = partnerPricing.hasAllPartnerPricing;
+            hasProducts = true;
+            productCount = partnerPricing.productCount;
+          }
+        }
 
         // Calculate discounted price for percentage-only offers if not provided
         if (discountedPrice === 0 && discountPercentage > 0 && originalPrice > 0) {
@@ -295,9 +344,14 @@ export class PartnersOffersComponent implements OnInit, OnDestroy {
           featured: offer.featured || false,
           isB2B: offer.is_b2b || false,
           discount_type: offer.discount_type,
-          discount_value: offer.discount_value
-        };
-      });
+          discount_value: offer.discount_value,
+          hasAllPartnerPricing: hasAllPartnerPricing,
+          hasProducts: hasProducts,
+          productCount: productCount
+        } as any;
+      }));
+
+      this.b2bOffers = transformedOffers;
     } catch (error) {
       console.error('Error loading B2B offers:', error);
     } finally {
@@ -315,7 +369,12 @@ export class PartnersOffersComponent implements OnInit, OnDestroy {
     this.router.navigate(['/partneri/registracija']);
   }
 
-  claimOffer(offer: Offer): void {
+  navigateToPartnerContact(): void {
+    // Navigate to partner contact page
+    this.router.navigate(['/partneri/kontakt']);
+  }
+
+  claimOffer(offer: any): void {
     // Check if user is authenticated and has company ID
     if (!this.isAuthenticated || !this.userCompanyId) {
       this.toastService.showError(this.translationService.translate('b2b.auth.pleaseLoginAsPartner'));
@@ -331,7 +390,7 @@ export class PartnersOffersComponent implements OnInit, OnDestroy {
     // Load offer products and add them to cart
     this.loadOfferProducts(offer.id).pipe(
       takeUntil(this.destroy$)
-    ).subscribe(products => {
+    ).subscribe(async (products) => {
       if (!products || products.length === 0) {
         // If no products, just show success message (general offer)
         let message = this.translationService.translate('b2b.offers.offerClaimed', { title: offer.title });
@@ -343,7 +402,7 @@ export class PartnersOffersComponent implements OnInit, OnDestroy {
       }
 
       // Use the bulk add action for better performance and consistency
-      this.addOfferProductsToCartBulk(products, offer);
+      await this.addOfferProductsToCartBulk(products, offer);
     });
   }
 
@@ -376,19 +435,30 @@ export class PartnersOffersComponent implements OnInit, OnDestroy {
     );
   }
 
-  private addOfferProductsToCartBulk(offerProducts: any[], offer: Offer): void {
+  private async addOfferProductsToCartBulk(offerProducts: any[], offer: any): Promise<void> {
     if (!this.userCompanyId) {
       this.toastService.showError(this.translationService.translate('b2b.auth.companyIdNotFound'));
       return;
     }
 
-    // Filter and prepare products for bulk add with individual discounts
+    // First, fetch partner pricing for all products
+    const productsWithPricing = await this.getProductsWithPartnerPricing(
+      offerProducts.map(op => op.products.id),
+      this.userCompanyId
+    );
+
+    // Filter and prepare products for bulk add with partner pricing and individual discounts
     const availableProducts = offerProducts
       .filter(offerProduct => {
         const product = offerProduct.products;
         return product && product.stock_quantity > 0;
       })
       .map(offerProduct => {
+        // Get partner pricing for this product
+        const productWithPricing = productsWithPricing.find(p => p.id === offerProduct.products.id);
+        const partnerPrice = productWithPricing?.partner_price || productWithPricing?.company_price;
+        const retailPrice = offerProduct.products.price;
+
         // Determine individual discount type and value
         const hasIndividualDiscount = (offerProduct.discount_percentage && offerProduct.discount_percentage > 0) ||
                                       (offerProduct.discount_amount && offerProduct.discount_amount > 0);
@@ -400,7 +470,7 @@ export class PartnersOffersComponent implements OnInit, OnDestroy {
             (offerProduct.discount_percentage || offerProduct.discount_amount) : undefined,
           individualDiscountType: hasIndividualDiscount ?
             (offerProduct.discount_amount > 0 ? 'fixed_amount' : 'percentage') as 'percentage' | 'fixed_amount' : undefined,
-          originalPrice: offerProduct.products.price
+          originalPrice: partnerPrice || retailPrice // Use partner price as base, fall back to retail price if no partner pricing
         };
       });
 
@@ -433,7 +503,7 @@ export class PartnersOffersComponent implements OnInit, OnDestroy {
     }
   }
 
-  viewOfferDetails(offer: Offer): void {
+  viewOfferDetails(offer: any): void {
     this.router.navigate(['/partneri/ponude', offer.id]);
   }
 
@@ -460,5 +530,122 @@ export class PartnersOffersComponent implements OnInit, OnDestroy {
     return new Date(endDate) < new Date();
   }
 
+  /**
+   * Calculate partner pricing for an offer based on its products
+   */
+  private async calculateOfferPartnerPricing(offerId: string, companyId: string): Promise<{originalPrice: number, discountedPrice: number, hasAllPartnerPricing: boolean, productCount: number} | null> {
+    try {
+      // Get offer products
+      const { data: offerProducts, error: offerError } = await this.supabaseService.client
+        .from('offer_products')
+        .select(`
+          *,
+          products (
+            id,
+            name,
+            price
+          )
+        `)
+        .eq('offer_id', offerId);
+
+      if (offerError || !offerProducts?.length) {
+        return null;
+      }
+
+      // Get partner pricing for these products
+      const productIds = offerProducts.map(op => op.products.id);
+      const productsWithPricing = await this.getProductsWithPartnerPricing(productIds, companyId);
+
+      // Calculate sum of partner prices (not average)
+      let totalPartnerPrice = 0;
+      let productsWithValidPricing = 0;
+      const totalProducts = offerProducts.length;
+
+      offerProducts.forEach(offerProduct => {
+        const productWithPricing = productsWithPricing.find(p => p.id === offerProduct.products.id);
+        const partnerPrice = productWithPricing?.partner_price;
+
+        if (partnerPrice) {
+          totalPartnerPrice += partnerPrice;
+          productsWithValidPricing++;
+        }
+      });
+
+      // Check if all products have partner pricing
+      const hasAllPartnerPricing = productsWithValidPricing === totalProducts;
+
+      if (productsWithValidPricing === 0) {
+        return null;
+      }
+
+      // Get the offer details to calculate discount
+      const { data: offer } = await this.supabaseService.client
+        .from('offers')
+        .select('discount_type, discount_value')
+        .eq('id', offerId)
+        .single();
+
+      let discountedPrice = totalPartnerPrice;
+
+      if (offer) {
+        if (offer.discount_type === 'percentage' && offer.discount_value) {
+          discountedPrice = totalPartnerPrice * (1 - offer.discount_value / 100);
+        } else if (offer.discount_type === 'fixed_amount' && offer.discount_value) {
+          discountedPrice = Math.max(0, totalPartnerPrice - offer.discount_value);
+        }
+      }
+
+      return {
+        originalPrice: totalPartnerPrice, // Sum of partner prices
+        discountedPrice: discountedPrice, // Sum of discounted partner prices
+        hasAllPartnerPricing,
+        productCount: totalProducts
+      };
+    } catch (error) {
+      console.error('Error calculating offer partner pricing:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Get products with partner pricing for a specific company
+   */
+  private async getProductsWithPartnerPricing(productIds: string[], companyId: string): Promise<any[]> {
+    try {
+      const { data: products, error } = await this.supabaseService.client
+        .from('products')
+        .select(`
+          id,
+          name,
+          price,
+          company_pricing!left (
+            price_tier_1,
+            price,
+            company_id
+          )
+        `)
+        .in('id', productIds);
+
+      if (error) {
+        console.error('Error fetching products with partner pricing:', error);
+        return [];
+      }
+
+      return (products || []).map(product => {
+        // Find the company-specific pricing
+        const companyPricing = product.company_pricing?.find((cp: any) => cp.company_id === companyId);
+
+        return {
+          ...product,
+          partner_price: companyPricing?.price_tier_1 || companyPricing?.price,
+          company_price: companyPricing?.price_tier_1 || companyPricing?.price,
+          has_partner_pricing: !!companyPricing
+        };
+      });
+    } catch (error) {
+      console.error('Error in getProductsWithPartnerPricing:', error);
+      return [];
+    }
+  }
 
 } 

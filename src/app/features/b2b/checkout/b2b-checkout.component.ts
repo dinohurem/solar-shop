@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
-import { filter } from 'rxjs/operators';
+import { filter, takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
@@ -72,30 +73,51 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap');
   `]
 })
-export class B2bCheckoutComponent implements OnInit {
+export class B2bCheckoutComponent implements OnInit, OnDestroy {
   currentStep = 1;
+  private destroy$ = new Subject<void>();
 
-  constructor(private router: Router) { }
+  constructor(
+    private router: Router,
+    private cdr: ChangeDetectorRef
+  ) { }
 
   ngOnInit(): void {
     // Listen to route changes to update current step
     this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
+      filter(event => event instanceof NavigationEnd),
+      takeUntil(this.destroy$)
     ).subscribe((event: NavigationEnd) => {
+      console.log('B2B Checkout: Navigation to:', event.url);
       this.updateCurrentStep(event.url);
+      this.cdr.detectChanges();
     });
 
     // Set initial step based on current URL
     this.updateCurrentStep(this.router.url);
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   private updateCurrentStep(url: string): void {
-    if (url.includes('/order-review')) {
-      this.currentStep = 1;
+    console.log('B2B Checkout: Updating step for URL:', url);
+
+    let newStep = 1; // Default to step 1
+
+    if (url.includes('/order-review') || url.endsWith('/checkout') || url.includes('/b2b-checkout')) {
+      newStep = 1;
     } else if (url.includes('/shipping')) {
-      this.currentStep = 2;
+      newStep = 2;
     } else if (url.includes('/payment')) {
-      this.currentStep = 3;
+      newStep = 3;
+    }
+
+    if (this.currentStep !== newStep) {
+      console.log('B2B Checkout: Step changed from', this.currentStep, 'to', newStep);
+      this.currentStep = newStep;
     }
   }
 

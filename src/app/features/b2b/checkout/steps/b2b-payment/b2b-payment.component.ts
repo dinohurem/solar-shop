@@ -55,17 +55,6 @@ import { B2BCartItem } from '../../../cart/models/b2b-cart.model';
               </div>
             </div>
 
-            <!-- Special Instructions -->
-            <div class="mb-8">
-              <h3 class="text-lg font-semibold text-gray-900 mb-4 font-['Poppins']">{{ 'b2bCheckout.specialInstructions' | translate }}</h3>
-              <textarea
-                formControlName="specialInstructions"
-                rows="4"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-solar-500 focus:border-transparent font-['DM_Sans']"
-                [placeholder]="'b2bCheckout.specialInstructionsPlaceholder' | translate"
-              ></textarea>
-            </div>
-
             <!-- Terms and Conditions -->
             <div class="mb-8">
               <label class="flex items-start space-x-3">
