@@ -5,6 +5,7 @@ import { Subject, Observable, from, of, firstValueFrom, BehaviorSubject } from '
 import { takeUntil, switchMap, map, catchError, filter } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import { Actions, ofType } from '@ngrx/effects';
+import * as B2BCartActions from '../../cart/store/b2b-cart.actions';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { SupabaseService } from '../../../../services/supabase.service';
 import { applyB2BCoupon, addAllToB2BCartFromOffer, addAllToB2BCartFromOfferSuccess } from '../../cart/store/b2b-cart.actions';
@@ -807,6 +808,9 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
       partnerOfferValidUntil: offer.endDate
     }));
 
+    // Open cart sidebar
+    this.store.dispatch(B2BCartActions.openB2BCartSidebar());
+
     let message = this.translationService.translate('b2b.offers.offerClaimedWithProducts', {
       title: offer.title,
       count: availableProducts.length
@@ -871,6 +875,9 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
         partnerOfferValidUntil: this.offer.endDate
       }));
 
+      // Open cart sidebar
+      this.store.dispatch(B2BCartActions.openB2BCartSidebar());
+
       this.toastService.showSuccess(this.translationService.translate('cart.itemAddedToCart'));
     });
   }
@@ -928,6 +935,9 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
         partnerOfferDiscount: discountValue,
         partnerOfferValidUntil: this.offer!.endDate
       }));
+
+      // Open cart sidebar
+      this.store.dispatch(B2BCartActions.openB2BCartSidebar());
 
       this.toastService.showSuccess(
         this.translationService.translate('offers.addedProductsToCart', { count: availableProducts.length })

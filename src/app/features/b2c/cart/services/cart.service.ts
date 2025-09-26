@@ -675,6 +675,24 @@ export class CartService {
 
     private updateCartItems(items: CartItem[]): void {
         this.cartItems.next(items);
+
+        // If cart becomes empty, clear applied coupons to allow fresh coupon application
+        if (items.length === 0 && this.appliedCoupons.value.length > 0) {
+            console.log('Cart is empty, clearing applied coupons for fresh session');
+            this.appliedCoupons.next([]);
+
+            // Clear session coupon tracking
+            this.couponValidationService.clearSessionCouponTracking();
+
+            // Clear from database if authenticated
+            if (this.isAuthenticated && this.currentUserId) {
+                // Clear applied coupons from database (fire and forget)
+                this.clearAppliedCouponsFromSupabase().catch(error => {
+                    console.error('Error clearing applied coupons from database:', error);
+                });
+            }
+        }
+
         this.updateCartSummary(items);
     }
 

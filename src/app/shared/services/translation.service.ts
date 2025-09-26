@@ -392,6 +392,8 @@ export class TranslationService {
                     lowestPrice: 'najniža cijena',
                     from: 'od',
                     downloadTechnicalSheet: 'Pogledajte tehnički list',
+                    quantity: 'Količina',
+                    tierPricing: 'Cijena po razini',
                     // Status labels
                     pendingApproval: 'Čeka odobrenje',
                     rejected: 'Odbačeno'
@@ -1087,6 +1089,36 @@ export class TranslationService {
                     productName: 'Naziv proizvoda',
                     customPricingSummary: 'Sažetak prilagođenih cijena',
                     pricingTiers: 'Cijene za količine',
+                    // Bulk pricing translations
+                    bulkPricing: 'Grupne cijene',
+                    applyBulkDiscount: 'Primijeni grupni popust',
+                    discountPercentage: 'Postotak popusta',
+                    applyToAll: 'Primijeni na sve',
+                    applyToFiltered: 'Primijeni na filtrirane',
+                    clearAllPricing: 'Obriši sve cijene',
+                    bulkDiscountHint: 'Grupni popust omogućuje vam postavljanje popusta na više proizvoda odjednom.',
+                    discount: 'popust',
+                    // Alert messages
+                    confirmBulkDiscountAll: 'Primijeni {{percentage}}% popust na SVE tvrtke i SVE proizvode? Ovo će ažurirati sve postojeće cijene.',
+                    bulkDiscountAppliedAll: 'Grupni popust od {{percentage}}% primijenjen na svih {{count}} proizvoda',
+                    bulkDiscountAppliedFiltered: 'Grupni popust od {{percentage}}% primijenjen na {{count}} filtriranih proizvoda',
+                    errorSavingPricing: 'Greška prilikom spremanja promjena cijena. Molimo pokušajte ponovno.',
+                    allPricingCleared: 'Sve prilagođene cijene su obrisane',
+                    // Additional alert messages
+                    noDataFoundInCsv: 'Nisu pronađeni podaci u CSV datoteci',
+                    errorImportingCsv: 'Greška prilikom uvoza CSV datoteke. Molimo provjerite konzolu za detalje i pokušajte ponovno.',
+                    noCompanyPricingDataToExport: 'Nema podataka o cijenama tvrtki za izvoz',
+                    noPricingRecordsFoundToUpdate: 'Nisu pronađeni zapisi cijena za ažuriranje',
+                    errorExportingCompanyPricing: 'Greška prilikom izvoza podataka o cijenama tvrtki. Molimo pokušajte ponovno.',
+                    successfullyDeletedAllCustomPricing: 'Uspješno obrisane sve prilagođene cijene za {{companyName}}',
+                    errorDeletingCompanyPricing: 'Greška prilikom brisanja cijena tvrtke. Molimo pokušajte ponovno.',
+                    // Bulk discount loading messages
+                    bulkDiscountProcessing: 'Procesiranje grupnog popusta...',
+                    bulkDiscountProgress: 'Obrađeno {{current}} od {{total}} kombinacija tvrtki-proizvoda',
+                    bulkDiscountCompleted: 'Grupni popust uspješno primijenjen na {{count}} kombinacija',
+                    confirmBulkDiscountCompany: 'Primijeni {{percentage}}% popust na sve proizvode za ovu tvrtku?',
+                    confirmBulkDiscountFiltered: 'Primijeni {{percentage}}% popust na {{count}} filtriranih proizvoda?',
+                    confirmClearAllPricing: 'Jeste li sigurni da želite obrisati sve prilagođene cijene za ovu tvrtku?',
                 },
                 companyPricingDetails: {
                     backToCompanies: 'Povratak na tvrtke',
@@ -1738,7 +1770,9 @@ export class TranslationService {
                 no: 'Ne',
                 today: 'Danas',
                 thisWeek: 'Ovaj tjedan',
-                thisMonth: 'Ovaj mjesec'
+                thisMonth: 'Ovaj mjesec',
+                show: 'Prikaži',
+                hide: 'Sakrij'
             },
             // Contact Information
             contact: {
@@ -1933,6 +1967,7 @@ export class TranslationService {
                 discountCode: 'Kod za popust',
                 enterDiscountCode: 'Unesite kod za popust',
                 apply: 'Primijeni',
+                singleCouponLimit: 'Samo jedan kupon može biti primijenjen u isto vrijeme.',
                 subtotal: 'Ukupno',
                 tax: 'Porez',
                 shipping: 'Dostava',
@@ -2192,8 +2227,8 @@ export class TranslationService {
                 solarPanels: 'Solarni paneli',
                 inverters: 'Pretvarači',
                 batteries: 'Baterije',
-                mountingSystems: 'Sustavi za montažu',
-                cables: 'Kabeli'
+                airConditioners: 'Klima uređaji',
+                stoves: 'Peći'
             },
             // Safety Payment
             safetyPayment: {
@@ -3066,6 +3101,8 @@ export class TranslationService {
                     lowestPrice: 'lowest price',
                     from: 'from',
                     downloadTechnicalSheet: 'View Technical Sheet',
+                    quantity: 'Quantity',
+                    tierPricing: 'Tier pricing',
                     // Status labels
                     pendingApproval: 'Pending Approval',
                     rejected: 'Rejected'
@@ -3665,6 +3702,36 @@ export class TranslationService {
                     productName: 'Product Name',
                     customPricingSummary: 'Custom Pricing Summary',
                     pricingTiers: 'Pricing Tiers',
+                    // Bulk pricing translations
+                    bulkPricing: 'Bulk Pricing',
+                    applyBulkDiscount: 'Apply Bulk Discount',
+                    discountPercentage: 'Discount Percentage',
+                    applyToAll: 'Apply to All',
+                    applyToFiltered: 'Apply to Filtered',
+                    clearAllPricing: 'Clear All Pricing',
+                    bulkDiscountHint: 'Bulk discount allows you to set discounts on multiple products at once.',
+                    discount: 'discount',
+                    // Alert messages
+                    confirmBulkDiscountAll: 'Apply {{percentage}}% discount to ALL companies and ALL products? This will update all existing pricing records.',
+                    bulkDiscountAppliedAll: 'Bulk discount of {{percentage}}% applied to all {{count}} products',
+                    bulkDiscountAppliedFiltered: 'Bulk discount of {{percentage}}% applied to {{count}} filtered products',
+                    errorSavingPricing: 'Error saving pricing changes. Please try again.',
+                    allPricingCleared: 'All custom pricing has been cleared',
+                    // Additional alert messages
+                    noDataFoundInCsv: 'No data found in CSV file',
+                    errorImportingCsv: 'Error importing CSV file. Please check the console for details and try again.',
+                    noCompanyPricingDataToExport: 'No company pricing data to export',
+                    noPricingRecordsFoundToUpdate: 'No pricing records found to update',
+                    errorExportingCompanyPricing: 'Error exporting company pricing data. Please try again.',
+                    successfullyDeletedAllCustomPricing: 'Successfully deleted all custom pricing for {{companyName}}',
+                    errorDeletingCompanyPricing: 'Error deleting company pricing. Please try again.',
+                    // Bulk discount loading messages
+                    bulkDiscountProcessing: 'Processing bulk discount...',
+                    bulkDiscountProgress: 'Processed {{current}} of {{total}} company-product combinations',
+                    bulkDiscountCompleted: 'Bulk discount successfully applied to {{count}} combinations',
+                    confirmBulkDiscountCompany: 'Apply {{percentage}}% discount to all products for this company?',
+                    confirmBulkDiscountFiltered: 'Apply {{percentage}}% discount to {{count}} filtered products?',
+                    confirmClearAllPricing: 'Are you sure you want to clear all custom pricing for this company?',
                 },
                 companyPricingDetails: {
                     backToCompanies: 'Back to Companies',
@@ -4300,7 +4367,9 @@ export class TranslationService {
                 no: 'No',
                 today: 'Today',
                 thisWeek: 'This Week',
-                thisMonth: 'This Month'
+                thisMonth: 'This Month',
+                show: 'Show',
+                hide: 'Hide'
             },
             // Contact Information
             contact: {
@@ -4494,6 +4563,7 @@ export class TranslationService {
                 discountCode: 'Discount code',
                 enterDiscountCode: 'Enter discount code',
                 apply: 'Apply',
+                singleCouponLimit: 'Only one coupon can be applied at a time.',
                 subtotal: 'Subtotal',
                 tax: 'Tax',
                 shipping: 'Shipping',
@@ -4753,8 +4823,8 @@ export class TranslationService {
                 solarPanels: 'Solar Panels',
                 inverters: 'Inverters',
                 batteries: 'Batteries',
-                mountingSystems: 'Mounting Systems',
-                cables: 'Cables'
+                airConditioners: 'Air Conditioners',
+                stoves: 'Stoves'
             },
             // Safety Payment
             safetyPayment: {

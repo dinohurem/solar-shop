@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { TranslationService } from './translation.service';
+import { SupabaseService } from '../../services/supabase.service';
 
 export interface SearchSuggestion {
   type: 'search' | 'filter' | 'category';
@@ -14,19 +15,30 @@ export interface SearchSuggestion {
 })
 export class SearchSuggestionsService {
   private translationService = inject(TranslationService);
+  private supabaseService = inject(SupabaseService);
   private readonly STORAGE_KEY = 'search_suggestions';
   private readonly MAX_SUGGESTIONS = 10;
   private readonly MAX_AGE_DAYS = 30;
 
   /**
-   * Add a search suggestion to localStorage
+   * Add a search suggestion to both localStorage and global database
    */
   addSearchSuggestion(type: 'search' | 'filter' | 'category', value: string, displayText?: string): void {
-    const suggestions = this.getSuggestions();
     const normalizedValue = value.toLowerCase().trim();
-
     if (!normalizedValue) return;
 
+    // Add to localStorage (for immediate user experience)
+    this.addToLocalStorage(type, normalizedValue, displayText || value);
+
+    // Add to global database (for cross-user suggestions)
+    this.addToGlobalDatabase(type, normalizedValue, displayText || value);
+  }
+
+  /**
+   * Add suggestion to localStorage for immediate user experience
+   */
+  private addToLocalStorage(type: 'search' | 'filter' | 'category', normalizedValue: string, displayText: string): void {
+    const suggestions = this.getSuggestions();
     const existingIndex = suggestions.findIndex(s =>
       s.type === type && s.value.toLowerCase() === normalizedValue
     );
@@ -34,20 +46,17 @@ export class SearchSuggestionsService {
     const suggestion: SearchSuggestion = {
       type,
       value: normalizedValue,
-      displayText: displayText || value,
+      displayText,
       timestamp: Date.now(),
       count: existingIndex >= 0 ? suggestions[existingIndex].count + 1 : 1
     };
 
     if (existingIndex >= 0) {
-      // Update existing suggestion
       suggestions[existingIndex] = suggestion;
     } else {
-      // Add new suggestion
       suggestions.push(suggestion);
     }
 
-    // Sort by count (descending) and then by timestamp (most recent first)
     suggestions.sort((a, b) => {
       if (a.count === b.count) {
         return b.timestamp - a.timestamp;
@@ -55,10 +64,46 @@ export class SearchSuggestionsService {
       return b.count - a.count;
     });
 
-    // Keep only the most relevant suggestions
     const trimmedSuggestions = suggestions.slice(0, this.MAX_SUGGESTIONS);
-
     this.saveSuggestions(trimmedSuggestions);
+  }
+
+  /**
+   * Add suggestion to global database
+   */
+  private async addToGlobalDatabase(type: 'search' | 'filter' | 'category', normalizedValue: string, displayText: string): Promise<void> {
+    try {
+      // First try to update existing record
+      const { data: existing } = await this.supabaseService.client
+        .from('global_search_suggestions')
+        .select('*')
+        .eq('type', type)
+        .eq('value', normalizedValue)
+        .single();
+
+      if (existing) {
+        // Update existing record
+        await this.supabaseService.client
+          .from('global_search_suggestions')
+          .update({
+            count: existing.count + 1,
+            display_text: displayText
+          })
+          .eq('id', existing.id);
+      } else {
+        // Insert new record
+        await this.supabaseService.client
+          .from('global_search_suggestions')
+          .insert({
+            type,
+            value: normalizedValue,
+            display_text: displayText,
+            count: 1
+          });
+      }
+    } catch (error) {
+      console.error('Error adding global search suggestion:', error);
+    }
   }
 
   /**
@@ -91,25 +136,87 @@ export class SearchSuggestionsService {
   }
 
   /**
-   * Get popular search suggestions (most used)
+   * Get popular search suggestions (most used globally)
    */
-  getPopularSuggestions(limit: number = 5): SearchSuggestion[] {
-    const suggestions = this.getSuggestions();
+  async getPopularSuggestions(limit: number = 5): Promise<SearchSuggestion[]> {
+    try {
+      // First try to get truly popular suggestions (count >= 2)
+      let { data } = await this.supabaseService.client
+        .from('global_search_suggestions')
+        .select('*')
+        .gte('count', 2)
+        .order('count', { ascending: false })
+        .limit(limit);
 
-    return suggestions
-      .filter(s => s.count > 1) // Only show frequently used
-      .slice(0, limit);
+      // If no popular suggestions found, get any suggestions with count >= 1
+      if (!data || data.length === 0) {
+        const { data: fallbackData } = await this.supabaseService.client
+          .from('global_search_suggestions')
+          .select('*')
+          .gte('count', 1)
+          .order('count', { ascending: false })
+          .limit(limit);
+        data = fallbackData;
+      }
+
+      // If still no data, seed with default popular categories
+      if (!data || data.length === 0) {
+        await this.seedPopularSuggestions();
+
+        // Try once more after seeding
+        const { data: seededData } = await this.supabaseService.client
+          .from('global_search_suggestions')
+          .select('*')
+          .gte('count', 1)
+          .order('count', { ascending: false })
+          .limit(limit);
+        data = seededData;
+      }
+
+      return (data || []).map(item => ({
+        type: item.type as 'search' | 'filter' | 'category',
+        value: item.value,
+        displayText: item.display_text,
+        timestamp: new Date(item.updated_at).getTime(),
+        count: item.count
+      }));
+    } catch (error) {
+      console.error('Error fetching popular suggestions:', error);
+      // Fallback to localStorage
+      const suggestions = this.getSuggestions();
+      return suggestions
+        .filter(s => s.count >= 1) // Lowered threshold for fallback too
+        .sort((a, b) => b.count - a.count)
+        .slice(0, limit);
+    }
   }
 
   /**
-   * Get recent search suggestions
+   * Get recent search suggestions (globally)
    */
-  getRecentSuggestions(limit: number = 5): SearchSuggestion[] {
-    const suggestions = this.getSuggestions();
+  async getRecentSuggestions(limit: number = 5): Promise<SearchSuggestion[]> {
+    try {
+      const { data } = await this.supabaseService.client
+        .from('global_search_suggestions')
+        .select('*')
+        .order('updated_at', { ascending: false })
+        .limit(limit);
 
-    return suggestions
-      .sort((a, b) => b.timestamp - a.timestamp)
-      .slice(0, limit);
+      return (data || []).map(item => ({
+        type: item.type as 'search' | 'filter' | 'category',
+        value: item.value,
+        displayText: item.display_text,
+        timestamp: new Date(item.updated_at).getTime(),
+        count: item.count
+      }));
+    } catch (error) {
+      console.error('Error fetching recent suggestions:', error);
+      // Fallback to localStorage
+      const suggestions = this.getSuggestions();
+      return suggestions
+        .sort((a, b) => b.timestamp - a.timestamp)
+        .slice(0, limit);
+    }
   }
 
   /**
@@ -141,15 +248,15 @@ export class SearchSuggestionsService {
       },
       {
         type: 'category',
-        value: 'mounting-systems',
-        displayText: this.translationService.translate('search.mountingSystems'),
+        value: 'klima-uredaji',
+        displayText: 'Klima uređaji',
         timestamp,
         count: 1
       },
       {
         type: 'category',
-        value: 'cables',
-        displayText: this.translationService.translate('search.cables'),
+        value: 'peci',
+        displayText: 'Peći',
         timestamp,
         count: 1
       }
@@ -172,6 +279,55 @@ export class SearchSuggestionsService {
 
     const validSuggestions = suggestions.filter(s => s.timestamp > cutoffTime);
     this.saveSuggestions(validSuggestions);
+  }
+
+  /**
+   * Seed popular suggestions with default categories
+   */
+  private async seedPopularSuggestions(): Promise<void> {
+    try {
+      const defaultSuggestions = [
+        {
+          type: 'category',
+          value: 'solar-panels',
+          display_text: this.translationService.translate('search.solarPanels'),
+          count: 3
+        },
+        {
+          type: 'category',
+          value: 'inverters',
+          display_text: this.translationService.translate('search.inverters'),
+          count: 3
+        },
+        {
+          type: 'category',
+          value: 'batteries',
+          display_text: this.translationService.translate('search.batteries'),
+          count: 2
+        },
+        {
+          type: 'category',
+          value: 'klima-uredaji',
+          display_text: 'Klima uređaji',
+          count: 2
+        },
+        {
+          type: 'category',
+          value: 'peci',
+          display_text: 'Peći',
+          count: 2
+        }
+      ];
+
+      // Insert the seeded suggestions
+      for (const suggestion of defaultSuggestions) {
+        await this.supabaseService.client
+          .from('global_search_suggestions')
+          .upsert(suggestion);
+      }
+    } catch (error) {
+      console.error('Error seeding popular suggestions:', error);
+    }
   }
 
   private getSuggestions(): SearchSuggestion[] {

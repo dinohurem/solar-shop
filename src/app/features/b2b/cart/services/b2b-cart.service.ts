@@ -7,7 +7,7 @@ import { SupabaseService } from '../../../../services/supabase.service';
 import { CouponValidationService } from '../../../../shared/services/coupon-validation.service';
 import { TranslationService } from '../../../../shared/services/translation.service';
 import { CartItem } from '../../../../shared/models/cart.model';
-import { Coupon } from '../../../../shared/models/coupon.model';
+import { Coupon, CouponValidationResult } from '../../../../shared/models/coupon.model';
 
 interface AddToCartOptions {
     partnerOfferId?: string;
@@ -330,6 +330,18 @@ export class B2BCartService {
     private saveEntireCart(companyId: string, items: B2BCartItem[]): void {
         const storageKey = this.STORAGE_KEY + companyId;
         localStorage.setItem(storageKey, JSON.stringify(items));
+
+        // If cart becomes empty, clear applied coupons to allow fresh coupon application
+        if (items.length === 0) {
+            const currentCoupons = this.loadStoredCoupons(companyId);
+            if (currentCoupons.length > 0) {
+                console.log('B2B Cart is empty, clearing applied coupons for fresh session');
+                this.clearStoredCoupons(companyId);
+
+                // Clear session coupon tracking
+                this.couponValidationService.clearSessionCouponTracking();
+            }
+        }
     }
 
     /**
@@ -656,7 +668,7 @@ export class B2BCartService {
     private async applyCouponAsync(code: string, cartItems: B2BCartItem[], companyId: string): Promise<{ coupon: Coupon; discount: number }> {
         try {
             const mappedItems: CartItem[] = cartItems.map(item => this.mapB2BItemToCartItem(item));
-            const validationResult = await firstValueFrom(this.couponValidationService.validateCoupon(code, mappedItems));
+            const validationResult: CouponValidationResult = await firstValueFrom(this.couponValidationService.validateCoupon(code, mappedItems));
 
             if (!validationResult.isValid || !validationResult.coupon || !validationResult.discountAmount) {
                 throw new Error(validationResult.errorMessage || this.translationService.translate('cart.couponValidationError'));

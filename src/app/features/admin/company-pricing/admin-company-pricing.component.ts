@@ -1,11 +1,13 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { SupabaseService } from '../../../services/supabase.service';
 import { DataTableComponent, TableConfig } from '../shared/data-table/data-table.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { TranslationService } from '../../../shared/services/translation.service';
+import { ToastService } from '../../../shared/services/toast.service';
 
 interface CompanyPricingSummary {
   id: string;
@@ -19,13 +21,25 @@ interface CompanyPricingSummary {
 @Component({
   selector: 'app-admin-company-pricing',
   standalone: true,
-  imports: [CommonModule, DataTableComponent, TranslatePipe],
+  imports: [CommonModule, FormsModule, DataTableComponent, TranslatePipe],
   template: `
     <div class="space-y-6">
       <div class="flex items-center justify-between">
         <div>
           <h1 class="text-3xl font-bold text-gray-900">{{ 'admin.companyPricingForm.title' | translate }}</h1>
           <p class="mt-2 text-gray-600">{{ 'admin.companyPricingForm.subtitle' | translate }}</p>
+        </div>
+        <div class="flex items-center space-x-4">
+          <button
+            (click)="toggleGlobalBulkPricing()"
+            class="px-4 py-2 text-sm font-medium text-purple-700 bg-purple-100 border border-purple-300 rounded-md hover:bg-purple-200 transition-colors">
+            <div class="flex items-center space-x-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
+              </svg>
+              <span>{{ 'admin.companyPricingForm.bulkPricing' | translate }}</span>
+            </div>
+          </button>
         </div>
       </div>
       <app-data-table
@@ -39,18 +53,70 @@ interface CompanyPricingSummary {
         (csvImported)="onCsvImported($event)"
         (exportClicked)="onExport()">
       </app-data-table>
+
+      <!-- Global Bulk Pricing Modal -->
+      <div *ngIf="showGlobalBulkPricing" class="mt-6 bg-purple-50 border border-purple-200 rounded-lg p-6">
+        <h3 class="text-lg font-semibold text-purple-900 mb-4">{{ 'admin.companyPricingForm.bulkPricing' | translate }}</h3>
+
+        <div class="bg-purple-100 border border-purple-300 rounded-lg p-4">
+          <h4 class="text-sm font-semibold text-purple-900 mb-3">{{ 'admin.companyPricingForm.applyBulkDiscount' | translate }}</h4>
+          <div class="flex items-end space-x-4 mb-4">
+            <div class="flex-1">
+              <label class="block text-sm font-medium text-purple-700 mb-2">
+                {{ 'admin.companyPricingForm.discountPercentage' | translate }}
+              </label>
+              <input
+                type="number"
+                [(ngModel)]="globalBulkDiscountPercentage"
+                min="0"
+                max="100"
+                step="0.1"
+                class="w-full px-3 py-2 border border-purple-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                placeholder="0.0">
+            </div>
+          </div>
+
+          <!-- Preset Buttons -->
+          <div class="flex flex-wrap gap-2 mb-4">
+            <button
+              *ngFor="let preset of [5, 10, 15, 20, 25, 30]"
+              (click)="applyGlobalPresetDiscount(preset)"
+              class="px-3 py-1 bg-purple-200 hover:bg-purple-300 text-purple-800 rounded text-sm transition-colors">
+              -{{ preset }}% {{ 'admin.companyPricingForm.discount' | translate }}
+            </button>
+          </div>
+
+          <div class="flex space-x-3 mb-4">
+            <button
+              (click)="applyGlobalBulkDiscountToAll()"
+              [disabled]="!globalBulkDiscountPercentage || globalBulkDiscountPercentage <= 0 || globalBulkDiscountPercentage > 100"
+              class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:bg-gray-300 disabled:cursor-not-allowed">
+              {{ 'admin.companyPricingForm.applyToAll' | translate }}
+            </button>
+          </div>
+
+          <p class="text-xs text-purple-600 mb-4">
+            {{ 'admin.companyPricingForm.bulkDiscountHint' | translate }}
+          </p>
+        </div>
+      </div>
     </div>
   `,
 })
 export class AdminCompanyPricingComponent implements OnInit {
   private supabase = inject(SupabaseService);
   private router = inject(Router);
+  private toastService = inject(ToastService);
   translationService = inject(TranslationService);
   private companyPricingSubject = new BehaviorSubject<CompanyPricingSummary[]>([]);
   private loadingSubject = new BehaviorSubject<boolean>(true);
 
   companyPricing$ = this.companyPricingSubject.asObservable();
   loading$ = this.loadingSubject.asObservable();
+
+  // Global bulk pricing properties
+  showGlobalBulkPricing = false;
+  globalBulkDiscountPercentage: number = 0;
 
   tableConfig: TableConfig = {
     columns: [
@@ -101,7 +167,8 @@ export class AdminCompanyPricingComponent implements OnInit {
 
   async onCsvImported(csvData: any[]): Promise<void> {
     if (!csvData || csvData.length === 0) {
-      alert('No data found in CSV file');
+      const message = this.translationService.translate('admin.companyPricingForm.noDataFoundInCsv');
+      alert(message);
       return;
     }
 
@@ -324,7 +391,8 @@ export class AdminCompanyPricingComponent implements OnInit {
       await this.loadCompanyPricing();
     } catch (error) {
       console.error('Error importing CSV:', error);
-      alert('Error importing CSV file. Please check the console for details and try again.');
+      const errorMessage = this.translationService.translate('admin.companyPricingForm.errorImportingCsv');
+      alert(errorMessage);
     }
   }
 
@@ -333,7 +401,8 @@ export class AdminCompanyPricingComponent implements OnInit {
       // Get all company pricing data with tier pricing
       const allPricing = await this.supabase.getTable('company_pricing');
       if (!allPricing || allPricing.length === 0) {
-        alert('No company pricing data to export');
+        const message = this.translationService.translate('admin.companyPricingForm.noCompanyPricingDataToExport');
+        alert(message);
         return;
       }
 
@@ -394,7 +463,8 @@ export class AdminCompanyPricingComponent implements OnInit {
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Error exporting company pricing:', error);
-      alert('Error exporting company pricing data. Please try again.');
+      const errorMessage = this.translationService.translate('admin.companyPricingForm.errorExportingCompanyPricing');
+      alert(errorMessage);
     }
   }
 
@@ -477,10 +547,196 @@ export class AdminCompanyPricingComponent implements OnInit {
       }
 
       this.loadCompanyPricing();
-      alert(`Successfully deleted all custom pricing for ${companySummary.company_name}`);
+      const successMessage = this.translationService.translate('admin.companyPricingForm.successfullyDeletedAllCustomPricing', {
+        companyName: companySummary.company_name
+      });
+      alert(successMessage);
     } catch (err) {
       console.error('Error deleting company pricing', err);
-      alert('Error deleting company pricing. Please try again.');
+      const errorMessage = this.translationService.translate('admin.companyPricingForm.errorDeletingCompanyPricing');
+      alert(errorMessage);
+    }
+  }
+
+  // Global bulk pricing methods
+  toggleGlobalBulkPricing(): void {
+    this.showGlobalBulkPricing = !this.showGlobalBulkPricing;
+  }
+
+  applyGlobalPresetDiscount(percentage: number): void {
+    this.globalBulkDiscountPercentage = percentage;
+  }
+
+  async applyGlobalBulkDiscountToAll(): Promise<void> {
+    if (!this.globalBulkDiscountPercentage || this.globalBulkDiscountPercentage <= 0 || this.globalBulkDiscountPercentage > 100) {
+      return;
+    }
+
+    const confirmMessage = this.translationService.translate('admin.companyPricingForm.confirmBulkDiscountAll', {
+      percentage: this.globalBulkDiscountPercentage.toString()
+    });
+    if (confirm(confirmMessage)) {
+      this.applyGlobalBulkDiscountToAllConfirmed();
+    }
+  }
+
+  private async applyGlobalBulkDiscountToAllConfirmed(): Promise<void> {
+    let toastId: string | undefined;
+
+    try {
+      this.loadingSubject.next(true);
+
+      // Start loading toast
+      const loadingMessage = this.translationService.translate('admin.companyPricingForm.bulkDiscountProcessing');
+      toastId = this.toastService.showLoading(loadingMessage);
+
+      const discount = this.globalBulkDiscountPercentage / 100;
+      let successCount = 0;
+      let errorCount = 0;
+
+      // Step 1: Get all approved companies
+      const { data: companies, error: companiesError } = await this.supabase.client
+        .from('companies')
+        .select('*')
+        .eq('status', 'approved');
+
+      if (companiesError) {
+        console.error('Error fetching companies:', companiesError);
+        throw new Error('Failed to fetch companies');
+      }
+
+      if (!companies || companies.length === 0) {
+        this.toastService.failLoading(toastId, 'No approved companies found to apply discount to.');
+        return;
+      }
+
+      // Step 2: Get all products
+      const allProducts = await this.supabase.getTable('products');
+      if (!allProducts || allProducts.length === 0) {
+        this.toastService.failLoading(toastId, 'No products found to apply discount to.');
+        return;
+      }
+
+      // Step 3: Get existing company pricing records for efficiency
+      const existingPricing = await this.supabase.getTable('company_pricing');
+      const pricingMap = new Map<string, any>();
+
+      if (existingPricing) {
+        existingPricing.forEach(pricing => {
+          const key = `${pricing.company_id}-${pricing.product_id}`;
+          pricingMap.set(key, pricing);
+        });
+      }
+
+      // Step 4: Process all company-product combinations
+      const totalCombinations = companies.length * allProducts.length;
+      let processedCount = 0;
+
+      for (const company of companies) {
+        for (const product of allProducts) {
+          try {
+            processedCount++;
+
+            // Update progress every 10 items or on final item
+            if (processedCount % 10 === 0 || processedCount === totalCombinations) {
+              const progress = Math.round((processedCount / totalCombinations) * 100);
+              const progressMessage = this.translationService.translate('admin.companyPricingForm.bulkDiscountProgress', {
+                current: processedCount.toString(),
+                total: totalCombinations.toString()
+              });
+              this.toastService.updateLoadingProgress(toastId, progressMessage, progress);
+            }
+
+            const key = `${company.id}-${product.id}`;
+            const existingRecord = pricingMap.get(key);
+
+            // Always use the original product price as the base for discount calculation
+            const basePrice = Number(product.price) || 0;
+            if (basePrice <= 0) {
+              continue; // Skip products without valid price
+            }
+
+            const discountedPrice = Math.round(basePrice * (1 - discount) * 100) / 100;
+
+            if (existingRecord) {
+              // Update existing pricing record with discounted original price
+              const updatedData = {
+                price_tier_1: discountedPrice,
+                quantity_tier_1: 1,
+                price_tier_2: null,
+                quantity_tier_2: null,
+                price_tier_3: null,
+                quantity_tier_3: null,
+                minimum_order: 1,
+                updated_at: new Date().toISOString()
+              };
+
+              const { error: updateError } = await this.supabase.client
+                .from('company_pricing')
+                .update(updatedData)
+                .eq('id', existingRecord.id);
+
+              if (updateError) {
+                console.error('Error updating existing pricing:', updateError);
+                errorCount++;
+              } else {
+                successCount++;
+              }
+            } else {
+              // Create new pricing record with discounted base price
+              const newPricingData = {
+                company_id: company.id,
+                product_id: product.id,
+                price_tier_1: discountedPrice,
+                quantity_tier_1: 1,
+                price_tier_2: null,
+                quantity_tier_2: null,
+                price_tier_3: null,
+                quantity_tier_3: null,
+                minimum_order: 1,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              };
+
+              const { error: insertError } = await this.supabase.client
+                .from('company_pricing')
+                .insert(newPricingData);
+
+              if (insertError) {
+                console.error('Error inserting new pricing:', insertError);
+                errorCount++;
+              } else {
+                successCount++;
+              }
+            }
+          } catch (error) {
+            console.error('Error processing company-product combination:', error);
+            errorCount++;
+          }
+        }
+      }
+
+      // Complete the loading toast with success
+      const successMessage = this.translationService.translate('admin.companyPricingForm.bulkDiscountCompleted', {
+        count: successCount.toString()
+      });
+      this.toastService.completeLoading(toastId, successMessage);
+
+      // Reload the data
+      await this.loadCompanyPricing();
+
+    } catch (error) {
+      console.error('Error applying global bulk discount:', error);
+      const errorMessage = this.translationService.translate('admin.companyPricingForm.errorSavingPricing');
+
+      // Check if toastId exists (might be undefined if error occurred before toast creation)
+      if (typeof toastId !== 'undefined') {
+        this.toastService.failLoading(toastId, errorMessage);
+      } else {
+        this.toastService.showError(errorMessage);
+      }
+    } finally {
+      this.loadingSubject.next(false);
     }
   }
 }

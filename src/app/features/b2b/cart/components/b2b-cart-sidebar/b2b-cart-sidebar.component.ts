@@ -246,7 +246,8 @@ import { LucideAngularModule, ShoppingCart } from 'lucide-angular';
               </div>
             </div>
 
-            <div class="flex space-x-2">
+            <!-- Coupon Input - Only show when no coupons are applied -->
+            <div *ngIf="!(hasCouponsApplied$ | async)" class="flex space-x-2">
               <input
                 type="text"
                 [(ngModel)]="couponCode"
@@ -262,6 +263,11 @@ import { LucideAngularModule, ShoppingCart } from 'lucide-angular';
                 <span *ngIf="!(isCouponLoading$ | async)">{{ 'cart.apply' | translate }}</span>
                 <span *ngIf="isCouponLoading$ | async">...</span>
               </button>
+            </div>
+
+            <!-- Single coupon limitation message -->
+            <div *ngIf="hasCouponsApplied$ | async" class="text-xs text-gray-600 mt-2">
+              {{ 'cart.singleCouponLimit' | translate }}
             </div>
 
             <div *ngIf="couponError$ | async as error" class="mt-2 text-sm text-red-600">
@@ -418,6 +424,7 @@ export class B2BCartSidebarComponent implements OnInit, OnDestroy {
   appliedCoupons$: Observable<B2BAppliedCoupon[]>;
   couponError$: Observable<string | null>;
   isCouponLoading$: Observable<boolean>;
+  hasCouponsApplied$: Observable<boolean>;
 
   couponCode = '';
 
@@ -438,6 +445,7 @@ export class B2BCartSidebarComponent implements OnInit, OnDestroy {
     this.appliedCoupons$ = this.store.select(B2BCartSelectors.selectB2BCartAppliedCoupons);
     this.couponError$ = this.store.select(B2BCartSelectors.selectB2BCartCouponError);
     this.isCouponLoading$ = this.store.select(B2BCartSelectors.selectB2BCartIsCouponLoading);
+    this.hasCouponsApplied$ = this.store.select(B2BCartSelectors.selectB2BCartHasCoupons);
     this.hasMinimumOrderViolations$ = this.cartItems$.pipe(
       takeUntil(this.destroy$),
       // Check if any item has quantity below minimum order

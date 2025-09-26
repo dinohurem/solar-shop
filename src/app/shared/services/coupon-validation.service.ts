@@ -22,8 +22,10 @@ export class CouponValidationService {
         console.error('Error validating coupon:', error);
         return of({
           isValid: false,
-          errorMessage: this.translationService.translate('cart.couponValidationError')
-        });
+          errorMessage: this.translationService.translate('cart.couponValidationError'),
+          discountAmount: undefined,
+          coupon: undefined
+        } as CouponValidationResult);
       })
     );
   }
@@ -36,7 +38,9 @@ export class CouponValidationService {
       if (!coupon) {
         return {
           isValid: false,
-          errorMessage: this.translationService.translate('cart.couponNotFound')
+          errorMessage: this.translationService.translate('cart.couponNotFound'),
+          discountAmount: undefined,
+          coupon: undefined
         };
       }
 
@@ -71,7 +75,9 @@ export class CouponValidationService {
       console.error('Error in coupon validation:', error);
       return {
         isValid: false,
-        errorMessage: this.translationService.translate('cart.couponValidationError')
+        errorMessage: this.translationService.translate('cart.couponValidationError'),
+        discountAmount: undefined,
+        coupon: undefined
       };
     }
   }
@@ -165,7 +171,9 @@ export class CouponValidationService {
       console.log('Coupon has already been used in this session:', coupon.code);
       return {
         isValid: false,
-        errorMessage: this.translationService.translate('cart.couponAlreadyUsedInSession') || 'This coupon has already been used in this session'
+        errorMessage: this.translationService.translate('cart.couponAlreadyUsedInSession') || 'This coupon has already been used in this session',
+        discountAmount: undefined,
+        coupon: undefined
       };
     }
 
@@ -174,7 +182,9 @@ export class CouponValidationService {
       console.log('Coupon is not active:', coupon.isActive);
       return {
         isValid: false,
-        errorMessage: this.translationService.translate('cart.couponInactive')
+        errorMessage: this.translationService.translate('cart.couponInactive'),
+        discountAmount: undefined,
+        coupon: undefined
       };
     }
 
@@ -186,7 +196,9 @@ export class CouponValidationService {
       console.log('Coupon start date is in the future');
       return {
         isValid: false,
-        errorMessage: this.translationService.translate('cart.couponNotYetValid')
+        errorMessage: this.translationService.translate('cart.couponNotYetValid'),
+        discountAmount: undefined,
+        coupon: undefined
       };
     }
 
@@ -194,7 +206,9 @@ export class CouponValidationService {
       console.log('Coupon has expired');
       return {
         isValid: false,
-        errorMessage: this.translationService.translate('cart.couponExpired')
+        errorMessage: this.translationService.translate('cart.couponExpired'),
+        discountAmount: undefined,
+        coupon: undefined
       };
     }
 
@@ -211,7 +225,9 @@ export class CouponValidationService {
       console.log('Coupon has no uses left:', { usagesLeft, currentUsage });
       return {
         isValid: false,
-        errorMessage: this.translationService.translate('cart.couponUsageLimitReached')
+        errorMessage: this.translationService.translate('cart.couponUsageLimitReached'),
+        discountAmount: undefined,
+        coupon: undefined
       };
     }
 
@@ -224,7 +240,9 @@ export class CouponValidationService {
         isValid: false,
         errorMessage: this.translationService.translate('cart.couponMinOrderNotMet', {
           amount: coupon.minOrderAmount.toFixed(2)
-        })
+        }),
+        discountAmount: undefined,
+        coupon: undefined
       };
     }
 
@@ -234,7 +252,9 @@ export class CouponValidationService {
         isValid: false,
         errorMessage: this.translationService.translate('cart.couponMaxOrderExceeded', {
           amount: coupon.maxOrderAmount.toFixed(2)
-        })
+        }),
+        discountAmount: undefined,
+        coupon: undefined
       };
     }
 
@@ -255,7 +275,9 @@ export class CouponValidationService {
 
       return {
         isValid: false,
-        errorMessage: this.translationService.translate('cart.couponCannotApplyToDiscountedProducts') || 'Cannot apply coupon to products that already have offer discounts'
+        errorMessage: this.translationService.translate('cart.couponCannotApplyToDiscountedProducts') || 'Cannot apply coupon to products that already have offer discounts',
+        discountAmount: undefined,
+        coupon: undefined
       };
     }
 
@@ -275,7 +297,9 @@ export class CouponValidationService {
         if (!hasApplicableOffer) {
           return {
             isValid: false,
-            errorMessage: this.translationService.translate('cart.couponNotApplicableToOffers')
+            errorMessage: this.translationService.translate('cart.couponNotApplicableToOffers'),
+            discountAmount: undefined,
+            coupon: undefined
           };
         }
       }
@@ -289,7 +313,9 @@ export class CouponValidationService {
         if (hasExcludedOffer) {
           return {
             isValid: false,
-            errorMessage: this.translationService.translate('cart.couponExcludedFromOffers')
+            errorMessage: this.translationService.translate('cart.couponExcludedFromOffers'),
+            discountAmount: undefined,
+            coupon: undefined
           };
         }
       }
@@ -308,7 +334,9 @@ export class CouponValidationService {
       if (!hasApplicableProduct) {
         return {
           isValid: false,
-          errorMessage: this.translationService.translate('cart.couponNotApplicableToProducts')
+          errorMessage: this.translationService.translate('cart.couponNotApplicableToProducts'),
+          discountAmount: undefined,
+          coupon: undefined
         };
       }
     }
@@ -322,7 +350,9 @@ export class CouponValidationService {
       if (hasExcludedProduct) {
         return {
           isValid: false,
-          errorMessage: this.translationService.translate('cart.couponExcludedFromProducts')
+          errorMessage: this.translationService.translate('cart.couponExcludedFromProducts'),
+          discountAmount: undefined,
+          coupon: undefined
         };
       }
     }
@@ -336,7 +366,9 @@ export class CouponValidationService {
       if (!hasApplicableCategory) {
         return {
           isValid: false,
-          errorMessage: this.translationService.translate('cart.couponNotApplicableToCategories')
+          errorMessage: this.translationService.translate('cart.couponNotApplicableToCategories'),
+          discountAmount: undefined,
+          coupon: undefined
         };
       }
     }

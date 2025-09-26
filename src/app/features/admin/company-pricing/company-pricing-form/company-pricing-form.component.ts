@@ -8,6 +8,7 @@ import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { SupabaseService } from '../../../../services/supabase.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../shared/services/translation.service';
 import * as CompanyPricingActions from '../store/company-pricing.actions';
 import * as CompanyPricingSelectors from '../store/company-pricing.selectors';
 import { Company, Product } from '../store/company-pricing.actions';
@@ -91,6 +92,82 @@ interface ProductWithCustomPrice extends Product {
         </div>
       </div>
 
+      <!-- Bulk Pricing Tools -->
+      <div *ngIf="selectedCompany" class="bg-white shadow-sm rounded-xl border border-gray-100 p-6 mb-6">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
+            </svg>
+            {{ 'admin.companyPricingForm.bulkPricing' | translate }}
+          </h3>
+          <button
+            type="button"
+            (click)="toggleBulkPricing()"
+            class="px-4 py-2 text-sm font-medium text-purple-700 bg-purple-100 border border-purple-300 rounded-md hover:bg-purple-200">
+            {{ showBulkPricing ? ('common.hide' | translate) : ('common.show' | translate) }}
+          </button>
+        </div>
+
+        <div *ngIf="showBulkPricing" class="space-y-4">
+          <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+            <h4 class="text-sm font-semibold text-purple-900 mb-3">{{ 'admin.companyPricingForm.applyBulkDiscount' | translate }}</h4>
+            <div class="flex items-end space-x-4">
+              <div class="flex-1">
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  {{ 'admin.companyPricingForm.discountPercentage' | translate }}
+                </label>
+                <div class="relative">
+                  <input
+                    type="number"
+                    [(ngModel)]="bulkDiscountPercentage"
+                    min="0"
+                    max="100"
+                    step="1"
+                    placeholder="e.g., 15"
+                    class="w-full px-4 py-2 pr-8 border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:ring-0 transition-colors duration-200">
+                  <span class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500">%</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                (click)="applyBulkDiscount()"
+                [disabled]="!bulkDiscountPercentage || bulkDiscountPercentage <= 0 || bulkDiscountPercentage > 100"
+                class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                {{ 'admin.companyPricingForm.applyToAll' | translate }}
+              </button>
+              <button
+                type="button"
+                (click)="applyBulkDiscountToFiltered()"
+                [disabled]="!bulkDiscountPercentage || bulkDiscountPercentage <= 0 || bulkDiscountPercentage > 100 || filteredProducts.length === 0"
+                class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                {{ 'admin.companyPricingForm.applyToFiltered' | translate }} ({{ filteredProducts.length }})
+              </button>
+              <button
+                type="button"
+                (click)="clearAllCustomPricing()"
+                class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                {{ 'admin.companyPricingForm.clearAllPricing' | translate }}
+              </button>
+            </div>
+            <p class="text-xs text-purple-600 mt-2">
+              {{ 'admin.companyPricingForm.bulkDiscountHint' | translate }}
+            </p>
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="grid grid-cols-4 gap-3">
+            <button
+              *ngFor="let preset of [5, 10, 15, 20]"
+              type="button"
+              (click)="applyPresetDiscount(preset)"
+              class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium">
+              -{{ preset }}% {{ 'admin.companyPricingForm.discount' | translate }}
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- Products Table -->
       <div *ngIf="selectedCompany" class="bg-white shadow-sm rounded-xl border border-gray-100 p-6">
         <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
@@ -119,41 +196,41 @@ interface ProductWithCustomPrice extends Product {
 
         <!-- Products Table -->
         <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
+          <table class="w-full table-fixed divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="w-1/4 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   {{ 'admin.companyPricingForm.productName' | translate }}
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="w-20 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   {{ 'admin.companyPricingForm.skuLabel' | translate }}
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="w-24 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   {{ 'admin.companyPricingForm.currentPrice' | translate }}
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="w-1/3 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   {{ 'admin.companyPricingForm.pricingTiers' | translate }}
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="w-28 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   {{ 'admin.companyPricingForm.minimumOrder' | translate }}
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="w-20 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   {{ 'common.actions' | translate }}
                 </th>
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
               <tr *ngFor="let product of filteredProducts" class="hover:bg-gray-50">
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-medium text-gray-900">{{ product.name }}</div>
+                <td class="w-1/4 px-4 py-4">
+                  <div class="text-sm font-medium text-gray-900 break-words">{{ product.name }}</div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-500">{{ product.sku }}</div>
+                <td class="w-20 px-4 py-4">
+                  <div class="text-sm text-gray-500 break-all">{{ product.sku }}</div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
+                <td class="w-24 px-3 py-4">
                   <div class="text-sm text-gray-900">€{{ product.price | number:'1.2-2' }}</div>
                 </td>
-                <td class="px-6 py-4">
+                <td class="w-1/3 px-3 py-4">
                   <div class="space-y-2">
                     <!-- Tier 1 (Base Price) -->
                     <div class="flex items-center space-x-2">
@@ -222,7 +299,7 @@ interface ProductWithCustomPrice extends Product {
                     </div>
                   </div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
+                <td class="w-28 px-3 py-4">
                   <input
                     type="number"
                     step="1"
@@ -230,9 +307,9 @@ interface ProductWithCustomPrice extends Product {
                     [value]="product.minimumOrder || 1"
                     (input)="updateMinimumOrder(product, $event)"
                     placeholder="1"
-                    class="w-24 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    class="w-20 px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
+                <td class="w-20 px-3 py-4">
                   <button
                     *ngIf="product.hasCustomPrice"
                     type="button"
@@ -305,6 +382,7 @@ export class CompanyPricingFormComponent implements OnInit, OnDestroy {
   private supabase = inject(SupabaseService);
   private title = inject(Title);
   private store = inject(Store);
+  private translationService = inject(TranslationService);
   private destroy$ = new Subject<void>();
 
   companies$: Observable<Company[]> = this.store.select(CompanyPricingSelectors.selectCompanies);
@@ -318,6 +396,8 @@ export class CompanyPricingFormComponent implements OnInit, OnDestroy {
   selectedCompany: Company | null = null;
   productSearchTerm: string = '';
   existingPricing: any[] = [];
+  bulkDiscountPercentage: number = 0;
+  showBulkPricing: boolean = false;
 
   ngOnInit(): void {
     console.log('Company Pricing Form: ngOnInit called');
@@ -632,11 +712,130 @@ export class CompanyPricingFormComponent implements OnInit, OnDestroy {
       this.router.navigate(['/admin/cijene-tvrtki']);
     } catch (error) {
       console.error('Error saving company pricing:', error);
-      alert('Error saving pricing changes. Please try again.');
+      const errorMessage = this.translationService.translate('admin.companyPricingForm.errorSavingPricing');
+      alert(errorMessage);
     }
   }
 
   goBack(): void {
     this.router.navigate(['/admin/cijene-tvrtki']);
+  }
+
+  toggleBulkPricing(): void {
+    this.showBulkPricing = !this.showBulkPricing;
+  }
+
+  applyBulkDiscount(): void {
+    if (!this.bulkDiscountPercentage || this.bulkDiscountPercentage <= 0 || this.bulkDiscountPercentage > 100) {
+      return;
+    }
+
+    const confirmMessage = this.translationService.translate('admin.companyPricingForm.confirmBulkDiscountCompany', {
+      percentage: this.bulkDiscountPercentage.toString()
+    });
+    if (confirm(confirmMessage)) {
+      this.applyBulkDiscountConfirmed();
+    }
+  }
+
+  private applyBulkDiscountConfirmed(): void {
+    const discount = this.bulkDiscountPercentage / 100;
+
+    // Apply discount to all products
+    this.filteredProducts = this.products.map(product => {
+      const discountedPrice = product.price * (1 - discount);
+      const quantityTier1 = 1;
+      const priceTier1 = Math.round(discountedPrice * 100) / 100; // Round to 2 decimal places
+
+      return {
+        ...product,
+        customPrice: priceTier1,
+        hasCustomPrice: true,
+        minimumOrder: 1,
+        quantityTier1,
+        priceTier1,
+        quantityTier2: undefined,
+        priceTier2: undefined,
+        quantityTier3: undefined,
+        priceTier3: undefined
+      };
+    });
+
+    // Show notification
+    const message = this.translationService.translate('admin.companyPricingForm.bulkDiscountAppliedAll', {
+      percentage: this.bulkDiscountPercentage.toString(),
+      count: this.products.length.toString()
+    });
+    alert(message);
+  }
+
+  applyBulkDiscountToFiltered(): void {
+    if (!this.bulkDiscountPercentage || this.bulkDiscountPercentage <= 0 || this.bulkDiscountPercentage > 100) {
+      return;
+    }
+
+    const confirmMessage = this.translationService.translate('admin.companyPricingForm.confirmBulkDiscountFiltered', {
+      percentage: this.bulkDiscountPercentage.toString(),
+      count: this.filteredProducts.length.toString()
+    });
+    if (!confirm(confirmMessage)) {
+      return;
+    }
+
+    const discount = this.bulkDiscountPercentage / 100;
+
+    // Apply discount only to currently filtered/visible products
+    this.filteredProducts = this.filteredProducts.map(product => {
+      const discountedPrice = product.price * (1 - discount);
+      const quantityTier1 = product.quantityTier1 || 1;
+      const priceTier1 = Math.round(discountedPrice * 100) / 100;
+
+      return {
+        ...product,
+        customPrice: priceTier1,
+        hasCustomPrice: true,
+        minimumOrder: 1,
+        quantityTier1,
+        priceTier1,
+        quantityTier2: undefined,
+        priceTier2: undefined,
+        quantityTier3: undefined,
+        priceTier3: undefined
+      };
+    });
+
+    const message = this.translationService.translate('admin.companyPricingForm.bulkDiscountAppliedFiltered', {
+      percentage: this.bulkDiscountPercentage.toString(),
+      count: this.filteredProducts.length.toString()
+    });
+    alert(message);
+  }
+
+  applyPresetDiscount(percentage: number): void {
+    this.bulkDiscountPercentage = percentage;
+  }
+
+  clearAllCustomPricing(): void {
+    const confirmMessage = this.translationService.translate('admin.companyPricingForm.confirmClearAllPricing');
+    if (!confirm(confirmMessage)) {
+      return;
+    }
+
+    // Clear all custom pricing
+    this.filteredProducts = this.filteredProducts.map(product => ({
+      ...product,
+      customPrice: product.price,
+      hasCustomPrice: false,
+      minimumOrder: 1,
+      quantityTier1: 1,
+      priceTier1: product.price,
+      quantityTier2: undefined,
+      priceTier2: undefined,
+      quantityTier3: undefined,
+      priceTier3: undefined
+    }));
+
+    const message = this.translationService.translate('admin.companyPricingForm.allPricingCleared');
+    alert(message);
   }
 }

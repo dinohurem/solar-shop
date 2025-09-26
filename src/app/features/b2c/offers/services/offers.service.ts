@@ -122,6 +122,16 @@ export class OffersService {
             const { originalPrice, discountedPrice } = await this.calculateOfferPricing(offer);
             let discountPercentage = 0;
 
+            console.log('Offers Service - Converting offer:', {
+                offerId: offer.id,
+                title: offer.title,
+                discount_type: offer.discount_type,
+                discount_value: offer.discount_value,
+                calculatedOriginal: originalPrice,
+                calculatedDiscounted: discountedPrice,
+                difference: originalPrice - discountedPrice
+            });
+
             if (originalPrice > 0) {
                 if (offer.discount_type === 'percentage') {
                     discountPercentage = offer.discount_value;
@@ -173,10 +183,21 @@ export class OffersService {
                 const originalPrice = 100;
                 let discountedPrice = originalPrice;
 
+                console.log('calculateOfferPricing - No products, using placeholder logic:', {
+                    offerId: offer.id,
+                    discount_type: offer.discount_type,
+                    discount_value: offer.discount_value,
+                    originalPrice
+                });
+
                 if (offer.discount_type === 'percentage') {
                     discountedPrice = originalPrice * (1 - offer.discount_value / 100);
+                    console.log('Applied percentage discount to placeholder:', discountedPrice);
                 } else if (offer.discount_type === 'fixed_amount') {
                     discountedPrice = Math.max(0, originalPrice - offer.discount_value);
+                    console.log('Applied fixed amount discount to placeholder:', discountedPrice);
+                } else {
+                    console.log('NO DISCOUNT APPLIED to placeholder - discount_type not recognized:', offer.discount_type);
                 }
 
                 return { originalPrice, discountedPrice };
@@ -191,12 +212,22 @@ export class OffersService {
 
             // Calculate discounted price based on discount type
             let totalDiscountedPrice = 0;
+            console.log('calculateOfferPricing discount calculation:', {
+                offerId: offer.id,
+                discount_type: offer.discount_type,
+                discount_value: offer.discount_value,
+                totalOriginalPrice
+            });
+
             if (offer.discount_type === 'percentage') {
                 totalDiscountedPrice = totalOriginalPrice * (1 - offer.discount_value / 100);
+                console.log('Applied percentage discount:', totalDiscountedPrice);
             } else if (offer.discount_type === 'fixed_amount') {
                 totalDiscountedPrice = Math.max(0, totalOriginalPrice - offer.discount_value);
+                console.log('Applied fixed amount discount:', totalDiscountedPrice);
             } else {
                 totalDiscountedPrice = totalOriginalPrice;
+                console.log('NO DISCOUNT APPLIED - discount_type not recognized:', offer.discount_type);
             }
 
             return {

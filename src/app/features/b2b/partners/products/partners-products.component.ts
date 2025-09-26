@@ -7,6 +7,7 @@ import { Observable, combineLatest, Subject } from 'rxjs';
 import { map, filter, switchMap, takeUntil, debounceTime, distinctUntilChanged, take, skip } from 'rxjs/operators';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { TranslationService } from '../../../../shared/services/translation.service';
+import { LucideAngularModule, ShoppingCart } from 'lucide-angular';
 import { selectCurrentUser } from '../../../../core/auth/store/auth.selectors';
 import { User } from '../../../../shared/models/user.model';
 import { Company } from '../../../../shared/models/company.model';
@@ -22,7 +23,7 @@ import { B2BProductsUrlStateService, B2BProductListUrlState } from './services/b
 @Component({
   selector: 'app-partners-products',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, TranslatePipe],
+  imports: [CommonModule, RouterModule, FormsModule, TranslatePipe, LucideAngularModule],
   template: `
     <div class="min-h-screen bg-gray-50">
       <!-- Header -->
@@ -445,10 +446,17 @@ import { B2BProductsUrlStateService, B2BProductListUrlState } from './services/b
                       <!-- Actions - Always at bottom with fixed height -->
                       <div class="mt-auto space-y-2 h-[100px] flex flex-col justify-end">
                         <!-- Add to Cart Button - only show if has B2B price and in stock -->
-                        <button *ngIf="isCompanyContact && product.in_stock && hasB2BPrice(product)" 
+                        <button *ngIf="isCompanyContact && product.in_stock && hasB2BPrice(product)"
                                 (click)="addToCart(product, $event)"
                                 class="w-full bg-solar-600 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-solar-700 transition-colors">
-                          {{ 'b2b.products.addToCart' | translate }}
+                          <span class="flex items-center justify-center space-x-2">
+                            <lucide-angular
+                              name="shopping-cart"
+                              class="w-4 h-4"
+                              [img]="ShoppingCartIcon">
+                            </lucide-angular>
+                            <span>{{ 'b2b.products.addToCart' | translate }}</span>
+                          </span>
                         </button>
                         
                         <!-- Request Quote Button - only show if no B2B price OR out of stock -->
@@ -524,10 +532,17 @@ import { B2BProductsUrlStateService, B2BProductListUrlState } from './services/b
                                     class="px-3 py-1 border border-gray-300 text-gray-700 rounded text-sm hover:bg-gray-50">
                               {{ 'b2b.products.viewDetails' | translate }}
                             </button>
-                            <button *ngIf="isCompanyContact && product.in_stock && hasB2BPrice(product)" 
+                            <button *ngIf="isCompanyContact && product.in_stock && hasB2BPrice(product)"
                                     (click)="addToCart(product)"
                                     class="px-3 py-1 bg-solar-600 text-white rounded text-sm hover:bg-solar-700">
-                              {{ 'b2b.products.addToCart' | translate }}
+                              <span class="flex items-center space-x-1">
+                                <lucide-angular
+                                  name="shopping-cart"
+                                  class="w-3 h-3"
+                                  [img]="ShoppingCartIcon">
+                                </lucide-angular>
+                                <span>{{ 'b2b.products.addToCart' | translate }}</span>
+                              </span>
                             </button>
                             <button *ngIf="isCompanyContact && (!hasB2BPrice(product) || !product.in_stock)" 
                                     (click)="requestQuote(product)"
@@ -720,6 +735,9 @@ export class PartnersProductsComponent implements OnInit, OnDestroy {
 
   gridView = 'grid';
   showMobileFilters = false;
+
+  // Lucide icons
+  ShoppingCartIcon = ShoppingCart;
 
   // Category expansion state
   categoryExpansionState: { [categoryId: string]: boolean } = {};
@@ -1183,6 +1201,9 @@ export class PartnersProductsComponent implements OnInit, OnDestroy {
         quantity: 1,
         companyId: this.company.id
       }));
+
+      // Open cart sidebar
+      this.store.dispatch(B2BCartActions.openB2BCartSidebar());
     }
   }
 

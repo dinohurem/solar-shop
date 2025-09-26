@@ -875,20 +875,27 @@ export class NavbarComponent implements OnInit, OnDestroy {
     return this.currentRoute.startsWith(route);
   }
 
-  updateSearchSuggestions(): void {
-    // Get suggestions from localStorage
-    this.recentSuggestions = this.searchSuggestionsService.getRecentSuggestions(4);
-    this.popularSuggestions = this.searchSuggestionsService.getPopularSuggestions(4);
-    this.defaultSuggestions = this.searchSuggestionsService.getDefaultCategorySuggestions();
+  async updateSearchSuggestions(): Promise<void> {
+    // Get suggestions from database and localStorage
+    try {
+      this.recentSuggestions = await this.searchSuggestionsService.getRecentSuggestions(4);
+      this.popularSuggestions = await this.searchSuggestionsService.getPopularSuggestions(4);
+      this.defaultSuggestions = this.searchSuggestionsService.getDefaultCategorySuggestions();
 
-    // Combine all suggestions for display logic
-    this.displaySuggestions = [
-      ...this.recentSuggestions,
-      ...this.popularSuggestions,
-      ...this.defaultSuggestions
-    ];
+      // Combine all suggestions for display logic
+      this.displaySuggestions = [
+        ...this.recentSuggestions,
+        ...this.popularSuggestions,
+        ...this.defaultSuggestions
+      ];
 
-    // Clean up old suggestions periodically
-    this.searchSuggestionsService.clearOldSuggestions();
+      // Clean up old suggestions periodically
+      this.searchSuggestionsService.clearOldSuggestions();
+    } catch (error) {
+      console.error('Error loading search suggestions:', error);
+      // Fallback to default suggestions only
+      this.defaultSuggestions = this.searchSuggestionsService.getDefaultCategorySuggestions();
+      this.displaySuggestions = [...this.defaultSuggestions];
+    }
   }
 } 

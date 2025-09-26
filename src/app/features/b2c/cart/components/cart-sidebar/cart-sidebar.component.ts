@@ -211,16 +211,16 @@ import { LucideAngularModule, ShoppingCart } from 'lucide-angular';
                   </div>
                 </div>
 
-                <!-- Coupon Input -->
-                <div class="flex space-x-2">
-                  <input 
+                <!-- Coupon Input - Only show when no coupons are applied -->
+                <div *ngIf="!(hasCouponsApplied$ | async)" class="flex space-x-2">
+                  <input
                     type="text"
                     [(ngModel)]="couponCode"
                     [placeholder]="'cart.enterDiscountCode' | translate"
                     class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     [disabled]="(isCouponLoading$ | async) || false"
                   >
-                  <button 
+                  <button
                     (click)="applyCoupon()"
                     [disabled]="isApplyButtonDisabled || (isCouponLoading$ | async)"
                     class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -228,6 +228,11 @@ import { LucideAngularModule, ShoppingCart } from 'lucide-angular';
                     <span *ngIf="!(isCouponLoading$ | async)">{{ 'cart.apply' | translate }}</span>
                     <span *ngIf="isCouponLoading$ | async">...</span>
                   </button>
+                </div>
+
+                <!-- Single coupon limitation message -->
+                <div *ngIf="hasCouponsApplied$ | async" class="text-xs text-gray-600 mt-2">
+                  {{ 'cart.singleCouponLimit' | translate }}
                 </div>
 
                 <!-- Coupon Error -->
@@ -247,13 +252,6 @@ import { LucideAngularModule, ShoppingCart } from 'lucide-angular';
                   <div class="flex justify-between">
                     <span class="text-gray-600">{{ 'cart.subtotal' | translate }}</span>
                     <span>{{ summary.subtotal | currency:'EUR':'symbol':'1.2-2' }}</span>
-                  </div>
-                  <div
-                    *ngIf="summary.shipping && summary.shipping > 0"
-                    class="flex justify-between text-gray-600"
-                  >
-                    <span>{{ 'cart.shipping' | translate }}</span>
-                    <span>{{ summary.shipping | currency:'EUR':'symbol':'1.2-2' }}</span>
                   </div>
                   <div
                     *ngIf="summary.discount && summary.discount > 0"
@@ -364,6 +362,7 @@ export class CartSidebarComponent implements OnInit {
   couponError$ = this.store.select(CartSelectors.selectCouponError);
   isCouponLoading$ = this.store.select(CartSelectors.selectIsCouponLoading);
   canApplyCoupon$ = this.store.select(CartSelectors.selectCanApplyCoupon);
+  hasCouponsApplied$ = this.store.select(CartSelectors.selectHasCouponsApplied);
 
   // Component state
   couponCode = '';

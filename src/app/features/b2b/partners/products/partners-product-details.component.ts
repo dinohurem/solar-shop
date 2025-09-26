@@ -1,10 +1,12 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil, switchMap, map } from 'rxjs/operators';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { LucideAngularModule, ShoppingCart } from 'lucide-angular';
 import { selectCurrentUser } from '../../../../core/auth/store/auth.selectors';
 import { User } from '../../../../shared/models/user.model';
 import { Company } from '../../../../shared/models/company.model';
@@ -17,7 +19,7 @@ import * as B2BCartActions from '../../cart/store/b2b-cart.actions';
 @Component({
   selector: 'app-partners-product-details',
   standalone: true,
-  imports: [CommonModule, RouterModule, TranslatePipe],
+  imports: [CommonModule, RouterModule, FormsModule, TranslatePipe, LucideAngularModule],
   template: `
     <div class="min-h-screen bg-gray-50">
       <!-- Breadcrumb -->
@@ -429,13 +431,60 @@ import * as B2BCartActions from '../../cart/store/b2b-cart.actions';
 
             
 
+            <!-- Quantity Selector for Add to Cart -->
+            <div *ngIf="isCompanyContact && product.in_stock && hasB2BPrice(product)" class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                {{ 'b2b.products.quantity' | translate }}:
+              </label>
+              <div class="flex items-center space-x-4">
+                <div class="flex items-center border border-gray-300 rounded-lg">
+                  <button
+                    (click)="decreaseQuantity()"
+                    class="px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors rounded-l-lg"
+                  >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                    </svg>
+                  </button>
+                  <input
+                    type="number"
+                    [(ngModel)]="selectedQuantity"
+                    (change)="onQuantityChange($event)"
+                    min="1"
+                    class="w-20 px-3 py-2 text-center border-x border-gray-300 focus:outline-none focus:ring-2 focus:ring-solar-500"
+                  >
+                  <button
+                    (click)="increaseQuantity()"
+                    class="px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors rounded-r-lg"
+                  >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                  </button>
+                </div>
+                <div class="text-sm text-gray-600">
+                  <span *ngIf="getMinimumOrder(product) > 1" class="text-amber-600">
+                    {{ 'b2b.products.minimumOrder' | translate }}: {{ getMinimumOrder(product) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
             <!-- Actions -->
             <div class="space-y-3">
               <!-- Add to Cart Button -->
-              <button *ngIf="isCompanyContact && product.in_stock && hasB2BPrice(product)" 
+              <button *ngIf="isCompanyContact && product.in_stock && hasB2BPrice(product)"
                       (click)="addToCart(product)"
                       class="w-full bg-solar-600 text-white py-3 px-6 rounded-lg text-lg font-medium hover:bg-solar-700 transition-colors">
-                {{ 'b2b.products.addToCart' | translate }}
+                <span class="flex items-center justify-center space-x-2">
+                  <lucide-angular
+                    name="shopping-cart"
+                    class="w-6 h-6"
+                    [img]="ShoppingCartIcon">
+                  </lucide-angular>
+                  <span *ngIf="selectedQuantity === 1">{{ 'b2b.products.addToCart' | translate }}</span>
+                  <span *ngIf="selectedQuantity > 1">{{ 'b2b.products.addToCart' | translate }} ({{ selectedQuantity }} {{ 'b2b.products.pieces' | translate }})</span>
+                </span>
               </button>
               
               <!-- Request Quote Button -->
@@ -572,10 +621,16 @@ export class PartnersProductDetailsComponent implements OnInit, OnDestroy {
   // Collapsible state
   isDescriptionExpanded = true;
   isSpecificationsExpanded = false;
+
+  // Lucide icons
+  ShoppingCartIcon = ShoppingCart;
   isTechnicalSheetExpanded = true;
 
   // Image carousel state
   currentImageIndex = 0;
+
+  // Quantity selector
+  selectedQuantity = 1;
 
   products$: Observable<ProductWithPricing[]>;
   loading$: Observable<boolean>;
@@ -586,7 +641,15 @@ export class PartnersProductDetailsComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // Load user and company info
+    // First, get the product ID from route
+    const productId = this.route.snapshot.params['id'];
+    if (!productId) {
+      this.error = 'Product ID not found';
+      this.loading = false;
+      return;
+    }
+
+    // Load user and company info first, then load products
     this.store.select(selectCurrentUser)
       .pipe(takeUntil(this.destroy$))
       .subscribe(async (user) => {
@@ -594,31 +657,23 @@ export class PartnersProductDetailsComponent implements OnInit, OnDestroy {
         this.isAuthenticated = !!user;
 
         if (user) {
+          // Load company info and wait for it to complete
           await this.loadCompanyInfo(user.id);
+
+          // Now load the product with company pricing if available
+          this.loadProduct(productId);
+        } else {
+          // No user, load product without company pricing
+          this.loadProduct(productId);
         }
       });
 
-    // Subscribe to products from store and route params
-    this.route.params
+    // Subscribe to products from store
+    this.products$
       .pipe(
-        switchMap(params => {
-          const productId = params['id'];
-          if (!productId) {
-            this.error = 'Product ID not found';
-            this.loading = false;
-            return [];
-          }
-
-          // Load products if not already loaded
-          this.loadProduct(productId);
-
-          return this.products$.pipe(
-            map(products => ({ products, productId }))
-          );
-        }),
         takeUntil(this.destroy$)
       )
-      .subscribe(({ products, productId }) => {
+      .subscribe(products => {
         if (products && products.length > 0 && productId) {
           const foundProduct = products.find(p => p.id === productId);
           if (foundProduct) {
@@ -667,12 +722,18 @@ export class PartnersProductDetailsComponent implements OnInit, OnDestroy {
   private loadProduct(productId: string): void {
     this.loading = true;
     this.error = null;
-    // Load all products (which includes the specific product)
+
+    // Always load all products first
     this.store.dispatch(ProductsActions.loadProducts({}));
 
-    // If we need company-specific pricing, load that too
+    // If we have company info, load company-specific pricing
+    // Use a small delay to ensure company info is fully loaded
     if (this.isCompanyContact && this.company) {
-      this.store.dispatch(ProductsActions.loadCompanyPricing({ companyId: this.company.id }));
+      setTimeout(() => {
+        if (this.company) {
+          this.store.dispatch(ProductsActions.loadCompanyPricing({ companyId: this.company.id }));
+        }
+      }, 100);
     }
   }
 
@@ -694,11 +755,40 @@ export class PartnersProductDetailsComponent implements OnInit, OnDestroy {
 
   addToCart(product: ProductWithPricing): void {
     if (this.isCompanyContact && this.company) {
+      // Ensure quantity meets minimum order requirement
+      const quantity = Math.max(this.selectedQuantity, this.getMinimumOrder(product));
+
       this.store.dispatch(B2BCartActions.addToB2BCart({
         productId: product.id,
-        quantity: 1,
+        quantity: quantity,
         companyId: this.company.id
       }));
+
+      // Open cart sidebar after adding
+      this.store.dispatch(B2BCartActions.openB2BCartSidebar());
+
+      // Reset quantity to minimum order or 1
+      this.selectedQuantity = Math.max(1, this.getMinimumOrder(product));
+    }
+  }
+
+  increaseQuantity(): void {
+    this.selectedQuantity++;
+  }
+
+  decreaseQuantity(): void {
+    if (this.selectedQuantity > 1) {
+      this.selectedQuantity--;
+    }
+  }
+
+  onQuantityChange(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    const value = parseInt(target.value);
+    if (!isNaN(value) && value > 0) {
+      this.selectedQuantity = value;
+    } else {
+      this.selectedQuantity = 1;
     }
   }
 

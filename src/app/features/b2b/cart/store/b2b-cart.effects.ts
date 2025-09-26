@@ -189,6 +189,9 @@ export class B2BCartEffects {
                 this.toastService.showSuccess(
                     `${item.name} ${addedToCartMessage}`
                 );
+
+                // Open the cart sidebar to show the added product
+                this.store.dispatch(B2BCartActions.openB2BCartSidebar());
             })
         ),
         { dispatch: false }
@@ -416,11 +419,14 @@ export class B2BCartEffects {
                 if (addedCount > 0) {
                     const message = this.translationService.translate('b2bCart.productsAddedToCart', { count: addedCount });
                     this.toastService.showSuccess(message);
-                    
+
                     if (skippedCount > 0) {
                         const warningMessage = this.translationService.translate('b2bCart.productsSkipped', { count: skippedCount });
                         this.toastService.showWarning(warningMessage);
                     }
+
+                    // Open the cart sidebar to show the added products
+                    this.store.dispatch(B2BCartActions.openB2BCartSidebar());
                 } else {
                     this.toastService.showError(this.translationService.translate('b2bCart.noProductsAdded'));
                 }
