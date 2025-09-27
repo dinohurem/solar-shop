@@ -17,6 +17,7 @@ import { User } from '../../../shared/models/user.model';
 import { filter, take } from 'rxjs/operators';
 import { TranslationService } from '../../../shared/services/translation.service';
 import { SearchSuggestionsService, SearchSuggestion } from '../../../shared/services/search-suggestions.service';
+import { AdminNotificationsService } from '../../admin/shared/services/admin-notifications.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { Subject, takeUntil } from 'rxjs';
 import { FormsModule } from '@angular/forms';
@@ -379,10 +380,10 @@ import { LucideAngularModule, Search, User as UserIcon, CircleUserRound, Mail, P
                       <span>{{ 'profile.profile' | translate }}</span>
                     </div>
                   </a>
-                  <a 
+                  <a
                     *ngIf="isAdmin$ | async"
-                    routerLink="/admin" 
-                    (click)="closeProfileMenu()"
+                    routerLink="/admin"
+                    (click)="navigateToAdmin()"
                     class="block px-4 py-3 text-sm text-gray-700 hover:bg-accent-50 hover:text-accent-600 transition-all duration-200">
                     <div class="flex items-center space-x-3">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -473,10 +474,10 @@ import { LucideAngularModule, Search, User as UserIcon, CircleUserRound, Mail, P
                     <span>{{ 'profile.profile' | translate }}</span>
                   </div>
                 </a>
-                <a 
+                <a
                   *ngIf="isAdmin$ | async"
-                  routerLink="/admin" 
-                  (click)="closeProfileMenu()"
+                  routerLink="/admin"
+                  (click)="navigateToAdmin()"
                   class="block px-4 py-3 text-sm text-gray-700 hover:bg-accent-50 hover:text-accent-600 transition-all duration-200">
                   <div class="flex items-center space-x-3">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -574,10 +575,10 @@ import { LucideAngularModule, Search, User as UserIcon, CircleUserRound, Mail, P
                class="block text-gray-900 hover:text-solar-600 font-medium transition-all duration-300 py-2 px-3 rounded-lg hover:bg-solar-50 mb-2">
               {{ 'profile.profile' | translate }}
             </a>
-            <a 
+            <a
               *ngIf="isAdmin$ | async"
-              routerLink="/admin" 
-              (click)="closeProfileMenu(); closeMobileMenu()"
+              routerLink="/admin"
+              (click)="navigateToAdmin(); closeMobileMenu()"
               class="block text-gray-900 hover:text-accent-600 font-medium transition-all duration-300 py-2 px-3 rounded-lg hover:bg-accent-50 mb-2">
               {{ 'profile.adminDashboard' | translate }}
             </a>
@@ -686,6 +687,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private translationService = inject(TranslationService);
   private searchSuggestionsService = inject(SearchSuggestionsService);
+  private adminNotificationsService = inject(AdminNotificationsService);
   private destroy$ = new Subject<void>();
 
   isMobileMenuOpen$: Observable<boolean>;
@@ -781,6 +783,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   navigateToAdmin(): void {
+    this.adminNotificationsService.refreshCounts();
     this.router.navigate(['/admin']);
     this.closeProfileMenu();
   }

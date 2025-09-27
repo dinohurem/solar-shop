@@ -24,6 +24,7 @@ import {
   selectCompaniesDeleting
 } from './store/companies.selectors';
 import { TranslationService } from '../../../shared/services/translation.service';
+import { AdminNotificationsService } from '../shared/services/admin-notifications.service';
 
 @Component({
   selector: 'app-admin-companies',
@@ -275,6 +276,7 @@ export class AdminCompaniesComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private router = inject(Router);
   translationService = inject(TranslationService);
+  private notificationsService = inject(AdminNotificationsService);
 
   // Observables
   filteredCompanies$: Observable<Company[]>;
@@ -397,6 +399,9 @@ export class AdminCompaniesComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadCompanies();
+
+    // Mark companies section as viewed to clear notification badge
+    this.notificationsService.markSectionAsViewed('companies');
   }
 
   ngOnDestroy(): void {

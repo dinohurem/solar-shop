@@ -13,6 +13,7 @@ import { takeUntil, map } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { TranslationService } from '../../../shared/services/translation.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { AdminNotificationsService } from '../shared/services/admin-notifications.service';
 
 @Component({
     selector: 'app-admin-reviews',
@@ -64,6 +65,7 @@ export class AdminReviewsComponent implements OnInit {
     private translationService = inject(TranslationService);
     private actions$ = inject(Actions);
     private destroy$ = new Subject<void>();
+    private notificationsService = inject(AdminNotificationsService);
 
     // Observables from store
     reviews$ = this.store.select(selectReviews);
@@ -164,6 +166,9 @@ export class AdminReviewsComponent implements OnInit {
     ngOnInit(): void {
         // Load reviews from store
         this.store.dispatch(ReviewsActions.loadReviews());
+
+        // Mark reviews section as viewed to clear notification badge
+        this.notificationsService.markSectionAsViewed('reviews');
 
         // Listen for success actions
         this.actions$.pipe(

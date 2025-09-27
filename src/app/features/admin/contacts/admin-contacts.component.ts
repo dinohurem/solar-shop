@@ -5,6 +5,7 @@ import { SupabaseService } from '../../../services/supabase.service';
 import { TranslationService } from '../../../shared/services/translation.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { DataTableComponent, TableConfig } from '../shared/data-table/data-table.component';
+import { AdminNotificationsService } from '../shared/services/admin-notifications.service';
 
 @Component({
   selector: 'app-admin-contacts',
@@ -68,6 +69,7 @@ import { DataTableComponent, TableConfig } from '../shared/data-table/data-table
 export class AdminContactsComponent implements OnInit {
   private supabaseService = inject(SupabaseService);
   private translationService = inject(TranslationService);
+  private notificationsService = inject(AdminNotificationsService);
 
   private contactsSubject = new BehaviorSubject<any[]>([]);
   private loadingSubject = new BehaviorSubject<boolean>(true);
@@ -145,6 +147,9 @@ export class AdminContactsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadContacts();
+
+    // Mark contacts section as viewed to clear notification badge
+    this.notificationsService.markSectionAsViewed('contacts');
   }
 
   onTableAction(event: { action: string, item: any }): void {

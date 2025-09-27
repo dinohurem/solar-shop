@@ -81,11 +81,13 @@ export class SupabaseService {
                         firstName: request.firstName,
                         lastName: request.lastName,
                         phone: request.phone
-                    }
+                    },
+                    emailRedirectTo: window.location.origin + '/potvrda'
                 }
             });
 
             if (error) {
+                console.error('Supabase signUp error:', error);
                 return { user: null, session: null, error: error.message };
             }
 

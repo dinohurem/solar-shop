@@ -186,36 +186,43 @@ export const companiesReducer = createReducer(
     }))
 );
 
-// Helper function to filter companies
+// Helper function to filter and sort companies
 function filterCompanies(companies: any[], filters: any): any[] {
-    return companies.filter(company => {
-        const matchesStatus = !filters.status || company.status === filters.status;
-        const matchesBusinessType = !filters.businessType || company.businessType === filters.businessType;
-        const matchesSearch = !filters.searchTerm ||
-            company.companyName?.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
-            company.contactPersonName?.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
-            company.companyEmail?.toLowerCase().includes(filters.searchTerm.toLowerCase());
+    return companies
+        .filter(company => {
+            const matchesStatus = !filters.status || company.status === filters.status;
+            const matchesBusinessType = !filters.businessType || company.businessType === filters.businessType;
+            const matchesSearch = !filters.searchTerm ||
+                company.companyName?.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
+                company.contactPersonName?.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
+                company.companyEmail?.toLowerCase().includes(filters.searchTerm.toLowerCase());
 
-        let matchesDate = true;
-        if (filters.dateRange) {
-            const now = new Date();
-            const companyDate = new Date(company.createdAt);
+            let matchesDate = true;
+            if (filters.dateRange) {
+                const now = new Date();
+                const companyDate = new Date(company.createdAt);
 
-            switch (filters.dateRange) {
-                case 'today':
-                    matchesDate = companyDate.toDateString() === now.toDateString();
-                    break;
-                case 'week':
-                    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-                    matchesDate = companyDate >= weekAgo;
-                    break;
-                case 'month':
-                    const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-                    matchesDate = companyDate >= monthAgo;
-                    break;
+                switch (filters.dateRange) {
+                    case 'today':
+                        matchesDate = companyDate.toDateString() === now.toDateString();
+                        break;
+                    case 'week':
+                        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                        matchesDate = companyDate >= weekAgo;
+                        break;
+                    case 'month':
+                        const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                        matchesDate = companyDate >= monthAgo;
+                        break;
+                }
             }
-        }
 
-        return matchesStatus && matchesBusinessType && matchesSearch && matchesDate;
-    });
+            return matchesStatus && matchesBusinessType && matchesSearch && matchesDate;
+        })
+        .sort((a, b) => {
+            // Sort by createdAt descending (most recent first)
+            const dateA = new Date(a.createdAt || '').getTime();
+            const dateB = new Date(b.createdAt || '').getTime();
+            return dateB - dateA;
+        });
 } 

@@ -7,6 +7,7 @@ import { SupabaseService } from '../../../services/supabase.service';
 import { DataTableComponent, TableConfig } from '../shared/data-table/data-table.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { TranslationService } from '../../../shared/services/translation.service';
+import { AdminNotificationsService } from '../shared/services/admin-notifications.service';
 
 interface UserWishlistSummary {
     id: string;
@@ -145,6 +146,7 @@ export class AdminWishlistComponent implements OnInit {
     private router = inject(Router);
     private title = inject(Title);
     private translationService = inject(TranslationService);
+    private notificationsService = inject(AdminNotificationsService);
 
     private userWishlistsSubject = new BehaviorSubject<UserWishlistSummary[]>([]);
     private wishlistItemsSubject = new BehaviorSubject<WishlistItemDetail[]>([]);
@@ -162,6 +164,9 @@ export class AdminWishlistComponent implements OnInit {
         this.initializeTableConfig();
         this.title.setTitle(this.translationService.translate('adminWishlist.title') + ' Management - Solar Shop Admin');
         this.loadUserWishlists();
+
+        // Mark wishlists section as viewed to clear notification badge
+        this.notificationsService.markSectionAsViewed('wishlists');
     }
 
     private initializeTableConfig(): void {

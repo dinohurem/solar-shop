@@ -8,6 +8,7 @@ import { DataTableComponent, TableConfig } from '../shared/data-table/data-table
 import { SuccessModalComponent } from '../../../shared/components/modals/success-modal/success-modal.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { TranslationService } from '../../../shared/services/translation.service';
+import { AdminNotificationsService } from '../shared/services/admin-notifications.service';
 
 @Component({
     selector: 'app-admin-users',
@@ -55,6 +56,7 @@ export class AdminUsersComponent implements OnInit {
     private router = inject(Router);
     private title = inject(Title);
     private translationService = inject(TranslationService);
+    private notificationsService = inject(AdminNotificationsService);
 
     private usersSubject = new BehaviorSubject<any[]>([]);
     private loadingSubject = new BehaviorSubject<boolean>(true);
@@ -73,6 +75,9 @@ export class AdminUsersComponent implements OnInit {
         this.initializeTableConfig();
         this.title.setTitle(this.translationService.translate('adminUsers.title') + ' - Solar Shop Admin');
         this.loadUsers();
+
+        // Mark users section as viewed to clear notification badge
+        this.notificationsService.markSectionAsViewed('users');
     }
 
     private initializeTableConfig(): void {
@@ -200,7 +205,13 @@ export class AdminUsersComponent implements OnInit {
 
         try {
             const users = await this.supabaseService.getTable('profiles');
-            this.usersSubject.next(users || []);
+            // Sort users by creation date descending (most recent first)
+            const sortedUsers = (users || []).sort((a: any, b: any) => {
+                const dateA = new Date(a.created_at || '').getTime();
+                const dateB = new Date(b.created_at || '').getTime();
+                return dateB - dateA;
+            });
+            this.usersSubject.next(sortedUsers);
         } catch (error) {
             console.error('Error loading users:', error);
             this.usersSubject.next([]);

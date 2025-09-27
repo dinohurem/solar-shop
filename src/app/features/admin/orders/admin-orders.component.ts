@@ -14,6 +14,7 @@ import { takeUntil, map } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { TranslationService } from '../../../shared/services/translation.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { AdminNotificationsService } from '../shared/services/admin-notifications.service';
 
 @Component({
     selector: 'app-admin-orders',
@@ -80,6 +81,7 @@ export class AdminOrdersComponent implements OnInit {
     private actions$ = inject(Actions);
     private destroy$ = new Subject<void>();
     private translationService = inject(TranslationService);
+    private notificationsService = inject(AdminNotificationsService);
 
     orders$: Observable<Order[]> = this.store.select(selectOrders);
     loading$: Observable<boolean> = this.store.select(selectOrdersLoading);
@@ -90,10 +92,10 @@ export class AdminOrdersComponent implements OnInit {
         map(orders => orders
             .filter(order => order.is_b2b !== true)
             .sort((a, b) => {
-                // Sort by createdAt ascending (oldest first)
+                // Sort by createdAt descending (most recent first)
                 const dateA = new Date(a.createdAt || '').getTime();
                 const dateB = new Date(b.createdAt || '').getTime();
-                return dateA - dateB;
+                return dateB - dateA;
             })
         )
     );
@@ -120,6 +122,9 @@ export class AdminOrdersComponent implements OnInit {
 
         // Load orders
         this.store.dispatch(OrdersActions.loadOrders());
+
+        // Mark orders section as viewed to clear notification badge
+        this.notificationsService.markSectionAsViewed('orders');
 
         // Listen for successful delete operations (silent - no popup)
         this.actions$.pipe(
