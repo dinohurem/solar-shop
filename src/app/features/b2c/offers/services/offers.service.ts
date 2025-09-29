@@ -203,32 +203,65 @@ export class OffersService {
                 return { originalPrice, discountedPrice };
             }
 
-            // Calculate total original price first
+            // Calculate pricing based on specific product discounts or general offer discount
             let totalOriginalPrice = 0;
+            let totalDiscountAmount = 0;
+
+            console.log('calculateOfferPricing - analyzing offer products:', {
+                offerId: offer.id,
+                offerProductsCount: offerProducts.length,
+                products: offerProducts.map(op => ({
+                    productId: op.product_id,
+                    productPrice: op.products?.price,
+                    discountType: op.discount_type,
+                    discountAmount: op.discount_amount,
+                    discountPercentage: op.discount_percentage
+                }))
+            });
+
+            // Calculate original price and total discount
             for (const offerProduct of offerProducts) {
                 const productPrice = offerProduct.products?.price || 0;
                 totalOriginalPrice += productPrice;
+
+                // Check if this product has individual discount settings
+                const hasIndividualDiscount = offerProduct.discount_amount > 0 || offerProduct.discount_percentage > 0;
+
+                if (hasIndividualDiscount) {
+                    // Use individual product discount
+                    if (offerProduct.discount_type === 'fixed_amount' && offerProduct.discount_amount > 0) {
+                        totalDiscountAmount += offerProduct.discount_amount;
+                        console.log(`Product ${offerProduct.product_id} has individual fixed discount: €${offerProduct.discount_amount}`);
+                    } else if (offerProduct.discount_type === 'percentage' && offerProduct.discount_percentage > 0) {
+                        const productDiscount = productPrice * (offerProduct.discount_percentage / 100);
+                        totalDiscountAmount += productDiscount;
+                        console.log(`Product ${offerProduct.product_id} has individual percentage discount: ${offerProduct.discount_percentage}% = €${productDiscount}`);
+                    }
+                } else {
+                    // Use general offer discount
+                    if (offer.discount_type === 'percentage') {
+                        const productDiscount = productPrice * (offer.discount_value / 100);
+                        totalDiscountAmount += productDiscount;
+                        console.log(`Product ${offerProduct.product_id} uses general percentage discount: ${offer.discount_value}% = €${productDiscount}`);
+                    } else if (offer.discount_type === 'fixed_amount') {
+                        // For fixed amount, divide equally among products (or could be applied differently based on business logic)
+                        const discountPerProduct = offer.discount_value / offerProducts.length;
+                        totalDiscountAmount += discountPerProduct;
+                        console.log(`Product ${offerProduct.product_id} uses general fixed discount: €${discountPerProduct} (€${offer.discount_value} / ${offerProducts.length} products)`);
+                    }
+                }
             }
 
-            // Calculate discounted price based on discount type
-            let totalDiscountedPrice = 0;
-            console.log('calculateOfferPricing discount calculation:', {
+            const totalDiscountedPrice = Math.max(0, totalOriginalPrice - totalDiscountAmount);
+
+            console.log('calculateOfferPricing final calculation:', {
                 offerId: offer.id,
-                discount_type: offer.discount_type,
-                discount_value: offer.discount_value,
-                totalOriginalPrice
+                totalOriginalPrice,
+                totalDiscountAmount,
+                totalDiscountedPrice,
+                discountType: offer.discount_type,
+                discountValue: offer.discount_value
             });
-
-            if (offer.discount_type === 'percentage') {
-                totalDiscountedPrice = totalOriginalPrice * (1 - offer.discount_value / 100);
-                console.log('Applied percentage discount:', totalDiscountedPrice);
-            } else if (offer.discount_type === 'fixed_amount') {
-                totalDiscountedPrice = Math.max(0, totalOriginalPrice - offer.discount_value);
-                console.log('Applied fixed amount discount:', totalDiscountedPrice);
-            } else {
-                totalDiscountedPrice = totalOriginalPrice;
-                console.log('NO DISCOUNT APPLIED - discount_type not recognized:', offer.discount_type);
-            }
 
             return {
                 originalPrice: totalOriginalPrice,

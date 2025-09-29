@@ -554,11 +554,12 @@ export class CouponValidationService {
           console.log(`   Determined type: ${discountType}, amount: ${discountAmount}, percentage: ${discountPercentage}`);
 
           if (discountType === 'fixed_amount' && discountAmount > 0) {
-            // Fixed amount discount per item in cart
+            // Fixed amount discount per unit - multiply by quantity
+            // If you have 4 units of a product with 50 EUR discount, total discount = 4 × 50 EUR = 200 EUR
             itemDiscount = discountAmount * cartItem.quantity;
-            console.log(`   💰 Fixed discount: €${discountAmount} x ${cartItem.quantity} = €${itemDiscount}`);
+            console.log(`   💰 Fixed discount: €${discountAmount} × ${cartItem.quantity} units = €${itemDiscount}`);
           } else if (discountType === 'percentage' && discountPercentage > 0) {
-            // Percentage discount on the item's total price
+            // Percentage discount on the item's total price (quantity considered for percentage)
             const itemTotal = cartItem.price * cartItem.quantity;
             itemDiscount = itemTotal * (discountPercentage / 100);
             console.log(`   📊 Percentage discount: ${discountPercentage}% of €${itemTotal} = €${itemDiscount}`);

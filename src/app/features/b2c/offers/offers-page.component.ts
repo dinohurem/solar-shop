@@ -10,6 +10,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { Offer } from '../../../shared/models/offer.model';
 import { FooterActions } from '../footer/store/footer.actions';
 import { selectNewsletterState } from '../footer/store/footer.selectors';
+import { SupabaseService } from '../../../services/supabase.service';
 
 @Component({
   selector: 'app-offers-page',
@@ -47,8 +48,7 @@ import { selectNewsletterState } from '../footer/store/footer.selectors';
               >
               <!-- Discount Badge -->
               <div class="absolute top-4 left-4 bg-gradient-to-r from-accent-500 to-accent-600 text-white text-sm font-bold px-3 py-2 rounded-full shadow-lg">
-                <span *ngIf="offer.discount_type === 'percentage' || !offer.discount_type">-{{ offer.discountPercentage }}%</span>
-                <span *ngIf="offer.discount_type === 'fixed_amount'">{{ offer.discount_value | currency:'EUR':'symbol':'1.0-2' }} OFF</span>
+                {{ getDiscountDisplay(offer) }}
               </div>
               <!-- Sale Badge -->
               <div class="absolute top-4 right-4 bg-solar-600 text-white text-xs font-bold px-2 py-1 rounded-full">
@@ -69,16 +69,16 @@ import { selectNewsletterState } from '../footer/store/footer.selectors';
               <!-- Pricing -->
               <div class="flex items-center gap-3 mb-6">
                 <span class="text-lg text-gray-400 line-through font-medium font-['DM_Sans']">
-                  {{ (offer.originalPrice || 0) | currency:'EUR':'symbol':'1.2-2' }}
+                  {{ getTotalOriginalPrice(offer) | currency:'EUR':'symbol':'1.2-2' }}
                 </span>
                 <span class="text-2xl font-bold text-[#324053] font-['DM_Sans']">
-                  {{ (offer.discountedPrice || 0) | currency:'EUR':'symbol':'1.2-2' }}
+                  {{ calculateTotalDiscountedPrice(offer) | currency:'EUR':'symbol':'1.2-2' }}
                 </span>
               </div>
 
               <!-- Savings -->
               <div class="bg-solar-50 text-solar-800 text-sm font-semibold px-3 py-2 rounded-lg mb-4 text-center">
-                {{ 'offers.youSave' | translate }} {{ ((offer.originalPrice || 0) - (offer.discountedPrice || 0)) | currency:'EUR':'symbol':'1.2-2' }}
+                {{ 'offers.youSave' | translate }} {{ getTotalSavings(offer) | currency:'EUR':'symbol':'1.2-2' }}
               </div>
 
               <!-- Action Buttons -->
@@ -177,6 +177,7 @@ import { selectNewsletterState } from '../footer/store/footer.selectors';
 export class OffersPageComponent implements OnInit {
   private store = inject(Store);
   private router = inject(Router);
+  private supabaseService = inject(SupabaseService);
 
   @ViewChild('emailInput') emailInput!: ElementRef<HTMLInputElement>;
   @ViewChild('newsletterForm') newsletterForm!: NgForm;
@@ -184,6 +185,7 @@ export class OffersPageComponent implements OnInit {
   offers$: Observable<Offer[]>;
   isLoading$: Observable<boolean>;
   newsletterState$: Observable<{ loading: boolean; success: boolean; error: string | null }>;
+  private offerProducts: { [offerId: string]: any[] } = {}; // Store products for each offer
 
   constructor() {
     this.offers$ = this.store.select(selectOffers);
@@ -193,6 +195,77 @@ export class OffersPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.store.dispatch(OffersActions.loadOffers());
+
+    // Load product data for accurate pricing calculations
+    this.offers$.subscribe(async (offers) => {
+      if (offers && offers.length > 0) {
+        await this.loadOfferProducts(offers);
+      }
+    });
+  }
+
+  private async loadOfferProducts(offers: Offer[]): Promise<void> {
+    const productPromises = offers.map(offer => this.getRelatedProducts(offer));
+    const allProducts = await Promise.all(productPromises);
+
+    offers.forEach((offer, index) => {
+      this.offerProducts[offer.id] = allProducts[index];
+    });
+  }
+
+  private async getRelatedProducts(offer: Offer): Promise<any[]> {
+    try {
+      const { data: offerProducts, error } = await this.supabaseService.client
+        .from('offer_products')
+        .select(`
+          *,
+          products (
+            id,
+            name,
+            description,
+            price,
+            sku,
+            stock_quantity,
+            images,
+            category_id,
+            categories (
+              name
+            )
+          )
+        `)
+        .eq('offer_id', offer.id)
+        .order('sort_order');
+
+      if (error) {
+        console.error('Error fetching related products:', error);
+        return [];
+      }
+
+      if (offerProducts && offerProducts.length > 0) {
+        const products = offerProducts.map((op: any) => {
+          const discountType = (op.discount_amount && op.discount_amount > 0) ? 'fixed_amount' : 'percentage';
+
+          return {
+            id: op.products.id,
+            name: op.products.name,
+            description: op.products.description,
+            price: op.products.price,
+            images: op.products.images || [],
+            category: op.products.categories?.name,
+            stock_quantity: op.products.stock_quantity || 0,
+            discount_percentage: op.discount_percentage || 0,
+            discount_amount: op.discount_amount || 0,
+            discount_type: discountType
+          };
+        });
+        return products;
+      } else {
+        return [];
+      }
+    } catch (error) {
+      console.error('Error in getRelatedProducts:', error);
+      return [];
+    }
   }
 
   trackByOfferId(index: number, offer: Offer): string {
@@ -222,6 +295,71 @@ export class OffersPageComponent implements OnInit {
         this.store.dispatch(FooterActions.resetNewsletterState());
       }, 3000);
     }
+  }
+
+  getTotalSavings(offer: Offer): number {
+    return this.getTotalOriginalPrice(offer) - this.calculateTotalDiscountedPrice(offer);
+  }
+
+  calculateDiscountedPrice(originalPrice: number, offer: Offer, product?: any): number {
+    // If we have product-specific discount information, use that
+    if (product && (product.discount_percentage > 0 || product.discount_amount > 0)) {
+      if (product.discount_type === 'fixed_amount') {
+        return Math.max(0, originalPrice - (product.discount_amount || 0));
+      } else {
+        return originalPrice * (1 - (product.discount_percentage || 0) / 100);
+      }
+    }
+
+    // Fallback to offer-level discount calculation
+    if (!offer.discount_type || offer.discount_type === 'percentage') {
+      const discountPercentage = offer.discountPercentage || 0;
+      return originalPrice * (1 - discountPercentage / 100);
+    } else if (offer.discount_type === 'fixed_amount') {
+      // For fixed amount discounts, calculate proportional discount per product
+      const totalOriginalPrice = this.getTotalOriginalPrice(offer);
+      const fixedDiscountAmount = offer.discount_value || 0;
+      if (totalOriginalPrice > 0) {
+        const proportionalDiscount = (originalPrice / totalOriginalPrice) * fixedDiscountAmount;
+        return Math.max(0, originalPrice - proportionalDiscount);
+      }
+    }
+    return originalPrice;
+  }
+
+  calculateTotalDiscountedPrice(offer: Offer): number {
+    const products = this.offerProducts[offer.id] || [];
+    return products.reduce((total, product) => {
+      return total + this.calculateDiscountedPrice(product.price, offer, product);
+    }, 0);
+  }
+
+  getTotalOriginalPrice(offer: Offer): number {
+    const products = this.offerProducts[offer.id] || [];
+    return products.reduce((total, product) => total + product.price, 0);
+  }
+
+  getDiscountDisplay(offer: Offer): string {
+    // For specific products: show total discount amount
+    // For categories/general: show original discount value
+    // For percentage: show percentage
+
+    if (offer.discount_type === 'percentage') {
+      return `-${offer.discountPercentage}%`;
+    } else if (offer.discount_type === 'fixed_amount') {
+      // Show total savings (sum of all product discounts)
+      const totalSavings = this.getTotalSavings(offer);
+      return `€${totalSavings.toFixed(0)} OFF`;
+    } else {
+      // Fallback to percentage
+      return `-${offer.discountPercentage}%`;
+    }
+  }
+
+  isSpecificProductOffer(offer: Offer): boolean {
+    // This would need to be determined from the offer data structure
+    // For now, we'll assume fixed_amount offers are specific product offers
+    return offer.discount_type === 'fixed_amount';
   }
 
   getSavingsAmount(offer: Offer): string {
