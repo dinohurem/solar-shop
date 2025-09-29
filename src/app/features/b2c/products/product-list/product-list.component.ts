@@ -1178,8 +1178,8 @@ export class ProductListComponent implements OnInit, OnDestroy {
    */
   private restoreStateFromUrl(): void {
     this.route.queryParams.pipe(
-      takeUntil(this.destroy$),
-      take(1) // Only process initial params
+      takeUntil(this.destroy$)
+      // Removed take(1) to allow continuous listening to query param changes
     ).subscribe(params => {
       const urlState = this.urlStateService.deserializeFromQueryParams(params);
       

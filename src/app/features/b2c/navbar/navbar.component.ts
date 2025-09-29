@@ -120,7 +120,7 @@ import { LucideAngularModule, Search, User as UserIcon, CircleUserRound, Mail, P
               <div class="flex flex-wrap gap-1 sm:gap-2">
                 <button
                   *ngFor="let suggestion of recentSuggestions"
-                  (click)="selectSearchSuggestion(suggestion.displayText)"
+                  (click)="selectSearchSuggestion(suggestion.displayText, suggestion.type)"
                   class="px-2 sm:px-3 py-1 bg-gray-100 hover:bg-solar-100 text-gray-700 hover:text-solar-700 rounded-full transition-colors text-xs flex items-center gap-1">
                   <lucide-angular
                     *ngIf="suggestion.type === 'category'"
@@ -145,7 +145,7 @@ import { LucideAngularModule, Search, User as UserIcon, CircleUserRound, Mail, P
               <div class="flex flex-wrap gap-1 sm:gap-2">
                 <button
                   *ngFor="let suggestion of popularSuggestions"
-                  (click)="selectSearchSuggestion(suggestion.displayText)"
+                  (click)="selectSearchSuggestion(suggestion.displayText, suggestion.type)"
                   class="px-2 sm:px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 hover:text-blue-800 rounded-full transition-colors text-xs flex items-center gap-1">
                   <lucide-angular
                     *ngIf="suggestion.type === 'category'"
@@ -164,7 +164,7 @@ import { LucideAngularModule, Search, User as UserIcon, CircleUserRound, Mail, P
               <div class="flex flex-wrap gap-1 sm:gap-2">
                 <button
                   *ngFor="let suggestion of defaultSuggestions"
-                  (click)="selectSearchSuggestion(suggestion.displayText)"
+                  (click)="selectSearchSuggestion(suggestion.displayText, suggestion.type)"
                   class="px-2 sm:px-3 py-1 bg-gray-100 hover:bg-solar-100 text-gray-700 hover:text-solar-700 rounded-full transition-colors text-xs flex items-center gap-1">
                   <lucide-angular
                     name="tag"
@@ -845,9 +845,19 @@ export class NavbarComponent implements OnInit, OnDestroy {
     }
   }
 
-  selectSearchSuggestion(suggestion: string): void {
-    this.searchQuery = suggestion;
-    this.performSearch();
+  selectSearchSuggestion(suggestion: string, suggestionType?: string): void {
+    // If this is a category suggestion, navigate with category filter instead of search
+    if (suggestionType === 'category') {
+      this.closeSearchOverlay();
+      this.router.navigate(['/proizvodi'], {
+        queryParams: { categories: suggestion },
+        state: { fromNavbar: true, clearFilters: true }
+      });
+    } else {
+      // Regular search suggestion
+      this.searchQuery = suggestion;
+      this.performSearch();
+    }
   }
 
   performSearch(): void {

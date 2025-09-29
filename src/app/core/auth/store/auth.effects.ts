@@ -95,7 +95,7 @@ export class AuthEffects {
                 this.authPersistence.saveAuthState(token, user);
                 // If user is not email verified, navigate to confirmation page
                 if (user && !user.emailVerified) {
-                    this.router.navigate(['/potvrda'], {
+                    this.router.navigate(['/confirm'], {
                         queryParams: { email: user.email }
                     });
                 }

@@ -650,9 +650,9 @@ export class CartService {
 
         const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
         const tax = 0; // No tax
-        const shipping = subtotal > 100 ? 0 : 10; // Free shipping over €100
+        const shipping = 0; // No shipping fees
         const discount = discountAmount;
-        const total = subtotal + shipping - discount;
+        const total = subtotal - discount;
         const itemCount = items.reduce((count, item) => count + item.quantity, 0);
 
         console.log('🧮 CART CALCULATION DEBUG:');
@@ -660,8 +660,8 @@ export class CartService {
         console.log('Subtotal calculation:', subtotal.toFixed(2));
         console.log('Shipping:', shipping.toFixed(2));
         console.log('Discount amount:', discount.toFixed(2));
-        console.log('Total calculation:', `${subtotal.toFixed(2)} + ${shipping.toFixed(2)} - ${discount.toFixed(2)} = ${total.toFixed(2)}`);
-        console.log('Expected total:', (subtotal + shipping - discount).toFixed(2));
+        console.log('Total calculation:', `${subtotal.toFixed(2)} - ${discount.toFixed(2)} = ${total.toFixed(2)}`);
+        console.log('Expected total:', (subtotal - discount).toFixed(2));
 
         return {
             subtotal,

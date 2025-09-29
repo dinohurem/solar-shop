@@ -113,7 +113,14 @@ export class TranslationService {
                 oneMoreStep: 'Samo još jedan korak do početka',
                 confirmEmailToUnlock: 'Potvrdite svoju email adresu da biste otvorili sve funkcije SolarShop-a',
                 confirmationEmailSentSuccess: 'Potvrda emaila poslana uspješno! Provjerite svoju inbox.',
-                failedToResendEmail: 'Neuspjelo ponovno slanje potvrde emaila'
+                failedToResendEmail: 'Neuspjelo ponovno slanje potvrde emaila',
+                // Email verification callback messages
+                verifyingEmail: 'Potvrđujemo vašu email adresu...',
+                emailVerifiedSuccess: 'Email adresa je uspješno potvrđena!',
+                emailVerificationFailed: 'Potvrđivanje nije uspjelo. Molimo pokušajte ponovno.',
+                invalidVerificationLink: 'Nevažeća ili istekla poveznica za potvrđivanje.',
+                redirecting: 'Preusmjeravamo...',
+                verificationError: 'Dogodila se greška. Molimo pokušajte ponovno.'
             },
             // Forgot Password
             forgotPassword: {

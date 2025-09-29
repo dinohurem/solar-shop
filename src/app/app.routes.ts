@@ -6,6 +6,7 @@ import { LoginComponent } from './core/auth/components/login/login.component';
 import { RegisterComponent } from './core/auth/components/register/register.component';
 import { ResetPasswordComponent } from './core/auth/components/reset-password/reset-password.component';
 import { ConfirmationComponent } from './core/auth/components/confirmation/confirmation.component';
+import { AuthCallbackComponent } from './core/auth/components/auth-callback/auth-callback.component';
 import { PageLayoutComponent } from './core/page-layout/page-layout.component';
 import { CompanyComponent } from './features/b2c/company/company.component';
 import { BlogComponent } from './features/b2c/blog/blog.component';
@@ -76,7 +77,8 @@ export const routes: Routes = [
     // Authentication routes (no layout) - no guards needed, Supabase handles auth state
     { path: 'prijava', component: LoginComponent },
     { path: 'registracija', component: RegisterComponent },
-    { path: 'potvrda', component: ConfirmationComponent },
+    { path: 'potvrda', component: AuthCallbackComponent },
+    { path: 'confirm', component: ConfirmationComponent },
     { path: 'zaboravljena-lozinka', component: ForgotPasswordComponent },
     { path: 'reset-lozinka', component: ResetPasswordComponent },
     
