@@ -606,10 +606,35 @@ export class CartService {
         );
     }
 
-    // Helper method to get total discount amount from applied coupons
+    // Helper method to get total discount amount from applied coupons and offers
     private getTotalDiscountAmount(coupons: AppliedCoupon[]): number {
+        // Check if any cart items have individual discounts (offerSavings)
+        // This applies to both coupon-based individual discounts and offer-based individual discounts
+        const cartItems = this.getCartItemsArray();
+        const itemsWithIndividualDiscounts = cartItems.filter(item => item.offerSavings && item.offerSavings > 0);
+
+        if (itemsWithIndividualDiscounts.length > 0) {
+            // Calculate total discount from individual item savings
+            // offerSavings is the per-unit savings, so we need to multiply by quantity
+            const totalDiscount = itemsWithIndividualDiscounts.reduce((total, item) => {
+                const perUnitSavings = item.offerSavings || 0;
+                return total + (perUnitSavings * item.quantity);
+            }, 0);
+
+            console.log('💰 DISCOUNT CALCULATION DEBUG (Individual Discounts):');
+            console.log('Items with individual discounts:', itemsWithIndividualDiscounts.map(item => ({
+                name: item.name,
+                offerSavings: item.offerSavings,
+                quantity: item.quantity,
+                totalSavings: (item.offerSavings || 0) * item.quantity
+            })));
+            console.log('Total discount amount:', totalDiscount.toFixed(2));
+            return totalDiscount;
+        }
+
+        // Otherwise, use the coupon discount amount (for general coupons without individual discounts)
         const totalDiscount = coupons.reduce((total, coupon) => total + coupon.discountAmount, 0);
-        console.log('💰 DISCOUNT CALCULATION DEBUG:');
+        console.log('💰 DISCOUNT CALCULATION DEBUG (General Coupons):');
         console.log('Applied coupons:', coupons.map(c => ({ code: c.code, discountAmount: c.discountAmount })));
         console.log('Total discount amount:', totalDiscount.toFixed(2));
         return totalDiscount;
@@ -934,7 +959,9 @@ export class CartService {
 
                     return {
                         ...item,
-                        price: Math.round(discountedPrice * 100) / 100,
+                        // Keep the original price - don't modify it
+                        // The discount will be shown separately in the cart summary
+                        price: basePrice,
                         originalPrice: item.originalPrice || basePrice,
                         offerId: offerData.id,
                         offerName: this.getCouponOfferName(couponCode),
@@ -1198,7 +1225,9 @@ export class CartService {
                     name: product.name,
                     description: product.description,
                     sku: product.sku || '',
-                    price: discountedPrice,
+                    // Keep the original price - don't modify it
+                    // The discount will be shown separately via offerSavings
+                    price: originalPrice,
                     originalPrice: originalPrice,
                     quantity,
                     minQuantity: 1,
@@ -1236,7 +1265,7 @@ export class CartService {
                     offerOriginalPrice: originalPrice,
                     offerValidUntil,
                     offerAppliedAt: now,
-                    offerSavings: savings * quantity
+                    offerSavings: savings
                 };
 
                 console.log('Cart Item created with offer data:', {
