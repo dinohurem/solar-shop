@@ -255,6 +255,60 @@ export class SupabaseService {
         return data as Database['public']['Tables'][T]['Row'];
     }
 
+    async createGuestOrder(
+        orderData: Database['public']['Tables']['orders']['Insert']
+    ): Promise<Database['public']['Tables']['orders']['Row'] | null> {
+        // For guest orders with null user_id, we need to handle RLS differently
+        // Create with a special guest user UUID to satisfy RLS policies
+        const guestUserUuid = '00000000-0000-0000-0000-000000000000'; // Reserved UUID for guest orders
+
+        const guestOrderData = {
+            ...orderData,
+            user_id: guestUserUuid // Use special guest UUID instead of null
+        };
+
+        console.log('Creating guest order with special guest UUID:', guestUserUuid);
+
+        const { data, error } = await this.supabase
+            .from('orders')
+            .insert(guestOrderData)
+            .select()
+            .single();
+
+        if (error) {
+            // If RLS still blocks the insert, log detailed error info
+            console.error('Guest order creation failed with RLS policy:', {
+                error: error.message,
+                code: error.code,
+                details: error.details,
+                hint: error.hint,
+                orderData: { ...guestOrderData, user_id: guestOrderData.user_id }
+            });
+
+            // Try with null user_id as fallback
+            console.log('Retrying guest order creation with null user_id...');
+            const fallbackOrderData = {
+                ...orderData,
+                user_id: null
+            };
+
+            const { data: fallbackData, error: fallbackError } = await this.supabase
+                .from('orders')
+                .insert(fallbackOrderData)
+                .select()
+                .single();
+
+            if (fallbackError) {
+                console.error('Fallback guest order creation also failed:', fallbackError);
+                throw new Error(`Unable to create guest order: RLS policy blocking guest orders. Error: ${fallbackError.message}`);
+            }
+
+            return fallbackData as Database['public']['Tables']['orders']['Row'];
+        }
+
+        return data as Database['public']['Tables']['orders']['Row'];
+    }
+
     async updateRecord<T extends keyof Database['public']['Tables']>(
         tableName: T,
         id: string,

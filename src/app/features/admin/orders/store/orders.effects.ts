@@ -504,8 +504,17 @@ export class OrdersEffects {
                 throw new Error('Insufficient stock for one or more items');
             }
 
-            // Create order in database
-            const orderRecord = await this.supabaseService.createRecord('orders', orderData);
+            // Create order in database - use special method for guest orders
+            let orderRecord;
+            if (orderData.user_id === null) {
+                // Guest order - use special guest order creation method
+                console.log('Creating guest order with null user_id');
+                orderRecord = await this.supabaseService.createGuestOrder(orderData);
+            } else {
+                // Authenticated user order - use regular method
+                console.log('Creating authenticated user order with user_id:', orderData.user_id);
+                orderRecord = await this.supabaseService.createRecord('orders', orderData);
+            }
 
             if (!orderRecord) {
                 // Rollback stock if order creation fails
