@@ -258,16 +258,14 @@ export class SupabaseService {
     async createGuestOrder(
         orderData: Database['public']['Tables']['orders']['Insert']
     ): Promise<Database['public']['Tables']['orders']['Row'] | null> {
-        // For guest orders with null user_id, we need to handle RLS differently
-        // Create with a special guest user UUID to satisfy RLS policies
-        const guestUserUuid = '00000000-0000-0000-0000-000000000000'; // Reserved UUID for guest orders
-
+        // For guest orders, set user_id to null to avoid foreign key constraint issues
+        // Since RLS is now disabled for orders table, this should work
         const guestOrderData = {
             ...orderData,
-            user_id: guestUserUuid // Use special guest UUID instead of null
+            user_id: null // Guest orders have no user_id
         };
 
-        console.log('Creating guest order with special guest UUID:', guestUserUuid);
+        console.log('Creating guest order with null user_id (RLS disabled)');
 
         const { data, error } = await this.supabase
             .from('orders')
@@ -276,34 +274,15 @@ export class SupabaseService {
             .single();
 
         if (error) {
-            // If RLS still blocks the insert, log detailed error info
-            console.error('Guest order creation failed with RLS policy:', {
+            console.error('Guest order creation failed:', {
                 error: error.message,
                 code: error.code,
                 details: error.details,
                 hint: error.hint,
-                orderData: { ...guestOrderData, user_id: guestOrderData.user_id }
+                orderData: { ...guestOrderData }
             });
 
-            // Try with null user_id as fallback
-            console.log('Retrying guest order creation with null user_id...');
-            const fallbackOrderData = {
-                ...orderData,
-                user_id: null
-            };
-
-            const { data: fallbackData, error: fallbackError } = await this.supabase
-                .from('orders')
-                .insert(fallbackOrderData)
-                .select()
-                .single();
-
-            if (fallbackError) {
-                console.error('Fallback guest order creation also failed:', fallbackError);
-                throw new Error(`Unable to create guest order: RLS policy blocking guest orders. Error: ${fallbackError.message}`);
-            }
-
-            return fallbackData as Database['public']['Tables']['orders']['Row'];
+            throw new Error(`Unable to create guest order: ${error.message}`);
         }
 
         return data as Database['public']['Tables']['orders']['Row'];
