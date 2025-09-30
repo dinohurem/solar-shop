@@ -870,14 +870,25 @@ export class SupabaseService {
         try {
             console.log(`Decrementing stock for product ${productId} by ${quantity}`);
 
-            // First check current stock
-            const product = await this.getTableById('products', productId);
-            if (!product) {
-                console.error(`Product ${productId} not found`);
+            // First check if product exists and get current stock
+            const { data: products, error: fetchError } = await this.supabase
+                .from('products')
+                .select('*')
+                .eq('id', productId);
+
+            if (fetchError) {
+                console.error(`Error fetching product ${productId}:`, fetchError);
                 return false;
             }
 
-            const currentStock = product.stock_quantity;
+            if (!products || products.length === 0) {
+                console.error(`Product ${productId} not found in database`);
+                return false;
+            }
+
+            const product = products[0];
+            const currentStock = product.stock_quantity || 0;
+
             if (currentStock < quantity) {
                 console.error(`Insufficient stock for product ${productId}. Available: ${currentStock}, Requested: ${quantity}`);
                 return false;
@@ -885,17 +896,16 @@ export class SupabaseService {
 
             const newStock = currentStock - quantity;
 
-            // Update stock quantity
+            // Update stock quantity without using .single()
             const { data, error } = await this.supabase
                 .from('products')
                 .update({
                     stock_quantity: newStock,
-                    stock_status: this.calculateStockStatus(newStock, (product as any).stock_threshold || 5),
+                    stock_status: this.calculateStockStatus(newStock, product.stock_threshold || 5),
                     updated_at: new Date().toISOString()
                 })
                 .eq('id', productId)
-                .select()
-                .single();
+                .select();
 
             if (error) {
                 console.error('Error updating product stock:', error);
@@ -914,27 +924,36 @@ export class SupabaseService {
         try {
             console.log(`Incrementing stock for product ${productId} by ${quantity}`);
 
-            // Get current product
-            const product = await this.getTableById('products', productId);
-            if (!product) {
-                console.error(`Product ${productId} not found`);
+            // First check if product exists and get current stock
+            const { data: products, error: fetchError } = await this.supabase
+                .from('products')
+                .select('*')
+                .eq('id', productId);
+
+            if (fetchError) {
+                console.error(`Error fetching product ${productId}:`, fetchError);
                 return false;
             }
 
-            const currentStock = product.stock_quantity;
+            if (!products || products.length === 0) {
+                console.error(`Product ${productId} not found in database`);
+                return false;
+            }
+
+            const product = products[0];
+            const currentStock = product.stock_quantity || 0;
             const newStock = currentStock + quantity;
 
-            // Update stock quantity
+            // Update stock quantity without using .single()
             const { data, error } = await this.supabase
                 .from('products')
                 .update({
                     stock_quantity: newStock,
-                    stock_status: this.calculateStockStatus(newStock, (product as any).stock_threshold || 5),
+                    stock_status: this.calculateStockStatus(newStock, product.stock_threshold || 5),
                     updated_at: new Date().toISOString()
                 })
                 .eq('id', productId)
-                .select()
-                .single();
+                .select();
 
             if (error) {
                 console.error('Error updating product stock:', error);
@@ -956,12 +975,16 @@ export class SupabaseService {
             const stockAdjustments: { productId: string; quantity: number; success: boolean }[] = [];
 
             for (const item of orderItems) {
-                if (!item.product_id && !item.productId) {
-                    console.log(`Skipping stock adjustment for item without product_id: ${item.product_name || item.name}`);
+                // Try multiple possible fields for product ID
+                const productId = item.product_id || item.productId || item.id;
+
+                if (!productId) {
+                    console.log(`Skipping stock adjustment for item without product ID:`, item);
+                    console.log(`Item name: ${item.product_name || item.name}`);
                     continue;
                 }
 
-                const productId = item.product_id || item.productId;
+                console.log(`Processing item with productId: ${productId}, quantity: ${item.quantity}`);
                 const quantity = item.quantity;
 
                 const success = decrement
