@@ -286,4 +286,15 @@ export class CartEffects {
             )
         )
     );
+
+    // Open cart sidebar after successfully adding all items from offer
+    openCartAfterAddAllSuccess$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(CartActions.addAllToCartFromOfferSuccess),
+            tap(({ addedCount }) => {
+                console.log('🛒 B2C Opening cart after adding', addedCount, 'items from offer');
+            }),
+            map(() => CartActions.openCart())
+        )
+    );
 } 

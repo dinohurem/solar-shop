@@ -255,6 +255,34 @@ export class CartService {
                 console.log(`   Using as cart price: €${actualSellingPrice}`);
                 console.log(`   Using as originalPrice: €${compareAtPrice}`);
 
+                // Check if this product is part of any existing bundle in the cart
+                let bundleInfo: { offerId?: string; offerName?: string; offerType?: 'percentage' | 'fixed_amount' | 'buy_x_get_y' | 'bundle'; offerDiscount?: number; offerOriginalPrice?: number; offerValidUntil?: string; isBundle?: boolean; bundleProductIds?: string[] } = {};
+
+                const bundleItem = currentItems.find(item =>
+                    item.isBundle &&
+                    item.bundleProductIds &&
+                    item.bundleProductIds.includes(productId)
+                );
+
+                if (bundleItem) {
+                    console.log('🔗 Product is part of existing bundle:', {
+                        offerId: bundleItem.offerId,
+                        offerName: bundleItem.offerName,
+                        bundleProductIds: bundleItem.bundleProductIds
+                    });
+
+                    bundleInfo = {
+                        offerId: bundleItem.offerId,
+                        offerName: bundleItem.offerName,
+                        offerType: bundleItem.offerType,
+                        offerDiscount: bundleItem.offerDiscount,
+                        offerOriginalPrice: bundleItem.offerOriginalPrice,
+                        offerValidUntil: bundleItem.offerValidUntil,
+                        isBundle: true,
+                        bundleProductIds: bundleItem.bundleProductIds
+                    };
+                }
+
                 const cartItem: CartItem = {
                     id: this.generateCartItemId(),
                     productId: product.id,
@@ -267,10 +295,13 @@ export class CartService {
                     minQuantity: 1,
                     maxQuantity: product.stock_quantity,
                     image: this.getProductImage(product.images),
-                    category: await this.getCategoryName(product.category_id),
+                    category: '', // Hide category label
                     brand: product.brand,
                     addedAt: now,
                     updatedAt: now,
+                    // Bundle fields (if this product is part of an existing bundle)
+                    ...bundleInfo,
+                    bundleComplete: false, // Will be calculated by recalculateBundleStatus
                     availability: {
                         quantity: product.stock_quantity,
                         stockStatus: product.stock_status,
@@ -613,6 +644,9 @@ export class CartService {
         const cartItems = this.getCartItemsArray();
         const itemsWithIndividualDiscounts = cartItems.filter(item => item.offerSavings && item.offerSavings > 0);
 
+        // Check if there are any items with offer/bundle fields (even if savings is currently 0/undefined)
+        const itemsWithOffers = cartItems.filter(item => item.offerId && item.offerDiscount !== undefined);
+
         if (itemsWithIndividualDiscounts.length > 0) {
             // Calculate total discount from individual item savings
             // offerSavings is the per-unit savings, so we need to multiply by quantity
@@ -630,6 +664,20 @@ export class CartService {
             })));
             console.log('Total discount amount:', totalDiscount.toFixed(2));
             return totalDiscount;
+        }
+
+        // If there are items with offer fields but no savings (e.g., incomplete bundle),
+        // return 0 instead of falling back to coupon discountAmount
+        if (itemsWithOffers.length > 0) {
+            console.log('💰 DISCOUNT CALCULATION DEBUG (Offer items with no savings - incomplete bundle):');
+            console.log('Items with offers but no savings:', itemsWithOffers.map(item => ({
+                name: item.name,
+                offerId: item.offerId,
+                offerSavings: item.offerSavings,
+                bundleComplete: item.bundleComplete
+            })));
+            console.log('Total discount amount: 0.00 (bundle incomplete)');
+            return 0;
         }
 
         // Otherwise, use the coupon discount amount (for general coupons without individual discounts)
@@ -699,10 +747,13 @@ export class CartService {
     }
 
     private updateCartItems(items: CartItem[]): void {
-        this.cartItems.next(items);
+        // Recalculate bundle status before updating cart
+        const itemsWithUpdatedBundles = this.recalculateBundleStatus(items);
+
+        this.cartItems.next(itemsWithUpdatedBundles);
 
         // If cart becomes empty, clear applied coupons to allow fresh coupon application
-        if (items.length === 0 && this.appliedCoupons.value.length > 0) {
+        if (itemsWithUpdatedBundles.length === 0 && this.appliedCoupons.value.length > 0) {
             console.log('Cart is empty, clearing applied coupons for fresh session');
             this.appliedCoupons.next([]);
 
@@ -718,7 +769,7 @@ export class CartService {
             }
         }
 
-        this.updateCartSummary(items);
+        this.updateCartSummary(itemsWithUpdatedBundles);
     }
 
     private updateCartSummary(items: CartItem[], discount?: number): void {
@@ -913,9 +964,11 @@ export class CartService {
                 originalPrice: item.originalPrice
             })));
 
+            // Get bundle product IDs for later use
+            const bundleProductIds = offerProducts.map(op => op.product_id);
+
             // If this is a bundle offer, check if all bundle products are in the cart
             if (isBundle) {
-                const bundleProductIds = offerProducts.map(op => op.product_id);
                 const bundleItemsInCart = currentItems.filter(item =>
                     bundleProductIds.includes(item.productId)
                 );
@@ -994,7 +1047,11 @@ export class CartService {
                         offerOriginalPrice: basePrice, // The price before this discount
                         offerValidUntil: undefined,
                         offerAppliedAt: new Date().toISOString(),
-                        offerSavings: Math.round(actualSavings * 100) / 100
+                        offerSavings: Math.round(actualSavings * 100) / 100,
+                        // Bundle fields (if this is a bundle offer)
+                        isBundle: isBundle,
+                        bundleProductIds: isBundle ? bundleProductIds : undefined,
+                        bundleComplete: false // Will be calculated by recalculateBundleStatus
                     };
                 } else {
                     console.log(`❌ NO MATCH: ${item.name} (ID: ${item.productId}) - keeping original price`);
@@ -1026,7 +1083,11 @@ export class CartService {
             offerOriginalPrice: undefined,
             offerValidUntil: undefined,
             offerAppliedAt: undefined,
-            offerSavings: undefined
+            offerSavings: undefined,
+            // Reset bundle fields
+            isBundle: undefined,
+            bundleProductIds: undefined,
+            bundleComplete: undefined
         }));
     }
 
@@ -1089,7 +1150,11 @@ export class CartService {
                         offerOriginalPrice: undefined,
                         offerValidUntil: undefined,
                         offerAppliedAt: undefined,
-                        offerSavings: undefined
+                        offerSavings: undefined,
+                        // Reset bundle fields
+                        isBundle: undefined,
+                        bundleProductIds: undefined,
+                        bundleComplete: undefined
                     };
                 }
                 return item;
@@ -1169,7 +1234,9 @@ export class CartService {
         offerOriginalPrice?: number,
         offerValidUntil?: string,
         individualDiscount?: number,
-        individualDiscountType?: 'percentage' | 'fixed_amount'
+        individualDiscountType?: 'percentage' | 'fixed_amount',
+        isBundle?: boolean,
+        bundleProductIds?: string[]
     ): Promise<void> {
         try {
             // Get product details from Supabase
@@ -1200,27 +1267,34 @@ export class CartService {
                 offerDiscount,
                 offerType,
                 effectiveDiscount,
-                effectiveDiscountType
+                effectiveDiscountType,
+                isBundle
             });
 
-            if (effectiveDiscountType === 'percentage' && effectiveDiscount) {
-                discountedPrice = originalPrice * (1 - effectiveDiscount / 100);
-                savings = originalPrice - discountedPrice;
-                console.log('Percentage discount calculation:', {
-                    originalPrice,
-                    effectiveDiscount,
-                    discountedPrice,
-                    savings
-                });
-            } else if (effectiveDiscountType === 'fixed_amount' && effectiveDiscount) {
-                discountedPrice = Math.max(originalPrice - effectiveDiscount, 0);
-                savings = effectiveDiscount; // For fixed amount, savings IS the discount amount
-                console.log('Fixed amount discount calculation:', {
-                    originalPrice,
-                    effectiveDiscount,
-                    discountedPrice,
-                    savings
-                });
+            // For bundles, don't calculate the discounted price yet - it will be done by recalculateBundleStatus
+            // But still store the discount info on the item
+            if (!isBundle) {
+                if (effectiveDiscountType === 'percentage' && effectiveDiscount) {
+                    discountedPrice = originalPrice * (1 - effectiveDiscount / 100);
+                    savings = originalPrice - discountedPrice;
+                    console.log('Percentage discount calculation:', {
+                        originalPrice,
+                        effectiveDiscount,
+                        discountedPrice,
+                        savings
+                    });
+                } else if (effectiveDiscountType === 'fixed_amount' && effectiveDiscount) {
+                    discountedPrice = Math.max(originalPrice - effectiveDiscount, 0);
+                    savings = effectiveDiscount; // For fixed amount, savings IS the discount amount
+                    console.log('Fixed amount discount calculation:', {
+                        originalPrice,
+                        effectiveDiscount,
+                        discountedPrice,
+                        savings
+                    });
+                }
+            } else {
+                console.log('Bundle item - discount will be applied by recalculateBundleStatus');
             }
 
             if (existingItemIndex > -1) {
@@ -1261,7 +1335,7 @@ export class CartService {
                     weight: product.weight,
                     dimensions: product.dimensions,
                     image: this.getProductImage(product.images),
-                    category: 'General',
+                    category: '', // Hide category label
                     brand: product.brand || '',
                     addedAt: now,
                     updatedAt: now,
@@ -1291,7 +1365,11 @@ export class CartService {
                     offerOriginalPrice: originalPrice,
                     offerValidUntil,
                     offerAppliedAt: now,
-                    offerSavings: savings
+                    offerSavings: savings,
+                    // Bundle fields
+                    isBundle,
+                    bundleProductIds,
+                    bundleComplete: false // Will be calculated by recalculateBundleStatus
                 };
 
                 console.log('Cart Item created with offer data:', {
@@ -1300,7 +1378,9 @@ export class CartService {
                     offerDiscount: cartItem.offerDiscount,
                     offerSavings: cartItem.offerSavings,
                     price: cartItem.price,
-                    originalPrice: cartItem.originalPrice
+                    originalPrice: cartItem.originalPrice,
+                    isBundle: cartItem.isBundle,
+                    bundleProductIds: cartItem.bundleProductIds
                 });
 
                 const updatedItems = [...currentItems, cartItem];
@@ -1394,23 +1474,22 @@ export class CartService {
                     productPrice: product.price
                 });
 
-                // For bundle offers, don't apply discount when adding products
-                // Discount will be validated and applied based on bundle completion
-                const discountForAdd = isBundle ? 0 : discountToApply;
-                const discountTypeForAdd = isBundle ? undefined : (discountType as 'percentage' | 'fixed_amount');
-
+                // For bundle offers, pass the discount info but don't apply it immediately
+                // The discount will be applied by recalculateBundleStatus when bundle is complete
                 await this.addToCartFromOfferAsync(
                     productData.productId,
                     productData.quantity,
                     productData.variantId,
                     offerId,
                     offerName,
-                    discountType as 'percentage' | 'fixed_amount' | 'buy_x_get_y' | 'bundle',
-                    discountForAdd, // 0 for bundles, actual discount for non-bundles
+                    offerType, // Pass the actual offer type
+                    offerDiscount, // Pass the actual offer discount (not 0)
                     originalPrice,
                     offerValidUntil,
-                    discountForAdd, // Individual discount amount (0 for bundles)
-                    discountTypeForAdd // Individual discount type (undefined for bundles)
+                    undefined, // No individual discount for bundles
+                    undefined, // No individual discount type for bundles
+                    isBundle, // Pass bundle flag
+                    bundleProductIds // Pass bundle product IDs
                 );
 
                 addedCount++;
@@ -1420,10 +1499,7 @@ export class CartService {
             }
         }
 
-        // For bundle offers, apply discount after all products are added if bundle is complete
-        if (isBundle && bundleProductIds && addedCount > 0) {
-            await this.applyBundleDiscount(offerId, offerName, offerType, offerDiscount, bundleProductIds, offerValidUntil);
-        }
+        // Bundle status will be automatically recalculated by updateCartItems -> recalculateBundleStatus
 
         // Increment usage count for the offer if at least one product was added
         if (addedCount > 0) {
@@ -1449,6 +1525,112 @@ export class CartService {
         return { addedCount, skippedCount };
     }
 
+    /**
+     * Recalculate bundle completion status for all items and apply/remove discounts accordingly
+     */
+    private recalculateBundleStatus(items: CartItem[]): CartItem[] {
+        console.log('🔄 B2C recalculateBundleStatus called with', items.length, 'items');
+
+        // Group bundle items by offer ID
+        const bundleGroups = new Map<string, CartItem[]>();
+
+        items.forEach(item => {
+            if (item.isBundle && item.bundleProductIds && item.offerId) {
+                const key = item.offerId;
+                if (!bundleGroups.has(key)) {
+                    bundleGroups.set(key, []);
+                }
+                bundleGroups.get(key)!.push(item);
+                console.log('📦 B2C Bundle item found:', {
+                    productId: item.productId,
+                    name: item.name,
+                    offerId: item.offerId,
+                    bundleProductIds: item.bundleProductIds,
+                    currentBundleComplete: item.bundleComplete,
+                    price: item.price,
+                    originalPrice: item.originalPrice,
+                    offerDiscount: item.offerDiscount
+                });
+            }
+        });
+
+        console.log('📊 B2C Found', bundleGroups.size, 'bundle groups');
+
+        // For each bundle, check if complete and update all items
+        const updatedItems = items.map(item => {
+            if (!item.isBundle || !item.bundleProductIds || !item.offerId) {
+                return item;
+            }
+
+            // Get all products in cart for this bundle
+            const productsInCart = items
+                .filter(i => i.offerId === item.offerId)
+                .map(i => i.productId);
+
+            console.log('🔍 B2C Checking bundle for product:', item.name, {
+                bundleProductIds: item.bundleProductIds,
+                productsInCart: productsInCart,
+                hasAll: item.bundleProductIds.every(id => productsInCart.includes(id))
+            });
+
+            // Check if bundle is complete
+            const bundleComplete = item.bundleProductIds.every(id => productsInCart.includes(id));
+
+            console.log('✅ B2C Bundle complete?', bundleComplete, 'for product:', item.name);
+
+            // Calculate savings if bundle is complete
+            // NOTE: We do NOT modify the price field - it stays as the base price
+            // The discount is tracked via offerSavings
+            let savings = 0;
+
+            if (bundleComplete && item.offerDiscount !== undefined) {
+                console.log('💰 B2C Applying bundle discount:', {
+                    product: item.name,
+                    basePrice: item.price,
+                    discount: item.offerDiscount,
+                    discountType: item.offerType
+                });
+
+                // Calculate savings based on discount type
+                const basePrice = item.price;
+
+                if (item.offerType === 'percentage') {
+                    savings = basePrice * (item.offerDiscount / 100);
+                } else if (item.offerType === 'fixed_amount') {
+                    // For fixed amount: apply discount to EACH product (not distributed)
+                    // If offer says €50 discount, each product gets €50 off
+                    savings = Math.min(basePrice, item.offerDiscount); // Can't discount more than the price
+                }
+
+                console.log('💵 B2C Savings calculated:', savings);
+            } else if (!bundleComplete) {
+                // Remove discount if bundle is incomplete
+                savings = 0;
+                console.log('❌ B2C Bundle incomplete, removing discount for:', item.name);
+            }
+
+            const updatedItem = {
+                ...item,
+                bundleComplete,
+                // Keep price as the base price - do NOT modify it
+                offerSavings: bundleComplete ? savings : undefined,
+                updatedAt: new Date().toISOString()
+            };
+
+            console.log('📝 B2C Updated item:', {
+                product: updatedItem.name,
+                bundleComplete: updatedItem.bundleComplete,
+                price: updatedItem.price,
+                originalPrice: updatedItem.originalPrice
+            });
+
+            return updatedItem;
+        });
+
+        console.log('✨ B2C recalculateBundleStatus complete, returning', updatedItems.length, 'items');
+        return updatedItems;
+    }
+
     // Apply bundle discount if all bundle products are in cart
     private async applyBundleDiscount(
         offerId: string,
@@ -1458,12 +1640,6 @@ export class CartService {
         bundleProductIds: string[],
         offerValidUntil?: string
     ): Promise<void> {
-        console.log('Checking bundle completion for offer:', offerId, {
-            bundleProductIds,
-            offerDiscount,
-            offerType
-        });
-
         const currentItems = this.getCartItemsArray();
 
         // Check if all bundle products are in the cart
@@ -1472,12 +1648,6 @@ export class CartService {
         );
 
         const bundleComplete = bundleItemsInCart.length === bundleProductIds.length;
-
-        console.log('Bundle status:', {
-            bundleProductIds,
-            bundleItemsInCart: bundleItemsInCart.map(i => i.productId),
-            bundleComplete
-        });
 
         // Update all bundle items with bundle information and apply discount if complete
         const updatedItems = currentItems.map(item => {
@@ -1514,11 +1684,6 @@ export class CartService {
         });
 
         this.updateCartItems(updatedItems);
-
-        console.log('Bundle discount application completed:', {
-            bundleComplete,
-            itemsUpdated: updatedItems.filter(i => i.isBundle).length
-        });
     }
 
     // Load applied coupons from database

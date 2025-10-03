@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { combineLatest } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Cart, CartItem } from '../../../../../shared/models/cart.model';
 import * as CartActions from '../../store/cart.actions';
 import * as CartSelectors from '../../store/cart.selectors';
@@ -206,10 +208,10 @@ import { LucideAngularModule, ShoppingCart } from 'lucide-angular';
               <div class="mt-4 p-3 bg-gray-50 rounded-lg flex-shrink-0">
                 <h4 class="text-sm font-medium text-gray-900 mb-3">{{ 'cart.discountCode' | translate }}</h4>
                 
-                <!-- Applied Coupons -->
-                <div *ngIf="appliedCoupons$ | async as coupons" class="mb-3">
+                <!-- Applied Coupons - Only show when discount is actually being applied -->
+                <div *ngIf="shouldShowAppliedCoupons$ | async" class="mb-3">
                   <div
-                    *ngFor="let coupon of coupons"
+                    *ngFor="let coupon of (appliedCoupons$ | async)"
                     class="flex items-center justify-between p-2 bg-green-100 text-green-800 rounded text-sm"
                   >
                     <span>
@@ -250,11 +252,6 @@ import { LucideAngularModule, ShoppingCart } from 'lucide-angular';
                     <span *ngIf="!(isCouponLoading$ | async)">{{ 'cart.apply' | translate }}</span>
                     <span *ngIf="isCouponLoading$ | async">...</span>
                   </button>
-                </div>
-
-                <!-- Single coupon limitation message -->
-                <div *ngIf="hasCouponsApplied$ | async" class="text-xs text-gray-600 mt-2">
-                  {{ 'cart.singleCouponLimit' | translate }}
                 </div>
 
                 <!-- Coupon Error -->
@@ -385,6 +382,16 @@ export class CartSidebarComponent implements OnInit {
   isCouponLoading$ = this.store.select(CartSelectors.selectIsCouponLoading);
   canApplyCoupon$ = this.store.select(CartSelectors.selectCanApplyCoupon);
   hasCouponsApplied$ = this.store.select(CartSelectors.selectHasCouponsApplied);
+
+  // Only show applied coupons if they're actually providing a discount (bundle complete)
+  shouldShowAppliedCoupons$ = combineLatest([
+    this.appliedCoupons$,
+    this.cartSummary$
+  ]).pipe(
+    map(([coupons, summary]) => {
+      return coupons && coupons.length > 0 && summary && summary.discount > 0;
+    })
+  );
 
   // Component state
   couponCode = '';
