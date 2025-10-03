@@ -493,7 +493,9 @@ export class TranslationService {
                     sumOfPartnerPrices: 'Zbroj partnerskih cijena',
                     products: 'proizvoda',
                     incompletePricing: 'Nepotpun cjenik',
-                    browseProducts: 'Pregledaj proizvode'
+                    browseProducts: 'Pregledaj proizvode',
+                    bundleOffer: 'Paketna ponuda',
+                    bundleRequiresAllProductsInCart: 'Svi proizvodi moraju biti u košarici za primjenu popusta'
                 },
                 profile: {
                     title: 'Partner profil',
@@ -1250,6 +1252,14 @@ export class TranslationService {
                     matchesGlobalDiscount: 'Podudara se sa globalnim popustom',
                     autoSetToMatchGlobalDiscount: 'Automatski postavljeno da se podudara sa globalnim popustom',
                     productDiscountMustMatch: 'Popust proizvoda mora biti točno {{type}}{{value}} da se podudara sa globalnim popustom ponude',
+                    bundleConfiguration: 'Konfiguracija paketa',
+                    bundleOffer: 'Paketna ponuda',
+                    bundleOfferDescription: 'Paketna ponuda zahtijeva kupnju svih proizvoda zajedno',
+                    bundleOfferNotice: 'Napomena o paketnoj ponudi',
+                    bundleRequiresAllProducts: 'Paketna ponuda zahtijeva kupnju svih proizvoda',
+                    bundleDiscountAppliedOnlyWhenComplete: 'Popust se primjenjuje samo kada su svi proizvodi u košarici',
+                    bundleCanBeDisabledForB2C: 'Može se onemogućiti za B2C kupce',
+                    requiredForB2B: 'Obavezno za B2B',
                 },
                 reviewsForm: {
                     title: 'Recenzije',
@@ -2013,7 +2023,9 @@ export class TranslationService {
                 couponAlreadyApplied: 'Ovaj kupon je već primijenjen',
                 couponAppliedSuccess: 'Kupon {{code}} je uspješno primijenjen',
                 couponRemoved: 'Kupon {{code}} je uklonjen',
-                couponRemovedGeneric: 'Kupon je uklonjen'
+                couponRemovedGeneric: 'Kupon je uklonjen',
+                bundleComplete: 'Paket kompletan',
+                bundleIncomplete: 'Paket nekompletan'
             },
             // Checkout
             checkout: {
@@ -3202,7 +3214,9 @@ export class TranslationService {
                     sumOfPartnerPrices: 'Sum of partner prices',
                     products: 'products',
                     incompletePricing: 'Incomplete pricing',
-                    browseProducts: 'Browse products'
+                    browseProducts: 'Browse products',
+                    bundleOffer: 'Bundle Offer',
+                    bundleRequiresAllProductsInCart: 'All products must be in cart to apply discount'
                 },
                 profile: {
                     title: 'Partner Profile',
@@ -3864,6 +3878,14 @@ export class TranslationService {
                     matchesGlobalDiscount: 'Matches global discount',
                     autoSetToMatchGlobalDiscount: 'Auto-set to match global discount',
                     productDiscountMustMatch: 'Product discount must be exactly {{type}}{{value}} to match the global offer discount',
+                    bundleConfiguration: 'Bundle Configuration',
+                    bundleOffer: 'Bundle Offer',
+                    bundleOfferDescription: 'Bundle offer requires purchasing all products together',
+                    bundleOfferNotice: 'Bundle Offer Notice',
+                    bundleRequiresAllProducts: 'Bundle offer requires purchasing all products',
+                    bundleDiscountAppliedOnlyWhenComplete: 'Discount applies only when all products are in cart',
+                    bundleCanBeDisabledForB2C: 'Can be disabled for B2C customers',
+                    requiredForB2B: 'Required for B2B',
                 },
                 reviewsForm: {
                     title: 'Reviews',
@@ -4609,7 +4631,9 @@ export class TranslationService {
                 couponAlreadyApplied: 'This coupon has already been applied',
                 couponAppliedSuccess: 'Coupon {{code}} applied successfully',
                 couponRemoved: 'Coupon {{code}} removed',
-                couponRemovedGeneric: 'Coupon removed'
+                couponRemovedGeneric: 'Coupon removed',
+                bundleComplete: 'Bundle complete',
+                bundleIncomplete: 'Bundle incomplete'
             },
             // Checkout
             checkout: {

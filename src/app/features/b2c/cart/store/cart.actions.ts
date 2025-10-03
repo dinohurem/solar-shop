@@ -178,6 +178,8 @@ export const addAllToCartFromOffer = createAction(
         offerType: 'percentage' | 'fixed_amount' | 'buy_x_get_y' | 'bundle';
         offerDiscount: number;
         offerValidUntil?: string;
+        isBundle?: boolean;
+        bundleProductIds?: string[];
     }>()
 );
 

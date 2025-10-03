@@ -54,6 +54,10 @@ export interface CartItem {
     offerValidUntil?: string;
     offerAppliedAt?: string;
     offerSavings?: number;
+    // Bundle offer fields
+    isBundle?: boolean;
+    bundleProductIds?: string[];
+    bundleComplete?: boolean;
 }
 
 export interface ProductCustomization {

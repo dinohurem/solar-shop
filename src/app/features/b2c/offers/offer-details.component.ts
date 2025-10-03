@@ -167,14 +167,14 @@ import { TranslationService } from '../../../shared/services/translation.service
                   buttonText="{{ 'offers.addToCart' | translate }}"
                   [fullWidth]="true"
                   size="md"
-                  [offerId]="offer.id"
-                  [offerName]="offer.title"
-                  [offerType]="product.discount_type === 'fixed_amount' ? 'fixed_amount' : 'percentage'"
-                  [offerDiscount]="product.discount_type === 'fixed_amount' ? product.discount_amount : product.discount_percentage"
-                  [offerOriginalPrice]="product.price"
-                  [offerValidUntil]="offer.endDate"
-                  [individualDiscount]="product.discount_type === 'fixed_amount' ? product.discount_amount : product.discount_percentage"
-                  [individualDiscountType]="product.discount_type">
+                  [offerId]="!isBundle ? offer.id : undefined"
+                  [offerName]="!isBundle ? offer.title : undefined"
+                  [offerType]="!isBundle ? (product.discount_type === 'fixed_amount' ? 'fixed_amount' : 'percentage') : undefined"
+                  [offerDiscount]="!isBundle ? (product.discount_type === 'fixed_amount' ? product.discount_amount : product.discount_percentage) : undefined"
+                  [offerOriginalPrice]="!isBundle ? product.price : undefined"
+                  [offerValidUntil]="!isBundle ? offer.endDate : undefined"
+                  [individualDiscount]="!isBundle ? (product.discount_type === 'fixed_amount' ? product.discount_amount : product.discount_percentage) : undefined"
+                  [individualDiscountType]="!isBundle ? product.discount_type : undefined">
                 </app-add-to-cart-button>
                 
                 <button 
@@ -263,6 +263,8 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
   copiedCoupon = false;
   private destroy$ = new Subject<void>();
   private currentProducts: any[] = [];
+  isBundle = false;
+  currentOffer: any = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -295,17 +297,29 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
     // Scroll to top when component loads
     window.scrollTo(0, 0);
 
-    // Debug: Log the offer data
-    this.offer$.subscribe(offer => {
+    // Load offer data and check if it's a bundle
+    this.offer$.subscribe(async offer => {
       if (offer) {
-        console.log('Offer Details - Loaded offer:', {
-          id: offer.id,
-          title: offer.title,
-          discount_type: offer.discount_type,
-          discount_value: offer.discount_value,
-          discountPercentage: offer.discountPercentage,
-          code: (offer as any).code
-        });
+        this.currentOffer = offer;
+
+        // Fetch full offer details from database to get bundle flag
+        try {
+          const fullOffer = await this.supabaseService.getTableById('offers', offer.id);
+          if (fullOffer) {
+            this.isBundle = fullOffer.bundle || false;
+            console.log('Offer Details - Loaded offer:', {
+              id: offer.id,
+              title: offer.title,
+              discount_type: offer.discount_type,
+              discount_value: offer.discount_value,
+              discountPercentage: offer.discountPercentage,
+              code: (offer as any).code,
+              isBundle: this.isBundle
+            });
+          }
+        } catch (error) {
+          console.error('Error loading full offer details:', error);
+        }
       }
     });
   }
@@ -534,12 +548,16 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
         return productData;
       });
 
-      // Get the original offer from database to get discount_value
+      // Get the original offer from database to get discount_value and bundle flag
       let discountValue = offer.discountPercentage || 0;
+      let isBundle = false;
+      let totalProductsInOffer = this.currentProducts.length;
+
       try {
         const originalOffer = await this.supabaseService.getTableById('offers', offer.id);
         if (originalOffer) {
           discountValue = originalOffer.discount_value || offer.discountPercentage || 0;
+          isBundle = originalOffer.bundle || false;
         }
       } catch (error) {
         console.error('Error fetching original offer data:', error);
@@ -552,7 +570,9 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
         offerName: offer.title,
         offerType: (offer.discount_type || 'percentage') as 'percentage' | 'fixed_amount' | 'buy_x_get_y' | 'bundle',
         offerDiscount: discountValue,
-        offerValidUntil: offer.endDate
+        offerValidUntil: offer.endDate,
+        isBundle: isBundle,
+        bundleProductIds: isBundle ? this.currentProducts.map(p => p.id) : undefined
       };
 
       console.log('Offer Details - Dispatching cart action:', {

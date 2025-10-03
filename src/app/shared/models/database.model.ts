@@ -363,6 +363,7 @@ export interface Database {
                     end_date?: string;
                     is_active: boolean;
                     is_b2b: boolean;
+                    bundle: boolean;
                     created_at: string;
                     updated_at: string;
                 };
@@ -397,6 +398,7 @@ export interface Database {
                     end_date?: string;
                     is_active?: boolean;
                     is_b2b?: boolean;
+                    bundle?: boolean;
                     created_at?: string;
                     updated_at?: string;
                 };
@@ -431,6 +433,7 @@ export interface Database {
                     end_date?: string;
                     is_active?: boolean;
                     is_b2b?: boolean;
+                    bundle?: boolean;
                     updated_at?: string;
                 };
             };

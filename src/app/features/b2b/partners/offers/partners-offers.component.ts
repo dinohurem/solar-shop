@@ -89,9 +89,13 @@ import { User } from '../../../../shared/models/user.model';
               </div>
 
               <!-- Partner Only Badge -->
-              <div class="absolute top-4 right-4">
+              <div class="absolute top-4 right-4 flex flex-col gap-2 items-end">
                 <span class="bg-solar-600 text-white px-3 py-1 rounded-full text-xs font-medium">
                   {{ 'b2b.offers.partnerOnly' | translate }}
+                </span>
+                <!-- Bundle Badge -->
+                <span *ngIf="offer.bundle" class="bg-purple-600 text-white px-3 py-1 rounded-full text-xs font-medium">
+                  {{ 'b2b.offers.bundleOffer' | translate }}
                 </span>
               </div>
 
@@ -135,6 +139,15 @@ import { User } from '../../../../shared/models/user.model';
                 </div>
                 <div class="text-xs text-gray-500 mt-1">
                   {{ 'b2b.offers.sumOfPartnerPrices' | translate }} ({{ offer.productCount }} {{ 'b2b.offers.products' | translate }})
+                </div>
+                <!-- Bundle Notice -->
+                <div *ngIf="offer.bundle" class="mt-2 p-2 bg-purple-50 border border-purple-200 rounded-lg">
+                  <p class="text-xs text-purple-700 flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                    </svg>
+                    {{ 'b2b.offers.bundleRequiresAllProductsInCart' | translate }}
+                  </p>
                 </div>
               </div>
 
@@ -348,7 +361,8 @@ export class PartnersOffersComponent implements OnInit, OnDestroy {
           discount_value: offer.discount_value,
           hasAllPartnerPricing: hasAllPartnerPricing,
           hasProducts: hasProducts,
-          productCount: productCount
+          productCount: productCount,
+          bundle: offer.bundle || false
         } as any;
       }));
 
@@ -484,6 +498,9 @@ export class PartnersOffersComponent implements OnInit, OnDestroy {
     const offerType = (offer.discount_type || 'percentage') as 'percentage' | 'fixed_amount' | 'tier_based' | 'bundle';
     const discountValue = offer.discount_value || offer.discountPercentage || 0;
 
+    // Get all product IDs from this offer for bundle tracking
+    const allProductIds = offerProducts.map(op => op.products.id);
+
     // Dispatch the bulk add action
     this.store.dispatch(addAllToB2BCartFromOffer({
       products: availableProducts,
@@ -492,7 +509,9 @@ export class PartnersOffersComponent implements OnInit, OnDestroy {
       partnerOfferName: offer.title,
       partnerOfferType: offerType,
       partnerOfferDiscount: discountValue,
-      partnerOfferValidUntil: offer.endDate
+      partnerOfferValidUntil: offer.endDate,
+      isBundle: offer.bundle || false,
+      bundleProductIds: offer.bundle ? allProductIds : undefined
     }));
 
     // Open cart sidebar

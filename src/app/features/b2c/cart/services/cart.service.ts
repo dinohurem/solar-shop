@@ -871,7 +871,7 @@ export class CartService {
             // First, find the offer by coupon code
             const { data: offerData, error: offerError } = await this.supabaseService.client
                 .from('offers')
-                .select('id')
+                .select('id, bundle')
                 .eq('code', couponCode)
                 .single();
 
@@ -881,6 +881,9 @@ export class CartService {
             }
 
             console.log('✅ Found offer for coupon:', offerData);
+
+            // Check if this is a bundle offer
+            const isBundle = offerData.bundle || false;
 
             // Get individual product discounts for this offer
             // First try to get all columns to see what exists
@@ -909,6 +912,27 @@ export class CartService {
                 price: item.price,
                 originalPrice: item.originalPrice
             })));
+
+            // If this is a bundle offer, check if all bundle products are in the cart
+            if (isBundle) {
+                const bundleProductIds = offerProducts.map(op => op.product_id);
+                const bundleItemsInCart = currentItems.filter(item =>
+                    bundleProductIds.includes(item.productId)
+                );
+
+                const bundleComplete = bundleItemsInCart.length === bundleProductIds.length;
+
+                console.log('🎁 Bundle offer validation:', {
+                    bundleProductIds,
+                    itemsInCart: bundleItemsInCart.map(i => i.productId),
+                    bundleComplete
+                });
+
+                if (!bundleComplete) {
+                    console.log('❌ Bundle is incomplete - not all products are in cart. Skipping discount application.');
+                    throw new Error('All products from the bundle offer must be in the cart to apply the discount.');
+                }
+            }
 
             const resetItems = this.resetCartItemsToOriginalPrices(currentItems);
             console.log('🔄 Reset items to original prices');
@@ -1116,9 +1140,11 @@ export class CartService {
         offerName: string,
         offerType: 'percentage' | 'fixed_amount' | 'buy_x_get_y' | 'bundle',
         offerDiscount: number,
-        offerValidUntil?: string
+        offerValidUntil?: string,
+        isBundle?: boolean,
+        bundleProductIds?: string[]
     ): Observable<{ cart: Cart; addedCount: number; skippedCount: number }> {
-        return from(this.addAllToCartFromOfferAsync(products, offerId, offerName, offerType, offerDiscount, offerValidUntil)).pipe(
+        return from(this.addAllToCartFromOfferAsync(products, offerId, offerName, offerType, offerDiscount, offerValidUntil, isBundle, bundleProductIds)).pipe(
             map(({ addedCount, skippedCount }) => ({
                 cart: this.createCartFromItems(this.getCartItemsArray()),
                 addedCount,
@@ -1307,13 +1333,17 @@ export class CartService {
         offerName: string,
         offerType: 'percentage' | 'fixed_amount' | 'buy_x_get_y' | 'bundle',
         offerDiscount: number,
-        offerValidUntil?: string
+        offerValidUntil?: string,
+        isBundle?: boolean,
+        bundleProductIds?: string[]
     ): Promise<{ addedCount: number; skippedCount: number }> {
         console.log('addAllToCartFromOfferAsync - Starting with offer:', {
             offerId,
             offerName,
             offerType,
             offerDiscount,
+            isBundle,
+            bundleProductIds,
             products: products.map(p => ({
                 productId: p.productId,
                 individualDiscount: p.individualDiscount,
@@ -1364,18 +1394,23 @@ export class CartService {
                     productPrice: product.price
                 });
 
+                // For bundle offers, don't apply discount when adding products
+                // Discount will be validated and applied based on bundle completion
+                const discountForAdd = isBundle ? 0 : discountToApply;
+                const discountTypeForAdd = isBundle ? undefined : (discountType as 'percentage' | 'fixed_amount');
+
                 await this.addToCartFromOfferAsync(
                     productData.productId,
                     productData.quantity,
                     productData.variantId,
                     offerId,
                     offerName,
-                    discountType as 'percentage' | 'fixed_amount' | 'buy_x_get_y' | 'bundle', // Use individual discount type
-                    discountToApply, // Use individual discount amount
+                    discountType as 'percentage' | 'fixed_amount' | 'buy_x_get_y' | 'bundle',
+                    discountForAdd, // 0 for bundles, actual discount for non-bundles
                     originalPrice,
                     offerValidUntil,
-                    discountToApply, // Individual discount amount
-                    discountType as 'percentage' | 'fixed_amount' // Individual discount type
+                    discountForAdd, // Individual discount amount (0 for bundles)
+                    discountTypeForAdd // Individual discount type (undefined for bundles)
                 );
 
                 addedCount++;
@@ -1383,6 +1418,11 @@ export class CartService {
                 console.error(`Error adding product ${productData.productId} from offer:`, error);
                 skippedCount++;
             }
+        }
+
+        // For bundle offers, apply discount after all products are added if bundle is complete
+        if (isBundle && bundleProductIds && addedCount > 0) {
+            await this.applyBundleDiscount(offerId, offerName, offerType, offerDiscount, bundleProductIds, offerValidUntil);
         }
 
         // Increment usage count for the offer if at least one product was added
@@ -1407,6 +1447,78 @@ export class CartService {
 
         console.log('addAllToCartFromOfferAsync - Completed:', { addedCount, skippedCount });
         return { addedCount, skippedCount };
+    }
+
+    // Apply bundle discount if all bundle products are in cart
+    private async applyBundleDiscount(
+        offerId: string,
+        offerName: string,
+        offerType: 'percentage' | 'fixed_amount' | 'buy_x_get_y' | 'bundle',
+        offerDiscount: number,
+        bundleProductIds: string[],
+        offerValidUntil?: string
+    ): Promise<void> {
+        console.log('Checking bundle completion for offer:', offerId, {
+            bundleProductIds,
+            offerDiscount,
+            offerType
+        });
+
+        const currentItems = this.getCartItemsArray();
+
+        // Check if all bundle products are in the cart
+        const bundleItemsInCart = currentItems.filter(item =>
+            bundleProductIds.includes(item.productId) && item.offerId === offerId
+        );
+
+        const bundleComplete = bundleItemsInCart.length === bundleProductIds.length;
+
+        console.log('Bundle status:', {
+            bundleProductIds,
+            bundleItemsInCart: bundleItemsInCart.map(i => i.productId),
+            bundleComplete
+        });
+
+        // Update all bundle items with bundle information and apply discount if complete
+        const updatedItems = currentItems.map(item => {
+            if (bundleProductIds.includes(item.productId) && item.offerId === offerId) {
+                // Calculate discount for this item if bundle is complete
+                let discountedPrice = item.price;
+                let savings = 0;
+
+                if (bundleComplete) {
+                    if (offerType === 'percentage') {
+                        discountedPrice = item.price * (1 - offerDiscount / 100);
+                        savings = item.price - discountedPrice;
+                    } else if (offerType === 'fixed_amount') {
+                        // For fixed amount in bundles, distribute proportionally
+                        const totalOriginalPrice = bundleItemsInCart.reduce((sum, i) => sum + i.price, 0);
+                        const proportionalDiscount = (item.price / totalOriginalPrice) * offerDiscount;
+                        discountedPrice = Math.max(0, item.price - proportionalDiscount);
+                        savings = proportionalDiscount;
+                    }
+                }
+
+                return {
+                    ...item,
+                    isBundle: true,
+                    bundleProductIds,
+                    bundleComplete,
+                    price: bundleComplete ? discountedPrice : item.price,
+                    offerDiscount: bundleComplete ? offerDiscount : undefined,
+                    offerSavings: bundleComplete ? savings : undefined,
+                    updatedAt: new Date().toISOString()
+                };
+            }
+            return item;
+        });
+
+        this.updateCartItems(updatedItems);
+
+        console.log('Bundle discount application completed:', {
+            bundleComplete,
+            itemsUpdated: updatedItems.filter(i => i.isBundle).length
+        });
     }
 
     // Load applied coupons from database

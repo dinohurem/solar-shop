@@ -47,7 +47,7 @@ export class B2BCartEffects {
             switchMap(({ productId, quantity, companyId }) =>
                 this.b2bCartService.addToCart(productId, quantity, companyId).pipe(
                     switchMap(() =>
-                        // Reload the cart to get all items with updated pricing
+                        // Reload the cart to get all items with updated pricing and bundle status
                         this.b2bCartService.loadCart(companyId).pipe(
                             map(({ items, companyName, appliedCoupons, couponDiscount }) =>
                                 B2BCartActions.loadB2BCartSuccess({
@@ -358,7 +358,7 @@ export class B2BCartEffects {
     addAllToB2BCartFromOffer$ = createEffect(() =>
         this.actions$.pipe(
             ofType(B2BCartActions.addAllToB2BCartFromOffer),
-            switchMap(({ products, companyId, partnerOfferId, partnerOfferName, partnerOfferType, partnerOfferDiscount, partnerOfferValidUntil }) => {
+            switchMap(({ products, companyId, partnerOfferId, partnerOfferName, partnerOfferType, partnerOfferDiscount, partnerOfferValidUntil, isBundle, bundleProductIds }) => {
                 // Create observables for each product add operation
                 const addObservables = products.map(({ productId, quantity, individualDiscount, individualDiscountType, originalPrice }) =>
                     this.b2bCartService.addToCart(productId, quantity, companyId, {
@@ -369,7 +369,9 @@ export class B2BCartEffects {
                         partnerOfferValidUntil,
                         individualDiscount,
                         individualDiscountType,
-                        originalPrice
+                        originalPrice,
+                        isBundle,
+                        bundleProductIds
                     }).pipe(
                         map((item: B2BCartItem) => ({ success: true as const, item })),
                         catchError(error => {
@@ -381,25 +383,37 @@ export class B2BCartEffects {
 
                 // Execute all add operations in parallel
                 return forkJoin(addObservables).pipe(
-                    map(results => {
-                        const addedItems: B2BCartItem[] = [];
+                    switchMap(results => {
                         let addedCount = 0;
                         let skippedCount = 0;
 
                         results.forEach(result => {
                             if (result.success && result.item) {
-                                addedItems.push(result.item);
                                 addedCount++;
                             } else {
                                 skippedCount++;
                             }
                         });
 
-                        return B2BCartActions.addAllToB2BCartFromOfferSuccess({
-                            items: addedItems,
-                            addedCount,
-                            skippedCount
-                        });
+                        // After all items are added, reload the cart to get the correct bundle status for ALL items
+                        return this.b2bCartService.loadCart(companyId).pipe(
+                            map(({ items, companyName, appliedCoupons, couponDiscount }) => {
+                                // Dispatch loadB2BCartSuccess to update the entire cart state with correct bundle status
+                                this.store.dispatch(B2BCartActions.loadB2BCartSuccess({
+                                    items,
+                                    companyId,
+                                    companyName,
+                                    appliedCoupons,
+                                    couponDiscount
+                                }));
+
+                                return B2BCartActions.addAllToB2BCartFromOfferSuccess({
+                                    items: [],
+                                    addedCount,
+                                    skippedCount
+                                });
+                            })
+                        );
                     }),
                     catchError(error => {
                         return of(B2BCartActions.addAllToB2BCartFromOfferFailure({

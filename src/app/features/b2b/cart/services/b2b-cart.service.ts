@@ -18,6 +18,8 @@ interface AddToCartOptions {
     individualDiscount?: number;
     individualDiscountType?: 'percentage' | 'fixed_amount';
     originalPrice?: number;
+    isBundle?: boolean;
+    bundleProductIds?: string[];
 }
 
 @Injectable({
@@ -42,6 +44,9 @@ export class B2BCartService {
 
         // Apply tiered pricing based on quantity
         parsedItems = this.recalculateTieredPricing(parsedItems);
+
+        // Recalculate bundle status for all items
+        parsedItems = this.recalculateBundleStatus(parsedItems, companyId);
 
         const appliedCoupons = this.loadStoredCoupons(companyId);
         const couponDiscount = this.calculateCouponDiscount(appliedCoupons);
@@ -71,7 +76,22 @@ export class B2BCartService {
                 // For offers: First apply partner pricing and quantity tiers, then apply offer discount
                 let finalUnitPrice = tierInfo.unitPrice;
 
-                if (options.partnerOfferId) {
+                // For bundle offers, check if all products are in cart before applying discount
+                let shouldApplyDiscount = true;
+                if (options.partnerOfferId && options.isBundle && options.bundleProductIds) {
+                    // Check if all bundle products are already in cart
+                    const currentCart = this.loadStoredCart(companyId);
+                    const productsInCart = currentCart.map(item => item.productId);
+
+                    // Add current product to the check
+                    const allProducts = [...productsInCart, productId];
+                    const uniqueProducts = [...new Set(allProducts)];
+
+                    // Bundle is complete only if all bundle products are present
+                    shouldApplyDiscount = options.bundleProductIds.every(id => uniqueProducts.includes(id));
+                }
+
+                if (options.partnerOfferId && shouldApplyDiscount) {
                     // Apply offer discount to the quantity-tiered partner price
                     finalUnitPrice = this.calculateOfferDiscountOnPartnerPrice(
                         tierInfo.unitPrice,
@@ -108,6 +128,7 @@ export class B2BCartService {
                     partnerOfferId: options.partnerOfferId,
                     partnerOfferName: options.partnerOfferName,
                     partnerOfferType: options.partnerOfferType,
+                    // Store the discount value even for incomplete bundles - we'll apply it later when complete
                     partnerOfferDiscount: options.partnerOfferDiscount,
                     partnerOfferOriginalPrice: options.partnerOfferId ? retailPrice : undefined,
                     partnerOfferValidUntil: options.partnerOfferValidUntil,
@@ -120,8 +141,13 @@ export class B2BCartService {
                     quantityTier2: product.quantity_tier_2,
                     priceTier3: product.price_tier_3,
                     quantityTier3: product.quantity_tier_3,
-                    originalUnitPrice: baseCompanyPrice,
-                    appliedTier: tierInfo.appliedTier
+                    // Store the tiered price BEFORE offer discount is applied (this is what we'll use as base for bundle discount)
+                    originalUnitPrice: tierInfo.unitPrice,
+                    appliedTier: tierInfo.appliedTier,
+                    // Bundle information
+                    isBundle: options.isBundle,
+                    bundleProductIds: options.bundleProductIds,
+                    bundleComplete: shouldApplyDiscount && options.isBundle ? true : false
                 };
 
                 this.saveCartItem(companyId, newItem);
@@ -131,11 +157,14 @@ export class B2BCartService {
                 const parsedItems = updatedCart.map(item => this.parseStoredCartItem(item));
                 const tieredItems = this.recalculateTieredPricing(parsedItems);
 
-                // Save the updated cart with tiered pricing
-                this.saveEntireCart(companyId, tieredItems);
+                // Recalculate bundle completion and apply discounts if needed
+                const bundleUpdatedItems = this.recalculateBundleStatus(tieredItems, companyId);
 
-                // Return the specific item with tiered pricing applied
-                const updatedItem = tieredItems.find(item => item.productId === productId);
+                // Save the updated cart with tiered pricing and bundle updates
+                this.saveEntireCart(companyId, bundleUpdatedItems);
+
+                // Return the specific item with all updates applied
+                const updatedItem = bundleUpdatedItems.find(item => item.productId === productId);
                 return updatedItem || newItem;
             }),
             delay(200)
@@ -170,8 +199,11 @@ export class B2BCartService {
         const parsedItems = items.map(item => this.parseStoredCartItem(item));
         const tieredItems = this.recalculateTieredPricing(parsedItems);
 
-        // Save the cart with tiered pricing applied
-        this.saveEntireCart(companyId, tieredItems);
+        // Recalculate bundle status for all items
+        const bundleUpdatedItems = this.recalculateBundleStatus(tieredItems, companyId);
+
+        // Save the cart with tiered pricing and bundle updates applied
+        this.saveEntireCart(companyId, bundleUpdatedItems);
 
         return of(true).pipe(delay(200));
     }
@@ -191,7 +223,13 @@ export class B2BCartService {
 
         if (quantity === 0) {
             items = items.filter(item => item.productId !== productId);
-            this.saveEntireCart(companyId, items);
+
+            // Recalculate tiered pricing and bundle status for remaining items
+            const parsedItems = items.map(item => this.parseStoredCartItem(item));
+            const tieredItems = this.recalculateTieredPricing(parsedItems);
+            const bundleUpdatedItems = this.recalculateBundleStatus(tieredItems, companyId);
+
+            this.saveEntireCart(companyId, bundleUpdatedItems);
             return of(null); // Instant, no delay
         } else {
             // Update quantity first
@@ -206,11 +244,14 @@ export class B2BCartService {
         const parsedItems = items.map(item => this.parseStoredCartItem(item));
         const tieredItems = this.recalculateTieredPricing(parsedItems);
 
-        // Save the cart with tiered pricing applied
-        this.saveEntireCart(companyId, tieredItems);
+        // Recalculate bundle status for all items
+        const bundleUpdatedItems = this.recalculateBundleStatus(tieredItems, companyId);
+
+        // Save the cart with tiered pricing and bundle updates applied
+        this.saveEntireCart(companyId, bundleUpdatedItems);
 
         // Return the specific updated item
-        const updatedItem = tieredItems.find(item => item.productId === productId);
+        const updatedItem = bundleUpdatedItems.find(item => item.productId === productId);
         return of(updatedItem || null); // Instant, no delay
     }
 
@@ -405,7 +446,8 @@ export class B2BCartService {
             }
 
             // Apply partner offer if it gives better price
-            if (item.partnerOfferId && item.partnerOfferOriginalPrice) {
+            // EXCEPT for bundle offers - those are handled by recalculateBundleStatus
+            if (item.partnerOfferId && item.partnerOfferOriginalPrice && !item.isBundle) {
                 const offerPrice = this.calculateOfferUnitPrice(
                     item.partnerOfferOriginalPrice,
                     item.partnerOfferType,
@@ -423,15 +465,94 @@ export class B2BCartService {
             const standardSavingsPerUnit = Math.max(0, retailPrice - (item.originalUnitPrice || basePrice));
             const additionalSavingsPerUnit = Math.max(0, totalSavingsPerUnit - standardSavingsPerUnit);
 
+            // For bundle items, update originalUnitPrice to the tiered price (before bundle discount)
+            // This ensures recalculateBundleStatus has the correct base price to work with
+            const updatedOriginalUnitPrice = item.isBundle ? unitPrice : item.originalUnitPrice;
+
             return {
                 ...item,
                 unitPrice,
                 totalPrice: unitPrice * item.quantity,
                 savings: totalSavingsPerUnit * item.quantity,
                 additionalSavings: additionalSavingsPerUnit * item.quantity,
-                appliedTier
+                appliedTier,
+                originalUnitPrice: updatedOriginalUnitPrice
             };
         });
+    }
+
+    /**
+     * Recalculate bundle completion status for all items and apply discounts if bundles are complete
+     */
+    private recalculateBundleStatus(items: B2BCartItem[], companyId: string): B2BCartItem[] {
+        // Group items by bundle offer ID
+        const bundleGroups = new Map<string, B2BCartItem[]>();
+
+        items.forEach(item => {
+            if (item.isBundle && item.bundleProductIds && item.partnerOfferId) {
+                const key = item.partnerOfferId;
+                if (!bundleGroups.has(key)) {
+                    bundleGroups.set(key, []);
+                }
+                bundleGroups.get(key)!.push(item);
+            }
+        });
+
+        // For each bundle, check if complete and update all items
+        const updatedItems = items.map(item => {
+            if (!item.isBundle || !item.bundleProductIds || !item.partnerOfferId) {
+                return item;
+            }
+
+            // Get all products in cart for this bundle
+            const productsInCart = items
+                .filter(i => i.partnerOfferId === item.partnerOfferId)
+                .map(i => i.productId);
+
+            // Check if bundle is complete
+            const bundleComplete = item.bundleProductIds.every(id => productsInCart.includes(id));
+
+            // Store original discount info (needed for when bundle becomes complete)
+            const originalDiscount = item.partnerOfferDiscount;
+            const originalDiscountType = item.partnerOfferType;
+
+            // Calculate new price with discount if bundle is complete
+            let newUnitPrice = item.unitPrice;
+            let newAdditionalSavings = item.additionalSavings || 0;
+
+            if (bundleComplete && originalDiscount !== undefined) {
+                // Apply the offer discount
+                const basePrice = item.originalUnitPrice || item.unitPrice;
+                newUnitPrice = this.calculateOfferDiscountOnPartnerPrice(
+                    basePrice,
+                    originalDiscountType,
+                    originalDiscount,
+                    undefined,
+                    undefined
+                );
+
+                const retailPrice = item.retailPrice;
+                const totalSavingsPerUnit = retailPrice - newUnitPrice;
+                const standardSavingsPerUnit = Math.max(0, retailPrice - basePrice);
+                newAdditionalSavings = Math.max(0, totalSavingsPerUnit - standardSavingsPerUnit) * item.quantity;
+            } else if (!bundleComplete) {
+                // Remove discount if bundle is incomplete
+                newUnitPrice = item.originalUnitPrice || item.unitPrice;
+                newAdditionalSavings = 0;
+            }
+
+            return {
+                ...item,
+                bundleComplete,
+                unitPrice: newUnitPrice,
+                totalPrice: newUnitPrice * item.quantity,
+                savings: (item.retailPrice - newUnitPrice) * item.quantity,
+                additionalSavings: newAdditionalSavings
+                // Keep original discount info so we can apply it when bundle becomes complete
+            };
+        });
+
+        return updatedItems;
     }
 
     private generateId(): string {
@@ -684,6 +805,16 @@ export class B2BCartService {
                 throw new Error(this.translationService.translate('cart.couponAlreadyApplied'));
             }
 
+            // Check if this is a bundle offer coupon
+            const isBundleOffer = await this.checkIfBundleOffer(validationResult.coupon.id);
+            if (isBundleOffer) {
+                // Verify all products from the bundle are in the cart
+                const hasAllBundleProducts = await this.verifyBundleProductsInCart(validationResult.coupon.id, cartItems);
+                if (!hasAllBundleProducts) {
+                    throw new Error(this.translationService.translate('b2b.offers.bundleRequiresAllProductsError'));
+                }
+            }
+
             const appliedCoupon: B2BAppliedCoupon = {
                 id: validationResult.coupon.id,
                 code: validationResult.coupon.code,
@@ -711,6 +842,59 @@ export class B2BCartService {
             };
         } catch (error: any) {
             throw new Error(error?.message || this.translationService.translate('cart.couponValidationError'));
+        }
+    }
+
+    /**
+     * Check if an offer is a bundle offer
+     */
+    private async checkIfBundleOffer(offerId: string): Promise<boolean> {
+        try {
+            const { data, error } = await this.supabaseService.client
+                .from('offers')
+                .select('bundle')
+                .eq('id', offerId)
+                .single();
+
+            if (error || !data) {
+                return false;
+            }
+
+            return data.bundle === true;
+        } catch (error) {
+            console.warn('Error checking if offer is bundle:', error);
+            return false;
+        }
+    }
+
+    /**
+     * Verify that all products from a bundle offer are in the cart
+     */
+    private async verifyBundleProductsInCart(offerId: string, cartItems: B2BCartItem[]): Promise<boolean> {
+        try {
+            // Get all products for this offer
+            const { data: offerProducts, error } = await this.supabaseService.client
+                .from('offer_products')
+                .select('product_id')
+                .eq('offer_id', offerId);
+
+            if (error || !offerProducts || offerProducts.length === 0) {
+                // If no products found, allow coupon (might be a general offer)
+                return true;
+            }
+
+            // Get product IDs from cart
+            const cartProductIds = cartItems.map(item => item.productId);
+
+            // Check if all offer products are in the cart
+            const allProductsInCart = offerProducts.every(offerProduct =>
+                cartProductIds.includes(offerProduct.product_id)
+            );
+
+            return allProductsInCart;
+        } catch (error) {
+            console.warn('Error verifying bundle products in cart:', error);
+            return false;
         }
     }
 

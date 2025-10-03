@@ -218,6 +218,8 @@ export const addAllToB2BCartFromOffer = createAction(
         partnerOfferType: 'percentage' | 'fixed_amount' | 'tier_based' | 'bundle';
         partnerOfferDiscount: number;
         partnerOfferValidUntil?: string;
+        isBundle?: boolean;
+        bundleProductIds?: string[];
     }>()
 );
 

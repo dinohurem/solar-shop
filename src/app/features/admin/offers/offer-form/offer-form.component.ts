@@ -666,7 +666,7 @@ import { TranslationService } from '../../../../shared/services/translation.serv
                   class="sr-only"
                 >
                 <span class="flex items-center">
-                  <span class="flex-shrink-0 w-5 h-5 border-2 border-gray-300 rounded mr-3 transition-colors duration-200" 
+                  <span class="flex-shrink-0 w-5 h-5 border-2 border-gray-300 rounded mr-3 transition-colors duration-200"
                         [class.bg-blue-600]="offerForm.get('is_b2b')?.value"
                         [class.border-blue-600]="offerForm.get('is_b2b')?.value">
                     <svg *ngIf="offerForm.get('is_b2b')?.value" class="w-3 h-3 text-white mx-auto mt-0.5" fill="currentColor" viewBox="0 0 20 20">
@@ -676,6 +676,70 @@ import { TranslationService } from '../../../../shared/services/translation.serv
                   <span class="text-sm font-medium text-gray-700">{{ 'admin.offersForm.b2bOffer' | translate }}</span>
                 </span>
               </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bundle Offer Section -->
+        <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+            </svg>
+            {{ 'admin.offersForm.bundleConfiguration' | translate }}
+          </h3>
+
+          <div class="space-y-4">
+            <div class="flex items-center">
+              <label class="relative flex items-center p-4 rounded-lg border-2 border-gray-200 transition-colors duration-200 w-full"
+                     [class.cursor-pointer]="!offerForm.get('is_b2b')?.value"
+                     [class.hover:border-blue-300]="!offerForm.get('is_b2b')?.value"
+                     [class.bg-gray-50]="offerForm.get('is_b2b')?.value"
+                     [class.cursor-not-allowed]="offerForm.get('is_b2b')?.value">
+              <input
+                id="bundle"
+                type="checkbox"
+                formControlName="bundle"
+                [disabled]="offerForm.get('is_b2b')?.value"
+                  class="sr-only"
+                >
+                <span class="flex items-center">
+                  <span class="flex-shrink-0 w-5 h-5 border-2 border-gray-300 rounded mr-3 transition-colors duration-200"
+                        [class.bg-blue-600]="offerForm.get('bundle')?.value"
+                        [class.border-blue-600]="offerForm.get('bundle')?.value"
+                        [class.bg-gray-400]="offerForm.get('is_b2b')?.value && offerForm.get('bundle')?.value">
+                    <svg *ngIf="offerForm.get('bundle')?.value" class="w-3 h-3 text-white mx-auto mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                    </svg>
+                  </span>
+                  <div class="flex flex-col">
+                    <span class="text-sm font-medium text-gray-700">
+                      {{ 'admin.offersForm.bundleOffer' | translate }}
+                      <span *ngIf="offerForm.get('is_b2b')?.value" class="ml-2 text-xs text-gray-500">({{ 'admin.offersForm.requiredForB2B' | translate }})</span>
+                    </span>
+                    <span class="text-xs text-gray-500 mt-1">
+                      {{ 'admin.offersForm.bundleOfferDescription' | translate }}
+                    </span>
+                  </div>
+                </span>
+              </label>
+            </div>
+
+            <!-- Bundle Info Notice -->
+            <div *ngIf="offerForm.get('bundle')?.value" class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div class="flex items-start">
+                <svg class="w-5 h-5 text-blue-600 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                </svg>
+                <div class="flex-1">
+                  <p class="text-sm font-medium text-blue-800 mb-1">{{ 'admin.offersForm.bundleOfferNotice' | translate }}</p>
+                  <ul class="text-xs text-blue-700 space-y-1 list-disc list-inside">
+                    <li>{{ 'admin.offersForm.bundleRequiresAllProducts' | translate }}</li>
+                    <li>{{ 'admin.offersForm.bundleDiscountAppliedOnlyWhenComplete' | translate }}</li>
+                    <li *ngIf="!offerForm.get('is_b2b')?.value">{{ 'admin.offersForm.bundleCanBeDisabledForB2C' | translate }}</li>
+                  </ul>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -734,6 +798,7 @@ export class OfferFormComponent implements OnInit {
       priority: [0],
       status: ['draft', [Validators.required]],
       is_b2b: [false],
+      bundle: [false],
       category_id: [null],
       apply_to_category: [false],
       products: this.fb.array([])
@@ -757,6 +822,13 @@ export class OfferFormComponent implements OnInit {
 
     this.offerForm.get('discount_value')?.valueChanges.subscribe((discountValue) => {
       this.onDiscountValueChange(discountValue);
+    });
+
+    // Listen for changes to is_b2b to automatically set bundle to true
+    this.offerForm.get('is_b2b')?.valueChanges.subscribe((isB2B) => {
+      if (isB2B) {
+        this.offerForm.get('bundle')?.setValue(true, { emitEvent: false });
+      }
     });
   }
 

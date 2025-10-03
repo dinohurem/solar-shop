@@ -35,6 +35,10 @@ export interface B2BCartItem {
     quantityTier3?: number;
     originalUnitPrice?: number; // Store the original price before tier adjustment
     appliedTier?: 1 | 2 | 3; // Which tier is currently applied
+    // Bundle offer fields
+    isBundle?: boolean;
+    bundleProductIds?: string[];
+    bundleComplete?: boolean;
 }
 
 export interface B2BAppliedCoupon extends AppliedCoupon {

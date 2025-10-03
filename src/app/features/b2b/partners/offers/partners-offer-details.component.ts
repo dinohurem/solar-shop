@@ -33,6 +33,7 @@ interface PartnerOffer {
   featured: boolean;
   isB2B: boolean;
   applicable_category_ids?: string[];
+  bundle?: boolean;
 }
 
 interface PartnerProduct {
@@ -75,8 +76,14 @@ interface PartnerProduct {
                 <span *ngIf="isFixedAmountDiscount()">{{ offer.discount_value | currency:'EUR':'symbol':'1.0-2' }} OFF</span>
               </div>
               <!-- Partner Only Badge -->
-              <div class="absolute top-6 right-6 bg-solar-100 text-solar-800 text-sm font-bold px-3 py-2 rounded-full shadow-lg">
-                {{ 'b2b.offers.partnerOnly' | translate }}
+              <div class="absolute top-6 right-6 flex flex-col gap-2 items-end">
+                <span class="bg-solar-100 text-solar-800 text-sm font-bold px-3 py-2 rounded-full shadow-lg">
+                  {{ 'b2b.offers.partnerOnly' | translate }}
+                </span>
+                <!-- Bundle Badge -->
+                <span *ngIf="offer.bundle" class="bg-purple-600 text-white text-sm font-bold px-3 py-2 rounded-full shadow-lg">
+                  {{ 'b2b.offers.bundleOffer' | translate }}
+                </span>
               </div>
             </div>
 
@@ -169,6 +176,16 @@ interface PartnerProduct {
                             {{ totalDiscountPercentage }}%
                           </div>
                         </div>
+                      </div>
+
+                      <!-- Bundle Notice -->
+                      <div *ngIf="offer.bundle" class="mt-4 p-3 bg-purple-500/20 border border-purple-300/30 rounded-lg">
+                        <p class="text-sm text-white flex items-center">
+                          <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                          </svg>
+                          {{ 'b2b.offers.bundleRequiresAllProductsInCart' | translate }}
+                        </p>
                       </div>
                     </div>
 
@@ -575,7 +592,8 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
         endDate: offer.end_date || '',
         featured: offer.featured || false,
         isB2B: offer.is_b2b,
-        applicable_category_ids: offer.applicable_category_ids || []
+        applicable_category_ids: offer.applicable_category_ids || [],
+        bundle: offer.bundle || false
       };
 
       // Load category name if applicable
@@ -805,7 +823,9 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
       partnerOfferName: offer.title,
       partnerOfferType: offerType,
       partnerOfferDiscount: discountValue,
-      partnerOfferValidUntil: offer.endDate
+      partnerOfferValidUntil: offer.endDate,
+      isBundle: offer.bundle || false,
+      bundleProductIds: offer.bundle ? this.products.map((p: PartnerProduct) => p.id) : undefined
     }));
 
     // Open cart sidebar
@@ -872,7 +892,9 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
         partnerOfferName: this.offer.title,
         partnerOfferType: offerType,
         partnerOfferDiscount: discountValue,
-        partnerOfferValidUntil: this.offer.endDate
+        partnerOfferValidUntil: this.offer.endDate,
+        isBundle: this.offer.bundle || false,
+        bundleProductIds: this.offer.bundle ? this.products.map((p: PartnerProduct) => p.id) : undefined
       }));
 
       // Open cart sidebar
@@ -933,7 +955,9 @@ export class PartnersOfferDetailsComponent implements OnInit, OnDestroy {
         partnerOfferName: this.offer!.title,
         partnerOfferType: offerType,
         partnerOfferDiscount: discountValue,
-        partnerOfferValidUntil: this.offer!.endDate
+        partnerOfferValidUntil: this.offer!.endDate,
+        isBundle: this.offer!.bundle || false,
+        bundleProductIds: this.offer!.bundle ? this.products.map((p: PartnerProduct) => p.id) : undefined
       }));
 
       // Open cart sidebar
