@@ -84,7 +84,7 @@ import { User } from '../../../../shared/models/user.model';
               <div class="absolute top-4 left-4">
                 <span class="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
                   <span *ngIf="offer.discount_type === 'percentage' || !offer.discount_type">-{{ offer.discountPercentage }}%</span>
-                  <span *ngIf="offer.discount_type === 'fixed_amount'">{{ offer.discount_value | currency:'EUR':'symbol':'1.0-2' }} OFF</span>
+                  <span *ngIf="offer.discount_type === 'fixed_amount'">{{ offer.discount_value | currency:'EUR':'symbol':'1.0-2' }} {{ 'hero.off' | translate }}</span>
                 </span>
               </div>
 

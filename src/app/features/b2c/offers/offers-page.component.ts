@@ -48,7 +48,7 @@ import { SupabaseService } from '../../../services/supabase.service';
               >
               <!-- Discount Badge -->
               <div class="absolute top-4 left-4 bg-gradient-to-r from-accent-500 to-accent-600 text-white text-sm font-bold px-3 py-2 rounded-full shadow-lg">
-                {{ getDiscountDisplay(offer) }}
+                {{ getDiscountDisplay(offer) }} {{ 'hero.off' | translate }}
               </div>
               <!-- Sale Badge -->
               <div class="absolute top-4 right-4 bg-solar-600 text-white text-xs font-bold px-2 py-1 rounded-full">
@@ -349,7 +349,7 @@ export class OffersPageComponent implements OnInit {
     } else if (offer.discount_type === 'fixed_amount') {
       // Show total savings (sum of all product discounts)
       const totalSavings = this.getTotalSavings(offer);
-      return `€${totalSavings.toFixed(0)} OFF`;
+      return `€${totalSavings.toFixed(0)}`;
     } else {
       // Fallback to percentage
       return `-${offer.discountPercentage}%`;

@@ -33,7 +33,7 @@ import { TranslationService } from '../../../shared/services/translation.service
               <!-- Discount Badge -->
               <div class="absolute top-6 left-6 bg-accent-500 text-white text-lg font-bold px-4 py-3 rounded-full shadow-lg">
                 <span *ngIf="offer.discount_type === 'percentage' || !offer.discount_type">-{{ offer.discountPercentage }}%</span>
-                <span *ngIf="offer.discount_type === 'fixed_amount'">{{ offer.discount_value | currency:'EUR':'symbol':'1.0-2' }} OFF</span>
+                <span *ngIf="offer.discount_type === 'fixed_amount'">{{ offer.discount_value | currency:'EUR':'symbol':'1.0-2' }} {{ 'hero.off' | translate }}</span>
               </div>
             </div>
 
@@ -153,8 +153,8 @@ import { TranslationService } from '../../../shared/services/translation.service
               <!-- Individual Product Discount Badge (Only if product has specific discount) -->
               <div *ngIf="hasProductSpecificDiscount(product)" class="mb-3">
                 <span class="inline-block bg-green-100 text-green-800 text-xs font-semibold px-2 py-1 rounded">
-                  <span *ngIf="product.discount_type === 'percentage'">{{ product.discount_percentage }}% discount</span>
-                  <span *ngIf="product.discount_type === 'fixed_amount'">{{ product.discount_amount | currency:'EUR':'symbol':'1.0-2' }} off</span>
+                  <span *ngIf="product.discount_type === 'percentage'">{{ product.discount_percentage }}% {{ 'hero.off' | translate }}</span>
+                  <span *ngIf="product.discount_type === 'fixed_amount'">{{ product.discount_amount | currency:'EUR':'symbol':'1.0-2' }} {{ 'hero.off' | translate }}</span>
                 </span>
               </div>
 

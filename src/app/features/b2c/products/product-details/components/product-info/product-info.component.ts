@@ -145,7 +145,7 @@ import { LucideAngularModule, Star, StarHalf, ShoppingCart } from 'lucide-angula
           <div class="flex items-center justify-between bg-green-50 p-3 rounded-lg">
             <span class="text-sm font-medium text-green-700 font-['DM_Sans']">{{ 'b2b.products.savings' | translate }}:</span>
             <span class="text-lg font-bold text-green-600 font-['DM_Sans']">
-              €{{ getCompanySavings() | number:'1.2-2':'de' }} ({{ COMPANY_DISCOUNT_PERCENTAGE }}% off)
+              €{{ getCompanySavings() | number:'1.2-2':'de' }} ({{ COMPANY_DISCOUNT_PERCENTAGE }}% {{ 'hero.off' | translate }})
             </span>
           </div>
         </div>

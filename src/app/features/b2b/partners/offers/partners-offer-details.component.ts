@@ -73,7 +73,7 @@ interface PartnerProduct {
               <!-- Discount Badge -->
               <div class="absolute top-6 left-6 bg-accent-500 text-white text-lg font-bold px-4 py-3 rounded-full shadow-lg">
                 <span *ngIf="isPercentageDiscount()">-{{ offer.discount_value || offer.discountPercentage }}%</span>
-                <span *ngIf="isFixedAmountDiscount()">{{ offer.discount_value | currency:'EUR':'symbol':'1.0-2' }} OFF</span>
+                <span *ngIf="isFixedAmountDiscount()">{{ offer.discount_value | currency:'EUR':'symbol':'1.0-2' }} {{ 'hero.off' | translate }}</span>
               </div>
               <!-- Partner Only Badge -->
               <div class="absolute top-6 right-6 flex flex-col gap-2 items-end">
@@ -305,7 +305,7 @@ interface PartnerProduct {
               <!-- Discount Badge -->
               <div class="absolute top-4 right-4 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
                 <span *ngIf="isPercentageDiscount()">-{{ offer.discount_value || offer.discountPercentage }}%</span>
-                <span *ngIf="isFixedAmountDiscount()">{{ offer.discount_value | currency:'EUR':'symbol':'1.0-2' }} OFF</span>
+                <span *ngIf="isFixedAmountDiscount()">{{ offer.discount_value | currency:'EUR':'symbol':'1.0-2' }} {{ 'hero.off' | translate }}</span>
               </div>
             </div>
 
