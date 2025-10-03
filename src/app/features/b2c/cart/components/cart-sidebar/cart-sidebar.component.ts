@@ -215,16 +215,7 @@ import { LucideAngularModule, ShoppingCart } from 'lucide-angular';
                     class="flex items-center justify-between p-2 bg-green-100 text-green-800 rounded text-sm"
                   >
                     <span>
-                      {{ coupon.code }} -
-                      <ng-container *ngIf="coupon.type === 'percentage'">
-                        {{ coupon.value }}% ({{ coupon.discountAmount | currency:'EUR':'symbol':'1.2-2' }})
-                      </ng-container>
-                      <ng-container *ngIf="coupon.type === 'fixed_amount'">
-                        {{ coupon.discountAmount | currency:'EUR':'symbol':'1.2-2' }}
-                      </ng-container>
-                      <ng-container *ngIf="coupon.type === 'free_shipping'">
-                        {{ 'cart.freeShipping' | translate }}
-                      </ng-container>
+                      {{ coupon.code }} - {{ totalIndividualDiscount$ | async | currency:'EUR':'symbol':'1.2-2' }}
                     </span>
                     <button
                       (click)="removeCoupon(coupon.id)"
@@ -266,22 +257,22 @@ import { LucideAngularModule, ShoppingCart } from 'lucide-angular';
 
             <!-- Cart Summary -->
             <div class="border-t border-gray-200 p-4 flex-shrink-0">
-              <ng-container *ngIf="cartSummary$ | async as summary">
+              <ng-container *ngIf="enhancedCartSummary$ | async as summary">
                 <div class="space-y-2 text-sm">
                   <div class="flex justify-between">
                     <span class="text-gray-600">{{ 'cart.subtotal' | translate }}</span>
-                    <span>{{ summary.subtotal | currency:'EUR':'symbol':'1.2-2' }}</span>
+                    <span>{{ summary.subtotalBeforeDiscount | currency:'EUR':'symbol':'1.2-2' }}</span>
                   </div>
                   <div
-                    *ngIf="summary.discount && summary.discount > 0"
+                    *ngIf="summary.totalDiscount && summary.totalDiscount > 0"
                     class="flex justify-between text-green-600"
                   >
                     <span>{{ 'cart.discount' | translate }}</span>
-                    <span>-{{ summary.discount | currency:'EUR':'symbol':'1.2-2' }}</span>
+                    <span>-{{ summary.totalDiscount | currency:'EUR':'symbol':'1.2-2' }}</span>
                   </div>
                   <div class="flex justify-between font-semibold text-lg border-t pt-2">
                     <span>{{ 'cart.total' | translate }}</span>
-                    <span>{{ summary.total | currency:'EUR':'symbol':'1.2-2' }}</span>
+                    <span>{{ summary.finalTotal | currency:'EUR':'symbol':'1.2-2' }}</span>
                   </div>
                 </div>
               </ng-container>
@@ -383,13 +374,54 @@ export class CartSidebarComponent implements OnInit {
   canApplyCoupon$ = this.store.select(CartSelectors.selectCanApplyCoupon);
   hasCouponsApplied$ = this.store.select(CartSelectors.selectHasCouponsApplied);
 
-  // Only show applied coupons if they're actually providing a discount (bundle complete)
+  // Show applied coupons if there are any coupons applied
+  // For individual product discounts, the discount is shown on each item, not in summary
   shouldShowAppliedCoupons$ = combineLatest([
     this.appliedCoupons$,
-    this.cartSummary$
+    this.cartItems$
   ]).pipe(
-    map(([coupons, summary]) => {
-      return coupons && coupons.length > 0 && summary && summary.discount > 0;
+    map(([coupons, items]) => {
+      if (!coupons || coupons.length === 0) return false;
+
+      // Show coupon if any item has offerSavings (individual discount applied)
+      const hasIndividualDiscounts = items && items.some(item => item.offerSavings && item.offerSavings > 0);
+
+      return hasIndividualDiscounts;
+    })
+  );
+
+  // Calculate total individual discount amount for display in coupon section
+  totalIndividualDiscount$ = this.cartItems$.pipe(
+    map(items => {
+      if (!items) return 0;
+      return items.reduce((total, item) => {
+        return total + ((item.offerSavings || 0) * item.quantity);
+      }, 0);
+    })
+  );
+
+  // Calculate enhanced summary with pre-discount subtotal
+  enhancedCartSummary$ = combineLatest([
+    this.cartSummary$,
+    this.cartItems$,
+    this.totalIndividualDiscount$
+  ]).pipe(
+    map(([summary, items, individualDiscount]) => {
+      if (!summary || !items) return null;
+
+      // Calculate subtotal before any discounts
+      const subtotalBeforeDiscount = items.reduce((total, item) => {
+        // Use offerOriginalPrice if available (price before coupon), otherwise use current price
+        const priceBeforeDiscount = item.offerOriginalPrice || item.price;
+        return total + (priceBeforeDiscount * item.quantity);
+      }, 0);
+
+      return {
+        ...summary,
+        subtotalBeforeDiscount,
+        totalDiscount: individualDiscount, // Use individual discount for display
+        finalTotal: summary.total
+      };
     })
   );
 

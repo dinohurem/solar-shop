@@ -31,6 +31,7 @@ export interface CartItem {
     sku: string;
     price: number;
     originalPrice?: number;
+    basePrice?: number; // The true base price before ANY offers/coupons - used when removing coupons
     quantity: number;
     minQuantity: number;
     maxQuantity: number;

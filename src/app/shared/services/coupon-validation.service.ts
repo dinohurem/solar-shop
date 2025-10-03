@@ -166,15 +166,11 @@ export class CouponValidationService {
   private validateBasicCouponRules(coupon: Coupon, cartItems: CartItem[]): CouponValidationResult {
     console.log('Validating basic coupon rules for:', coupon.code);
 
-    // Check if coupon has already been used in this session
+    // Allow reapplying coupons - users can apply the same coupon multiple times
+    // to discount newly added products (for regular offers) or to complete bundles
+    // The cart service will handle ensuring products don't get double-discounted
     if (this.usedCouponsInSession.has(coupon.code.toLowerCase())) {
-      console.log('Coupon has already been used in this session:', coupon.code);
-      return {
-        isValid: false,
-        errorMessage: this.translationService.translate('cart.couponAlreadyUsedInSession') || 'This coupon has already been used in this session',
-        discountAmount: undefined,
-        coupon: undefined
-      };
+      console.log('Coupon already applied - allowing reapplication for new products:', coupon.code);
     }
 
     // Check if coupon is active
@@ -262,11 +258,21 @@ export class CouponValidationService {
   }
 
   private async validateOfferBasedRules(coupon: Coupon, cartItems: CartItem[]): Promise<CouponValidationResult> {
-    // Check if cart contains products that already have offer discounts applied
-    const itemsWithOffers = cartItems.filter(item => item.offerId || item.offerName || item.offerSavings);
+    // Check if cart contains products that already have OTHER offer discounts applied
+    // Allow re-applying the same coupon (to newly added products)
+    const itemsWithOtherOffers = cartItems.filter(item => {
+      const hasOffer = item.offerId || item.offerName || item.offerSavings;
+      if (!hasOffer) return false;
 
-    if (itemsWithOffers.length > 0) {
-      console.log('Cart contains items with existing offer discounts:', itemsWithOffers.map(item => ({
+      // Allow if it's the same coupon/offer being reapplied
+      const isSameCoupon = item.offerName && item.offerName.toLowerCase().includes(coupon.code.toLowerCase());
+      if (isSameCoupon) return false;
+
+      return true; // Different offer exists
+    });
+
+    if (itemsWithOtherOffers.length > 0) {
+      console.log('Cart contains items with DIFFERENT offer discounts:', itemsWithOtherOffers.map(item => ({
         name: item.name,
         offerId: item.offerId,
         offerName: item.offerName,

@@ -2025,7 +2025,8 @@ export class TranslationService {
                 couponRemoved: 'Kupon {{code}} je uklonjen',
                 couponRemovedGeneric: 'Kupon je uklonjen',
                 bundleComplete: 'Paket kompletan',
-                bundleIncomplete: 'Paket nekompletan'
+                bundleIncomplete: 'Paket nekompletan',
+                bundleRequiresAllProducts: 'Svi proizvodi iz paketne ponude moraju biti u košarici da biste primijenili popust.'
             },
             // Checkout
             checkout: {
@@ -4633,7 +4634,8 @@ export class TranslationService {
                 couponRemoved: 'Coupon {{code}} removed',
                 couponRemovedGeneric: 'Coupon removed',
                 bundleComplete: 'Bundle complete',
-                bundleIncomplete: 'Bundle incomplete'
+                bundleIncomplete: 'Bundle incomplete',
+                bundleRequiresAllProducts: 'All products from the bundle offer must be in the cart to apply the discount.'
             },
             // Checkout
             checkout: {

@@ -177,7 +177,7 @@ export class CartService {
                 );
             }),
             catchError(error => {
-                console.error('Error applying coupon:', error);
+                // Error will be displayed to the user via the store/effects
                 throw error;
             })
         );
@@ -249,11 +249,17 @@ export class CartService {
                 const actualSellingPrice = product.price; // The real price customers pay (current/discounted price)
                 const compareAtPrice = product.original_price; // The higher "compare at" price for marketing
 
+                // Store the base price (before ANY offers) - this is what we'll revert to when removing coupons
+                // For regular products: use original_price or price if no original_price
+                // This ensures we can always go back to the true base price
+                const basePrice = product.original_price || product.price;
+
                 console.log(`🏷️ Price debugging for ${product.name}:`);
                 console.log(`   product.price: €${product.price}`);
                 console.log(`   product.original_price: €${product.original_price}`);
                 console.log(`   Using as cart price: €${actualSellingPrice}`);
                 console.log(`   Using as originalPrice: €${compareAtPrice}`);
+                console.log(`   Base price (for coupon removal): €${basePrice}`);
 
                 // Check if this product is part of any existing bundle in the cart
                 let bundleInfo: { offerId?: string; offerName?: string; offerType?: 'percentage' | 'fixed_amount' | 'buy_x_get_y' | 'bundle'; offerDiscount?: number; offerOriginalPrice?: number; offerValidUntil?: string; isBundle?: boolean; bundleProductIds?: string[] } = {};
@@ -291,6 +297,7 @@ export class CartService {
                     sku: product.sku,
                     price: actualSellingPrice, // Use the lower/actual selling price
                     originalPrice: compareAtPrice, // Use the higher "compare at" price
+                    basePrice: basePrice, // Store the true base price for coupon removal
                     quantity: quantity,
                     minQuantity: 1,
                     maxQuantity: product.stock_quantity,
@@ -382,7 +389,66 @@ export class CartService {
                 throw new Error('Cart item not found');
             }
 
-            const updatedItems = currentItems.filter(cartItem => cartItem.id !== itemId);
+            // BUNDLE OFFER LOGIC: If removing a bundle item, remove coupon from ALL bundle items
+            let updatedItems = currentItems.filter(cartItem => cartItem.id !== itemId);
+
+            if (item.isBundle && item.bundleProductIds && item.bundleProductIds.length > 0) {
+                console.log('🎁 Removing bundle item - checking if coupon needs to be removed from remaining items');
+                console.log(`   Bundle product IDs: ${item.bundleProductIds.join(', ')}`);
+
+                // Find all items that are part of this bundle
+                const bundleItems = updatedItems.filter(cartItem =>
+                    item.bundleProductIds!.includes(cartItem.productId)
+                );
+
+                console.log(`   Found ${bundleItems.length} remaining bundle items`);
+
+                // If bundle is now incomplete (not all products present), remove coupon from remaining items
+                const bundleComplete = bundleItems.length === item.bundleProductIds.length;
+
+                if (!bundleComplete) {
+                    console.log('   ❌ Bundle is now incomplete - removing coupon from remaining items');
+                    updatedItems = updatedItems.map(cartItem => {
+                        // Check if this item is part of the incomplete bundle
+                        if (item.bundleProductIds!.includes(cartItem.productId) && cartItem.isBundle) {
+                            console.log(`   Removing coupon from: ${cartItem.name}`);
+                            // Restore to the price before coupon was applied
+                            const restorePrice = cartItem.offerOriginalPrice || cartItem.basePrice || cartItem.price;
+                            return {
+                                ...cartItem,
+                                price: restorePrice,
+                                offerId: undefined,
+                                offerName: undefined,
+                                offerType: undefined,
+                                offerDiscount: undefined,
+                                offerOriginalPrice: undefined,
+                                offerValidUntil: undefined,
+                                offerAppliedAt: undefined,
+                                offerSavings: undefined,
+                                isBundle: undefined,
+                                bundleProductIds: undefined,
+                                bundleComplete: undefined
+                            };
+                        }
+                        return cartItem;
+                    });
+
+                    // Also remove the applied coupon if it was a bundle coupon
+                    const currentCoupons = this.appliedCoupons.value;
+                    const bundleCoupon = currentCoupons.find(c =>
+                        item.offerName && item.offerName.includes(c.code)
+                    );
+
+                    if (bundleCoupon) {
+                        console.log(`   Removing bundle coupon: ${bundleCoupon.code}`);
+                        this.appliedCoupons.next(currentCoupons.filter(c => c.id !== bundleCoupon.id));
+                        this.couponValidationService.removeCouponFromSession(bundleCoupon.code);
+                    }
+                } else {
+                    console.log('   ✅ Bundle still complete - keeping coupon on remaining items');
+                }
+            }
+
             this.updateCartItems(updatedItems);
 
             // Sync to Supabase if authenticated
@@ -648,22 +714,19 @@ export class CartService {
         const itemsWithOffers = cartItems.filter(item => item.offerId && item.offerDiscount !== undefined);
 
         if (itemsWithIndividualDiscounts.length > 0) {
-            // Calculate total discount from individual item savings
-            // offerSavings is the per-unit savings, so we need to multiply by quantity
-            const totalDiscount = itemsWithIndividualDiscounts.reduce((total, item) => {
-                const perUnitSavings = item.offerSavings || 0;
-                return total + (perUnitSavings * item.quantity);
-            }, 0);
-
+            // For individual product discounts, the prices are ALREADY reduced in item.price
+            // So we should NOT subtract the discount again from the subtotal
+            // Return 0 to prevent double-counting the discount
             console.log('💰 DISCOUNT CALCULATION DEBUG (Individual Discounts):');
             console.log('Items with individual discounts:', itemsWithIndividualDiscounts.map(item => ({
                 name: item.name,
+                price: item.price,
                 offerSavings: item.offerSavings,
                 quantity: item.quantity,
-                totalSavings: (item.offerSavings || 0) * item.quantity
+                note: 'Price already includes discount'
             })));
-            console.log('Total discount amount:', totalDiscount.toFixed(2));
-            return totalDiscount;
+            console.log('Total discount amount: 0.00 (already applied to item prices)');
+            return 0;
         }
 
         // If there are items with offer fields but no savings (e.g., incomplete bundle),
@@ -828,6 +891,11 @@ export class CartService {
             let appliedCouponId: string | null = null;
             const couponValue = couponDetails?.discountValue ?? discountAmount;
 
+            // Check if this coupon corresponds to an offer with individual product discounts
+            // Do this BEFORE saving to database so we can validate bundle requirements
+            const updatedItems = await this.applyIndividualCouponDiscounts(code, discountType);
+
+            // If we got here, validation passed - now save the coupon
             if (this.isAuthenticated && this.currentUserId) {
                 // Save applied coupon to user's cart in database
                 const { data, error } = await this.supabaseService.client
@@ -850,9 +918,6 @@ export class CartService {
                 appliedCouponId = `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
             }
 
-            // Check if this coupon corresponds to an offer with individual product discounts
-            const updatedItems = await this.applyIndividualCouponDiscounts(code, discountType);
-
             // Mark coupon as used in session
             this.couponValidationService.markCouponAsUsedInSession(code);
 
@@ -869,32 +934,8 @@ export class CartService {
             // Replace all existing coupons with this single coupon
             this.appliedCoupons.next([newCoupon]);
 
-            // Increment usage count for the offer (if it's an offer-based coupon)
-            try {
-                const { data: offerData, error: offerError } = await this.supabaseService.client
-                    .from('offers')
-                    .select('id')
-                    .eq('code', code)
-                    .single();
-
-                if (!offerError && offerData) {
-                    console.log('Incrementing usage for offer:', offerData.id);
-                    // Use the couponValidationService to increment usage
-                    this.couponValidationService.incrementOfferUsage(offerData.id).subscribe({
-                        next: (success) => {
-                            if (success) {
-                                console.log('Successfully incremented offer usage');
-                            } else {
-                                console.warn('Failed to increment offer usage');
-                            }
-                        },
-                        error: (error) => console.error('Error incrementing offer usage:', error)
-                    });
-                }
-            } catch (error) {
-                console.warn('Could not increment offer usage:', error);
-                // Don't fail the whole operation if usage increment fails
-            }
+            // NOTE: Coupon usage is NOT incremented here - it will be incremented when order is confirmed
+            // This allows users to reapply coupons and experiment without using up their coupon quota
 
             // Update cart items if individual discounts were applied
             if (updatedItems) {
@@ -907,7 +948,7 @@ export class CartService {
             }
 
         } catch (error) {
-            console.error('Error applying coupon async:', error);
+            // Re-throw error to be handled by the calling code
             throw error;
         }
     }
@@ -932,9 +973,11 @@ export class CartService {
             }
 
             console.log('✅ Found offer for coupon:', offerData);
+            console.log('📦 Bundle field value:', offerData.bundle);
 
             // Check if this is a bundle offer
-            const isBundle = offerData.bundle || false;
+            const isBundle = offerData.bundle === true || offerData.bundle === 1;
+            console.log('🎁 Is this a bundle offer?', isBundle);
 
             // Get individual product discounts for this offer
             // First try to get all columns to see what exists
@@ -983,25 +1026,41 @@ export class CartService {
 
                 if (!bundleComplete) {
                     console.log('❌ Bundle is incomplete - not all products are in cart. Skipping discount application.');
-                    throw new Error('All products from the bundle offer must be in the cart to apply the discount.');
+                    const errorMessage = this.translationService.translate('cart.bundleRequiresAllProducts') ||
+                                       'All products from the bundle offer must be in the cart to apply the discount.';
+                    throw new Error(errorMessage);
                 }
             }
 
-            const resetItems = this.resetCartItemsToOriginalPrices(currentItems);
-            console.log('🔄 Reset items to original prices');
+            // Don't reset items that already have THIS offer applied - only apply to new items
+            // This allows reapplying the same coupon to newly added products
+            console.log('🔄 Checking which items need discount applied');
 
             // Apply individual discounts to appropriate items
-            const updatedItems = resetItems.map(item => {
+            const updatedItems = currentItems.map(item => {
                 const productDiscount = offerProducts.find(op => op.product_id === item.productId);
+
+                console.log(`🔍 Checking item: ${item.name} (productId: ${item.productId})`);
+                console.log(`   Current state: offerId=${item.offerId}, offerSavings=${item.offerSavings}, isBundle=${item.isBundle}`);
+                console.log(`   Offer being applied: offerData.id=${offerData.id}`);
+                console.log(`   Type comparison: item.offerId type=${typeof item.offerId}, offerData.id type=${typeof offerData.id}`);
+
+                // Skip if this item already has this specific offer applied
+                // Use type-safe string comparison to avoid type mismatch issues
+                if (item.offerId && String(item.offerId) === String(offerData.id)) {
+                    console.log(`⏭️ SKIP: ${item.name} already has this offer applied (ID: ${offerData.id})`);
+                    return item;
+                }
 
                 if (productDiscount) {
                     console.log(`✅ MATCH: Applying individual discount to ${item.name} (ID: ${item.productId})`);
-                    console.log(`   Current price: €${item.price}, Original price: €${item.originalPrice || item.price}`);
+                    console.log(`   Current price: €${item.price}, Original price: €${item.originalPrice}, Base price: €${item.basePrice}`);
                     console.log(`   Discount data:`, productDiscount);
 
-                    // Apply discount to the CURRENT/LOWEST price, not the original/highest price
-                    const basePrice = item.price; // Use current price (lowest)
-                    let discountedPrice = basePrice;
+                    // CRITICAL: Apply discount to the CURRENT price (which may already have offer discount)
+                    // User expects: SolarInvert €899.99 - €50 = €849.99, Sunways €564.07 - €50 = €514.07
+                    const currentPrice = item.price; // Use the current offer price as base for coupon
+                    let discountedPrice = currentPrice;
                     let offerDiscount = 0;
                     let offerType: 'percentage' | 'fixed_amount' = 'fixed_amount';
 
@@ -1017,42 +1076,46 @@ export class CartService {
 
                     if (discountType === 'fixed_amount' && discountAmount > 0) {
                         offerDiscount = discountAmount;
-                        discountedPrice = Math.max(0, basePrice - offerDiscount); // Can't go below 0
+                        discountedPrice = Math.max(0, currentPrice - offerDiscount); // Apply discount to current price
                         offerType = 'fixed_amount';
-                        console.log(`   💰 Fixed discount: €${offerDiscount} from €${basePrice} = €${discountedPrice}`);
+                        console.log(`   💰 Fixed discount: €${offerDiscount} from CURRENT €${currentPrice} = €${discountedPrice}`);
                     } else if (discountType === 'percentage' && discountPercentage > 0) {
                         offerDiscount = discountPercentage;
-                        discountedPrice = basePrice * (1 - offerDiscount / 100);
+                        discountedPrice = currentPrice * (1 - offerDiscount / 100); // Apply discount to current price
                         offerType = 'percentage';
-                        console.log(`   📊 Percentage discount: ${offerDiscount}% from €${basePrice} = €${discountedPrice}`);
+                        console.log(`   📊 Percentage discount: ${offerDiscount}% from CURRENT €${currentPrice} = €${discountedPrice}`);
                     } else {
                         console.log(`   ❌ No valid discount applied`);
                         return item; // Return unchanged if no valid discount
                     }
 
-                    const actualSavings = basePrice - discountedPrice; // Savings from current price
+                    const actualSavings = currentPrice - discountedPrice; // Savings from CURRENT price
 
-                    console.log(`   ✅ Applied discount: €${basePrice} → €${discountedPrice} (saved €${actualSavings})`);
+                    console.log(`   ✅ Applied discount: CURRENT €${currentPrice} → €${discountedPrice} (saved €${actualSavings})`);
 
-                    return {
+                    const updatedItem: any = {
                         ...item,
-                        // Keep the original price - don't modify it
-                        // The discount will be shown separately in the cart summary
-                        price: basePrice,
-                        originalPrice: item.originalPrice || basePrice,
+                        // Set the discounted price as the new price
+                        price: discountedPrice,
+                        originalPrice: item.originalPrice || item.basePrice, // Keep the display originalPrice
                         offerId: offerData.id,
                         offerName: this.getCouponOfferName(couponCode),
                         offerType,
                         offerDiscount,
-                        offerOriginalPrice: basePrice, // The price before this discount
+                        offerOriginalPrice: currentPrice, // Store the price item had before THIS coupon (might be offer price)
                         offerValidUntil: undefined,
                         offerAppliedAt: new Date().toISOString(),
-                        offerSavings: Math.round(actualSavings * 100) / 100,
-                        // Bundle fields (if this is a bundle offer)
-                        isBundle: isBundle,
-                        bundleProductIds: isBundle ? bundleProductIds : undefined,
-                        bundleComplete: false // Will be calculated by recalculateBundleStatus
+                        offerSavings: Math.round(actualSavings * 100) / 100
                     };
+
+                    // Only set bundle fields for bundle offers
+                    if (isBundle) {
+                        updatedItem.isBundle = true;
+                        updatedItem.bundleProductIds = bundleProductIds;
+                        updatedItem.bundleComplete = false; // Will be calculated by recalculateBundleStatus
+                    }
+
+                    return updatedItem;
                 } else {
                     console.log(`❌ NO MATCH: ${item.name} (ID: ${item.productId}) - keeping original price`);
                 }
@@ -1061,12 +1124,21 @@ export class CartService {
             });
 
             console.log('🎯 FINAL: Updated cart items with individual discounts');
+            console.log('📊 Final item states:');
+            updatedItems.forEach(item => {
+                console.log(`   - ${item.name}:`);
+                console.log(`     offerId: ${item.offerId}`);
+                console.log(`     offerSavings: ${item.offerSavings}`);
+                console.log(`     isBundle: ${item.isBundle}`);
+                console.log(`     bundleProductIds: ${item.bundleProductIds}`);
+                console.log(`     price: €${item.price}`);
+            });
             console.log('=== END CART SERVICE INDIVIDUAL DISCOUNTS ===');
             return updatedItems;
 
         } catch (error) {
-            console.error('Error applying individual coupon discounts:', error);
-            return null;
+            // Re-throw errors (especially bundle validation errors) so they propagate to applyCouponAsync
+            throw error;
         }
     }
 
@@ -1133,31 +1205,50 @@ export class CartService {
         try {
             console.log('Removing individual product discounts for coupon:', couponCode);
 
-            // Reset cart items to their original prices (remove offer-related fields)
+            // Reset cart items - remove ONLY coupon-related discounts, keep original offer prices
             const currentItems = this.getCartItemsArray();
             const resetItems = currentItems.map(item => {
-                // If this item has an offer applied from the coupon, reset it
-                if (item.offerName && item.offerName.includes(this.getCouponOfferName(couponCode))) {
-                    console.log(`Resetting discount for ${item.name}`);
-                    return {
-                        ...item,
-                        price: item.originalPrice || item.price,
-                        originalPrice: undefined,
-                        offerId: undefined,
-                        offerName: undefined,
-                        offerType: undefined,
-                        offerDiscount: undefined,
-                        offerOriginalPrice: undefined,
-                        offerValidUntil: undefined,
-                        offerAppliedAt: undefined,
-                        offerSavings: undefined,
-                        // Reset bundle fields
-                        isBundle: undefined,
-                        bundleProductIds: undefined,
-                        bundleComplete: undefined
-                    };
+                // Check if this item has the coupon applied (by checking offerName)
+                const hasCouponApplied = item.offerName && item.offerName.includes(this.getCouponOfferName(couponCode));
+
+                if (!hasCouponApplied) {
+                    return item; // Not affected by this coupon
                 }
-                return item;
+
+                console.log(`Resetting coupon discount for ${item.name}`);
+                console.log(`   Current price: €${item.price}`);
+                console.log(`   Base price: €${item.basePrice}`);
+                console.log(`   Original price: €${item.originalPrice}`);
+                console.log(`   Offer original price: €${item.offerOriginalPrice}`);
+
+                // When removing a coupon, we need to restore the item to its state BEFORE the coupon was applied
+                // The item might have come from:
+                // 1. Regular product page -> restore to basePrice
+                // 2. Offer details page -> restore to offer price (which may already be discounted)
+
+                // If offerOriginalPrice exists, it means this was the price before THIS coupon was applied
+                // So we should restore to that price
+                const restorePrice = item.offerOriginalPrice || item.basePrice || item.price;
+
+                console.log(`   Restoring to: €${restorePrice}`);
+
+                return {
+                    ...item,
+                    price: restorePrice,
+                    originalPrice: item.basePrice, // Keep basePrice as originalPrice for strikethrough display
+                    offerId: undefined,
+                    offerName: undefined,
+                    offerType: undefined,
+                    offerDiscount: undefined,
+                    offerOriginalPrice: undefined,
+                    offerValidUntil: undefined,
+                    offerAppliedAt: undefined,
+                    offerSavings: undefined,
+                    // Reset bundle fields
+                    isBundle: undefined,
+                    bundleProductIds: undefined,
+                    bundleComplete: undefined
+                };
             });
 
             console.log('Reset cart items after removing coupon discounts:', resetItems);
@@ -1252,7 +1343,10 @@ export class CartService {
             );
 
             // Calculate offer pricing
-            const originalPrice = offerOriginalPrice || product.price;
+            // IMPORTANT: Use the true base price (original_price) as the starting point
+            // product.price may already have an offer discount applied
+            const baseProductPrice = product.original_price || product.price;
+            const originalPrice = offerOriginalPrice || baseProductPrice;
             let discountedPrice = originalPrice; // Start with original price, not product.price
             let savings = 0;
 
@@ -1262,6 +1356,10 @@ export class CartService {
 
             console.log('Cart Service - Adding product with discount:', {
                 productId,
+                productPrice: product.price,
+                productOriginalPrice: product.original_price,
+                baseProductPrice,
+                originalPrice,
                 individualDiscount,
                 individualDiscountType,
                 offerDiscount,
@@ -1325,10 +1423,12 @@ export class CartService {
                     name: product.name,
                     description: product.description,
                     sku: product.sku || '',
-                    // Keep the original price - don't modify it
-                    // The discount will be shown separately via offerSavings
-                    price: originalPrice,
+                    // Use the discounted price if there's a discount, otherwise use original price
+                    // For offers from offer pages, this will be the offer price (e.g., €564.07)
+                    // originalPrice will show the higher price for strikethrough (e.g., €1000)
+                    price: discountedPrice,
                     originalPrice: originalPrice,
+                    basePrice: baseProductPrice, // Store the true base price for coupon removal
                     quantity,
                     minQuantity: 1,
                     maxQuantity: product.stock_quantity || 999,
@@ -1357,16 +1457,17 @@ export class CartService {
                         taxRate: 0,
                         taxAmount: 0
                     },
-                    // Offer-specific fields
-                    offerId,
-                    offerName,
-                    offerType: effectiveDiscountType,
-                    offerDiscount: effectiveDiscount,
-                    offerOriginalPrice: originalPrice,
-                    offerValidUntil,
-                    offerAppliedAt: now,
-                    offerSavings: savings,
-                    // Bundle fields
+                    // Offer-specific fields - only set for non-bundle items
+                    // For bundle items, these will be set when the coupon is applied
+                    offerId: isBundle ? undefined : offerId,
+                    offerName: isBundle ? undefined : offerName,
+                    offerType: isBundle ? undefined : effectiveDiscountType,
+                    offerDiscount: isBundle ? undefined : effectiveDiscount,
+                    offerOriginalPrice: isBundle ? undefined : originalPrice,
+                    offerValidUntil: isBundle ? undefined : offerValidUntil,
+                    offerAppliedAt: isBundle ? undefined : now,
+                    offerSavings: isBundle ? undefined : savings,
+                    // Bundle fields - store the discount info for when coupon is applied
                     isBundle,
                     bundleProductIds,
                     bundleComplete: false // Will be calculated by recalculateBundleStatus
@@ -1474,20 +1575,20 @@ export class CartService {
                     productPrice: product.price
                 });
 
-                // For bundle offers, pass the discount info but don't apply it immediately
-                // The discount will be applied by recalculateBundleStatus when bundle is complete
+                // For bundle offers, pass the individual discount info
+                // Don't apply it immediately - it will be applied when coupon is applied
                 await this.addToCartFromOfferAsync(
                     productData.productId,
                     productData.quantity,
                     productData.variantId,
                     offerId,
                     offerName,
-                    offerType, // Pass the actual offer type
-                    offerDiscount, // Pass the actual offer discount (not 0)
+                    offerType,
+                    offerDiscount,
                     originalPrice,
                     offerValidUntil,
-                    undefined, // No individual discount for bundles
-                    undefined, // No individual discount type for bundles
+                    productData.individualDiscount, // Pass individual discount from offer_products
+                    productData.individualDiscountType, // Pass individual discount type
                     isBundle, // Pass bundle flag
                     bundleProductIds // Pass bundle product IDs
                 );
@@ -1501,25 +1602,8 @@ export class CartService {
 
         // Bundle status will be automatically recalculated by updateCartItems -> recalculateBundleStatus
 
-        // Increment usage count for the offer if at least one product was added
-        if (addedCount > 0) {
-            try {
-                console.log('Incrementing usage for offer:', offerId);
-                this.couponValidationService.incrementOfferUsage(offerId).subscribe({
-                    next: (success) => {
-                        if (success) {
-                            console.log('Successfully incremented offer usage after adding products to cart');
-                        } else {
-                            console.warn('Failed to increment offer usage after adding products to cart');
-                        }
-                    },
-                    error: (error) => console.error('Error incrementing offer usage after adding products:', error)
-                });
-            } catch (error) {
-                console.warn('Could not increment offer usage after adding products:', error);
-                // Don't fail the operation if usage increment fails
-            }
-        }
+        // NOTE: Offer usage is NOT incremented here - it will be incremented when order is confirmed
+        // This allows users to add/remove products and experiment without using up their offer quota
 
         console.log('addAllToCartFromOfferAsync - Completed:', { addedCount, skippedCount });
         return { addedCount, skippedCount };
@@ -1535,8 +1619,11 @@ export class CartService {
         const bundleGroups = new Map<string, CartItem[]>();
 
         items.forEach(item => {
-            if (item.isBundle && item.bundleProductIds && item.offerId) {
-                const key = item.offerId;
+            if (item.isBundle && item.bundleProductIds) {
+                // Group by bundleProductIds (as a string) to identify unique bundles
+                // Items with same bundleProductIds are part of the same bundle
+                // Create a copy before sorting to avoid mutating readonly arrays
+                const key = [...item.bundleProductIds].sort().join(',');
                 if (!bundleGroups.has(key)) {
                     bundleGroups.set(key, []);
                 }
@@ -1558,13 +1645,16 @@ export class CartService {
 
         // For each bundle, check if complete and update all items
         const updatedItems = items.map(item => {
-            if (!item.isBundle || !item.bundleProductIds || !item.offerId) {
+            if (!item.isBundle || !item.bundleProductIds) {
                 return item;
             }
 
-            // Get all products in cart for this bundle
+            // Get all products in cart for this bundle (match by bundleProductIds)
+            // Create copies before sorting to avoid mutating readonly arrays
+            const itemBundleKey = [...item.bundleProductIds].sort().join(',');
             const productsInCart = items
-                .filter(i => i.offerId === item.offerId)
+                .filter(i => i.isBundle && i.bundleProductIds &&
+                            [...i.bundleProductIds].sort().join(',') === itemBundleKey)
                 .map(i => i.productId);
 
             console.log('🔍 B2C Checking bundle for product:', item.name, {
@@ -1578,9 +1668,29 @@ export class CartService {
 
             console.log('✅ B2C Bundle complete?', bundleComplete, 'for product:', item.name);
 
-            // Calculate savings if bundle is complete
-            // NOTE: We do NOT modify the price field - it stays as the base price
-            // The discount is tracked via offerSavings
+            // CRITICAL: If the item already has offerSavings set by coupon application,
+            // DO NOT recalculate. The coupon application already handled the discount.
+            // We only calculate savings for items added via addToCartFromOffer without coupon.
+
+            // Check if coupon was already applied (has offerSavings and offerId matching offer)
+            const hasCouponApplied = item.offerSavings !== undefined && item.offerSavings > 0 && item.offerId;
+
+            if (hasCouponApplied) {
+                console.log('✅ B2C Item already has coupon discount applied, skipping recalculation:', {
+                    product: item.name,
+                    offerSavings: item.offerSavings,
+                    price: item.price
+                });
+
+                // Just update bundleComplete status, don't touch the savings
+                return {
+                    ...item,
+                    bundleComplete,
+                    updatedAt: new Date().toISOString()
+                };
+            }
+
+            // Calculate savings if bundle is complete and no coupon applied yet
             let savings = 0;
 
             if (bundleComplete && item.offerDiscount !== undefined) {
