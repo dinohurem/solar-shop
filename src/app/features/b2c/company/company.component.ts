@@ -64,6 +64,9 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
             <p class="font-['DM_Sans'] text-base text-gray-600 leading-relaxed">
               {{ 'company.teamText3' | translate }}
             </p>
+            <p class="font-['DM_Sans'] text-base text-gray-600 leading-relaxed">
+              {{ 'company.teamText4' | translate }}
+            </p>
           </div>
           
           <!-- Team Grid -->
