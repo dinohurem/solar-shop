@@ -217,4 +217,40 @@ export const selectManufacturerCounts = createSelector(
 export const selectManufacturerCountsLoading = createSelector(
     selectProductsFeature,
     (state: ProductsState) => state.manufacturerCountsLoading
+);
+
+// ERP Stock Management Selectors
+export const selectErpStock = createSelector(
+    selectProductsFeature,
+    (state: ProductsState) => state.erpStock
+);
+
+export const selectErpStockFiltered = createSelector(
+    selectProductsFeature,
+    (state: ProductsState) => state.erpStockFiltered
+);
+
+export const selectErpStockLoading = createSelector(
+    selectProductsFeature,
+    (state: ProductsState) => state.erpStockLoading
+);
+
+export const selectErpStockError = createSelector(
+    selectProductsFeature,
+    (state: ProductsState) => state.erpStockError
+);
+
+export const selectErpStockSku = createSelector(
+    selectProductsFeature,
+    (state: ProductsState) => state.erpStockSku
+);
+
+export const selectErpStockUnitFilter = createSelector(
+    selectProductsFeature,
+    (state: ProductsState) => state.erpStockUnitFilter
+);
+
+export const selectErpStockTotalQuantity = createSelector(
+    selectErpStockFiltered,
+    (stockItems) => stockItems.reduce((total, item) => total + item.quantity, 0)
 ); 

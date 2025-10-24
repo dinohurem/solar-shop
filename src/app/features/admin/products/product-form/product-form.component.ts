@@ -11,8 +11,24 @@ import { SupabaseService } from '../../../../services/supabase.service';
 import { TranslationService } from '../../../../shared/services/translation.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { ToastService } from '../../../../shared/services/toast.service';
-import { loadProducts, loadCategories } from '../../../b2b/shared/store/products.actions';
-import { selectProducts, selectCategories, selectProductsLoading } from '../../../b2b/shared/store/products.selectors';
+import {
+  loadProducts,
+  loadCategories,
+  loadErpStock,
+  clearErpStock,
+  filterErpStockByUnit,
+  ErpStockItem
+} from '../../../b2b/shared/store/products.actions';
+import {
+  selectProducts,
+  selectCategories,
+  selectProductsLoading,
+  selectErpStockFiltered,
+  selectErpStockLoading,
+  selectErpStockError,
+  selectErpStockTotalQuantity,
+  selectErpStock
+} from '../../../b2b/shared/store/products.selectors';
 import { Product, Category } from '../../../b2b/shared/store/products.actions';
 
 
@@ -162,7 +178,7 @@ interface ProductRelationship {
                 id="sku"
                 formControlName="sku"
                 class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 placeholder-transparent"
-                placeholder="SKU"
+                placeholder="Šifra artikla"
               >
               <label for="sku" class="absolute left-4 -top-2.5 bg-white px-2 text-sm font-medium text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600">
                 {{ 'admin.productSKU' | translate }} *
@@ -472,6 +488,184 @@ interface ProductRelationship {
           </div>
         </div>
 
+        <!-- ERP Stock Lookup (Only in Edit Mode) -->
+        <div *ngIf="isEditMode" class="bg-gradient-to-br from-blue-50 to-indigo-50 shadow-sm rounded-xl border-2 border-blue-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-2 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+            </svg>
+            Pregled Zaliha po Radnim Jedinicama (ERP)
+          </h3>
+          <p class="text-sm text-gray-600 mb-4">
+            Provjerite dostupnost proizvoda u različitim radnim jedinicama kroz ERP sustav.
+          </p>
+
+          <!-- Load Stock Button -->
+          <div class="mb-4">
+            <button
+              type="button"
+              (click)="loadErpStock()"
+              [disabled]="(erpStockLoading$ | async) || !productForm.get('sku')?.value"
+              class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200">
+              <svg *ngIf="!(erpStockLoading$ | async)" class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+              </svg>
+              <svg *ngIf="erpStockLoading$ | async" class="animate-spin w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              {{ (erpStockLoading$ | async) ? 'Učitavanje...' : 'Učitaj Zalihe iz ERP Sustava' }}
+            </button>
+          </div>
+
+          <!-- Error Message -->
+          <div *ngIf="erpStockError$ | async as error" class="mb-4 bg-red-50 border border-red-200 rounded-lg p-4">
+            <div class="flex items-center">
+              <svg class="w-5 h-5 text-red-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+              </svg>
+              <span class="text-red-800 text-sm">{{ error }}</span>
+            </div>
+          </div>
+
+          <!-- Empty Stock Message (after successful load but no results) -->
+          <div *ngIf="!(erpStockLoading$ | async) && (erpStockByUnit$ | async)?.length === 0 && !(erpStockError$ | async)" class="mb-4 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <div class="flex items-start">
+              <svg class="w-5 h-5 text-yellow-600 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+              </svg>
+              <div class="text-sm text-yellow-800">
+                <strong>Nema podataka o zalihama</strong><br>
+                Za šifru artikla "{{ productForm.get('sku')?.value }}" nisu pronađene zalihe u ERP sustavu. To može značiti:
+                <ul class="list-disc ml-5 mt-2 space-y-1">
+                  <li>Proizvod još nije dodan u ERP sustav</li>
+                  <li>Šifra artikla je različita u ERP sustavu</li>
+                  <li>Sve zalihe su rasprodane u svim radnim jedinicama</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stock Data Display -->
+          <div *ngIf="(erpStockByUnit$ | async)?.length ?? 0 > 0" class="space-y-4">
+            <!-- Summary Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="bg-white rounded-lg p-4 border border-gray-200">
+                <div class="text-sm text-gray-600 mb-1">Ukupna Zaliha</div>
+                <div class="text-2xl font-bold text-blue-600">{{ erpStockTotalQuantity$ | async }}</div>
+                <div class="text-xs text-gray-500 mt-1">Sve radne jedinice</div>
+              </div>
+              <div class="bg-white rounded-lg p-4 border border-gray-200">
+                <div class="text-sm text-gray-600 mb-1">Broj Radnih Jedinica</div>
+                <div class="text-2xl font-bold text-purple-600">{{ (erpStockByUnit$ | async)?.length }}</div>
+                <div class="text-xs text-gray-500 mt-1">S dostupnim proizvodima</div>
+              </div>
+              <div class="bg-white rounded-lg p-4 border border-gray-200">
+                <div class="text-sm text-gray-600 mb-1">Akcija</div>
+                <button
+                  type="button"
+                  (click)="syncStockFromErp()"
+                  class="w-full px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm transition-colors">
+                  Sinkroniziraj Zalihu
+                </button>
+              </div>
+            </div>
+
+            <!-- Search by Unit ID -->
+            <div class="bg-white rounded-lg p-4 border border-gray-200">
+              <label for="search-unit" class="block text-sm font-medium text-gray-700 mb-2">
+                Pretraži po Šifri Radne Jedinice
+              </label>
+              <input
+                type="text"
+                id="search-unit"
+                [(ngModel)]="searchUnitId"
+                [ngModelOptions]="{standalone: true}"
+                (input)="filterErpStockByUnit()"
+                placeholder="Unesite šifru radne jedinice (npr. 01, 03, 25...)"
+                class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200">
+            </div>
+
+            <!-- Stock Table -->
+            <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+              <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                  <thead class="bg-gray-50">
+                    <tr>
+                      <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Šifra RJ
+                      </th>
+                      <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Zaliha
+                      </th>
+                      <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Veleprodajna Cijena
+                      </th>
+                      <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Maloprodajna Cijena
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody class="bg-white divide-y divide-gray-200">
+                    <tr *ngFor="let stock of erpStockFiltered$ | async"
+                        class="hover:bg-blue-50 transition-colors"
+                        [class.bg-green-50]="stock.quantity > 0">
+                      <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {{ stock.unitId }}
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        <span class="px-2 py-1 rounded-full text-xs font-semibold"
+                              [class.bg-green-100]="stock.quantity > 0"
+                              [class.text-green-800]="stock.quantity > 0"
+                              [class.bg-gray-100]="stock.quantity === 0"
+                              [class.text-gray-800]="stock.quantity === 0">
+                          {{ stock.quantity }}
+                        </span>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                        {{ stock.wholesalePrice | number:'1.2-2' }} €
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                        {{ stock.retailPrice | number:'1.2-2' }} €
+                      </td>
+                    </tr>
+                    <tr *ngIf="(erpStockFiltered$ | async)?.length === 0">
+                      <td colspan="4" class="px-6 py-8 text-center text-sm text-gray-500">
+                        <svg class="w-12 h-12 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                        </svg>
+                        Nema rezultata za traženu radnu jedinicu
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Help Text -->
+            <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
+              <div class="flex items-start">
+                <svg class="w-5 h-5 text-blue-600 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                </svg>
+                <div class="text-sm text-blue-800">
+                  <strong>Napomena:</strong> Zalihe se automatski ažuriraju u ERP sustavu. Koristite "Sinkroniziraj Zalihu" za automatsko preuzimanje ukupne zalihe u polje iznad.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Initial State (before loading) -->
+          <div *ngIf="!(erpStockLoading$ | async) && ((erpStockByUnit$ | async) === undefined || (erpStockByUnit$ | async) === null)" class="text-center py-8">
+            <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+            </svg>
+            <p class="text-gray-500 text-sm">
+              Kliknite "Učitaj Zalihe iz ERP Sustava" za prikaz zaliha po radnim jedinicama
+            </p>
+          </div>
+        </div>
+
         <!-- Product Status -->
         <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-6">
           <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
@@ -754,11 +948,26 @@ export class ProductFormComponent implements OnInit, OnDestroy {
     is_active: true
   };
 
+  // ERP Stock Management (NgRx)
+  erpStockByUnit$: Observable<ErpStockItem[]>;
+  erpStockFiltered$: Observable<ErpStockItem[]>;
+  erpStockLoading$: Observable<boolean>;
+  erpStockError$: Observable<string | null>;
+  erpStockTotalQuantity$: Observable<number>;
+  searchUnitId = '';
+
   constructor() {
     this.initForm();
     this.categories$ = this.store.select(selectCategories);
     this.products$ = this.store.select(selectProducts);
     this.loading$ = this.store.select(selectProductsLoading);
+
+    // ERP Stock observables
+    this.erpStockByUnit$ = this.store.select(selectErpStock);
+    this.erpStockFiltered$ = this.store.select(selectErpStockFiltered);
+    this.erpStockLoading$ = this.store.select(selectErpStockLoading);
+    this.erpStockError$ = this.store.select(selectErpStockError);
+    this.erpStockTotalQuantity$ = this.store.select(selectErpStockTotalQuantity);
   }
 
   ngOnInit(): void {
@@ -770,6 +979,8 @@ export class ProductFormComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    // Clear ERP stock when leaving the component
+    this.store.dispatch(clearErpStock());
   }
 
   private initForm(): void {
@@ -878,6 +1089,12 @@ export class ProductFormComponent implements OnInit, OnDestroy {
         this.productForm.patchValue(formData);
         this.loadProductCategories();
         this.updateAvailableProducts();
+
+        // Auto-load ERP stock if SKU exists
+        if (data.sku) {
+          console.log('[Product Form] Auto-loading ERP stock for SKU:', data.sku);
+          this.store.dispatch(loadErpStock({ sku: data.sku }));
+        }
       }
     } catch (error) {
       console.error('Error loading product:', error);
@@ -1333,6 +1550,29 @@ export class ProductFormComponent implements OnInit, OnDestroy {
     }).catch(err => {
       console.error('Failed to copy UUID: ', err);
     });
+  }
+
+  // ERP Stock Management Methods (NgRx)
+  loadErpStock(): void {
+    const sku = this.productForm.get('sku')?.value;
+
+    if (!sku) {
+      this.toastService.showError('Molimo unesite šifru artikla prije pretraživanja zaliha');
+      return;
+    }
+
+    this.store.dispatch(loadErpStock({ sku }));
+  }
+
+  filterErpStockByUnit(): void {
+    this.store.dispatch(filterErpStockByUnit({ unitId: this.searchUnitId }));
+  }
+
+  syncStockFromErp(): void {
+    this.erpStockTotalQuantity$.pipe(takeUntil(this.destroy$)).subscribe(totalStock => {
+      this.productForm.patchValue({ stock_quantity: totalStock });
+      this.toastService.showSuccess(`Zaliha sinkronizirana iz ERP sustava: ${totalStock} jedinica`);
+    }).unsubscribe();
   }
 
   // Category selection methods

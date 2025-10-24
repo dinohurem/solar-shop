@@ -3,6 +3,7 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { of, from } from 'rxjs';
 import { map, catchError, switchMap } from 'rxjs/operators';
 import { SupabaseService } from '../../../../services/supabase.service';
+import { ErpIntegrationService } from '../../../../shared/services/erp-integration.service';
 import * as ProductsActions from './products.actions';
 
 @Injectable()
@@ -10,7 +11,8 @@ export class ProductsEffects {
 
     constructor(
         private actions$: Actions,
-        private supabaseService: SupabaseService
+        private supabaseService: SupabaseService,
+        private erpService: ErpIntegrationService
     ) { }
 
     private getPrimaryImageUrl(images: any[]): string {
@@ -544,4 +546,48 @@ export class ProductsEffects {
         // Merge with all manufacturers (overriding 0s with actual counts)
         return { ...allManufacturerCounts, ...filteredCounts };
     }
+
+    // ERP Stock Management
+    loadErpStock$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(ProductsActions.loadErpStock),
+            switchMap(({ sku }) => {
+                console.log(`[ERP] Loading stock for SKU: ${sku}`);
+                return this.erpService.getStockBySku(sku).pipe(
+                    map(response => {
+                        console.log('[ERP] Response received:', response);
+
+                        if (response.success) {
+                            const stockItems: ProductsActions.ErpStockItem[] = (response.data || []).map(item => ({
+                                sku: item.sku,
+                                unitId: item.unitId,
+                                quantity: item.quantity,
+                                wholesalePrice: item.wholesalePrice,
+                                retailPrice: item.retailPrice
+                            }));
+
+                            console.log(`[ERP] Stock items loaded: ${stockItems.length} items`);
+
+                            if (stockItems.length === 0) {
+                                console.warn(`[ERP] No stock found for SKU: ${sku}`);
+                            }
+
+                            return ProductsActions.loadErpStockSuccess({ sku, stockItems });
+                        } else {
+                            console.error('[ERP] Load failed:', response.error);
+                            return ProductsActions.loadErpStockFailure({
+                                error: response.error || 'Nije moguće učitati zalihe iz ERP sustava'
+                            });
+                        }
+                    }),
+                    catchError(error => {
+                        console.error('[ERP] Error fetching stock:', error);
+                        return of(ProductsActions.loadErpStockFailure({
+                            error: error.message || 'Greška pri povezivanju s ERP sustavom'
+                        }));
+                    })
+                );
+            })
+        )
+    );
 } 

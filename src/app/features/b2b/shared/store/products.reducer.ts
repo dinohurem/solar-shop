@@ -1,5 +1,5 @@
 import { createReducer, on } from '@ngrx/store';
-import { Product, CompanyPricing, Category } from './products.actions';
+import { Product, CompanyPricing, Category, ErpStockItem } from './products.actions';
 import * as ProductsActions from './products.actions';
 
 export interface ProductFilters {
@@ -33,6 +33,13 @@ export interface ProductsState {
     manufacturersLoading: boolean;
     categoryCountsLoading: boolean;
     manufacturerCountsLoading: boolean;
+    // ERP Stock Management
+    erpStock: ErpStockItem[];
+    erpStockFiltered: ErpStockItem[];
+    erpStockLoading: boolean;
+    erpStockError: string | null;
+    erpStockSku: string | null;
+    erpStockUnitFilter: string;
 }
 
 export const initialState: ProductsState = {
@@ -61,7 +68,14 @@ export const initialState: ProductsState = {
     manufacturerCounts: {},
     manufacturersLoading: false,
     categoryCountsLoading: false,
-    manufacturerCountsLoading: false
+    manufacturerCountsLoading: false,
+    // ERP Stock Management
+    erpStock: [],
+    erpStockFiltered: [],
+    erpStockLoading: false,
+    erpStockError: null,
+    erpStockSku: null,
+    erpStockUnitFilter: ''
 };
 
 export const productsReducer = createReducer(
@@ -320,5 +334,52 @@ export const productsReducer = createReducer(
         ...state,
         manufacturerCountsLoading: false,
         error
-    }))
+    })),
+
+    // ERP Stock Management
+    on(ProductsActions.loadErpStock, (state, { sku }) => ({
+        ...state,
+        erpStockLoading: true,
+        erpStockError: null,
+        erpStockSku: sku,
+        erpStockUnitFilter: ''
+    })),
+
+    on(ProductsActions.loadErpStockSuccess, (state, { sku, stockItems }) => ({
+        ...state,
+        erpStock: stockItems,
+        erpStockFiltered: stockItems,
+        erpStockLoading: false,
+        erpStockError: null,
+        erpStockSku: sku
+    })),
+
+    on(ProductsActions.loadErpStockFailure, (state, { error }) => ({
+        ...state,
+        erpStockLoading: false,
+        erpStockError: error
+    })),
+
+    on(ProductsActions.clearErpStock, (state) => ({
+        ...state,
+        erpStock: [],
+        erpStockFiltered: [],
+        erpStockLoading: false,
+        erpStockError: null,
+        erpStockSku: null,
+        erpStockUnitFilter: ''
+    })),
+
+    on(ProductsActions.filterErpStockByUnit, (state, { unitId }) => {
+        const searchTerm = unitId.toLowerCase().trim();
+        const filtered = searchTerm
+            ? state.erpStock.filter(item => item.unitId.toLowerCase().includes(searchTerm))
+            : state.erpStock;
+
+        return {
+            ...state,
+            erpStockFiltered: filtered,
+            erpStockUnitFilter: unitId
+        };
+    })
 ); 

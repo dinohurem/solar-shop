@@ -7,9 +7,11 @@ export interface Product {
     originalPrice?: number;
     discount?: number;
     currency: string;
-    sku: string;
+    sku: string;  // Šifra artikla
     brand: string;
     model?: string;
+    // ERP Integration fields
+    unit_id?: string;  // Šifra radne jedinice (ERP work unit/location code)
     category: ProductCategory;
     images: ProductImage[];
     specifications: { [key: string]: string };

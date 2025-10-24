@@ -279,4 +279,37 @@ export const loadManufacturerCountsSuccess = createAction(
 export const loadManufacturerCountsFailure = createAction(
     '[B2B Products] Load Manufacturer Counts Failure',
     props<{ error: string }>()
+);
+
+// ERP Stock Management
+export interface ErpStockItem {
+    sku: string;           // Šifra artikla
+    unitId: string;        // Šifra radne jedinice
+    quantity: number;      // Količina
+    wholesalePrice: number; // Veleprodajna cijena
+    retailPrice: number;   // Maloprodajna cijena
+}
+
+export const loadErpStock = createAction(
+    '[B2B Products] Load ERP Stock',
+    props<{ sku: string }>()
+);
+
+export const loadErpStockSuccess = createAction(
+    '[B2B Products] Load ERP Stock Success',
+    props<{ sku: string; stockItems: ErpStockItem[] }>()
+);
+
+export const loadErpStockFailure = createAction(
+    '[B2B Products] Load ERP Stock Failure',
+    props<{ error: string }>()
+);
+
+export const clearErpStock = createAction(
+    '[B2B Products] Clear ERP Stock'
+);
+
+export const filterErpStockByUnit = createAction(
+    '[B2B Products] Filter ERP Stock By Unit',
+    props<{ unitId: string }>()
 ); 

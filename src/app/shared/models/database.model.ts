@@ -131,9 +131,10 @@ export interface Database {
                     price: number;
                     original_price?: number;
                     currency: string;
-                    sku: string;
+                    sku: string;  // Šifra artikla
                     brand: string;
                     model?: string;
+                    unit_id?: string;  // Šifra radne jedinice (ERP work unit/location code)
                     category_id: string;
                     images: ProductImage[];
                     specifications: { [key: string]: string };
@@ -178,6 +179,7 @@ export interface Database {
                     sku: string;
                     brand: string;
                     model?: string;
+                    unit_id?: string;
                     category_id?: string;
                     images?: ProductImage[];
                     specifications?: { [key: string]: string };
@@ -222,6 +224,7 @@ export interface Database {
                     sku?: string;
                     brand?: string;
                     model?: string;
+                    unit_id?: string;
                     category_id?: string;
                     images?: ProductImage[];
                     specifications?: { [key: string]: string };
