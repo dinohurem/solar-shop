@@ -403,7 +403,9 @@ export class TranslationService {
                     tierPricing: 'Cijena po razini',
                     // Status labels
                     pendingApproval: 'Čeka odobrenje',
-                    rejected: 'Odbačeno'
+                    rejected: 'Odbačeno',
+                    // Stock information
+                    stockByLocation: 'Zalihe po lokaciji'
                 },
                 orders: {
                     pending: 'Na čekanju',
@@ -2454,7 +2456,12 @@ export class TranslationService {
                 freeInstallationOffer: 'Besplatna instalacija',
                 freeInstallationOfferDescription: 'Profesionalna instalacija uključena u cijenu. Limitirana ponuda za prvih 50 kupaca.',
                 freeInstallation: 'Besplatna instalacija',
-                worthValue: 'vrijednost'
+                worthValue: 'vrijednost',
+                // Stock Information
+                stockInformation: 'Informacije o zalihama',
+                units: 'jedinica',
+                totalStock: 'Ukupno na stanju',
+                loadingStockInformation: 'Učitavanje informacija o zalihama...'
             },
             // Privacy Policy
             privacyPolicy: {
@@ -3126,7 +3133,9 @@ export class TranslationService {
                     tierPricing: 'Tier pricing',
                     // Status labels
                     pendingApproval: 'Pending Approval',
-                    rejected: 'Rejected'
+                    rejected: 'Rejected',
+                    // Stock information
+                    stockByLocation: 'Stock by Location'
                 },
                 orders: {
                     pending: 'Pending',
@@ -5065,7 +5074,12 @@ export class TranslationService {
                 freeInstallationOffer: 'Free Installation',
                 freeInstallationOfferDescription: 'Professional installation included in price. Limited offer for first 50 customers.',
                 freeInstallation: 'Free Installation',
-                worthValue: 'worth'
+                worthValue: 'worth',
+                // Stock Information
+                stockInformation: 'Stock Information',
+                units: 'units',
+                totalStock: 'Total Stock',
+                loadingStockInformation: 'Loading stock information...'
             },
             // Privacy Policy
             privacyPolicy: {

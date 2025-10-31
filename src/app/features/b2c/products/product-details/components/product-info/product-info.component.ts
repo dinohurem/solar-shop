@@ -9,6 +9,7 @@ import { Product } from '../../../product-list/product-list.component';
 import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
 import { ToastService } from '../../../../../../shared/services/toast.service';
 import { TranslationService } from '../../../../../../shared/services/translation.service';
+import { ErpIntegrationService, StockItem } from '../../../../../../shared/services/erp-integration.service';
 import * as WishlistActions from '../../../../../b2c/wishlist/store/wishlist.actions';
 import {
   selectIsProductInWishlist,
@@ -79,7 +80,7 @@ import { LucideAngularModule, Star, StarHalf, ShoppingCart } from 'lucide-angula
         <!-- Availability -->
         <div class="flex items-center mb-6">
           <span class="text-sm font-medium text-gray-700 mr-2 font-['DM_Sans']">{{ 'productDetails.availability' | translate }}:</span>
-          <span 
+          <span
             class="px-2 py-1 rounded-full text-xs font-semibold"
             [ngClass]="{
               'bg-green-100 text-green-800': product.availability === 'available',
@@ -89,6 +90,45 @@ import { LucideAngularModule, Star, StarHalf, ShoppingCart } from 'lucide-angula
           >
             {{ getAvailabilityText(product.availability) | translate }}
           </span>
+        </div>
+
+        <!-- ERP Stock Information -->
+        <div *ngIf="erpStock && erpStock.length > 0" class="mb-6">
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <h4 class="text-sm font-semibold text-blue-900 mb-3 font-['DM_Sans']">
+              {{ 'productDetails.stockInformation' | translate }}
+            </h4>
+            <div class="space-y-2">
+              <div *ngFor="let stock of erpStock" class="flex items-center justify-between text-sm">
+                <span class="text-blue-700 font-['DM_Sans']">
+                  {{ stock.unitName || stock.unitId }}:
+                </span>
+                <span class="font-semibold text-blue-900 font-['DM_Sans']">
+                  {{ stock.quantity }} {{ 'productDetails.units' | translate }}
+                </span>
+              </div>
+              <div class="pt-2 mt-2 border-t border-blue-200 flex items-center justify-between">
+                <span class="text-sm font-semibold text-blue-900 font-['DM_Sans']">
+                  {{ 'productDetails.totalStock' | translate }}:
+                </span>
+                <span class="text-base font-bold text-blue-900 font-['DM_Sans']">
+                  {{ getTotalStock() }} {{ 'productDetails.units' | translate }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ERP Stock Loading -->
+        <div *ngIf="erpStockLoading" class="mb-6">
+          <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <div class="flex items-center justify-center">
+              <div class="animate-spin rounded-full h-5 w-5 border-2 border-blue-600 border-t-transparent mr-3"></div>
+              <span class="text-sm text-gray-600 font-['DM_Sans']">
+                {{ 'productDetails.loadingStockInformation' | translate }}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -505,6 +545,7 @@ export class ProductInfoComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private toastService = inject(ToastService);
   private translationService = inject(TranslationService);
+  private erpService = inject(ErpIntegrationService);
 
   private destroy$ = new Subject<void>();
 
@@ -527,6 +568,10 @@ export class ProductInfoComponent implements OnInit, OnDestroy {
   featuresOpen = false;
   technicalSheetOpen = false;
 
+  // ERP stock information
+  erpStock: StockItem[] = [];
+  erpStockLoading = false;
+
   ngOnInit(): void {
     // Create combined observable for template
     this.wishlistState$ = combineLatest([
@@ -543,6 +588,47 @@ export class ProductInfoComponent implements OnInit, OnDestroy {
 
     // Load wishlist data
     this.store.dispatch(WishlistActions.loadWishlist());
+
+    // Load ERP stock information
+    this.loadErpStock();
+  }
+
+  /**
+   * Load ERP stock information for the current product
+   */
+  private loadErpStock(): void {
+    if (!this.product.sku) {
+      console.warn('[Product Info] No SKU available for product');
+      return;
+    }
+
+    this.erpStockLoading = true;
+    this.erpService.getStockBySku(this.product.sku)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            this.erpStock = response.data;
+            console.log('[Product Info] ERP stock loaded:', this.erpStock);
+          } else {
+            console.warn('[Product Info] Failed to load ERP stock:', response.error);
+            this.erpStock = [];
+          }
+          this.erpStockLoading = false;
+        },
+        error: (error) => {
+          console.error('[Product Info] Error loading ERP stock:', error);
+          this.erpStock = [];
+          this.erpStockLoading = false;
+        }
+      });
+  }
+
+  /**
+   * Get total stock across all units
+   */
+  getTotalStock(): number {
+    return this.erpStock.reduce((total, stock) => total + stock.quantity, 0);
   }
 
   ngOnDestroy(): void {
