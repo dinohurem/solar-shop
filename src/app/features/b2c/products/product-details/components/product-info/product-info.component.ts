@@ -92,18 +92,35 @@ import { LucideAngularModule, Star, StarHalf, ShoppingCart } from 'lucide-angula
           </span>
         </div>
 
-        <!-- ERP Stock Information -->
+        <!-- ERP Stock Information (Collapsible) -->
         <div *ngIf="erpStock && erpStock.length > 0" class="mb-6">
           <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h4 class="text-sm font-semibold text-blue-900 mb-3 font-['DM_Sans']">
-              {{ 'productDetails.stockInformation' | translate }}
-            </h4>
-            <div class="space-y-2">
+            <button
+              type="button"
+              (click)="toggleStockInformation()"
+              class="flex items-center w-full justify-between group focus:outline-none"
+              [attr.aria-expanded]="stockInformationOpen"
+              [attr.aria-controls]="'stock-information-content'"
+            >
+              <h4 class="text-sm font-semibold text-blue-900 font-['DM_Sans']">
+                {{ 'productDetails.stockInformation' | translate }}
+              </h4>
+              <svg
+                [ngClass]="{'rotate-180': stockInformationOpen, 'rotate-0': !stockInformationOpen}"
+                class="w-5 h-5 text-blue-600 transition-transform duration-200"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            <div id="stock-information-content" *ngIf="stockInformationOpen" class="mt-3 space-y-2">
               <div *ngFor="let stock of erpStock" class="flex items-center justify-between text-sm">
                 <span class="text-blue-700 font-['DM_Sans']">
                   {{ stock.unitName || stock.unitId }}:
                 </span>
-                <span class="font-semibold text-blue-900 font-['DM_Sans']">
+                <span class="font-medium text-blue-900 font-['DM_Sans']">
                   {{ stock.quantity }} {{ 'productDetails.units' | translate }}
                 </span>
               </div>
@@ -567,6 +584,7 @@ export class ProductInfoComponent implements OnInit, OnDestroy {
   specificationsOpen = false;
   featuresOpen = false;
   technicalSheetOpen = false;
+  stockInformationOpen = false;
 
   // ERP stock information
   erpStock: StockItem[] = [];
@@ -769,6 +787,10 @@ export class ProductInfoComponent implements OnInit, OnDestroy {
 
   toggleTechnicalSheet() {
     this.technicalSheetOpen = !this.technicalSheetOpen;
+  }
+
+  toggleStockInformation() {
+    this.stockInformationOpen = !this.stockInformationOpen;
   }
 
   scrollToReviews() {

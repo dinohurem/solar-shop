@@ -4,8 +4,8 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } 
 import { ActivatedRoute, Router } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { Store } from '@ngrx/store';
-import { Observable, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { Observable, Subject, firstValueFrom } from 'rxjs';
+import { takeUntil, take } from 'rxjs/operators';
 import { AdminFormComponent } from '../../shared/admin-form/admin-form.component';
 import { SupabaseService } from '../../../../services/supabase.service';
 import { TranslationService } from '../../../../shared/services/translation.service';
@@ -1275,6 +1275,9 @@ export class ProductFormComponent implements OnInit, OnDestroy {
           .filter((certification: string) => certification.length > 0);
       }
 
+      // Get current ERP stock total quantity
+      const currentErpStock = await firstValueFrom(this.erpStockTotalQuantity$.pipe(take(1)));
+
       // Map form fields to database fields
       const productData: any = {
         name: formValue.name,
@@ -1302,6 +1305,12 @@ export class ProductFormComponent implements OnInit, OnDestroy {
         category_id: this.primaryCategoryId, // Set primary category for legacy support
         updated_at: new Date().toISOString()
       };
+
+      // If we have ERP stock data, include it in the update
+      if (typeof currentErpStock === 'number' && currentErpStock > 0) {
+        productData.erp_stock = currentErpStock;
+        productData.erp_stock_updated_at = new Date().toISOString();
+      }
 
       // Explicitly handle original_price to ensure it's always included in the payload
       if (formValue.compare_at_price && formValue.compare_at_price !== '' && formValue.compare_at_price !== null) {

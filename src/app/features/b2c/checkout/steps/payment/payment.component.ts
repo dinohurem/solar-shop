@@ -15,6 +15,7 @@ import { selectB2COrderCreating, selectB2COrderCreated, selectB2COrderError } fr
 import { TranslationService } from '../../../../../shared/services/translation.service';
 import { MonriPaymentService, MonriPaymentRequest } from '../../../../../shared/services/monri-payment.service';
 import * as CartSelectors from '../../../cart/store/cart.selectors';
+import { SettingsService } from '../../../../../shared/services/settings.service';
 
 @Component({
   selector: 'app-payment',
@@ -28,8 +29,8 @@ import * as CartSelectors from '../../../cart/store/cart.selectors';
         <!-- Payment Method Selection -->
         <div class="mb-8">
           <div class="space-y-3">
-            <!-- Credit Card -->
-            <label class="flex items-center p-4 border-2 border-blue-200 bg-blue-50 rounded-lg cursor-pointer">
+            <!-- Credit Card (Conditionally shown based on settings) -->
+            <label *ngIf="creditCardPaymentEnabled" class="flex items-center p-4 border-2 border-blue-200 bg-blue-50 rounded-lg cursor-pointer">
               <input
                 type="radio"
                 name="paymentMethod"
@@ -218,6 +219,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
   private supabaseService = inject(SupabaseService);
   private translationService = inject(TranslationService);
   private monriPaymentService = inject(MonriPaymentService);
+  private settingsService = inject(SettingsService);
 
   paymentForm: FormGroup;
   isProcessing = false;
@@ -227,6 +229,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
   orderCreationError$ = new BehaviorSubject<string | null>(null);
   cartSummary$: Observable<any>;
   private subscriptions = new Subscription();
+  creditCardPaymentEnabled = false; // Default to false until settings are loaded
 
   constructor() {
     this.currentUser$ = this.store.select(selectCurrentUser);
@@ -234,6 +237,26 @@ export class PaymentComponent implements OnInit, OnDestroy {
       map((user: User | null) => user?.companyId != null)
     );
     this.cartSummary$ = this.store.select(CartSelectors.selectCartSummary);
+
+    // Subscribe to settings to check if credit card payment is enabled
+    this.subscriptions.add(
+      this.settingsService.settings$.subscribe(settings => {
+        const previousValue = this.creditCardPaymentEnabled;
+        this.creditCardPaymentEnabled = settings.credit_card_payment_enabled;
+
+        console.log('[Payment] Credit card payment setting updated:', {
+          previous: previousValue,
+          current: this.creditCardPaymentEnabled,
+          settings
+        });
+
+        // If credit card is now disabled and it was selected, switch to cash on delivery
+        if (!this.creditCardPaymentEnabled && this.paymentForm?.get('paymentMethod')?.value === 'credit_card') {
+          this.paymentForm.patchValue({ paymentMethod: 'cash_on_delivery' });
+          console.log('[Payment] Switched payment method to cash_on_delivery because credit card is disabled');
+        }
+      })
+    );
 
     this.paymentForm = this.fb.group({
       paymentMethod: ['cash_on_delivery', [Validators.required]],

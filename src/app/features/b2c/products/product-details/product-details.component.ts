@@ -14,6 +14,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { OffersService } from '../../offers/services/offers.service';
 import { Offer } from '../../../../shared/models/offer.model';
 import { ProductsService } from '../services/products.service';
+import { ErpIntegrationService, StockItem } from '../../../../shared/services/erp-integration.service';
 
 @Component({
   selector: 'app-product-details',
@@ -100,6 +101,68 @@ import { ProductsService } from '../services/products.service';
           <!-- Product Info -->
           <div>
             <app-product-info [product]="product" [isCompanyPricing]="isCompanyPricing"></app-product-info>
+
+            <!-- ERP Stock Information -->
+            <div *ngIf="erpStock && erpStock.length > 0" class="mt-6 bg-white rounded-lg border border-gray-200 p-6">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900 font-['Poppins']">
+                  {{ showStockByUnit ? ('b2b.products.stockByLocation' | translate) : ('b2b.products.stockAvailability' | translate) }}
+                </h3>
+                <button
+                  (click)="showStockByUnit = !showStockByUnit"
+                  class="text-sm text-[#0ACF83] hover:text-[#09b574] font-medium flex items-center gap-2 transition-colors">
+                  <svg *ngIf="!showStockByUnit" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                  </svg>
+                  <svg *ngIf="showStockByUnit" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+                  </svg>
+                  {{ showStockByUnit ? ('b2b.products.hideStoreAvailability' | translate) : ('b2b.products.showStoreAvailability' | translate) }}
+                </button>
+              </div>
+
+              <!-- Total stock only (collapsed state) -->
+              <div *ngIf="!showStockByUnit" class="space-y-3">
+                <div class="flex items-center justify-between py-3 px-4 bg-green-50 rounded-lg">
+                  <span class="text-base font-semibold text-gray-900 font-['DM_Sans']">
+                    {{ 'productDetails.totalStock' | translate }}:
+                  </span>
+                  <span class="text-xl font-bold text-[#0ACF83] font-['DM_Sans']">
+                    {{ getTotalErpStock() }} {{ 'productDetails.units' | translate }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Stock by unit (expanded state) -->
+              <div *ngIf="showStockByUnit" class="space-y-3">
+                <div *ngFor="let stock of erpStock" class="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-lg">
+                  <span class="text-gray-700 font-medium font-['DM_Sans']">
+                    {{ stock.unitName || stock.unitId }}
+                  </span>
+                  <span class="text-lg font-bold text-[#0ACF83] font-['DM_Sans']">
+                    {{ stock.quantity }} {{ 'productDetails.units' | translate }}
+                  </span>
+                </div>
+                <div class="pt-3 mt-3 border-t border-gray-200 flex items-center justify-between">
+                  <span class="text-base font-semibold text-gray-900 font-['DM_Sans']">
+                    {{ 'productDetails.totalStock' | translate }}:
+                  </span>
+                  <span class="text-xl font-bold text-[#0ACF83] font-['DM_Sans']">
+                    {{ getTotalErpStock() }} {{ 'productDetails.units' | translate }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- ERP Stock Loading -->
+            <div *ngIf="erpStockLoading" class="mt-6 bg-white rounded-lg border border-gray-200 p-6">
+              <div class="flex items-center justify-center">
+                <div class="animate-spin rounded-full h-5 w-5 border-2 border-[#0ACF83] border-t-transparent mr-3"></div>
+                <span class="text-sm text-gray-600 font-['DM_Sans']">
+                  {{ 'productDetails.loadingStockInformation' | translate }}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -343,6 +406,7 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private offersService = inject(OffersService);
   private productsService = inject(ProductsService);
+  private erpService = inject(ErpIntegrationService);
   private destroy$ = new Subject<void>();
 
   product$: Observable<Product | null>;
@@ -360,6 +424,11 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
   // Related products data
   relatedProducts: Product[] = [];
   relatedProductsLoading = false;
+
+  // ERP stock information
+  erpStock: StockItem[] = [];
+  erpStockLoading = false;
+  showStockByUnit = false; // Toggle for showing stock by unit/location
 
   constructor() {
     this.product$ = this.store.select(selectProduct);
@@ -385,6 +454,16 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
         this.loadRelatedProducts(productId);
       } else {
         this.router.navigate(['/proizvodi']);
+      }
+    });
+
+    // Subscribe to product changes to load ERP stock
+    this.product$.pipe(
+      filter(product => !!product),
+      takeUntil(this.destroy$)
+    ).subscribe(product => {
+      if (product && product.sku) {
+        this.loadErpStock(product);
       }
     });
   }
@@ -506,6 +585,44 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
       case 'out-of-stock': return 'productDetails.outOfStock';
       default: return '';
     }
+  }
+
+  /**
+   * Load ERP stock information for the current product
+   */
+  private loadErpStock(product: Product): void {
+    if (!product.sku) {
+      console.warn('[B2C Product Details] No SKU available for product');
+      return;
+    }
+
+    this.erpStockLoading = true;
+    this.erpService.getStockBySku(product.sku)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            this.erpStock = response.data;
+            console.log('[B2C Product Details] ERP stock loaded:', this.erpStock);
+          } else {
+            console.warn('[B2C Product Details] Failed to load ERP stock:', response.error);
+            this.erpStock = [];
+          }
+          this.erpStockLoading = false;
+        },
+        error: (error) => {
+          console.error('[B2C Product Details] Error loading ERP stock:', error);
+          this.erpStock = [];
+          this.erpStockLoading = false;
+        }
+      });
+  }
+
+  /**
+   * Get total ERP stock across all units
+   */
+  getTotalErpStock(): number {
+    return this.erpStock.reduce((total, stock) => total + stock.quantity, 0);
   }
 
   public getStarArray(rating: number): number[] {

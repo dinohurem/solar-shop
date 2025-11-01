@@ -9,6 +9,7 @@ import { SuccessModalComponent } from '../../../shared/components/modals/success
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { TranslationService } from '../../../shared/services/translation.service';
 import { ErpIntegrationService } from '../../../shared/services/erp-integration.service';
+import { ToastService } from '../../../shared/services/toast.service';
 
 @Component({
     selector: 'app-admin-products',
@@ -22,8 +23,28 @@ import { ErpIntegrationService } from '../../../shared/services/erp-integration.
           <div class="min-w-0 flex-1">
             <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 truncate"> {{ 'admin.products' | translate }}</h1>
             <p class="mt-1 sm:mt-2 text-sm sm:text-base text-gray-600"> {{ 'admin.manageYourProductCatalog' | translate }}</p>
+          </div>
+
+          <!-- ERP Sync Button and Last Update -->
+          <div class="flex flex-col items-end space-y-2">
+            <button
+              (click)="manualErpSync()"
+              [disabled]="erpSyncInProgress"
+              class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200">
+              <svg *ngIf="!erpSyncInProgress" class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+              </svg>
+              <svg *ngIf="erpSyncInProgress" class="w-4 h-4 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              {{ 'admin.syncErpStock' | translate }}
+            </button>
+            <span *ngIf="lastErpSyncTime" class="text-xs text-gray-500">
+              {{ 'admin.lastUpdate' | translate }}: {{ lastErpSyncTime | date:'dd.MM.yyyy HH:mm' }}
+            </span>
+          </div>
         </div>
-      </div>
 
         <!-- Data Table Container -->
         <div class="w-full overflow-hidden">
@@ -60,19 +81,20 @@ export class AdminProductsComponent implements OnInit {
     private title = inject(Title);
     private translationService = inject(TranslationService);
     private erpService = inject(ErpIntegrationService);
+    private toastService = inject(ToastService);
 
     private productsSubject = new BehaviorSubject<any[]>([]);
     private loadingSubject = new BehaviorSubject<boolean>(true);
     products$ = this.productsSubject.asObservable();
     loading$ = this.loadingSubject.asObservable();
 
+    lastErpSyncTime: string | null = null;
+    erpSyncInProgress = false;
+
     // Modal properties
     showSuccessModal = false;
     successModalTitle = '';
     successModalMessage = '';
-
-    // ERP stock update status
-    private erpStockUpdating = false;
 
     tableConfig: TableConfig = {
         columns: [
@@ -182,9 +204,10 @@ export class AdminProductsComponent implements OnInit {
 
     ngOnInit(): void {
         this.title.setTitle('Products - Solar Shop Admin');
+        this.loadLastSyncTime();
         this.loadProducts();
-        // Automatically update stock from ERP after products load
-        this.autoUpdateErpStock();
+        // Check if we need to run automatic daily sync
+        this.checkAndRunAutomaticSync();
     }
 
     onTableAction(event: { action: string, item: any }): void {
@@ -410,27 +433,72 @@ export class AdminProductsComponent implements OnInit {
     }
 
     /**
-     * Automatically update ERP stock for all products on page load
+     * Load last sync time from localStorage
+     */
+    private loadLastSyncTime(): void {
+        const lastSync = localStorage.getItem('lastErpSyncTime');
+        if (lastSync) {
+            this.lastErpSyncTime = lastSync;
+        }
+    }
+
+    /**
+     * Save sync time to localStorage
+     */
+    private saveLastSyncTime(): void {
+        const now = new Date().toISOString();
+        this.lastErpSyncTime = now;
+        localStorage.setItem('lastErpSyncTime', now);
+    }
+
+    /**
+     * Check if automatic sync should run (once per day)
+     */
+    private checkAndRunAutomaticSync(): void {
+        const lastSync = localStorage.getItem('lastErpSyncTime');
+
+        if (!lastSync) {
+            // Never synced before, run sync
+            console.log('[Admin Products] No previous sync found, running automatic sync...');
+            this.autoUpdateErpStock();
+            return;
+        }
+
+        const lastSyncDate = new Date(lastSync);
+        const now = new Date();
+        const hoursSinceLastSync = (now.getTime() - lastSyncDate.getTime()) / (1000 * 60 * 60);
+
+        // Run automatic sync if more than 24 hours have passed
+        if (hoursSinceLastSync >= 24) {
+            console.log('[Admin Products] Last sync was more than 24 hours ago, running automatic sync...');
+            this.autoUpdateErpStock();
+        } else {
+            console.log(`[Admin Products] Last sync was ${Math.round(hoursSinceLastSync)} hours ago, skipping automatic sync.`);
+        }
+    }
+
+    /**
+     * Manual ERP sync triggered by button
+     */
+    async manualErpSync(): Promise<void> {
+        await this.autoUpdateErpStock();
+    }
+
+    /**
+     * Automatically update ERP stock for all products with progress tracking
      */
     private async autoUpdateErpStock(): Promise<void> {
-        if (this.erpStockUpdating) {
+        if (this.erpSyncInProgress) {
             return; // Prevent multiple concurrent updates
         }
 
-        this.erpStockUpdating = true;
-        console.log('[Admin Products] Starting automatic ERP stock update...');
+        this.erpSyncInProgress = true;
+        console.log('[Admin Products] Starting ERP stock update...');
+
+        let toastId: string | null = null;
 
         try {
-            // Wait for products to load first
-            await new Promise(resolve => {
-                const sub = this.products$.subscribe(products => {
-                    if (products.length > 0) {
-                        sub.unsubscribe();
-                        resolve(null);
-                    }
-                });
-            });
-
+            // Get products directly from subject (they're already loaded by this point)
             const products = this.productsSubject.value;
 
             if (!products || products.length === 0) {
@@ -440,14 +508,39 @@ export class AdminProductsComponent implements OnInit {
 
             // Get unique SKUs from products
             const skus = [...new Set(products.map(p => p.sku).filter(Boolean))];
+            const totalBatches = Math.ceil(skus.length / 3);
             console.log(`[Admin Products] Updating stock for ${skus.length} products...`);
 
-            // Fetch ERP stock for all products in parallel (limited batches)
-            const batchSize = 10;
-            const batches = [];
+            // Show initial loading toast with progress
+            toastId = this.toastService.showLoading(
+                `${this.translationService.translate('admin.erpSyncStarted')} - ${this.translationService.translate('admin.processingProducts')}: 0/${skus.length}`
+            );
 
+            // Fetch ERP stock for all products in batches with rate limiting
+            const batchSize = 3; // Very small batch size to avoid rate limits
+            const delayBetweenBatches = 2000; // 2 second delay between batches
+            const stockResponses: any[] = [];
+            let processedCount = 0;
+
+            // Helper function to delay execution
+            const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+            // Process batches sequentially with delays
             for (let i = 0; i < skus.length; i += batchSize) {
                 const batch = skus.slice(i, i + batchSize);
+                const currentBatch = Math.floor(i / batchSize) + 1;
+                console.log(`[Admin Products] Processing batch ${currentBatch} of ${totalBatches} (${batch.length} SKUs)`);
+
+                // Calculate progress percentage
+                const progress = Math.round((currentBatch / totalBatches) * 100);
+
+                // Update progress toast
+                this.toastService.updateLoadingProgress(
+                    toastId,
+                    `${this.translationService.translate('admin.erpSyncInProgress')} - ${this.translationService.translate('admin.processingBatch')} ${currentBatch}/${totalBatches}`,
+                    progress
+                );
+
                 const batchRequests = batch.map(sku =>
                     this.erpService.getStockBySku(sku).pipe(
                         catchError(err => {
@@ -456,47 +549,125 @@ export class AdminProductsComponent implements OnInit {
                         })
                     )
                 );
-                batches.push(forkJoin(batchRequests));
+
+                try {
+                    const batchResults = await forkJoin(batchRequests).toPromise();
+                    if (batchResults) {
+                        stockResponses.push(...batchResults);
+                        processedCount += batchResults.length;
+                    } else {
+                        // Add empty responses if batchResults is undefined
+                        batch.forEach(() => stockResponses.push({ success: false, error: 'No results' }));
+                        processedCount += batch.length;
+                    }
+                } catch (err) {
+                    console.error(`[Admin Products] Batch failed:`, err);
+                    // Add empty responses for failed batch
+                    batch.forEach(() => stockResponses.push({ success: false, error: 'Batch failed' }));
+                    processedCount += batch.length;
+                }
+
+                // Add delay between batches to avoid rate limiting (except for last batch)
+                if (i + batchSize < skus.length) {
+                    console.log(`[Admin Products] Waiting ${delayBetweenBatches}ms before next batch...`);
+                    await delay(delayBetweenBatches);
+                }
             }
 
-            // Process all batches
-            const allResponses = await Promise.all(
-                batches.map(batch => batch.toPromise())
-            );
+            // Update products with ERP stock in memory and database
+            const updatedProducts = [];
+            const dbUpdatePromises = [];
 
-            // Flatten responses
-            const stockResponses = allResponses.flat();
-
-            // Update products with ERP stock
-            const updatedProducts = products.map(product => {
-                if (!product.sku) return product;
+            for (const product of products) {
+                if (!product.sku) {
+                    updatedProducts.push(product);
+                    continue;
+                }
 
                 // Find stock response for this product
                 const stockIndex = skus.indexOf(product.sku);
-                if (stockIndex === -1) return product;
-
-                const stockResponse = stockResponses[stockIndex];
-                if (stockResponse?.success && stockResponse.data) {
-                    // Calculate total stock across all units
-                    const totalStock = stockResponse.data.reduce((sum, item) => sum + item.quantity, 0);
-
-                    return {
-                        ...product,
-                        erp_stock: totalStock,
-                        erp_stock_updated_at: new Date().toISOString()
-                    };
+                if (stockIndex === -1) {
+                    updatedProducts.push(product);
+                    continue;
                 }
 
-                return product;
-            });
+                const stockResponse = stockResponses[stockIndex];
+                // Skip if ERP didn't return valid data or if the data array is empty
+                if (stockResponse?.success && 'data' in stockResponse && stockResponse.data && Array.isArray(stockResponse.data) && stockResponse.data.length > 0) {
+                    // Calculate total stock across all units
+                    const totalStock = stockResponse.data.reduce((sum: number, item: any) => sum + item.quantity, 0);
+
+                    const updatedProduct = {
+                        ...product,
+                        erp_stock: totalStock,
+                        erp_stock_updated_at: new Date().toISOString(),
+                        stock_quantity: totalStock
+                    };
+
+                    updatedProducts.push(updatedProduct);
+
+                    // Update database (use partial update to avoid type errors)
+                    const updatePromise = this.supabaseService.updateRecord('products', product.id, {
+                        erp_stock: totalStock,
+                        erp_stock_updated_at: new Date().toISOString(),
+                        stock_quantity: totalStock
+                    } as any).catch(err => {
+                        console.error(`[Admin Products] Failed to update DB for product ${product.id}:`, err);
+                    });
+
+                    dbUpdatePromises.push(updatePromise);
+                } else {
+                    // Skip database update if SKU not found in ERP or no data returned
+                    if (!stockResponse?.success) {
+                        console.log(`[Admin Products] SKU ${product.sku} not found in ERP, skipping DB update`);
+                    }
+                    updatedProducts.push(product);
+                }
+            }
+
+            // Wait for all database updates to complete
+            await Promise.all(dbUpdatePromises);
 
             this.productsSubject.next(updatedProducts);
-            console.log('[Admin Products] ERP stock update completed successfully');
+            console.log('[Admin Products] ERP stock update completed successfully (memory + database)');
+
+            // Save sync time
+            this.saveLastSyncTime();
+            const successfulUpdates = dbUpdatePromises.length;
+
+            // Complete the loading toast with success message
+            this.toastService.completeLoading(
+                toastId,
+                `${this.translationService.translate('admin.erpSyncCompleted')} - ${successfulUpdates} ${this.translationService.translate('admin.productsUpdated')}`
+            );
+
+            // Auto-remove success toast after 5 seconds
+            setTimeout(() => {
+                this.toastService.removeToast(toastId!);
+            }, 5000);
 
         } catch (error) {
             console.error('[Admin Products] Error updating ERP stock:', error);
+
+            // If we have a toast ID, update it to show error
+            if (toastId) {
+                this.toastService.failLoading(
+                    toastId,
+                    this.translationService.translate('admin.erpSyncFailed')
+                );
+
+                // Auto-remove error toast after 5 seconds
+                setTimeout(() => {
+                    this.toastService.removeToast(toastId!);
+                }, 5000);
+            } else {
+                // Fallback if no toast was created
+                this.toastService.showError(
+                    this.translationService.translate('admin.erpSyncFailed')
+                );
+            }
         } finally {
-            this.erpStockUpdating = false;
+            this.erpSyncInProgress = false;
         }
     }
 

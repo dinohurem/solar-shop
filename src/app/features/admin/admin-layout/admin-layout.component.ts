@@ -9,6 +9,7 @@ import * as AuthActions from '../../../core/auth/store/auth.actions';
 import { TranslationService, SupportedLanguage } from '../../../shared/services/translation.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { AdminNotificationsService, NotificationCounts } from '../shared/services/admin-notifications.service';
+import { SettingsService } from '../../../shared/services/settings.service';
 
 @Component({
   selector: 'app-admin-layout',
@@ -243,17 +244,35 @@ import { AdminNotificationsService, NotificationCounts } from '../shared/service
                 </a>
               </div>
 
-                             <!-- Language Selector -->
-               <div class="pt-4 border-t border-gray-200">
-                 <div class="px-4">
-                   <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{{ 'admin.language' | translate }}</label>
-                  <select 
+              <!-- Language Selector -->
+              <div class="pt-4 border-t border-gray-200">
+                <div class="px-4">
+                  <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{{ 'admin.language' | translate }}</label>
+                  <select
                     [value]="currentLanguage"
                     (change)="onLanguageChange($event)"
                     class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     <option value="hr">Hrvatski</option>
                     <option value="en">English</option>
                   </select>
+                </div>
+              </div>
+
+              <!-- Credit Card Payment Toggle -->
+              <div class="pt-4 border-t border-gray-200">
+                <div class="px-4">
+                  <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{{ 'admin.paymentSettings' | translate }}</label>
+                  <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <span class="text-sm text-gray-700">{{ 'admin.creditCardPayment' | translate }}</span>
+                    <button
+                      (click)="toggleCreditCardPayment()"
+                      [class]="creditCardPaymentEnabled ? 'bg-green-600' : 'bg-gray-300'"
+                      class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                      <span
+                        [class]="creditCardPaymentEnabled ? 'translate-x-6' : 'translate-x-1'"
+                        class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"></span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -284,16 +303,23 @@ export class AdminLayoutComponent implements OnInit {
   private router = inject(Router);
   private translationService = inject(TranslationService);
   private notificationsService = inject(AdminNotificationsService);
+  private settingsService = inject(SettingsService);
 
   currentUser$: Observable<User | null>;
   notificationCounts$: Observable<NotificationCounts>;
   currentLanguage: SupportedLanguage = 'hr';
   showEmailTest = false;
+  creditCardPaymentEnabled = true;
 
   constructor() {
     this.currentUser$ = this.store.select(selectCurrentUser);
     this.notificationCounts$ = this.notificationsService.getNotificationCounts();
     this.currentLanguage = this.translationService.getCurrentLanguage();
+
+    // Subscribe to settings changes
+    this.settingsService.settings$.subscribe(settings => {
+      this.creditCardPaymentEnabled = settings.credit_card_payment_enabled;
+    });
   }
 
   ngOnInit(): void { }
@@ -325,5 +351,16 @@ export class AdminLayoutComponent implements OnInit {
 
   refreshNotifications(): void {
     this.notificationsService.refreshCounts();
+  }
+
+  async toggleCreditCardPayment(): Promise<void> {
+    const newValue = !this.creditCardPaymentEnabled;
+    const success = await this.settingsService.updateCreditCardPaymentEnabled(newValue);
+
+    if (success) {
+      console.log('[Admin] Credit card payment toggled:', newValue);
+    } else {
+      console.error('[Admin] Failed to toggle credit card payment');
+    }
   }
 } 

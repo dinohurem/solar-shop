@@ -170,13 +170,42 @@ import * as B2BCartActions from '../../cart/store/b2b-cart.actions';
 
             <!-- ERP Stock Information -->
             <div *ngIf="erpStock && erpStock.length > 0" class="bg-white rounded-lg border border-gray-200 p-6">
-              <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ 'b2b.products.stockByLocation' | translate }}</h3>
-              <div class="space-y-3">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">
+                  {{ showStockByUnit ? ('b2b.products.stockByLocation' | translate) : ('b2b.products.stockAvailability' | translate) }}
+                </h3>
+                <button
+                  (click)="showStockByUnit = !showStockByUnit"
+                  class="text-sm text-solar-600 hover:text-solar-700 font-medium flex items-center gap-2 transition-colors">
+                  <svg *ngIf="!showStockByUnit" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                  </svg>
+                  <svg *ngIf="showStockByUnit" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+                  </svg>
+                  {{ showStockByUnit ? ('b2b.products.hideStoreAvailability' | translate) : ('b2b.products.showStoreAvailability' | translate) }}
+                </button>
+              </div>
+
+              <!-- Total stock only (collapsed state) -->
+              <div *ngIf="!showStockByUnit" class="space-y-3">
+                <div class="flex items-center justify-between py-3 px-4 bg-solar-50 rounded-lg">
+                  <span class="text-base font-semibold text-gray-900">
+                    {{ 'productDetails.totalStock' | translate }}:
+                  </span>
+                  <span class="text-xl font-bold text-solar-600">
+                    {{ getTotalErpStock() }} {{ 'productDetails.units' | translate }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Stock by unit (expanded state) -->
+              <div *ngIf="showStockByUnit" class="space-y-3">
                 <div *ngFor="let stock of erpStock" class="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-lg">
                   <span class="text-gray-700 font-medium">
                     {{ stock.unitName || stock.unitId }}
                   </span>
-                  <span class="text-lg font-bold text-solar-600">
+                  <span class="text-lg font-medium text-solar-600">
                     {{ stock.quantity }} {{ 'productDetails.units' | translate }}
                   </span>
                 </div>
@@ -200,7 +229,6 @@ import * as B2BCartActions from '../../cart/store/b2b-cart.actions';
                 </span>
               </div>
             </div>
-          </div>
           </div>
 
           <!-- Product Info -->
@@ -674,6 +702,7 @@ export class PartnersProductDetailsComponent implements OnInit, OnDestroy {
   // ERP stock information
   erpStock: StockItem[] = [];
   erpStockLoading = false;
+  showStockByUnit = false; // Toggle for showing stock by unit/location
 
   constructor() {
     this.products$ = this.store.select(selectProductsWithPricing);
