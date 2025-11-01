@@ -11,6 +11,7 @@ import { environment } from '../../../environments/environment';
 export interface ErpStockItem {
   ARTIKL: string;      // Šifra artikla (Product SKU)
   RADJED: string;      // Šifra radne jedinice (Unit ID)
+  RADJEDNAZIV?: string; // Naziv radne jedinice (Unit name)
   ZALIHA: number;      // Količina (Stock quantity)
   VEL_CIJENA: number;  // Veleprodajna cijena (Wholesale price)
   MAL_CIJENA: number;  // Maloprodajna cijena (Retail price)
@@ -22,6 +23,7 @@ export interface ErpStockItem {
 export interface StockItem {
   sku: string;           // Šifra artikla
   unitId: string;        // Šifra radne jedinice
+  unitName?: string;     // Naziv radne jedinice
   quantity: number;      // Količina
   wholesalePrice: number; // Veleprodajna cijena
   retailPrice: number;   // Maloprodajna cijena
@@ -90,6 +92,7 @@ export class ErpIntegrationService {
         const normalizedData: StockItem[] = rawData.map(item => ({
           sku: item.ARTIKL,
           unitId: item.RADJED,
+          unitName: item.RADJEDNAZIV || item.RADJED, // Fallback to unit ID if name not available
           quantity: item.ZALIHA,
           wholesalePrice: item.VEL_CIJENA,
           retailPrice: item.MAL_CIJENA

@@ -2,12 +2,13 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Title } from '@angular/platform-browser';
-import { Observable, from, map, catchError, of, BehaviorSubject } from 'rxjs';
+import { Observable, from, map, catchError, of, BehaviorSubject, forkJoin } from 'rxjs';
 import { SupabaseService } from '../../../services/supabase.service';
 import { DataTableComponent, TableConfig, TableColumn, TableAction } from '../shared/data-table/data-table.component';
 import { SuccessModalComponent } from '../../../shared/components/modals/success-modal/success-modal.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { TranslationService } from '../../../shared/services/translation.service';
+import { ErpIntegrationService } from '../../../shared/services/erp-integration.service';
 
 @Component({
     selector: 'app-admin-products',
@@ -58,6 +59,7 @@ export class AdminProductsComponent implements OnInit {
     private router = inject(Router);
     private title = inject(Title);
     private translationService = inject(TranslationService);
+    private erpService = inject(ErpIntegrationService);
 
     private productsSubject = new BehaviorSubject<any[]>([]);
     private loadingSubject = new BehaviorSubject<boolean>(true);
@@ -68,6 +70,9 @@ export class AdminProductsComponent implements OnInit {
     showSuccessModal = false;
     successModalTitle = '';
     successModalMessage = '';
+
+    // ERP stock update status
+    private erpStockUpdating = false;
 
     tableConfig: TableConfig = {
         columns: [
@@ -178,6 +183,8 @@ export class AdminProductsComponent implements OnInit {
     ngOnInit(): void {
         this.title.setTitle('Products - Solar Shop Admin');
         this.loadProducts();
+        // Automatically update stock from ERP after products load
+        this.autoUpdateErpStock();
     }
 
     onTableAction(event: { action: string, item: any }): void {
@@ -399,6 +406,97 @@ export class AdminProductsComponent implements OnInit {
             console.warn('Products table not found in database. Using mock data as placeholder.');
         } finally {
             this.loadingSubject.next(false);
+        }
+    }
+
+    /**
+     * Automatically update ERP stock for all products on page load
+     */
+    private async autoUpdateErpStock(): Promise<void> {
+        if (this.erpStockUpdating) {
+            return; // Prevent multiple concurrent updates
+        }
+
+        this.erpStockUpdating = true;
+        console.log('[Admin Products] Starting automatic ERP stock update...');
+
+        try {
+            // Wait for products to load first
+            await new Promise(resolve => {
+                const sub = this.products$.subscribe(products => {
+                    if (products.length > 0) {
+                        sub.unsubscribe();
+                        resolve(null);
+                    }
+                });
+            });
+
+            const products = this.productsSubject.value;
+
+            if (!products || products.length === 0) {
+                console.log('[Admin Products] No products to update');
+                return;
+            }
+
+            // Get unique SKUs from products
+            const skus = [...new Set(products.map(p => p.sku).filter(Boolean))];
+            console.log(`[Admin Products] Updating stock for ${skus.length} products...`);
+
+            // Fetch ERP stock for all products in parallel (limited batches)
+            const batchSize = 10;
+            const batches = [];
+
+            for (let i = 0; i < skus.length; i += batchSize) {
+                const batch = skus.slice(i, i + batchSize);
+                const batchRequests = batch.map(sku =>
+                    this.erpService.getStockBySku(sku).pipe(
+                        catchError(err => {
+                            console.error(`[Admin Products] Error fetching stock for ${sku}:`, err);
+                            return of({ success: false, error: err.message });
+                        })
+                    )
+                );
+                batches.push(forkJoin(batchRequests));
+            }
+
+            // Process all batches
+            const allResponses = await Promise.all(
+                batches.map(batch => batch.toPromise())
+            );
+
+            // Flatten responses
+            const stockResponses = allResponses.flat();
+
+            // Update products with ERP stock
+            const updatedProducts = products.map(product => {
+                if (!product.sku) return product;
+
+                // Find stock response for this product
+                const stockIndex = skus.indexOf(product.sku);
+                if (stockIndex === -1) return product;
+
+                const stockResponse = stockResponses[stockIndex];
+                if (stockResponse?.success && stockResponse.data) {
+                    // Calculate total stock across all units
+                    const totalStock = stockResponse.data.reduce((sum, item) => sum + item.quantity, 0);
+
+                    return {
+                        ...product,
+                        erp_stock: totalStock,
+                        erp_stock_updated_at: new Date().toISOString()
+                    };
+                }
+
+                return product;
+            });
+
+            this.productsSubject.next(updatedProducts);
+            console.log('[Admin Products] ERP stock update completed successfully');
+
+        } catch (error) {
+            console.error('[Admin Products] Error updating ERP stock:', error);
+        } finally {
+            this.erpStockUpdating = false;
         }
     }
 

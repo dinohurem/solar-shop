@@ -11,6 +11,7 @@ import { selectCurrentUser } from '../../../../core/auth/store/auth.selectors';
 import { User } from '../../../../shared/models/user.model';
 import { Company } from '../../../../shared/models/company.model';
 import { SupabaseService } from '../../../../services/supabase.service';
+import { ErpIntegrationService, StockItem } from '../../../../shared/services/erp-integration.service';
 import * as ProductsActions from '../../shared/store/products.actions';
 import { selectProductsWithPricing, selectProductsLoading } from '../../shared/store/products.selectors';
 import { ProductWithPricing } from '../../shared/store/products.actions';
@@ -166,6 +167,40 @@ import * as B2BCartActions from '../../cart/store/b2b-cart.actions';
                 </div>
               </div>
             </div>
+
+            <!-- ERP Stock Information -->
+            <div *ngIf="erpStock && erpStock.length > 0" class="bg-white rounded-lg border border-gray-200 p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ 'b2b.products.stockByLocation' | translate }}</h3>
+              <div class="space-y-3">
+                <div *ngFor="let stock of erpStock" class="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-lg">
+                  <span class="text-gray-700 font-medium">
+                    {{ stock.unitName || stock.unitId }}
+                  </span>
+                  <span class="text-lg font-bold text-solar-600">
+                    {{ stock.quantity }} {{ 'productDetails.units' | translate }}
+                  </span>
+                </div>
+                <div class="pt-3 mt-3 border-t border-gray-200 flex items-center justify-between">
+                  <span class="text-base font-semibold text-gray-900">
+                    {{ 'productDetails.totalStock' | translate }}:
+                  </span>
+                  <span class="text-xl font-bold text-solar-600">
+                    {{ getTotalErpStock() }} {{ 'productDetails.units' | translate }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- ERP Stock Loading -->
+            <div *ngIf="erpStockLoading" class="bg-white rounded-lg border border-gray-200 p-6">
+              <div class="flex items-center justify-center">
+                <div class="animate-spin rounded-full h-5 w-5 border-2 border-solar-600 border-t-transparent mr-3"></div>
+                <span class="text-sm text-gray-600">
+                  {{ 'productDetails.loadingStockInformation' | translate }}
+                </span>
+              </div>
+            </div>
+          </div>
           </div>
 
           <!-- Product Info -->
@@ -606,6 +641,7 @@ export class PartnersProductDetailsComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private store = inject(Store);
   private supabaseService = inject(SupabaseService);
+  private erpService = inject(ErpIntegrationService);
   private destroy$ = new Subject<void>();
 
   currentUser: User | null = null;
@@ -634,6 +670,10 @@ export class PartnersProductDetailsComponent implements OnInit, OnDestroy {
 
   products$: Observable<ProductWithPricing[]>;
   loading$: Observable<boolean>;
+
+  // ERP stock information
+  erpStock: StockItem[] = [];
+  erpStockLoading = false;
 
   constructor() {
     this.products$ = this.store.select(selectProductsWithPricing);
@@ -681,6 +721,8 @@ export class PartnersProductDetailsComponent implements OnInit, OnDestroy {
             this.error = null;
             // Load suggested products
             this.loadSuggestedProducts(foundProduct.id);
+            // Load ERP stock
+            this.loadErpStock(foundProduct);
           } else if (!this.loading) {
             // Only set error if we're not still loading
             this.error = 'Product not found';
@@ -1058,5 +1100,43 @@ export class PartnersProductDetailsComponent implements OnInit, OnDestroy {
         categories: category // Pass the actual category name for filtering
       }
     });
+  }
+
+  /**
+   * Load ERP stock information for the current product
+   */
+  private loadErpStock(product: ProductWithPricing): void {
+    if (!product.sku) {
+      console.warn('[B2B Product Details] No SKU available for product');
+      return;
+    }
+
+    this.erpStockLoading = true;
+    this.erpService.getStockBySku(product.sku)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            this.erpStock = response.data;
+            console.log('[B2B Product Details] ERP stock loaded:', this.erpStock);
+          } else {
+            console.warn('[B2B Product Details] Failed to load ERP stock:', response.error);
+            this.erpStock = [];
+          }
+          this.erpStockLoading = false;
+        },
+        error: (error) => {
+          console.error('[B2B Product Details] Error loading ERP stock:', error);
+          this.erpStock = [];
+          this.erpStockLoading = false;
+        }
+      });
+  }
+
+  /**
+   * Get total ERP stock across all units
+   */
+  getTotalErpStock(): number {
+    return this.erpStock.reduce((total, stock) => total + stock.quantity, 0);
   }
 } 
