@@ -1,12 +1,13 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors, AsyncValidatorFn } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subject } from 'rxjs';
-import { takeUntil, filter } from 'rxjs/operators';
+import { takeUntil, filter, map, debounceTime, distinctUntilChanged, switchMap, first } from 'rxjs/operators';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { Company } from '../../../shared/models/company.model';
+import { SupabaseService } from '../../../services/supabase.service';
 import * as CompaniesActions from './store/companies.actions';
 import {
   selectCompaniesLoading,
@@ -126,7 +127,11 @@ import {
                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   [placeholder]="'admin.companiesForm.taxNumber' | translate">
                 <div *ngIf="companyForm.get('taxNumber')?.invalid && companyForm.get('taxNumber')?.touched" class="mt-1 text-sm text-red-600">
-                  {{ 'validation.required' | translate }}
+                  <span *ngIf="companyForm.get('taxNumber')?.errors?.['required']">{{ 'validation.required' | translate }}</span>
+                  <span *ngIf="companyForm.get('taxNumber')?.errors?.['taxNumberExists']">{{ 'validation.taxNumberExists' | translate }}</span>
+                </div>
+                <div *ngIf="companyForm.get('taxNumber')?.pending" class="mt-1 text-sm text-gray-500">
+                  Provjera OIB-a...
                 </div>
               </div>
 
@@ -154,7 +159,7 @@ import {
               <!-- Years in Business -->
               <div>
                 <label for="yearsInBusiness" class="block text-sm font-medium text-gray-700 mb-2">
-                  {{ 'admin.companiesForm.yearsInBusiness' | translate }}
+                  {{ 'admin.companiesForm.yearsInBusiness' | translate }} *
                 </label>
                 <input
                   type="number"
@@ -164,6 +169,9 @@ import {
                   max="100"
                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   [placeholder]="'admin.companiesForm.yearsInBusiness' | translate">
+                <div *ngIf="companyForm.get('yearsInBusiness')?.invalid && companyForm.get('yearsInBusiness')?.touched" class="mt-1 text-sm text-red-600">
+                  {{ 'validation.required' | translate }}
+                </div>
               </div>
 
               <!-- Number of Employees -->
@@ -362,6 +370,7 @@ export class AdminCompanyEditComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private store = inject(Store);
+  private supabaseService = inject(SupabaseService);
   private destroy$ = new Subject<void>();
 
   companyForm: FormGroup;
@@ -376,9 +385,9 @@ export class AdminCompanyEditComponent implements OnInit, OnDestroy {
 
     this.companyForm = this.fb.group({
       companyName: ['', [Validators.required]],
-      taxNumber: ['', [Validators.required]],
+      taxNumber: ['', [Validators.required], [this.taxNumberValidator()]],
       businessType: ['', [Validators.required]],
-      yearsInBusiness: [null],
+      yearsInBusiness: [null, [Validators.required, Validators.min(0)]],
       numberOfEmployees: [null],
       annualRevenue: [null],
       contactPersonName: ['', [Validators.required]],
@@ -387,7 +396,12 @@ export class AdminCompanyEditComponent implements OnInit, OnDestroy {
       website: [''],
       companyAddress: ['', [Validators.required]],
       description: [''],
-      status: ['pending']
+      status: ['pending'],
+      // Fields for contact person creation (only for new companies)
+      firstName: [''],
+      lastName: [''],
+      email: [''],
+      phoneNumber: ['']
     });
   }
 
@@ -479,5 +493,53 @@ export class AdminCompanyEditComponent implements OnInit, OnDestroy {
     }).catch(err => {
       console.error('Failed to copy Company UUID: ', err);
     });
+  }
+
+  /**
+   * Async validator to check if tax number already exists
+   */
+  private taxNumberValidator(): AsyncValidatorFn {
+    return (control: AbstractControl): Observable<ValidationErrors | null> => {
+      if (!control.value) {
+        return new Observable(observer => {
+          observer.next(null);
+          observer.complete();
+        });
+      }
+
+      return control.valueChanges.pipe(
+        debounceTime(500),
+        distinctUntilChanged(),
+        switchMap(() => {
+          // If editing, check if tax number belongs to current company
+          const taxNumberToCheck = control.value;
+
+          return this.supabaseService.client
+            .from('companies')
+            .select('id, tax_number')
+            .eq('tax_number', taxNumberToCheck)
+            .then(({ data, error }) => {
+              if (error) {
+                console.error('Error checking tax number:', error);
+                return null;
+              }
+
+              // If no company found with this tax number, it's available
+              if (!data || data.length === 0) {
+                return null;
+              }
+
+              // If editing and tax number belongs to current company, it's valid
+              if (this.isEditMode && this.companyId && data[0].id === this.companyId) {
+                return null;
+              }
+
+              // Tax number already exists for another company
+              return { taxNumberExists: true };
+            });
+        }),
+        first()
+      );
+    };
   }
 }

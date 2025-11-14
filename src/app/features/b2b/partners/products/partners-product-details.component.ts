@@ -12,7 +12,7 @@ import { User } from '../../../../shared/models/user.model';
 import { Company } from '../../../../shared/models/company.model';
 import { SupabaseService } from '../../../../services/supabase.service';
 import { ErpIntegrationService, StockItem } from '../../../../shared/services/erp-integration.service';
-import { getUnitName } from '../../../../shared/utils/erp-unit-names';
+import { getUnitName, filterAndCombineErpStock, FilteredStockItem } from '../../../../shared/utils/erp-unit-names';
 import * as ProductsActions from '../../shared/store/products.actions';
 import { selectProductsWithPricing, selectProductsLoading } from '../../shared/store/products.selectors';
 import { ProductWithPricing } from '../../shared/store/products.actions';
@@ -170,7 +170,7 @@ import * as B2BCartActions from '../../cart/store/b2b-cart.actions';
             </div>
 
             <!-- ERP Stock Information -->
-            <div *ngIf="erpStock && erpStock.length > 0" class="bg-white rounded-lg border border-gray-200 p-6">
+            <div *ngIf="filteredErpStock && filteredErpStock.length > 0" class="bg-white rounded-lg border border-gray-200 p-6">
               <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-semibold text-gray-900">
                   {{ showStockByUnit ? ('b2b.products.stockByLocation' | translate) : ('b2b.products.stockAvailability' | translate) }}
@@ -202,9 +202,9 @@ import * as B2BCartActions from '../../cart/store/b2b-cart.actions';
 
               <!-- Stock by unit (expanded state) -->
               <div *ngIf="showStockByUnit" class="space-y-3">
-                <div *ngFor="let stock of erpStock" class="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-lg">
+                <div *ngFor="let stock of filteredErpStock" class="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-lg">
                   <span class="text-gray-700 font-medium">
-                    {{ getUnitDisplayName(stock.unitId, stock.unitName) }}
+                    {{ stock.displayName }}
                   </span>
                   <span class="text-lg font-medium text-solar-600">
                     {{ stock.quantity }}
@@ -704,6 +704,8 @@ export class PartnersProductDetailsComponent implements OnInit, OnDestroy {
   erpStock: StockItem[] = [];
   erpStockLoading = false;
   showStockByUnit = false; // Toggle for showing stock by unit/location
+  // Filtered and combined ERP stock (only mapped units, Buzin combined)
+  filteredErpStock: FilteredStockItem[] = [];
 
   constructor() {
     this.products$ = this.store.select(selectProductsWithPricing);
@@ -1148,26 +1150,37 @@ export class PartnersProductDetailsComponent implements OnInit, OnDestroy {
         next: (response) => {
           if (response.success && response.data) {
             this.erpStock = response.data;
+            // Filter and combine stock for display
+            this.updateFilteredStock();
             console.log('[B2B Product Details] ERP stock loaded:', this.erpStock);
           } else {
             console.warn('[B2B Product Details] Failed to load ERP stock:', response.error);
             this.erpStock = [];
+            this.filteredErpStock = [];
           }
           this.erpStockLoading = false;
         },
         error: (error) => {
           console.error('[B2B Product Details] Error loading ERP stock:', error);
           this.erpStock = [];
+          this.filteredErpStock = [];
           this.erpStockLoading = false;
         }
       });
   }
 
   /**
+   * Update filtered stock when erpStock changes
+   */
+  private updateFilteredStock(): void {
+    this.filteredErpStock = filterAndCombineErpStock(this.erpStock);
+  }
+
+  /**
    * Get total ERP stock across all units
    */
   getTotalErpStock(): number {
-    return this.erpStock.reduce((total, stock) => total + stock.quantity, 0);
+    return this.filteredErpStock.reduce((total, stock) => total + stock.quantity, 0);
   }
 
   /**

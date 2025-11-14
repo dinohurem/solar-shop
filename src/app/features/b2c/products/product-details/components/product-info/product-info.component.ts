@@ -1,4 +1,4 @@
-import { Component, Input, inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, Input, inject, OnInit, OnDestroy, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
@@ -10,7 +10,7 @@ import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
 import { ToastService } from '../../../../../../shared/services/toast.service';
 import { TranslationService } from '../../../../../../shared/services/translation.service';
 import { StockItem } from '../../../../../../shared/services/erp-integration.service';
-import { getUnitName } from '../../../../../../shared/utils/erp-unit-names';
+import { getUnitName, filterAndCombineErpStock, FilteredStockItem } from '../../../../../../shared/utils/erp-unit-names';
 import * as WishlistActions from '../../../../../b2c/wishlist/store/wishlist.actions';
 import {
   selectIsProductInWishlist,
@@ -94,7 +94,7 @@ import { LucideAngularModule, Star, StarHalf, ShoppingCart } from 'lucide-angula
         </div>
 
         <!-- ERP Stock Information (Collapsible) -->
-        <div *ngIf="erpStock && erpStock.length > 0" class="mb-6">
+        <div *ngIf="filteredErpStock && filteredErpStock.length > 0" class="mb-6">
           <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <button
               type="button"
@@ -117,9 +117,9 @@ import { LucideAngularModule, Star, StarHalf, ShoppingCart } from 'lucide-angula
               </svg>
             </button>
             <div id="stock-information-content" *ngIf="stockInformationOpen" class="mt-3 space-y-2">
-              <div *ngFor="let stock of erpStock" class="flex items-center justify-between text-sm">
+              <div *ngFor="let stock of filteredErpStock" class="flex items-center justify-between text-sm">
                 <span class="text-blue-700 font-['DM_Sans']">
-                  {{ getUnitDisplayName(stock.unitId, stock.unitName) }}:
+                  {{ stock.displayName }}:
                 </span>
                 <span class="font-medium text-blue-900 font-['DM_Sans']">
                   {{ stock.quantity }}
@@ -546,11 +546,14 @@ import { LucideAngularModule, Star, StarHalf, ShoppingCart } from 'lucide-angula
     .rotate-0 { transform: rotate(0deg); }
   `]
 })
-export class ProductInfoComponent implements OnInit, OnDestroy {
+export class ProductInfoComponent implements OnInit, OnDestroy, OnChanges {
   @Input() product!: Product;
   @Input() isCompanyPricing: boolean = false;
   @Input() erpStock: StockItem[] = []; // Receive ERP stock from parent component
   @Input() erpStockLoading: boolean = false; // Receive loading state from parent
+
+  // Filtered and combined ERP stock (only mapped units, Buzin combined)
+  filteredErpStock: FilteredStockItem[] = [];
 
   quantity: number = 1;
 
@@ -604,20 +607,25 @@ export class ProductInfoComponent implements OnInit, OnDestroy {
 
     // Load wishlist data
     this.store.dispatch(WishlistActions.loadWishlist());
+
+    // Filter and combine ERP stock
+    this.updateFilteredStock();
+  }
+
+  ngOnChanges(): void {
+    // Update filtered stock when erpStock input changes
+    this.updateFilteredStock();
+  }
+
+  private updateFilteredStock(): void {
+    this.filteredErpStock = filterAndCombineErpStock(this.erpStock);
   }
 
   /**
-   * Get total stock across all units
+   * Get total stock across all filtered units
    */
   getTotalStock(): number {
-    return this.erpStock.reduce((total, stock) => total + stock.quantity, 0);
-  }
-
-  /**
-   * Get display name for a unit ID
-   */
-  getUnitDisplayName(unitId: string | undefined, unitName?: string): string {
-    return getUnitName(unitId, unitName);
+    return this.filteredErpStock.reduce((total, stock) => total + stock.quantity, 0);
   }
 
   ngOnDestroy(): void {

@@ -977,6 +977,8 @@ export class TranslationService {
                     subtitle: 'Upravljajte zahtjevima za partnerstvo',
                     editCompany: 'Uredi partnera',
                     createCompany: 'Dodaj partnera',
+                    editCompanySubtitle: 'Ažuriraj informacije o partneru',
+                    createCompanySubtitle: 'Dodaj novog partnera',
                     updateCompanyInformation: 'Ažuriraj informacije o partneru',
                     createNewCompany: 'Dodaj novog partnera',
                     company: 'Tvrtka',
@@ -1017,6 +1019,7 @@ export class TranslationService {
                     thisWeek: 'Ovaj tjedan',
                     thisMonth: 'Ovaj mjesec',
                     allTypes: 'Sve vrste',
+                    selectBusinessType: 'Odaberite vrstu poslovanja',
                     retailer: 'Trgovac na malo',
                     wholesaler: 'Trgovac na veliko',
                     installer: 'Instaler',
@@ -1055,8 +1058,7 @@ export class TranslationService {
                     companyApplications: 'Zahtjevi za partnerstvo',
                     companyApplicationsDescription: 'Upravljajte zahtjevima za partnerstvo',
                     noDataFoundInCsvFile: 'Nema podataka u CSV datoteci',
-                    errorImportingCompanies: 'Greška prilikom učitavanja tvrtki. Molimo provjerite format CSV datoteke.',
-                    editCompanySubtitle: 'Uredi informacije o partneru',
+                    errorImportingCompanies: 'Greška prilikom učitavanja tvrtki. Molimo provjerite format CSV datoteke.'
                 },
                 companyPricingForm: {
                     title: 'Cjenik za partnere',
@@ -1720,6 +1722,19 @@ export class TranslationService {
                 startShopping: 'Počnite kupovati da biste vidjeli svoje narudžbe ovdje',
                 browseProducts: 'Pregledaj proizvode',
                 myWishlist: 'Moja lista želja',
+                account: 'Račun',
+                accountSettings: 'Postavke računa',
+                managePasswordSecurity: 'Upravljajte lozinkom i sigurnošću računa',
+                passwordUpdated: 'Lozinka uspješno ažurirana',
+                newPassword: 'Nova lozinka',
+                enterNewPassword: 'Unesite novu lozinku',
+                confirmPassword: 'Potvrdi lozinku',
+                enterConfirmPassword: 'Potvrdite novu lozinku',
+                passwordRequired: 'Lozinka je obavezna',
+                passwordMinLength: 'Lozinka mora imati najmanje 6 znakova',
+                confirmPasswordRequired: 'Molimo potvrdite lozinku',
+                passwordsMustMatch: 'Lozinke se moraju podudarati',
+                updatePassword: 'Ažuriraj lozinku',
                 viewWishlistItems: 'Pogledaj stavke liste želja',
                 noWishlistItems: 'Nema proizvoda u listi želja',
                 startAddingToWishlist: 'Počnite dodavati proizvode u svoju listu želja',
@@ -1806,6 +1821,12 @@ export class TranslationService {
                 thisMonth: 'Ovaj mjesec',
                 show: 'Prikaži',
                 hide: 'Sakrij'
+            },
+            // Validation Messages
+            validation: {
+                required: 'Ovo polje je obavezno',
+                invalidEmail: 'Unesite valjanu email adresu',
+                taxNumberExists: 'OIB već postoji u sustavu'
             },
             // Contact Information
             contact: {
@@ -3626,6 +3647,8 @@ export class TranslationService {
                     subtitle: 'Manage partner applications',
                     editCompany: 'Edit company',
                     createCompany: 'Add company',
+                    editCompanySubtitle: 'Update company information',
+                    createCompanySubtitle: 'Add new company',
                     updateCompanyInformation: 'Update company information',
                     createNewCompany: 'Add new company',
                     company: 'Company',
@@ -3666,6 +3689,7 @@ export class TranslationService {
                     thisWeek: 'This week',
                     thisMonth: 'This month',
                     allTypes: 'All types',
+                    selectBusinessType: 'Select business type',
                     retailer: 'Retailer',
                     wholesaler: 'Wholesaler',
                     installer: 'Installer',
@@ -3704,8 +3728,7 @@ export class TranslationService {
                     companyApplications: 'Company applications',
                     companyApplicationsDescription: 'Manage company applications',
                     noDataFoundInCsvFile: 'No data found in CSV file',
-                    errorImportingCompanies: 'Error importing companies. Please check the CSV format.',
-                    editCompanySubtitle: 'Edit company information',
+                    errorImportingCompanies: 'Error importing companies. Please check the CSV format.'
                 },
                 companyPricingForm: {
                     title: 'Company Pricing',
@@ -4349,6 +4372,19 @@ export class TranslationService {
                 missingReviews: 'Missing reviews for {{count}} products',
                 trackOrder: 'Track Order',
                 noOrdersFound: 'No orders found',
+                account: 'Account',
+                accountSettings: 'Account Settings',
+                managePasswordSecurity: 'Manage your password and account security',
+                passwordUpdated: 'Password updated successfully',
+                newPassword: 'New Password',
+                enterNewPassword: 'Enter new password',
+                confirmPassword: 'Confirm Password',
+                enterConfirmPassword: 'Confirm your new password',
+                passwordRequired: 'Password is required',
+                passwordMinLength: 'Password must be at least 6 characters',
+                confirmPasswordRequired: 'Please confirm your password',
+                passwordsMustMatch: 'Passwords must match',
+                updatePassword: 'Update Password',
                 startShopping: 'Start shopping to see your orders here',
                 browseProducts: 'Browse Products',
                 myWishlist: 'My Wishlist',
@@ -4438,6 +4474,12 @@ export class TranslationService {
                 thisMonth: 'This Month',
                 show: 'Show',
                 hide: 'Hide'
+            },
+            // Validation Messages
+            validation: {
+                required: 'This field is required',
+                invalidEmail: 'Please enter a valid email address',
+                taxNumberExists: 'Tax number already exists in the system'
             },
             // Contact Information
             contact: {

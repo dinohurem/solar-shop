@@ -5,13 +5,13 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { Store } from '@ngrx/store';
 import { Observable, Subject, firstValueFrom } from 'rxjs';
-import { takeUntil, take } from 'rxjs/operators';
+import { takeUntil, take, map } from 'rxjs/operators';
 import { AdminFormComponent } from '../../shared/admin-form/admin-form.component';
 import { SupabaseService } from '../../../../services/supabase.service';
 import { TranslationService } from '../../../../shared/services/translation.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { ToastService } from '../../../../shared/services/toast.service';
-import { getUnitName } from '../../../../shared/utils/erp-unit-names';
+import { getUnitName, filterAndCombineErpStock, FilteredStockItem } from '../../../../shared/utils/erp-unit-names';
 import {
   loadProducts,
   loadCategories,
@@ -24,10 +24,8 @@ import {
   selectProducts,
   selectCategories,
   selectProductsLoading,
-  selectErpStockFiltered,
   selectErpStockLoading,
   selectErpStockError,
-  selectErpStockTotalQuantity,
   selectErpStock
 } from '../../../b2b/shared/store/products.selectors';
 import { Product, Category } from '../../../b2b/shared/store/products.actions';
@@ -640,7 +638,7 @@ interface ProductRelationship {
                         {{ stock.unitId }}
                       </td>
                       <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                        {{ getUnitDisplayName(stock.unitId, stock.unitName) }}
+                        {{ stock.displayName }}
                       </td>
                       <td class="px-6 py-4 whitespace-nowrap text-sm">
                         <span class="px-2 py-1 rounded-full text-xs font-semibold"
@@ -979,7 +977,7 @@ export class ProductFormComponent implements OnInit, OnDestroy {
 
   // ERP Stock Management (NgRx)
   erpStockByUnit$: Observable<ErpStockItem[]>;
-  erpStockFiltered$: Observable<ErpStockItem[]>;
+  erpStockFiltered$: Observable<FilteredStockItem[]>;
   erpStockLoading$: Observable<boolean>;
   erpStockError$: Observable<string | null>;
   erpStockTotalQuantity$: Observable<number>;
@@ -991,12 +989,16 @@ export class ProductFormComponent implements OnInit, OnDestroy {
     this.products$ = this.store.select(selectProducts);
     this.loading$ = this.store.select(selectProductsLoading);
 
-    // ERP Stock observables
+    // ERP Stock observables - Apply filtering and combining
     this.erpStockByUnit$ = this.store.select(selectErpStock);
-    this.erpStockFiltered$ = this.store.select(selectErpStockFiltered);
+    this.erpStockFiltered$ = this.erpStockByUnit$.pipe(
+      map(stockItems => filterAndCombineErpStock(stockItems))
+    );
     this.erpStockLoading$ = this.store.select(selectErpStockLoading);
     this.erpStockError$ = this.store.select(selectErpStockError);
-    this.erpStockTotalQuantity$ = this.store.select(selectErpStockTotalQuantity);
+    this.erpStockTotalQuantity$ = this.erpStockFiltered$.pipe(
+      map(stockItems => stockItems.reduce((total, item) => total + item.quantity, 0))
+    );
   }
 
   ngOnInit(): void {

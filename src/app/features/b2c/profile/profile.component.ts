@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, filter, BehaviorSubject } from 'rxjs';
 import { take } from 'rxjs/operators';
@@ -106,6 +106,16 @@ import { WriteReviewModalComponent } from '../../../shared/components/modals/wri
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
                   </svg>
                   <span>{{ 'profile.myReviews' | translate }}</span>
+                </button>
+
+                <button
+                  (click)="setActiveTab('account')"
+                  [class]="activeTab === 'account' ? 'bg-solar-600 text-white' : 'text-gray-700 hover:bg-gray-50'"
+                  class="w-full text-left px-4 py-3 rounded-lg font-['DM_Sans'] font-medium transition-colors duration-200 flex items-center space-x-3">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                  </svg>
+                  <span>{{ 'profile.account' | translate }}</span>
                 </button>
               </nav>
             </div>
@@ -706,6 +716,83 @@ import { WriteReviewModalComponent } from '../../../shared/components/modals/wri
                 </div>
               </ng-template>
             </div>
+
+            <!-- Account Tab -->
+            <div *ngIf="activeTab === 'account'" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div class="mb-6">
+                <h2 class="text-2xl font-semibold text-gray-900 font-['Poppins'] mb-2">{{ 'profile.accountSettings' | translate }}</h2>
+                <p class="text-gray-600 font-['DM_Sans']">{{ 'profile.managePasswordSecurity' | translate }}</p>
+              </div>
+
+              <!-- Password Success Message -->
+              <div *ngIf="showPasswordSuccessMessage" class="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
+                <div class="flex items-center">
+                  <svg class="w-5 h-5 text-green-600 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                  </svg>
+                  <span class="text-green-800 font-['DM_Sans'] font-medium">{{ 'profile.passwordUpdated' | translate }}</span>
+                </div>
+              </div>
+
+              <!-- Password Error Message -->
+              <div *ngIf="passwordError" class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+                <div class="flex items-center">
+                  <svg class="w-5 h-5 text-red-600 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                  </svg>
+                  <span class="text-red-800 font-['DM_Sans'] font-medium">{{ passwordError }}</span>
+                </div>
+              </div>
+
+              <!-- Change Password Form -->
+              <form [formGroup]="passwordForm" (ngSubmit)="updatePassword()" class="space-y-6">
+                <div class="max-w-2xl">
+                  <!-- New Password -->
+                  <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-900 mb-2 font-['DM_Sans']">{{ 'profile.newPassword' | translate }}*</label>
+                    <input
+                      formControlName="newPassword"
+                      type="password"
+                      class="w-full h-12 px-4 py-3 border rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-solar-600 focus:border-transparent transition-all duration-200 font-['DM_Sans']"
+                      [class.border-red-500]="passwordForm.get('newPassword')?.invalid && passwordForm.get('newPassword')?.touched"
+                      [class.border-gray-300]="!passwordForm.get('newPassword')?.invalid || !passwordForm.get('newPassword')?.touched"
+                      [placeholder]="'profile.enterNewPassword' | translate">
+                    <div *ngIf="passwordForm.get('newPassword')?.invalid && passwordForm.get('newPassword')?.touched" class="mt-1 text-sm text-red-600 font-['DM_Sans']">
+                      <span *ngIf="passwordForm.get('newPassword')?.errors?.['required']">{{ 'profile.passwordRequired' | translate }}</span>
+                      <span *ngIf="passwordForm.get('newPassword')?.errors?.['minlength']">{{ 'profile.passwordMinLength' | translate }}</span>
+                    </div>
+                  </div>
+
+                  <!-- Confirm Password -->
+                  <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-900 mb-2 font-['DM_Sans']">{{ 'profile.confirmPassword' | translate }}*</label>
+                    <input
+                      formControlName="confirmPassword"
+                      type="password"
+                      class="w-full h-12 px-4 py-3 border rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-solar-600 focus:border-transparent transition-all duration-200 font-['DM_Sans']"
+                      [class.border-red-500]="(passwordForm.get('confirmPassword')?.invalid && passwordForm.get('confirmPassword')?.touched) || (passwordForm.errors?.['mismatch'] && passwordForm.get('confirmPassword')?.touched)"
+                      [class.border-gray-300]="(!passwordForm.get('confirmPassword')?.invalid || !passwordForm.get('confirmPassword')?.touched) && !passwordForm.errors?.['mismatch']"
+                      [placeholder]="'profile.enterConfirmPassword' | translate">
+                    <div *ngIf="passwordForm.get('confirmPassword')?.invalid && passwordForm.get('confirmPassword')?.touched" class="mt-1 text-sm text-red-600 font-['DM_Sans']">
+                      <span *ngIf="passwordForm.get('confirmPassword')?.errors?.['required']">{{ 'profile.confirmPasswordRequired' | translate }}</span>
+                    </div>
+                    <div *ngIf="passwordForm.errors?.['mismatch'] && passwordForm.get('confirmPassword')?.touched" class="mt-1 text-sm text-red-600 font-['DM_Sans']">
+                      {{ 'profile.passwordsMustMatch' | translate }}
+                    </div>
+                  </div>
+
+                  <!-- Save Button -->
+                  <div class="flex justify-end pt-6 border-t border-gray-200">
+                    <button
+                      type="submit"
+                      [disabled]="passwordForm.invalid"
+                      class="px-6 py-3 bg-solar-600 hover:bg-solar-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-solar-600 focus:ring-offset-2 font-['DM_Sans']">
+                      {{ 'profile.updatePassword' | translate }}
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       </div>
@@ -729,6 +816,7 @@ export class ProfileComponent implements OnInit {
   private store = inject(Store);
   private fb = inject(FormBuilder);
   public router = inject(Router);
+  private route = inject(ActivatedRoute);
   private actions$ = inject(Actions);
   private supabaseService = inject(SupabaseService);
 
@@ -736,9 +824,12 @@ export class ProfileComponent implements OnInit {
   loading$: Observable<boolean>;
   error$: Observable<any>;
 
-  activeTab: 'user-info' | 'billing-shipping' | 'my-orders' | 'my-wishlist' | 'my-reviews' = 'user-info';
+  activeTab: 'user-info' | 'billing-shipping' | 'my-orders' | 'my-wishlist' | 'my-reviews' | 'account' = 'user-info';
   userInfoForm: FormGroup;
+  passwordForm: FormGroup;
   showSuccessMessage = false;
+  showPasswordSuccessMessage = false;
+  passwordError = '';
 
   orders$: Observable<Order[]> = this.store.select(selectUserOrders);
   ordersLoading$: Observable<boolean> = this.store.select(selectUserOrdersLoading);
@@ -769,9 +860,26 @@ export class ProfileComponent implements OnInit {
       dateOfBirth: [''],
       gender: ['']
     });
+
+    this.passwordForm = this.fb.group({
+      newPassword: ['', [Validators.required, Validators.minLength(6)]],
+      confirmPassword: ['', Validators.required]
+    }, { validators: this.passwordMatchValidator });
+  }
+
+  passwordMatchValidator(g: FormGroup) {
+    return g.get('newPassword')?.value === g.get('confirmPassword')?.value
+      ? null : { 'mismatch': true };
   }
 
   ngOnInit(): void {
+    // Check for tab query parameter
+    this.route.queryParams.pipe(take(1)).subscribe(params => {
+      if (params['tab']) {
+        this.activeTab = params['tab'] as any;
+      }
+    });
+
     this.store.dispatch(AuthActions.loadUserProfile());
     this.store.dispatch(WishlistActions.loadWishlist());
 
@@ -820,9 +928,11 @@ export class ProfileComponent implements OnInit {
     });
   }
 
-  setActiveTab(tab: 'user-info' | 'billing-shipping' | 'my-orders' | 'my-wishlist' | 'my-reviews'): void {
+  setActiveTab(tab: 'user-info' | 'billing-shipping' | 'my-orders' | 'my-wishlist' | 'my-reviews' | 'account'): void {
     this.activeTab = tab;
     this.showSuccessMessage = false;
+    this.showPasswordSuccessMessage = false;
+    this.passwordError = '';
 
     if (tab === 'my-orders') {
       this.currentUser$.pipe(
@@ -947,5 +1057,35 @@ export class ProfileComponent implements OnInit {
         });
       });
     });
+  }
+
+  async updatePassword(): Promise<void> {
+    if (this.passwordForm.invalid) {
+      Object.keys(this.passwordForm.controls).forEach(key => {
+        this.passwordForm.get(key)?.markAsTouched();
+      });
+      return;
+    }
+
+    this.passwordError = '';
+    const newPassword = this.passwordForm.get('newPassword')?.value;
+
+    try {
+      const { error } = await this.supabaseService.client.auth.updateUser({
+        password: newPassword
+      });
+
+      if (error) {
+        this.passwordError = error.message;
+      } else {
+        this.showPasswordSuccessMessage = true;
+        this.passwordForm.reset();
+        setTimeout(() => {
+          this.showPasswordSuccessMessage = false;
+        }, 3000);
+      }
+    } catch (error: any) {
+      this.passwordError = error.message || 'An error occurred';
+    }
   }
 } 

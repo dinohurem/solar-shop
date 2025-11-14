@@ -107,35 +107,52 @@ export class CompaniesService {
 
     createCompany(company: Omit<Company, 'id' | 'createdAt' | 'updatedAt'>): Observable<Company> {
         return from(
-            this.supabaseService.getSession().then(session => {
-                const currentUserId = session?.user?.id;
-                return this.supabaseService.client
-                    .from('companies')
-                    .insert({
-                        contact_person_id: currentUserId, // Will be updated if needed
-                        company_name: company.companyName,
-                        tax_number: company.taxNumber,
-                        company_address: company.companyAddress,
-                        company_phone: company.companyPhone,
-                        company_email: company.companyEmail,
+            this.supabaseService.getSession().then(async () => {
+                // Parse first name and last name from contactPersonName
+                // Format: "FirstName LastName"
+                let firstName = 'Pending';
+                let lastName = 'User';
+
+                if (company.contactPersonName) {
+                    const nameParts = company.contactPersonName.trim().split(' ');
+                    firstName = nameParts[0] || 'Pending';
+                    lastName = nameParts.slice(1).join(' ') || 'User';
+                }
+
+                // Call Edge Function to create user, profile, and company
+                // This uses the service role key on the server side
+                const { data, error } = await this.supabaseService.client.functions.invoke('create-company-user', {
+                    body: {
+                        email: company.companyEmail,
+                        firstName,
+                        lastName,
+                        phoneNumber: company.companyPhone,
+                        companyName: company.companyName,
+                        taxNumber: company.taxNumber,
+                        companyAddress: company.companyAddress,
+                        companyPhone: company.companyPhone,
+                        companyEmail: company.companyEmail,
                         website: company.website,
-                        business_type: company.businessType,
-                        years_in_business: company.yearsInBusiness,
-                        annual_revenue: company.annualRevenue,
-                        number_of_employees: company.numberOfEmployees,
+                        businessType: company.businessType,
+                        yearsInBusiness: company.yearsInBusiness,
+                        annualRevenue: company.annualRevenue,
+                        numberOfEmployees: company.numberOfEmployees,
                         description: company.description,
-                        status: company.status || 'pending',
-                        approved: company.status === 'approved',
-                        created_at: new Date().toISOString(),
-                        updated_at: new Date().toISOString()
-                    })
-                    .select(`
-                        *,
-                        contact_person:profiles!companies_contact_person_id_fkey(
-                            full_name
-                        )
-                    `)
-                    .single();
+                        status: company.status || 'pending'
+                    }
+                });
+
+                if (error) {
+                    console.error('Error calling edge function:', error);
+                    throw new Error(`Failed to create company: ${error.message}`);
+                }
+
+                if (!data || !data.success) {
+                    throw new Error(data?.error || 'Unknown error creating company');
+                }
+
+                // Return the created company from the edge function response
+                return { data: data.company, error: null };
             })
         ).pipe(
             map(({ data, error }) => {
