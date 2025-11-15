@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, OnDestroy } from '@angular/core';
+import { Component, OnInit, inject, OnDestroy, HostListener, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, FormsModule, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -177,19 +177,94 @@ interface ProductWithCustomPrice extends Product {
           {{ 'admin.companyPricingForm.productSelection' | translate }} - {{ selectedCompany.name }}
         </h3>
 
-        <!-- Search -->
-        <div class="mb-6">
-          <div class="relative">
-            <input
-              type="text"
-              [(ngModel)]="productSearchTerm"
-              (ngModelChange)="filterProducts()"
-              placeholder="Search products..."
-              class="w-full px-4 py-3 pl-10 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-              </svg>
+        <!-- Search and Filter -->
+        <div class="mb-6 space-y-4">
+          <!-- Search Input and Category Dropdown - Side by Side -->
+          <div class="grid grid-cols-2 gap-4">
+            <!-- Search Input -->
+            <div class="relative">
+              <input
+                type="text"
+                [(ngModel)]="productSearchTerm"
+                (ngModelChange)="filterProducts()"
+                [placeholder]="'admin.companyPricingForm.searchProducts' | translate"
+                class="w-full px-4 py-3 pl-10 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+              </div>
+            </div>
+
+            <!-- Category Multi-Select Dropdown with Checkboxes -->
+            <div class="relative category-dropdown">
+              <button
+                type="button"
+                (click)="showCategoryDropdown = !showCategoryDropdown"
+                class="w-full px-4 py-3 pr-10 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-200 bg-white text-left flex items-center justify-between">
+                <span class="text-gray-700">
+                  <span *ngIf="selectedCategories.length === 0" class="text-gray-500">
+                    {{ 'admin.companyPricingForm.filterByCategories' | translate }}
+                  </span>
+                  <span *ngIf="selectedCategories.length > 0" class="font-medium">
+                    {{ selectedCategories.length }} {{ 'admin.companyPricingForm.categoriesSelected' | translate }}
+                  </span>
+                </span>
+                <svg class="w-5 h-5 text-gray-400 transition-transform" [class.rotate-180]="showCategoryDropdown" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+              </button>
+
+              <!-- Dropdown Panel -->
+              <div
+                *ngIf="showCategoryDropdown"
+                class="absolute z-50 mt-2 w-full bg-white border-2 border-gray-200 rounded-lg shadow-lg max-h-72 overflow-y-auto">
+                <div class="p-2">
+                  <div *ngFor="let category of availableCategories" class="flex items-center px-3 py-2 hover:bg-gray-50 rounded-md cursor-pointer transition-colors">
+                    <label class="flex items-center cursor-pointer w-full">
+                      <input
+                        type="checkbox"
+                        [checked]="selectedCategories.includes(category)"
+                        (change)="toggleCategory(category)"
+                        class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                      <span class="ml-3 text-sm text-gray-700">{{ category }}</span>
+                    </label>
+                  </div>
+                  <div *ngIf="availableCategories.length === 0" class="px-3 py-4 text-center text-sm text-gray-500">
+                    {{ 'admin.companyPricingForm.noCategories' | translate }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Selected Categories Display -->
+          <div *ngIf="selectedCategories.length > 0" class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-sm font-medium text-blue-900">
+                {{ 'admin.companyPricingForm.selectedCategories' | translate }} ({{ selectedCategories.length }})
+              </span>
+              <button
+                type="button"
+                (click)="clearCategories()"
+                class="text-xs text-blue-700 hover:text-blue-900 font-medium underline">
+                {{ 'admin.companyPricingForm.clearFilters' | translate }}
+              </button>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <span
+                *ngFor="let category of selectedCategories"
+                class="inline-flex items-center px-3 py-1 bg-blue-600 text-white text-sm font-medium rounded-full">
+                {{ category }}
+                <button
+                  type="button"
+                  (click)="removeCategory(category)"
+                  class="ml-2 hover:bg-blue-700 rounded-full p-0.5 transition-colors">
+                  <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                  </svg>
+                </button>
+              </span>
             </div>
           </div>
         </div>
@@ -199,11 +274,14 @@ interface ProductWithCustomPrice extends Product {
           <table class="w-full table-fixed divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
-                <th class="w-1/4 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="w-1/5 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   {{ 'admin.companyPricingForm.productName' | translate }}
                 </th>
                 <th class="w-20 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   {{ 'admin.companyPricingForm.skuLabel' | translate }}
+                </th>
+                <th class="w-32 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {{ 'admin.companyPricingForm.categories' | translate }}
                 </th>
                 <th class="w-24 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   {{ 'admin.companyPricingForm.currentPrice' | translate }}
@@ -221,11 +299,23 @@ interface ProductWithCustomPrice extends Product {
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
               <tr *ngFor="let product of filteredProducts" class="hover:bg-gray-50">
-                <td class="w-1/4 px-4 py-4">
+                <td class="w-1/5 px-4 py-4">
                   <div class="text-sm font-medium text-gray-900 break-words">{{ product.name }}</div>
                 </td>
                 <td class="w-20 px-4 py-4">
                   <div class="text-sm text-gray-500 break-all">{{ product.sku }}</div>
+                </td>
+                <td class="w-32 px-3 py-4">
+                  <div class="flex flex-wrap gap-1">
+                    <span *ngFor="let category of product.categories"
+                          class="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded">
+                      {{ category }}
+                    </span>
+                    <span *ngIf="!product.categories || product.categories.length === 0"
+                          class="text-xs text-gray-400 italic">
+                      {{ 'common.none' | translate }}
+                    </span>
+                  </div>
                 </td>
                 <td class="w-24 px-3 py-4">
                   <div class="text-sm text-gray-900">€{{ product.price | number:'1.2-2' }}</div>
@@ -383,6 +473,7 @@ export class CompanyPricingFormComponent implements OnInit, OnDestroy {
   private title = inject(Title);
   private store = inject(Store);
   private translationService = inject(TranslationService);
+  private elementRef = inject(ElementRef);
   private destroy$ = new Subject<void>();
 
   companies$: Observable<Company[]> = this.store.select(CompanyPricingSelectors.selectCompanies);
@@ -395,6 +486,9 @@ export class CompanyPricingFormComponent implements OnInit, OnDestroy {
   selectedCompanyId: string = '';
   selectedCompany: Company | null = null;
   productSearchTerm: string = '';
+  selectedCategories: string[] = [];
+  availableCategories: string[] = [];
+  showCategoryDropdown: boolean = false;
   existingPricing: any[] = [];
   bulkDiscountPercentage: number = 0;
   showBulkPricing: boolean = false;
@@ -421,6 +515,16 @@ export class CompanyPricingFormComponent implements OnInit, OnDestroy {
     this.products$.pipe(takeUntil(this.destroy$)).subscribe(products => {
       console.log('Company Pricing Form: Products received:', products);
       this.products = products;
+
+      // Extract unique categories from all products
+      const categoriesSet = new Set<string>();
+      products.forEach(product => {
+        if (product.categories && product.categories.length > 0) {
+          product.categories.forEach(category => categoriesSet.add(category));
+        }
+      });
+      this.availableCategories = Array.from(categoriesSet).sort();
+
       this.updateFilteredProducts();
       // If we have a selected company but products weren't loaded yet, trigger the selection again
       if (this.selectedCompanyId && this.selectedCompany && products.length > 0) {
@@ -434,6 +538,22 @@ export class CompanyPricingFormComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    const clickedInside = this.elementRef.nativeElement.contains(target);
+
+    // Check if the click is outside the dropdown area
+    if (!clickedInside || (!target.closest('.category-dropdown') && this.showCategoryDropdown)) {
+      // Only close if we didn't click on the dropdown button or its contents
+      const isDropdownButton = target.closest('button[type="button"]')?.textContent?.includes('kategorij') ||
+                                target.closest('button[type="button"]')?.textContent?.includes('categor');
+      if (!isDropdownButton) {
+        this.showCategoryDropdown = false;
+      }
+    }
   }
 
   private checkEditMode(): void {
@@ -515,6 +635,7 @@ export class CompanyPricingFormComponent implements OnInit, OnDestroy {
       };
     });
 
+    // Apply search term filter
     if (this.productSearchTerm) {
       const searchTerm = this.productSearchTerm.toLowerCase();
       filtered = filtered.filter(product =>
@@ -523,11 +644,41 @@ export class CompanyPricingFormComponent implements OnInit, OnDestroy {
       );
     }
 
+    // Apply category filter (multi-select - product must have at least one of the selected categories)
+    if (this.selectedCategories.length > 0) {
+      filtered = filtered.filter(product =>
+        product.categories && product.categories.some(cat => this.selectedCategories.includes(cat))
+      );
+    }
+
     this.filteredProducts = filtered;
   }
 
   filterProducts(): void {
     this.updateFilteredProducts();
+  }
+
+  toggleCategory(category: string): void {
+    const index = this.selectedCategories.indexOf(category);
+    if (index === -1) {
+      this.selectedCategories.push(category);
+    } else {
+      this.selectedCategories.splice(index, 1);
+    }
+    this.filterProducts();
+  }
+
+  removeCategory(category: string): void {
+    const index = this.selectedCategories.indexOf(category);
+    if (index !== -1) {
+      this.selectedCategories.splice(index, 1);
+      this.filterProducts();
+    }
+  }
+
+  clearCategories(): void {
+    this.selectedCategories = [];
+    this.filterProducts();
   }
 
   updateCustomPrice(product: ProductWithCustomPrice, event: Event): void {

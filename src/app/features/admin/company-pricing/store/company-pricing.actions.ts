@@ -26,6 +26,7 @@ export interface Product {
     name: string;
     sku: string;
     price: number;
+    categories?: string[]; // Array of category names
 }
 
 // Load companies for dropdown

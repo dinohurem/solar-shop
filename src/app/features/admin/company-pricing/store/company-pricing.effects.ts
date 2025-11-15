@@ -48,21 +48,48 @@ export class CompanyPricingEffects {
     loadProducts$ = createEffect(() =>
         this.actions$.pipe(
             ofType(CompanyPricingActions.loadProducts),
-            switchMap(() =>
-                this.supabaseService.getTable('products')
-                    .then(data => {
-                        const products = (data || [])
-                            .filter((p: any) => p.is_active !== false)
-                            .map((product: any) => ({
-                                id: product.id,
-                                name: product.name,
-                                sku: product.sku,
-                                price: product.price
-                            }));
-                        return CompanyPricingActions.loadProductsSuccess({ products });
-                    })
-                    .catch(error => CompanyPricingActions.loadProductsFailure({ error: error.message }))
-            ),
+            switchMap(async () => {
+                try {
+                    // Get all products
+                    const productsData = await this.supabaseService.getTable('products');
+                    const activeProducts = (productsData || []).filter((p: any) => p.is_active !== false);
+
+                    // Get product-category mappings for all products
+                    const { data: productCategories, error: pcError } = await this.supabaseService.client
+                        .from('product_categories')
+                        .select('product_id, category_id, categories(name)');
+
+                    if (pcError) {
+                        console.error('Error loading product categories:', pcError);
+                    }
+
+                    // Create a map of product_id to category names
+                    const productCategoryMap = new Map<string, string[]>();
+                    if (productCategories) {
+                        productCategories.forEach((pc: any) => {
+                            if (!productCategoryMap.has(pc.product_id)) {
+                                productCategoryMap.set(pc.product_id, []);
+                            }
+                            if (pc.categories?.name) {
+                                productCategoryMap.get(pc.product_id)!.push(pc.categories.name);
+                            }
+                        });
+                    }
+
+                    // Map products with their categories
+                    const products = activeProducts.map((product: any) => ({
+                        id: product.id,
+                        name: product.name,
+                        sku: product.sku,
+                        price: product.price,
+                        categories: productCategoryMap.get(product.id) || []
+                    }));
+
+                    return CompanyPricingActions.loadProductsSuccess({ products });
+                } catch (error: any) {
+                    return CompanyPricingActions.loadProductsFailure({ error: error.message });
+                }
+            }),
             catchError(error => of(CompanyPricingActions.loadProductsFailure({ error: error.message })))
         )
     );
