@@ -4,6 +4,7 @@ import { of, from } from 'rxjs';
 import { map, catchError, switchMap } from 'rxjs/operators';
 import { SupabaseService } from '../../../../services/supabase.service';
 import { ErpIntegrationService } from '../../../../shared/services/erp-integration.service';
+import { SortOptionsService } from '../../../../shared/services/sort-options.service';
 import * as ProductsActions from './products.actions';
 
 @Injectable()
@@ -12,7 +13,8 @@ export class ProductsEffects {
     constructor(
         private actions$: Actions,
         private supabaseService: SupabaseService,
-        private erpService: ErpIntegrationService
+        private erpService: ErpIntegrationService,
+        private sortOptionsService: SortOptionsService
     ) { }
 
     private getPrimaryImageUrl(images: any[]): string {
@@ -124,23 +126,18 @@ export class ProductsEffects {
             }
         }
 
-        // Apply sorting
-        if (query.sortBy) {
-            switch (query.sortBy) {
-                case 'name':
-                    supabaseQuery = supabaseQuery.order('name', { ascending: true });
-                    break;
-                case 'price-low':
-                    supabaseQuery = supabaseQuery.order('price', { ascending: true });
-                    break;
-                case 'price-high':
-                    supabaseQuery = supabaseQuery.order('price', { ascending: false });
-                    break;
-                default:
-                    supabaseQuery = supabaseQuery.order('created_at', { ascending: false });
-                    break;
+        // Apply sorting using dynamic sort options (multi-field support)
+        const sortCode = query.sortBy || this.sortOptionsService.getDefaultSortOptionCode();
+        const sortOptions = this.sortOptionsService.getEnabledSortOptions();
+        const selectedSort = sortOptions.find(opt => opt.code === sortCode);
+
+        if (selectedSort && selectedSort.sortFields && selectedSort.sortFields.length > 0) {
+            // Apply each sort field in order
+            for (const sf of selectedSort.sortFields) {
+                supabaseQuery = supabaseQuery.order(sf.field, { ascending: sf.direction === 'asc' });
             }
         } else {
+            // Fallback to created_at sorting
             supabaseQuery = supabaseQuery.order('created_at', { ascending: false });
         }
 

@@ -10,11 +10,12 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { TranslationService } from '../../../shared/services/translation.service';
 import { ErpIntegrationService } from '../../../shared/services/erp-integration.service';
 import { ToastService } from '../../../shared/services/toast.service';
+import { SortOptionsManagementComponent } from '../sort-options/sort-options-management.component';
 
 @Component({
     selector: 'app-admin-products',
     standalone: true,
-    imports: [CommonModule, DataTableComponent, SuccessModalComponent, TranslatePipe],
+    imports: [CommonModule, DataTableComponent, SuccessModalComponent, TranslatePipe, SortOptionsManagementComponent],
     template: `
     <div class="w-full max-w-full overflow-hidden">
       <div class="space-y-4 sm:space-y-6 p-4 sm:p-6">
@@ -45,6 +46,11 @@ import { ToastService } from '../../../shared/services/toast.service';
             </span>
           </div>
         </div>
+
+        <!-- Sort Options Management Section -->
+        <app-sort-options-management
+          (sortOptionsChanged)="onSortOptionsChanged()">
+        </app-sort-options-management>
 
         <!-- Data Table Container -->
         <div class="w-full overflow-hidden">
@@ -692,5 +698,10 @@ export class AdminProductsComponent implements OnInit {
         this.showSuccessModal = false;
         this.successModalTitle = '';
         this.successModalMessage = '';
+    }
+
+    onSortOptionsChanged(): void {
+        // Sort options have been updated, components will automatically refresh via the service
+        console.log('[Admin Products] Sort options changed');
     }
 }

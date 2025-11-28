@@ -1,8 +1,9 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable, from, map, catchError, of } from 'rxjs';
 import { SupabaseService } from '../../../../../services/supabase.service';
 import { Product, SortOption } from '../product-list.component';
 import { ProductsQuery, ProductsResponse } from '../store/product-list.actions';
+import { SortOptionsService } from '../../../../../shared/services/sort-options.service';
 
 export interface ProductFilters {
     category?: string;
@@ -32,6 +33,7 @@ export interface ManufacturerCountFilters {
     providedIn: 'root'
 })
 export class ProductListService {
+    private sortOptionsService = inject(SortOptionsService);
 
     constructor(private supabaseService: SupabaseService) { }
 
@@ -182,33 +184,18 @@ export class ProductListService {
                 }
             }
 
-            // Apply sorting
-            if (query.sortOption) {
-                switch (query.sortOption) {
-                    case 'featured':
-                        supabaseQuery = supabaseQuery.order('is_featured', { ascending: false })
-                                                   .order('created_at', { ascending: false });
-                        break;
-                    case 'newest':
-                        supabaseQuery = supabaseQuery.order('created_at', { ascending: false });
-                        break;
-                    case 'name-asc':
-                        supabaseQuery = supabaseQuery.order('name', { ascending: true });
-                        break;
-                    case 'name-desc':
-                        supabaseQuery = supabaseQuery.order('name', { ascending: false });
-                        break;
-                    case 'price-low':
-                        supabaseQuery = supabaseQuery.order('price', { ascending: true });
-                        break;
-                    case 'price-high':
-                        supabaseQuery = supabaseQuery.order('price', { ascending: false });
-                        break;
-                    default:
-                        supabaseQuery = supabaseQuery.order('created_at', { ascending: false });
-                        break;
+            // Apply sorting using dynamic sort options (multi-field support)
+            const sortCode = query.sortOption || this.sortOptionsService.getDefaultSortOptionCode();
+            const sortOptions = this.sortOptionsService.getEnabledSortOptions();
+            const selectedSort = sortOptions.find(opt => opt.code === sortCode);
+
+            if (selectedSort && selectedSort.sortFields && selectedSort.sortFields.length > 0) {
+                // Apply each sort field in order
+                for (const sf of selectedSort.sortFields) {
+                    supabaseQuery = supabaseQuery.order(sf.field, { ascending: sf.direction === 'asc' });
                 }
             } else {
+                // Fallback to featured sorting
                 supabaseQuery = supabaseQuery.order('is_featured', { ascending: false })
                                              .order('created_at', { ascending: false });
             }

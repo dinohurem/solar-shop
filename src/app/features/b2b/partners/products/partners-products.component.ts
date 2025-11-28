@@ -19,6 +19,7 @@ import { selectProductsWithPricing, selectProductsLoading, selectCategories, sel
 import { ProductWithPricing, Category } from '../../shared/store/products.actions';
 import { ProductCategory, CategoriesService } from '../../../b2c/products/services/categories.service';
 import { B2BProductsUrlStateService, B2BProductListUrlState } from './services/b2b-products-url-state.service';
+import { SortOptionsService, SortOptionDisplay } from '../../../../shared/services/sort-options.service';
 
 @Component({
   selector: 'app-partners-products',
@@ -321,12 +322,9 @@ import { B2BProductsUrlStateService, B2BProductListUrlState } from './services/b
                   <!-- Sort Controls -->
                   <div class="flex items-center space-x-2">
                     <label class="text-sm font-medium text-gray-700 whitespace-nowrap font-['DM_Sans']">{{ 'b2b.products.sortBy' | translate }}:</label>
-                    <select [value]="(filters$ | async)?.sortBy || 'name'" (change)="onSortChange($event)" 
+                    <select [value]="(filters$ | async)?.sortBy || defaultSortCode" (change)="onSortChange($event)"
                             class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-solar-500 focus:border-solar-500 text-sm font-medium font-['DM_Sans']">
-                      <option value="name">{{ 'b2b.products.name' | translate }}</option>
-                      <option value="price-low">{{ 'b2b.products.priceLowToHigh' | translate }}</option>
-                      <option value="price-high">{{ 'b2b.products.priceHighToLow' | translate }}</option>
-                      <option value="savings">{{ 'b2b.products.bestSavings' | translate }}</option>
+                      <option *ngFor="let option of enabledSortOptions$ | async" [value]="option.code">{{ option.label }}</option>
                     </select>
                   </div>
                 </div>
@@ -729,6 +727,10 @@ export class PartnersProductsComponent implements OnInit, OnDestroy {
   manufacturerCounts$: Observable<{ [manufacturerName: string]: number }>;
   manufacturerCountsLoading$: Observable<boolean>;
 
+  // Dynamic sort options
+  enabledSortOptions$: Observable<SortOptionDisplay[]>;
+  defaultSortCode: string = 'featured';
+
   isAuthenticated = false;
   isCompanyContact = false;
   company: Company | null = null;
@@ -748,7 +750,8 @@ export class PartnersProductsComponent implements OnInit, OnDestroy {
 
   constructor(
     private categoriesService: CategoriesService,
-    private urlStateService: B2BProductsUrlStateService
+    private urlStateService: B2BProductsUrlStateService,
+    private sortOptionsService: SortOptionsService
   ) {
     this.currentUser$ = this.store.select(selectCurrentUser);
     this.cartItemsCount$ = this.store.select(selectB2BCartTotalItems);
@@ -773,6 +776,10 @@ export class PartnersProductsComponent implements OnInit, OnDestroy {
     this.categoryCountsLoading$ = this.store.select(selectCategoryCountsLoading);
     this.manufacturerCounts$ = this.store.select(selectManufacturerCounts);
     this.manufacturerCountsLoading$ = this.store.select(selectManufacturerCountsLoading);
+
+    // Initialize sort options from service
+    this.enabledSortOptions$ = this.sortOptionsService.enabledSortOptions$;
+    this.defaultSortCode = this.sortOptionsService.getDefaultSortOptionCode();
   }
 
   ngOnInit(): void {

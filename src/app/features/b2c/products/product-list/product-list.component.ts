@@ -40,6 +40,7 @@ import { CategoryCountFilters, ManufacturerCountFilters } from './services/produ
 import { selectProductCategories } from '../store/products.selectors';
 import { ProductsActions } from '../store/products.actions';
 import { SearchSuggestionsService } from '../../../../shared/services/search-suggestions.service';
+import { SortOptionsService, SortOptionDisplay } from '../../../../shared/services/sort-options.service';
 
 export interface Product {
   id: string;
@@ -86,7 +87,8 @@ export interface PaginationState {
   totalItems: number;
 }
 
-export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'price-low' | 'price-high';
+// Dynamic sort option - accepts any string code from the database
+export type SortOption = string;
 
 @Component({
   selector: 'app-product-list',
@@ -270,17 +272,12 @@ export type SortOption = 'featured' | 'newest' | 'name-asc' | 'name-desc' | 'pri
               </p>
               <div class="flex items-center space-x-2">
                 <label class="text-sm font-medium text-gray-700 font-['DM_Sans']">{{ 'productList.sortBy' | translate }}</label>
-                <select 
+                <select
                   [value]="sortOption$ | async"
                   (change)="onSortChange($event)"
                   class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-solar-500 focus:border-solar-500 font-['DM_Sans']"
                 >
-                  <option value="featured">{{ 'productList.featured' | translate }}</option>
-                  <option value="newest">{{ 'productList.newestArrivals' | translate }}</option>
-                  <option value="name-asc">{{ 'productList.nameAZ' | translate }}</option>
-                  <option value="name-desc">{{ 'productList.nameZA' | translate }}</option>
-                  <option value="price-low">{{ 'productList.priceLowHigh' | translate }}</option>
-                  <option value="price-high">{{ 'productList.priceHighLow' | translate }}</option>
+                  <option *ngFor="let option of enabledSortOptions$ | async" [value]="option.code">{{ option.label }}</option>
                 </select>
               </div>
             </div>
@@ -571,6 +568,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
   manufacturerCountsLoading$!: Observable<boolean>;
   certificates$: Observable<string[]>;
   searchQuery$: Observable<string>;
+  enabledSortOptions$: Observable<SortOptionDisplay[]>;
 
   // Category expansion state
   categoryExpansionState: CategoryExpansionState = {};
@@ -588,7 +586,8 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
   constructor(
     private categoriesService: CategoriesService,
-    private searchSuggestionsService: SearchSuggestionsService
+    private searchSuggestionsService: SearchSuggestionsService,
+    private sortOptionsService: SortOptionsService
   ) {
     this.products$ = this.store.select(selectProducts);
     this.filteredProducts$ = this.store.select(selectFilteredProducts);
@@ -612,19 +611,25 @@ export class ProductListComponent implements OnInit, OnDestroy {
     this.currentPage$ = this.store.select(selectCurrentPage);
     this.itemsPerPage$ = this.store.select(selectItemsPerPage);
     this.totalPages$ = this.store.select(selectTotalPages);
+
+    // Initialize sort options from service
+    this.enabledSortOptions$ = this.sortOptionsService.enabledSortOptions$;
   }
 
   ngOnInit(): void {
     this.store.dispatch(ProductsActions.loadProductCategories());
-    
+
     // Load all manufacturers for filter sidebar
     this.store.dispatch(ProductListActions.loadAllManufacturers());
-    
+
     // Load nested categories for hierarchical display
     this.loadNestedCategories();
 
     // Check if we should clear filters based on navigation source
     this.checkAndClearFiltersIfNeeded();
+
+    // Set default sort option from database if no sort is specified in URL
+    this.setDefaultSortOptionIfNeeded();
 
     // Handle URL state restoration FIRST
     this.restoreStateFromUrl();
@@ -664,6 +669,29 @@ export class ProductListComponent implements OnInit, OnDestroy {
         }
       });
     });
+  }
+
+  /**
+   * Set default sort option from database if no sort is specified in URL
+   */
+  private setDefaultSortOptionIfNeeded(): void {
+    const currentParams = this.route.snapshot.queryParams;
+    // Only set default if no sort is specified in URL
+    if (!currentParams['sort']) {
+      // Wait for sort options to be loaded, then set the default
+      this.sortOptionsService.enabledSortOptions$.pipe(
+        filter(options => options.length > 0),
+        take(1),
+        takeUntil(this.destroy$)
+      ).subscribe(options => {
+        const defaultOption = options.find(opt => opt.isDefault);
+        if (defaultOption) {
+          this.store.dispatch(ProductListActions.updateSortOption({
+            sortOption: defaultOption.code
+          }));
+        }
+      });
+    }
   }
 
 
