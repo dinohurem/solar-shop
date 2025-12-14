@@ -2,7 +2,7 @@ import { Component, Input, Output, EventEmitter, OnInit, inject, OnChanges } fro
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
-import { LucideAngularModule, Edit, Trash2, Upload, Download, Plus, Search, Eye, EyeOff, Check, X, Printer } from 'lucide-angular';
+import { LucideAngularModule, Edit, Trash2, Upload, Download, Plus, Search, Eye, EyeOff, Check, X, Printer, ChevronUp, ChevronDown } from 'lucide-angular';
 import { DeleteConfirmationModalComponent } from '../../../../shared/components/modals/delete-confirmation-modal/delete-confirmation-modal.component';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { TranslationService } from '../../../../shared/services/translation.service';
@@ -10,13 +10,14 @@ import { TranslationService } from '../../../../shared/services/translation.serv
 export interface TableColumn {
   key: string;
   label: string;
-  type?: 'text' | 'number' | 'date' | 'boolean' | 'image' | 'status' | 'array';
+  type?: 'text' | 'number' | 'date' | 'boolean' | 'image' | 'status' | 'array' | 'editable-number';
   sortable?: boolean;
   searchable?: boolean;
   format?: (value: any, item?: any) => string;
   width?: string;
   minWidth?: string;
   maxWidth?: string;
+  editable?: boolean;
 }
 
 export interface TableAction {
@@ -239,11 +240,24 @@ export interface TableConfig {
                     </span>
                   </div>
                   
-                  <!-- Date -->
+                   <!-- Date -->
                   <span *ngSwitchCase="'date'" class="block truncate" [title]="formatDate(getColumnValue(item, column.key))">
                     {{ formatDate(getColumnValue(item, column.key)) }}
                   </span>
-                  
+
+                  <!-- Editable Number -->
+                  <div *ngSwitchCase="'editable-number'" class="flex items-center space-x-1" (click)="$event.stopPropagation()">
+                    <input
+                      type="number"
+                      [value]="getColumnValue(item, column.key)"
+                      (blur)="onCellValueChange(item, column.key, $event)"
+                      (keydown.enter)="onCellValueChange(item, column.key, $event)"
+                      (click)="$event.stopPropagation()"
+                      class="w-16 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      min="0"
+                      step="1">
+                  </div>
+
                   <!-- Default (text/number) -->
                   <span *ngSwitchDefault class="block truncate" [title]="column.format ? column.format(getColumnValue(item, column.key), item) : getColumnValue(item, column.key)">
                     {{ column.format ? column.format(getColumnValue(item, column.key), item) : getColumnValue(item, column.key) }}
@@ -348,6 +362,7 @@ export class DataTableComponent implements OnInit, OnChanges {
   @Output() csvImported = new EventEmitter<any[]>();
   @Output() rowClicked = new EventEmitter<any>();
   @Output() exportClicked = new EventEmitter<void>();
+  @Output() cellValueChanged = new EventEmitter<{ item: any, column: string, value: any }>();
   translationService = inject(TranslationService);
   private router = inject(Router);
 
@@ -369,6 +384,8 @@ export class DataTableComponent implements OnInit, OnChanges {
   readonly CheckIcon = Check;
   readonly XIcon = X;
   readonly PrinterIcon = Printer;
+  readonly ChevronUpIcon = ChevronUp;
+  readonly ChevronDownIcon = ChevronDown;
 
   searchTerm: string = '';
   sortColumn: string = '';
@@ -509,6 +526,13 @@ export class DataTableComponent implements OnInit, OnChanges {
 
   getColumnValue(item: any, key: string): any {
     return key.split('.').reduce((obj, k) => obj?.[k], item);
+  }
+
+  onCellValueChange(item: any, column: string, event: any): void {
+    const newValue = parseInt(event.target.value, 10);
+    if (!isNaN(newValue) && newValue >= 0) {
+      this.cellValueChanged.emit({ item, column, value: newValue });
+    }
   }
 
   getStatusClass(status: string): string {
@@ -657,8 +681,13 @@ export class DataTableComponent implements OnInit, OnChanges {
       case 'check':
         return this.CheckIcon;
       case 'x':
-        return this.XIcon; case 'printer':
+        return this.XIcon;
+      case 'printer':
         return this.PrinterIcon;
+      case 'chevron-up':
+        return this.ChevronUpIcon;
+      case 'chevron-down':
+        return this.ChevronDownIcon;
       default:
         return this.EditIcon; // Default fallback
     }

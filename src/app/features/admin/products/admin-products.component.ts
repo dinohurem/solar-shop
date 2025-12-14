@@ -1,21 +1,23 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Title } from '@angular/platform-browser';
-import { Observable, from, map, catchError, of, BehaviorSubject, forkJoin } from 'rxjs';
+import { BehaviorSubject, forkJoin, catchError, of } from 'rxjs';
 import { SupabaseService } from '../../../services/supabase.service';
-import { DataTableComponent, TableConfig, TableColumn, TableAction } from '../shared/data-table/data-table.component';
+import { DataTableComponent, TableConfig } from '../shared/data-table/data-table.component';
 import { SuccessModalComponent } from '../../../shared/components/modals/success-modal/success-modal.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { TranslationService } from '../../../shared/services/translation.service';
 import { ErpIntegrationService } from '../../../shared/services/erp-integration.service';
 import { ToastService } from '../../../shared/services/toast.service';
 import { SortOptionsManagementComponent } from '../sort-options/sort-options-management.component';
+import { LucideAngularModule, ChevronUp, ChevronDown } from 'lucide-angular';
 
 @Component({
     selector: 'app-admin-products',
     standalone: true,
-    imports: [CommonModule, DataTableComponent, SuccessModalComponent, TranslatePipe, SortOptionsManagementComponent],
+    imports: [CommonModule, FormsModule, DataTableComponent, SuccessModalComponent, TranslatePipe, SortOptionsManagementComponent, LucideAngularModule],
     template: `
     <div class="w-full max-w-full overflow-hidden">
       <div class="space-y-4 sm:space-y-6 p-4 sm:p-6">
@@ -61,7 +63,9 @@ import { SortOptionsManagementComponent } from '../sort-options/sort-options-man
         [loading]="(loading$ | async) || false"
         (actionClicked)="onTableAction($event)"
         (addClicked)="onAddProduct()"
-        (rowClicked)="onRowClick($event)"        (csvImported)="onCsvImported($event)">
+        (rowClicked)="onRowClick($event)"
+        (csvImported)="onCsvImported($event)"
+        (cellValueChanged)="onDisplayOrderChanged($event)">
       </app-data-table>
         </div>
       </div>
@@ -102,17 +106,33 @@ export class AdminProductsComponent implements OnInit {
     successModalTitle = '';
     successModalMessage = '';
 
+    // Icon references for lucide
+    ChevronUpIcon = ChevronUp;
+    ChevronDownIcon = ChevronDown;
+
+    editingDisplayOrder: { [key: string]: boolean } = {};
+    displayOrderValues: { [key: string]: number } = {};
+
     tableConfig: TableConfig = {
         columns: [
+            {
+                key: 'display_order',
+                label: '#',
+                type: 'editable-number',
+                sortable: true,
+                width: '5%',
+                minWidth: '60px',
+                maxWidth: '80px'
+            },
             {
                 key: 'name',
                 label: this.translationService.translate('admin.productName'),
                 type: 'text',
                 sortable: true,
                 searchable: true,
-                width: '25%',
-                minWidth: '200px',
-                maxWidth: '300px'
+                width: '22%',
+                minWidth: '180px',
+                maxWidth: '280px'
             },
             {
                 key: 'sku',
@@ -180,6 +200,18 @@ export class AdminProductsComponent implements OnInit {
         ],
         actions: [
             {
+                label: '',
+                icon: 'chevron-up',
+                action: 'move-up',
+                class: 'text-gray-600 hover:text-gray-900'
+            },
+            {
+                label: '',
+                icon: 'chevron-down',
+                action: 'move-down',
+                class: 'text-gray-600 hover:text-gray-900'
+            },
+            {
                 label: this.translationService.translate('common.edit'),
                 icon: 'edit',
                 action: 'edit',
@@ -225,6 +257,12 @@ export class AdminProductsComponent implements OnInit {
                 break;
             case 'delete':
                 this.deleteProduct(item);
+                break;
+            case 'move-up':
+                this.moveProduct(item, -1);
+                break;
+            case 'move-down':
+                this.moveProduct(item, 1);
                 break;
         }
     }
@@ -429,12 +467,131 @@ export class AdminProductsComponent implements OnInit {
         this.loadingSubject.next(true);
 
         try {
-            const products = await this.supabaseService.getTable('products');
-            this.productsSubject.next(products || []);
+            // Load products sorted by display_order
+            const { data: products, error } = await this.supabaseService.client
+                .from('products')
+                .select('*')
+                .order('display_order', { ascending: true });
+
+            if (error) {
+                console.error('Error loading products:', error);
+                this.productsSubject.next([]);
+            } else {
+                this.productsSubject.next(products || []);
+            }
         } catch (error) {
             console.warn('Products table not found in database. Using mock data as placeholder.');
         } finally {
             this.loadingSubject.next(false);
+        }
+    }
+
+    /**
+     * Move product up or down in display order
+     */
+    async moveProduct(product: any, direction: -1 | 1): Promise<void> {
+        const products = this.productsSubject.value;
+        const currentIndex = products.findIndex(p => p.id === product.id);
+        const newIndex = currentIndex + direction;
+
+        // Check bounds
+        if (newIndex < 0 || newIndex >= products.length) {
+            return;
+        }
+
+        const otherProduct = products[newIndex];
+
+        try {
+            // Swap display_order values using actual index positions
+            const updates = [
+                { id: product.id, display_order: newIndex },
+                { id: otherProduct.id, display_order: currentIndex }
+            ];
+
+            // Update both products in database
+            for (const update of updates) {
+                const { error } = await this.supabaseService.client
+                    .from('products')
+                    .update({ display_order: update.display_order })
+                    .eq('id', update.id);
+
+                if (error) {
+                    console.error('Error updating display order:', error);
+                    this.toastService.showError(this.translationService.translate('common.error'));
+                    return;
+                }
+            }
+
+            // Reload products to reflect changes
+            await this.loadProducts();
+        } catch (error) {
+            console.error('Error moving product:', error);
+            this.toastService.showError(this.translationService.translate('common.error'));
+        }
+    }
+
+    /**
+     * Handle display order change via inline editing
+     * If the new order number is already taken, shift other products down by one
+     */
+    async onDisplayOrderChanged(event: { item: any, column: string, value: number }): Promise<void> {
+        if (event.column !== 'display_order') return;
+
+        const { item, value: newDisplayOrder } = event;
+        const products = this.productsSubject.value;
+        const currentProduct = products.find(p => p.id === item.id);
+
+        if (!currentProduct || currentProduct.display_order === newDisplayOrder) {
+            return; // No change
+        }
+
+        try {
+            // Check if newDisplayOrder is already taken
+            const conflictingProduct = products.find(p => p.display_order === newDisplayOrder && p.id !== item.id);
+
+            if (conflictingProduct) {
+                // Shift all products at or above the new position down by 1
+                const productsToShift = products.filter(p =>
+                    p.id !== item.id && p.display_order >= newDisplayOrder
+                );
+
+                // Update all affected products
+                const updates = [
+                    { id: item.id, display_order: newDisplayOrder },
+                    ...productsToShift.map(p => ({ id: p.id, display_order: p.display_order + 1 }))
+                ];
+
+                for (const update of updates) {
+                    const { error } = await this.supabaseService.client
+                        .from('products')
+                        .update({ display_order: update.display_order })
+                        .eq('id', update.id);
+
+                    if (error) {
+                        console.error('Error updating display order:', error);
+                        this.toastService.showError(this.translationService.translate('common.error'));
+                        return;
+                    }
+                }
+            } else {
+                // No conflict, just update this product
+                const { error } = await this.supabaseService.client
+                    .from('products')
+                    .update({ display_order: newDisplayOrder })
+                    .eq('id', item.id);
+
+                if (error) {
+                    console.error('Error updating display order:', error);
+                    this.toastService.showError(this.translationService.translate('common.error'));
+                    return;
+                }
+            }
+
+            // Reload products to reflect changes
+            await this.loadProducts();
+        } catch (error) {
+            console.error('Error updating display order:', error);
+            this.toastService.showError(this.translationService.translate('common.error'));
         }
     }
 

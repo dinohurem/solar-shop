@@ -322,8 +322,9 @@ import { SortOptionsService, SortOptionDisplay } from '../../../../shared/servic
                   <!-- Sort Controls -->
                   <div class="flex items-center space-x-2">
                     <label class="text-sm font-medium text-gray-700 whitespace-nowrap font-['DM_Sans']">{{ 'b2b.products.sortBy' | translate }}:</label>
-                    <select [value]="(filters$ | async)?.sortBy || defaultSortCode" (change)="onSortChange($event)"
+                    <select [(ngModel)]="currentSortBy" (ngModelChange)="onSortChange($event)"
                             class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-solar-500 focus:border-solar-500 text-sm font-medium font-['DM_Sans']">
+                      <option value="">-</option>
                       <option *ngFor="let option of enabledSortOptions$ | async" [value]="option.code">{{ option.label }}</option>
                     </select>
                   </div>
@@ -729,7 +730,8 @@ export class PartnersProductsComponent implements OnInit, OnDestroy {
 
   // Dynamic sort options
   enabledSortOptions$: Observable<SortOptionDisplay[]>;
-  defaultSortCode: string = 'featured';
+  defaultSortCode: string = ''; // No default sort - use display_order from admin
+  currentSortBy: string = '';
 
   isAuthenticated = false;
   isCompanyContact = false;
@@ -779,20 +781,26 @@ export class PartnersProductsComponent implements OnInit, OnDestroy {
 
     // Initialize sort options from service
     this.enabledSortOptions$ = this.sortOptionsService.enabledSortOptions$;
-    this.defaultSortCode = this.sortOptionsService.getDefaultSortOptionCode();
+    // Don't set default sort code - use display_order from admin
+    // this.defaultSortCode = this.sortOptionsService.getDefaultSortOptionCode();
   }
 
   ngOnInit(): void {
     // Load categories first
     this.store.dispatch(ProductsActions.loadCategories());
-    
+
     // Load all manufacturers and initial counts
     this.store.dispatch(ProductsActions.loadAllManufacturers());
     this.store.dispatch(ProductsActions.loadCategoryCounts({ filters: {} }));
     this.store.dispatch(ProductsActions.loadManufacturerCounts({ filters: {} }));
-    
+
     // Load nested categories for hierarchical display
     this.loadNestedCategories();
+
+    // Subscribe to sortBy changes to update the select binding
+    this.filters$.pipe(takeUntil(this.destroy$)).subscribe(filters => {
+      this.currentSortBy = filters.sortBy || '';
+    });
 
     // Subscribe to user changes
     this.currentUser$.pipe(takeUntil(this.destroy$)).subscribe(async (user) => {
@@ -1145,9 +1153,8 @@ export class PartnersProductsComponent implements OnInit, OnDestroy {
     this.store.dispatch(ProductsActions.setAvailabilityFilter({ availability }));
   }
 
-  onSortChange(event: Event): void {
-    const target = event.target as HTMLSelectElement;
-    this.store.dispatch(ProductsActions.setSortOption({ sortBy: target.value }));
+  onSortChange(sortBy: string): void {
+    this.store.dispatch(ProductsActions.setSortOption({ sortBy }));
   }
 
   // Helper methods for improved category filtering

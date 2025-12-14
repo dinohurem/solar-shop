@@ -52,7 +52,7 @@ export const initialState: ProductsState = {
         manufacturers: [],
         searchQuery: '',
         availability: '',
-        sortBy: 'name'
+        sortBy: '' // No default sort - use display_order from admin
     },
     pagination: {
         currentPage: 1,
@@ -241,7 +241,7 @@ export const productsReducer = createReducer(
             manufacturers: [],
             searchQuery: '',
             availability: '',
-            sortBy: 'name'
+            sortBy: '' // No default sort - use display_order from admin
         },
         pagination: {
             ...state.pagination,

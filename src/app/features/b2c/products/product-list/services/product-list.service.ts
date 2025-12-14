@@ -185,7 +185,8 @@ export class ProductListService {
             }
 
             // Apply sorting using dynamic sort options (multi-field support)
-            const sortCode = query.sortOption || this.sortOptionsService.getDefaultSortOptionCode();
+            // Don't use default sort - let it fall back to display_order
+            const sortCode = query.sortOption || '';
             const sortOptions = this.sortOptionsService.getEnabledSortOptions();
             const selectedSort = sortOptions.find(opt => opt.code === sortCode);
 
@@ -195,9 +196,8 @@ export class ProductListService {
                     supabaseQuery = supabaseQuery.order(sf.field, { ascending: sf.direction === 'asc' });
                 }
             } else {
-                // Fallback to featured sorting
-                supabaseQuery = supabaseQuery.order('is_featured', { ascending: false })
-                                             .order('created_at', { ascending: false });
+                // Fallback to display_order sorting (admin-defined order)
+                supabaseQuery = supabaseQuery.order('display_order', { ascending: true });
             }
 
             // Apply pagination

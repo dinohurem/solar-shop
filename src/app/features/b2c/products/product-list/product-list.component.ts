@@ -277,6 +277,7 @@ export type SortOption = string;
                   (change)="onSortChange($event)"
                   class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-solar-500 focus:border-solar-500 font-['DM_Sans']"
                 >
+                  <option value="">-</option>
                   <option *ngFor="let option of enabledSortOptions$ | async" [value]="option.code">{{ option.label }}</option>
                 </select>
               </div>
@@ -677,21 +678,22 @@ export class ProductListComponent implements OnInit, OnDestroy {
   private setDefaultSortOptionIfNeeded(): void {
     const currentParams = this.route.snapshot.queryParams;
     // Only set default if no sort is specified in URL
-    if (!currentParams['sort']) {
-      // Wait for sort options to be loaded, then set the default
-      this.sortOptionsService.enabledSortOptions$.pipe(
-        filter(options => options.length > 0),
-        take(1),
-        takeUntil(this.destroy$)
-      ).subscribe(options => {
-        const defaultOption = options.find(opt => opt.isDefault);
-        if (defaultOption) {
-          this.store.dispatch(ProductListActions.updateSortOption({
-            sortOption: defaultOption.code
-          }));
-        }
-      });
-    }
+    // Don't set a default sort option - let it fall back to display_order sorting
+    // if (!currentParams['sort']) {
+    //   // Wait for sort options to be loaded, then set the default
+    //   this.sortOptionsService.enabledSortOptions$.pipe(
+    //     filter(options => options.length > 0),
+    //     take(1),
+    //     takeUntil(this.destroy$)
+    //   ).subscribe(options => {
+    //     const defaultOption = options.find(opt => opt.isDefault);
+    //     if (defaultOption) {
+    //       this.store.dispatch(ProductListActions.updateSortOption({
+    //         sortOption: defaultOption.code
+    //       }));
+    //     }
+    //   });
+    // }
   }
 
 

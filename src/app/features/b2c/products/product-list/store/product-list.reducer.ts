@@ -36,7 +36,7 @@ const initialState: ProductListState = {
         certificates: [],
         manufacturers: []
     },
-    sortOption: 'featured',
+    sortOption: '', // No default sort - use display_order from admin
     searchQuery: '',
     pagination: {
         currentPage: 1,
