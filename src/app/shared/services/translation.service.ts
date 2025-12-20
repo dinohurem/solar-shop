@@ -1994,15 +1994,11 @@ export class TranslationService {
             },
             // Sustainability Section
             sustainability: {
-                energyEfficiencySuggestions: 'Prijedlozi za energetsku učinkovitost',
-                energyEfficiencySuggestionsText: 'Vodiči za toplinsku izolaciju, smanjenje potrošnje i sustave obnovljive energije.',
-                greenCertifications: 'Zeleni certifikati i standardi',
-                greenCertificationsText: 'Pregled certifikata (LEED, ISO 14001, itd.)',
-                reducedEnvironmentalImpact: 'Proizvodi smanjenog utjecaja na okoliš',
-                reducedEnvironmentalImpactText: 'Odabir rješenja usmjerenih na održivost i recikliranje.',
-                sustainableMaterials: 'Održivi materijali',
-                sustainableMaterialsText: 'Certificirani proizvodi malog utjecaja.',
-                towardsSustainability: 'Prema održivosti'
+                energyEfficiencySuggestions: 'Hibridni pretvarači',
+                energyEfficiencySuggestionsText: 'Hibridni pretvarači predstavljaju napredna energetska rješenja koja kombiniraju funkcije klasičnih solarnih pretvarača i sustava za pohranu energije. Za razliku od običnih on-grid pretvarača, koji mogu raditi samo kada postoji napajanje iz mreže, hibridni pretvarač omogućuje istovremeni rad sa solarnim panelima, baterijama i električnom mrežom, čime sustav postaje fleksibilniji i učinkovitiji.',
+                greenCertifications: 'Grijanje i hlađenje',
+                greenCertificationsText: 'Grijanje i hlađenje pomoću dizalica topline, peći i klima-uređaja danas predstavljaju najčešća i najučinkovitija rješenja za održavanje ugodne temperature u domovima i poslovnim prostorima. Svaki od ovih sustava ima svoje prednosti, a odabir ovisi o potrebama korisnika, vrsti objekta i energetskim ciljevima.',
+                towardsSustainability: 'Više informacija'
             },
             // Blog
             blog: {
@@ -2280,7 +2276,7 @@ export class TranslationService {
             },
             // Footer
             footer: {
-                companyDescription: 'Vaša destinacija za održive građevinske materijale i rješenja energetske učinkovitosti. Izgradimo zeleniju budućnost zajedno.',
+                companyDescription: 'Mi smo Solar Shop, tvrtka specijalizirana za moderna i pouzdana solarna rješenja. Pružamo prodaju i ugradnju kvalitetnih solarnih sustava te stručno savjetovanje. Naš cilj je omogućiti klijentima jednostavan prelazak na čistu energiju i dugoročne uštede.',
                 address: 'Bani ul. 73, 10010, Buzin, Hrvatska',
                 phone: '+385 (1) 6407 715',
                 email: 'info@solarni-paneli.hr',
@@ -4708,15 +4704,11 @@ export class TranslationService {
             },
             // Sustainability Section
             sustainability: {
-                energyEfficiencySuggestions: 'Energy Efficiency Suggestions',
-                energyEfficiencySuggestionsText: 'Guides for thermal insulation, consumption reduction, and renewable energy systems.',
-                greenCertifications: 'Green Certifications & Standards',
-                greenCertificationsText: 'Overview of certifications (LEED, ISO 14001, etc.)',
-                reducedEnvironmentalImpact: 'Reduced Environmental Impact Products',
-                reducedEnvironmentalImpactText: 'Selection of solutions focused on sustainability and recyclability.',
-                sustainableMaterials: 'Sustainable Materials',
-                sustainableMaterialsText: 'Certified low-impact products.',
-                towardsSustainability: 'Towards Sustainability'
+                energyEfficiencySuggestions: 'Hybrid inverters',
+                energyEfficiencySuggestionsText: 'Hybrid inverters represent advanced energy solutions that combine the functions of traditional solar inverters and energy storage systems. Unlike standard on-grid inverters, which can operate only when grid power is available, a hybrid inverter enables simultaneous operation with solar panels, batteries, and the electrical grid, making the system more flexible and efficient.',
+                greenCertifications: 'Heating and cooling',
+                greenCertificationsText: 'Heating and cooling using heat pumps, furnaces, and air-conditioning systems today represent the most common and most efficient solutions for maintaining a comfortable temperature in homes and commercial spaces. Each of these systems has its own advantages, and the choice depends on user needs, the type of building, and energy goals.',
+                towardsSustainability: 'More information'
             },
             // Blog
             blog: {
@@ -4994,7 +4986,7 @@ export class TranslationService {
             },
             // Footer
             footer: {
-                companyDescription: 'Your destination for sustainable building materials and energy efficiency solutions. Let\'s build a greener future together.',
+                companyDescription: 'We are Solar Shop, a company specialized in modern and reliable solar solutions. We provide the sale and installation of high-quality solar systems, as well as professional consulting. Our goal is to enable clients to make a simple transition to clean energy and achieve long-term savings.',
                 address: 'Bani ul. 73, 10010, Buzin, Croatia',
                 phone: '+385 (1) 6407 715',
                 email: 'info@solarni-paneli.hr',
