@@ -13,6 +13,7 @@ import { Company } from '../../../../../shared/models/company.model';
 import { selectB2BCartItems, selectB2BCartSubtotal } from '../../../cart/store/b2b-cart.selectors';
 import * as B2BCartActions from '../../../cart/store/b2b-cart.actions';
 import { B2BCartItem } from '../../../cart/models/b2b-cart.model';
+import { SettingsService } from '../../../../../shared/services/settings.service';
 
 @Component({
   selector: 'app-b2b-payment',
@@ -21,7 +22,20 @@ import { B2BCartItem } from '../../../cart/models/b2b-cart.model';
   template: `
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
       <h2 class="text-2xl font-bold text-gray-900 mb-6 font-['Poppins']">{{ 'b2bCheckout.paymentMethod' | translate }}</h2>
-      
+
+      <!-- Ordering Disabled Notice -->
+      <div *ngIf="!orderingEnabled" class="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+        <div class="flex items-center space-x-3">
+          <svg class="w-6 h-6 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+          <div>
+            <h4 class="text-lg font-semibold text-amber-900 font-['Poppins']">{{ 'checkout.orderingDisabled' | translate }}</h4>
+            <p class="text-sm text-amber-800 font-['DM_Sans']">{{ 'checkout.orderingDisabledDescription' | translate }}</p>
+          </div>
+        </div>
+      </div>
+
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <!-- Payment Form -->
         <div class="lg:col-span-1">
@@ -81,9 +95,9 @@ import { B2BCartItem } from '../../../cart/models/b2b-cart.model';
               >
                 {{ 'b2bCheckout.backStep' | translate }} {{ 'b2bCheckout.step2' | translate }}
               </button>
-              <button 
+              <button
                 type="submit"
-                [disabled]="paymentForm.invalid || processing"
+                [disabled]="paymentForm.invalid || processing || !orderingEnabled"
                 class="flex-1 px-6 py-3 bg-solar-600 text-white rounded-lg hover:bg-solar-700 transition-colors font-semibold font-['DM_Sans'] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span *ngIf="!processing">{{ 'b2bCheckout.placeOrder' | translate }}</span>
@@ -170,6 +184,7 @@ export class B2bPaymentComponent implements OnInit, OnDestroy {
   private store = inject(Store);
   private supabaseService = inject(SupabaseService);
   private translationService = inject(TranslationService);
+  private settingsService = inject(SettingsService);
   private destroy$ = new Subject<void>();
 
   paymentForm: FormGroup;
@@ -178,12 +193,18 @@ export class B2bPaymentComponent implements OnInit, OnDestroy {
   cartItems: B2BCartItem[] = [];
   cartTotal = 0;
   processing = false;
+  orderingEnabled = true;
 
   constructor() {
     this.paymentForm = this.fb.group({
       paymentMethod: ['payment_upon_collection', [Validators.required]],
       specialInstructions: [''],
       acceptTerms: [false, [Validators.requiredTrue]]
+    });
+
+    // Subscribe to settings to check if ordering is enabled
+    this.settingsService.settings$.pipe(takeUntil(this.destroy$)).subscribe(settings => {
+      this.orderingEnabled = settings.ordering_enabled;
     });
   }
 

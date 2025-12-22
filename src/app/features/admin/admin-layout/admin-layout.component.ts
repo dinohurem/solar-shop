@@ -258,10 +258,25 @@ import { SettingsService } from '../../../shared/services/settings.service';
                 </div>
               </div>
 
-              <!-- Credit Card Payment Toggle -->
+              <!-- Shop Settings -->
               <div class="pt-4 border-t border-gray-200">
                 <div class="px-4">
-                  <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{{ 'admin.paymentSettings' | translate }}</label>
+                  <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{{ 'admin.shopSettings' | translate }}</label>
+
+                  <!-- Ordering Toggle -->
+                  <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg mb-2">
+                    <span class="text-sm text-gray-700">{{ 'admin.orderingEnabled' | translate }}</span>
+                    <button
+                      (click)="toggleOrdering()"
+                      [class]="orderingEnabled ? 'bg-green-600' : 'bg-gray-300'"
+                      class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                      <span
+                        [class]="orderingEnabled ? 'translate-x-6' : 'translate-x-1'"
+                        class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"></span>
+                    </button>
+                  </div>
+
+                  <!-- Credit Card Payment Toggle -->
                   <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <span class="text-sm text-gray-700">{{ 'admin.creditCardPayment' | translate }}</span>
                     <button
@@ -310,6 +325,7 @@ export class AdminLayoutComponent implements OnInit {
   currentLanguage: SupportedLanguage = 'hr';
   showEmailTest = false;
   creditCardPaymentEnabled = true;
+  orderingEnabled = true;
 
   constructor() {
     this.currentUser$ = this.store.select(selectCurrentUser);
@@ -319,6 +335,7 @@ export class AdminLayoutComponent implements OnInit {
     // Subscribe to settings changes
     this.settingsService.settings$.subscribe(settings => {
       this.creditCardPaymentEnabled = settings.credit_card_payment_enabled;
+      this.orderingEnabled = settings.ordering_enabled;
     });
   }
 
@@ -361,6 +378,17 @@ export class AdminLayoutComponent implements OnInit {
       console.log('[Admin] Credit card payment toggled:', newValue);
     } else {
       console.error('[Admin] Failed to toggle credit card payment');
+    }
+  }
+
+  async toggleOrdering(): Promise<void> {
+    const newValue = !this.orderingEnabled;
+    const success = await this.settingsService.updateOrderingEnabled(newValue);
+
+    if (success) {
+      console.log('[Admin] Ordering toggled:', newValue);
+    } else {
+      console.error('[Admin] Failed to toggle ordering');
     }
   }
 } 

@@ -780,6 +780,8 @@ export class TranslationService {
                 contacts: 'Poruke',
                 wishlist: 'Lista želja',
                 paymentSettings: 'Postavke plaćanja',
+                shopSettings: 'Postavke trgovine',
+                orderingEnabled: 'Narudžbe omogućene',
                 creditCardPayment: 'Plaćanje karticom',
                 totalProducts: 'Proizvodi',
                 manageProducts: 'Upravljanje proizvodima',
@@ -2199,7 +2201,9 @@ export class TranslationService {
                 customInvoicing: 'Posebno fakturiranje',
                 oneOrMoreItemsUnavailable: 'Jedan ili više proizvoda u vašoj košarici nije dostupan u traženoj količini. Molimo provjerite vašu košaricu i pokušajte ponovno.',
                 securePayment: 'Sigurno plaćanje',
-                securePaymentDescription: 'Detalji Vaše kartice bit će sigurno uneseni na Monri platformi za plaćanje.'
+                securePaymentDescription: 'Detalji Vaše kartice bit će sigurno uneseni na Monri platformi za plaćanje.',
+                orderingDisabled: 'Narudžbe trenutno nisu dostupne',
+                orderingDisabledDescription: 'Naručivanje je trenutno onemogućeno. Molimo pokušajte ponovno kasnije ili nas kontaktirajte za više informacija.'
             },
             // Payment
             payment: {
@@ -3508,6 +3512,8 @@ export class TranslationService {
                 contacts: 'Contacts',
                 wishlist: 'Wishlist',
                 paymentSettings: 'Payment Settings',
+                shopSettings: 'Shop Settings',
+                orderingEnabled: 'Ordering Enabled',
                 creditCardPayment: 'Credit Card Payment',
                 totalProducts: 'Products',
                 manageProducts: 'Manage products',
@@ -4909,7 +4915,9 @@ export class TranslationService {
                 customInvoicing: 'Custom Invoicing',
                 oneOrMoreItemsUnavailable: 'One or more items in your cart are no longer available in the requested quantity. Please review your cart and try again.',
                 securePayment: 'Secure Payment',
-                securePaymentDescription: 'Your card details will be securely entered on the Monri payment platform.'
+                securePaymentDescription: 'Your card details will be securely entered on the Monri payment platform.',
+                orderingDisabled: 'Ordering Currently Unavailable',
+                orderingDisabledDescription: 'Ordering is currently disabled. Please try again later or contact us for more information.'
             },
             // Payment
             payment: {

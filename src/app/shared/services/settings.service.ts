@@ -6,6 +6,7 @@ import { SupabaseService } from '../../services/supabase.service';
 export interface AppSettings {
   id?: string;
   credit_card_payment_enabled: boolean;
+  ordering_enabled: boolean;
   updated_at?: string;
   created_at?: string;
 }
@@ -15,7 +16,7 @@ export interface AppSettings {
 })
 export class SettingsService {
   private supabaseService = inject(SupabaseService);
-  private settingsSubject = new BehaviorSubject<AppSettings>({ credit_card_payment_enabled: true });
+  private settingsSubject = new BehaviorSubject<AppSettings>({ credit_card_payment_enabled: true, ordering_enabled: true });
 
   public settings$ = this.settingsSubject.asObservable();
 
@@ -69,7 +70,8 @@ export class SettingsService {
   private async createDefaultSettings(): Promise<void> {
     try {
       const defaultSettings: AppSettings = {
-        credit_card_payment_enabled: true
+        credit_card_payment_enabled: true,
+        ordering_enabled: true
       };
 
       const { data, error } = await this.supabaseService.client
@@ -167,5 +169,76 @@ export class SettingsService {
    */
   isCreditCardPaymentEnabled(): boolean {
     return this.settingsSubject.value.credit_card_payment_enabled;
+  }
+
+  /**
+   * Update ordering enabled setting
+   */
+  async updateOrderingEnabled(enabled: boolean): Promise<boolean> {
+    try {
+      // ALWAYS reload settings from database first to get current ID
+      console.log('[Settings] Reloading settings from database before update...');
+      await this.loadSettings();
+
+      const currentSettings = this.settingsSubject.value;
+      console.log('[Settings] Current settings after reload:', currentSettings);
+
+      // If we have an ID, use update. Otherwise, use insert
+      if (currentSettings.id) {
+        const { data, error } = await this.supabaseService.client
+          .from('settings')
+          .update({
+            ordering_enabled: enabled,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', currentSettings.id)
+          .select()
+          .single();
+
+        if (error) {
+          console.error('[Settings] Error updating ordering enabled setting:', error);
+          return false;
+        }
+
+        if (data) {
+          this.settingsSubject.next(data);
+          console.log('[Settings] Updated ordering enabled:', enabled);
+          return true;
+        }
+      } else {
+        // No settings exist yet, create new one
+        const { data, error } = await this.supabaseService.client
+          .from('settings')
+          .insert({
+            credit_card_payment_enabled: true,
+            ordering_enabled: enabled
+          })
+          .select()
+          .single();
+
+        if (error) {
+          console.error('[Settings] Error creating settings:', error);
+          return false;
+        }
+
+        if (data) {
+          this.settingsSubject.next(data);
+          console.log('[Settings] Created settings with ordering enabled:', enabled);
+          return true;
+        }
+      }
+
+      return false;
+    } catch (error) {
+      console.error('[Settings] Error updating ordering enabled setting:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Check if ordering is enabled
+   */
+  isOrderingEnabled(): boolean {
+    return this.settingsSubject.value.ordering_enabled;
   }
 }

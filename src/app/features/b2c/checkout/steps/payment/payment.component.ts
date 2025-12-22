@@ -24,7 +24,20 @@ import { SettingsService } from '../../../../../shared/services/settings.service
   template: `
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
       <h2 class="text-2xl font-bold text-gray-900 mb-6 font-['Poppins']">{{ 'checkout.paymentMethod' | translate }}</h2>
-      
+
+      <!-- Ordering Disabled Notice -->
+      <div *ngIf="!orderingEnabled" class="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+        <div class="flex items-center space-x-3">
+          <svg class="w-6 h-6 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+          <div>
+            <h4 class="text-lg font-semibold text-amber-900 font-['Poppins']">{{ 'checkout.orderingDisabled' | translate }}</h4>
+            <p class="text-sm text-amber-800 font-['DM_Sans']">{{ 'checkout.orderingDisabledDescription' | translate }}</p>
+          </div>
+        </div>
+      </div>
+
       <form [formGroup]="paymentForm" (ngSubmit)="onSubmit()">
         <!-- Payment Method Selection -->
         <div class="mb-8">
@@ -187,9 +200,9 @@ import { SettingsService } from '../../../../../shared/services/settings.service
           >
           {{ 'checkout.backStep' | translate }} {{ 'checkout.step2' | translate }}
           </button>
-          <button 
+          <button
             type="submit"
-            [disabled]="paymentForm.invalid || isProcessing"
+            [disabled]="paymentForm.invalid || isProcessing || !orderingEnabled"
             class="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold font-['DM_Sans'] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <span *ngIf="!isProcessing">{{ 'checkout.completeOrder' | translate }}</span>
@@ -230,6 +243,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
   cartSummary$: Observable<any>;
   private subscriptions = new Subscription();
   creditCardPaymentEnabled = false; // Default to false until settings are loaded
+  orderingEnabled = true; // Default to true until settings are loaded
 
   constructor() {
     this.currentUser$ = this.store.select(selectCurrentUser);
@@ -238,15 +252,17 @@ export class PaymentComponent implements OnInit, OnDestroy {
     );
     this.cartSummary$ = this.store.select(CartSelectors.selectCartSummary);
 
-    // Subscribe to settings to check if credit card payment is enabled
+    // Subscribe to settings to check if credit card payment and ordering are enabled
     this.subscriptions.add(
       this.settingsService.settings$.subscribe(settings => {
-        const previousValue = this.creditCardPaymentEnabled;
+        const previousCreditCardValue = this.creditCardPaymentEnabled;
         this.creditCardPaymentEnabled = settings.credit_card_payment_enabled;
+        this.orderingEnabled = settings.ordering_enabled;
 
-        console.log('[Payment] Credit card payment setting updated:', {
-          previous: previousValue,
-          current: this.creditCardPaymentEnabled,
+        console.log('[Payment] Settings updated:', {
+          previousCreditCard: previousCreditCardValue,
+          currentCreditCard: this.creditCardPaymentEnabled,
+          orderingEnabled: this.orderingEnabled,
           settings
         });
 
