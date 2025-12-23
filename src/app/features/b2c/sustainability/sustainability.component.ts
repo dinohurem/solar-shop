@@ -23,6 +23,15 @@ export interface SustainabilityFeature {
     <!-- Sustainability Section -->
     <section class="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-50 to-solar-50">
       <div class="max-w-7xl mx-auto">
+        <!-- Section Header -->
+        <div class="text-center mb-12">
+          <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 font-['Poppins'] mb-4">
+            {{ 'sustainability.title' | translate }}
+          </h2>
+          <p class="text-lg text-gray-600 max-w-2xl mx-auto font-['DM_Sans']">
+            {{ 'sustainability.subtitle' | translate }}
+          </p>
+        </div>
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <!-- Hero Image -->
           <div class="relative order-2 lg:order-1">

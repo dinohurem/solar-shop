@@ -285,9 +285,9 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
           <!-- Image -->
           <div class="order-2 lg:order-1">
-            <img 
-              src="assets/images/placeholders/forest-nature.jpg" 
-              alt="Sustainable Building" 
+            <img
+              src="assets/images/about_1.jpeg"
+              alt="Sustainable Building"
               class="w-full h-96 lg:h-[500px] object-cover rounded-[40px]"
             >
           </div>
@@ -418,9 +418,9 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
           <!-- Image -->
           <div>
-            <img 
-              src="assets/images/placeholders/business-consulting.jpg" 
-              alt="Sustainable Consulting" 
+            <img
+              src="assets/images/about_2.jpeg"
+              alt="Sustainable Consulting"
               class="w-full h-96 lg:h-[500px] object-cover rounded-[40px]"
             >
           </div>

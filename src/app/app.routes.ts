@@ -8,7 +8,6 @@ import { AdminLayoutComponent } from './features/admin/admin-layout/admin-layout
 
 // Eagerly loaded components (critical for initial page load)
 import { HomeComponent } from './features/b2c/home/home.component';
-import { NotFoundComponent } from './features/not-found/not-found.component';
 
 export const routes: Routes = [
     // Authentication routes - Lazy loaded
@@ -415,6 +414,6 @@ export const routes: Routes = [
         ]
     },
 
-    // 404 Not Found route
-    { path: '**', component: NotFoundComponent }
+    // Wildcard route - redirect to home
+    { path: '**', redirectTo: '', pathMatch: 'full' }
 ];

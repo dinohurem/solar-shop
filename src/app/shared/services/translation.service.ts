@@ -1903,8 +1903,8 @@ export class TranslationService {
             },
             // Hero Section
             hero: {
-                mainTitle: 'Vaša destinacija za solarnu energiju',
-                subtitle: 'Kupujte visokokvalitetne solarne panele, invertere, baterije i opremu. Sve što trebate za vlastiti sustav solarne energije na jednom mjestu.',
+                mainTitle: 'Solarni Paneli, Inverteri i Baterije',
+                subtitle: 'Fronius, Huawei, GoodWe - vrhunski brendovi solarne opreme. Brza dostava u Hrvatskoj.',
                 exploreProducts: 'Istražite proizvode',
                 exploreOffers: 'Istražite ponude',
                 loading: 'Učitavanje...',
@@ -1996,6 +1996,8 @@ export class TranslationService {
             },
             // Sustainability Section
             sustainability: {
+                title: 'Održivost i Energetska Rješenja',
+                subtitle: 'Napredna rješenja za Vaš dom i posao',
                 energyEfficiencySuggestions: 'Hibridni pretvarači',
                 energyEfficiencySuggestionsText: 'Hibridni pretvarači predstavljaju napredna energetska rješenja koja kombiniraju funkcije klasičnih solarnih pretvarača i sustava za pohranu energije. Za razliku od običnih on-grid pretvarača, koji mogu raditi samo kada postoji napajanje iz mreže, hibridni pretvarač omogućuje istovremeni rad sa solarnim panelima, baterijama i električnom mrežom, čime sustav postaje fleksibilniji i učinkovitiji.',
                 greenCertifications: 'Grijanje i hlađenje',
@@ -4627,8 +4629,8 @@ export class TranslationService {
             },
             // Hero Section
             hero: {
-                mainTitle: 'Your Destination for Solar Energy',
-                subtitle: 'Shop high-quality solar panels, inverters, batteries and equipment. Everything you need for your own solar energy system in one place.',
+                mainTitle: 'Solar Panels, Inverters and Batteries',
+                subtitle: 'Fronius, Huawei, GoodWe - premium solar equipment brands. Fast delivery in Croatia.',
                 exploreProducts: 'Explore Products',
                 exploreOffers: 'Explore Offers',
                 loading: 'Loading...',
@@ -4719,6 +4721,8 @@ export class TranslationService {
             },
             // Sustainability Section
             sustainability: {
+                title: 'Sustainability & Energy Solutions',
+                subtitle: 'Advanced solutions for your home and business',
                 energyEfficiencySuggestions: 'Hybrid inverters',
                 energyEfficiencySuggestionsText: 'Hybrid inverters represent advanced energy solutions that combine the functions of traditional solar inverters and energy storage systems. Unlike standard on-grid inverters, which can operate only when grid power is available, a hybrid inverter enables simultaneous operation with solar panels, batteries, and the electrical grid, making the system more flexible and efficient.',
                 greenCertifications: 'Heating and cooling',

@@ -3,7 +3,7 @@
   <!-- Homepage -->
   <url>
     <loc>https://www.solarno.hr/</loc>
-    <lastmod>2024-12-22</lastmod>
+    <lastmod>2025-12-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
@@ -11,7 +11,7 @@
   <!-- Products -->
   <url>
     <loc>https://www.solarno.hr/proizvodi</loc>
-    <lastmod>2024-12-22</lastmod>
+    <lastmod>2025-12-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -19,7 +19,7 @@
   <!-- Categories -->
   <url>
     <loc>https://www.solarno.hr/kategorije</loc>
-    <lastmod>2024-12-22</lastmod>
+    <lastmod>2025-12-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -27,7 +27,7 @@
   <!-- Offers -->
   <url>
     <loc>https://www.solarno.hr/ponude</loc>
-    <lastmod>2024-12-22</lastmod>
+    <lastmod>2025-12-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -35,7 +35,7 @@
   <!-- Blog -->
   <url>
     <loc>https://www.solarno.hr/blog</loc>
-    <lastmod>2024-12-22</lastmod>
+    <lastmod>2025-12-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -43,7 +43,7 @@
   <!-- About / Company -->
   <url>
     <loc>https://www.solarno.hr/tvrtka</loc>
-    <lastmod>2024-12-22</lastmod>
+    <lastmod>2025-12-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -51,7 +51,7 @@
   <!-- Contact -->
   <url>
     <loc>https://www.solarno.hr/kontakt</loc>
-    <lastmod>2024-12-22</lastmod>
+    <lastmod>2025-12-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -59,7 +59,7 @@
   <!-- Terms and Conditions -->
   <url>
     <loc>https://www.solarno.hr/uvjeti</loc>
-    <lastmod>2024-12-22</lastmod>
+    <lastmod>2025-12-23</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
@@ -67,7 +67,7 @@
   <!-- Privacy Policy -->
   <url>
     <loc>https://www.solarno.hr/privatnost</loc>
-    <lastmod>2024-12-22</lastmod>
+    <lastmod>2025-12-23</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
@@ -75,14 +75,14 @@
   <!-- B2B Partners Section -->
   <url>
     <loc>https://www.solarno.hr/partneri</loc>
-    <lastmod>2024-12-22</lastmod>
+    <lastmod>2025-12-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
     <loc>https://www.solarno.hr/partneri/proizvodi</loc>
-    <lastmod>2024-12-22</lastmod>
+    <lastmod>2025-12-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
@@ -90,14 +90,14 @@
   <!-- Login / Register -->
   <url>
     <loc>https://www.solarno.hr/prijava</loc>
-    <lastmod>2024-12-22</lastmod>
+    <lastmod>2025-12-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
 
   <url>
     <loc>https://www.solarno.hr/registracija</loc>
-    <lastmod>2024-12-22</lastmod>
+    <lastmod>2025-12-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
