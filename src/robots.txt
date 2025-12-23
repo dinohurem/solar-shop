@@ -10,4 +10,4 @@ Disallow: /partneri/blagajna/
 Disallow: /moj-racun/
 
 # Sitemap location
-Sitemap: https://solarno.hr/sitemap.xml
+Sitemap: https://www.solarno.hr/sitemap.xml
