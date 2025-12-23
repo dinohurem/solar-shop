@@ -1,17 +1,114 @@
 <!doctype html>
-<html lang="en">
+<html lang="hr">
 
 <head>
   <meta charset="utf-8">
-  <title>Solar Shop</title>
+  <title>Solarno.hr - Solarna Oprema i Inverteri | Fronius, Huawei, GoodWe</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Solarno.hr - Vaš pouzdani partner za solarnu opremu u Hrvatskoj. Nudimo širok izbor invertera (Fronius, Huawei, GoodWe), solarnih panela, baterija i dodatne opreme. Besplatna dostava i stručna podrška.">
+  <meta name="keywords" content="solarna oprema, inverteri, Fronius, Huawei, GoodWe, solarni paneli, baterije, solarna energija, Hrvatska, fotovoltaik, obnovljivi izvori energije">
+  <meta name="author" content="Solarno.hr">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://solarno.hr/">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://solarno.hr/">
+  <meta property="og:title" content="Solarno.hr - Solarna Oprema i Inverteri">
+  <meta property="og:description" content="Vaš pouzdani partner za solarnu opremu u Hrvatskoj. Inverteri Fronius, Huawei, GoodWe, solarni paneli i baterije.">
+  <meta property="og:image" content="https://solarno.hr/assets/images/og-image.jpg">
+  <meta property="og:locale" content="hr_HR">
+  <meta property="og:site_name" content="Solarno.hr">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://solarno.hr/">
+  <meta name="twitter:title" content="Solarno.hr - Solarna Oprema i Inverteri">
+  <meta name="twitter:description" content="Vaš pouzdani partner za solarnu opremu u Hrvatskoj. Inverteri Fronius, Huawei, GoodWe, solarni paneli i baterije.">
+  <meta name="twitter:image" content="https://solarno.hr/assets/images/og-image.jpg">
+
+  <!-- Favicon -->
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png">
+
+  <!-- Preconnect for performance -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap"
-    rel="stylesheet">
+
+  <!-- Preload critical fonts to reduce render blocking -->
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"></noscript>
+
+  <!-- DNS Prefetch for external resources -->
+  <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+  <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+
+  <!-- Structured Data (JSON-LD) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Solarno.hr",
+    "url": "https://solarno.hr",
+    "logo": "https://solarno.hr/assets/images/logo.png",
+    "description": "Vaš pouzdani partner za solarnu opremu u Hrvatskoj. Nudimo širok izbor invertera, solarnih panela i baterija.",
+    "address": {
+      "@type": "PostalAddress",
+      "addressCountry": "HR"
+    },
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "contactType": "customer service",
+      "availableLanguage": ["Croatian", "English"]
+    },
+    "sameAs": []
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Solarno.hr",
+    "url": "https://solarno.hr",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://solarno.hr/proizvodi?search={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Store",
+    "name": "Solarno.hr",
+    "description": "Online trgovina solarne opreme",
+    "url": "https://solarno.hr",
+    "priceRange": "$$",
+    "currenciesAccepted": "EUR",
+    "paymentAccepted": "Cash, Credit Card",
+    "openingHoursSpecification": {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+      "opens": "08:00",
+      "closes": "16:00"
+    }
+  }
+  </script>
+
+  <!-- Google Analytics (replace GA_MEASUREMENT_ID with your actual ID) -->
+  <!--
+  <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'GA_MEASUREMENT_ID');
+  </script>
+  -->
 </head>
 
 <body>

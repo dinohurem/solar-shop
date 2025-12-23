@@ -12,8 +12,8 @@ import { selectCurrentUser } from '../../../../core/auth/store/auth.selectors';
   standalone: true,
   imports: [CommonModule, TranslatePipe],
   template: `
-    <section class="relative bg-gradient-to-br from-b2b-600 to-b2b-800 py-24 text-center">
-      <div class="absolute inset-0 bg-black/20"></div>
+    <section class="relative bg-orange-600 py-24 text-center">
+      <div class="absolute inset-0"></div>
       <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h1 class="text-4xl md:text-6xl font-bold text-white mb-6 font-['Poppins']">
           {{ 'b2b.hero.title' | translate }}
@@ -24,17 +24,17 @@ import { selectCurrentUser } from '../../../../core/auth/store/auth.selectors';
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
           <!-- Buttons for authenticated company users -->
           <ng-container *ngIf="isCompanyContact$ | async">
-            <button (click)="navigateToProducts()" class="bg-white text-b2b-600 px-8 py-4 rounded-lg font-semibold hover:bg-b2b-50 transition-all">
+            <button (click)="navigateToProducts()" class="bg-white text-orange-600 px-8 py-4 rounded-lg font-semibold hover:bg-orange-50 transition-all">
               {{ 'b2b.products.title' | translate }}
             </button>
             <button (click)="navigateToOffers()" class="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold hover:bg-white/10 transition-all">
               {{ 'b2b.offers.title' | translate }}
             </button>
           </ng-container>
-          
+
           <!-- Default buttons for non-authenticated users -->
           <ng-container *ngIf="!(isCompanyContact$ | async)">
-            <button (click)="navigateToRegister()" class="bg-white text-b2b-600 px-8 py-4 rounded-lg font-semibold hover:bg-b2b-50 transition-all">
+            <button (click)="navigateToRegister()" class="bg-white text-orange-600 px-8 py-4 rounded-lg font-semibold hover:bg-orange-50 transition-all">
               {{ 'b2b.hero.getStarted' | translate }}
             </button>
             <button (click)="navigateToAbout()" class="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold hover:bg-white/10 transition-all">

@@ -245,8 +245,8 @@ import { SupabaseService } from '../../../services/supabase.service';
     </section>
   `,
   styles: [`
-    /* Custom font loading */
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap');
+    
+    
     
     :host {
       display: block;

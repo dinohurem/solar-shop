@@ -258,7 +258,7 @@ import { Order } from '../../../shared/models/order.model';
     </div>
   `,
   styles: [`
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+    
   `]
 })
 export class OrderDetailsComponent implements OnInit {

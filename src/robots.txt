@@ -1,0 +1,13 @@
+# robots.txt for solarno.hr
+
+User-agent: *
+Allow: /
+
+# Disallow admin and private areas
+Disallow: /admin/
+Disallow: /blagajna/
+Disallow: /partneri/blagajna/
+Disallow: /moj-racun/
+
+# Sitemap location
+Sitemap: https://solarno.hr/sitemap.xml

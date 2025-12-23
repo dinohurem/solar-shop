@@ -208,8 +208,8 @@ import { Company } from '../../../../../shared/models/company.model';
     </div>
   `,
   styles: [`
-    /* Custom font loading */
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap');
+    
+    
   `]
 })
 export class B2bShippingComponent implements OnInit, OnDestroy {

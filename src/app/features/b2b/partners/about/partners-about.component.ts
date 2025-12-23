@@ -10,8 +10,8 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
   template: `
     <div class="min-h-screen bg-gray-50">
       <!-- Hero Section -->
-      <section class="relative bg-gradient-to-br from-solar-600 to-solar-800 text-white py-20">
-        <div class="absolute inset-0 bg-black/10"></div>
+      <section class="relative bg-orange-600 text-white py-20">
+        <div class="absolute inset-0"></div>
         <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 class="text-4xl lg:text-5xl font-bold font-['Poppins'] mb-6">
             {{ 'b2b.about.heroTitle' | translate }}
@@ -387,7 +387,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
     </div>
   `,
   styles: [`
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap');
+    
     
     :host {
       display: block;

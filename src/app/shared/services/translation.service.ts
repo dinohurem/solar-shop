@@ -2126,6 +2126,15 @@ export class TranslationService {
                 bundleIncomplete: 'Paket nekompletan',
                 bundleRequiresAllProducts: 'Svi proizvodi iz paketne ponude moraju biti u košarici da biste primijenili popust.'
             },
+            // 404 Not Found
+            notFound: {
+                title: 'Stranica nije pronađena',
+                description: 'Nažalost, stranica koju tražite ne postoji ili je premještena. Molimo provjerite URL ili se vratite na početnu stranicu.',
+                backHome: 'Povratak na početnu',
+                browseProducts: 'Pregledaj proizvode',
+                needHelp: 'Trebate pomoć?',
+                contactUs: 'Kontaktirajte nas'
+            },
             // Checkout
             checkout: {
                 title: 'Naplata',
@@ -4839,6 +4848,15 @@ export class TranslationService {
                 bundleComplete: 'Bundle complete',
                 bundleIncomplete: 'Bundle incomplete',
                 bundleRequiresAllProducts: 'All products from the bundle offer must be in the cart to apply the discount.'
+            },
+            // 404 Not Found
+            notFound: {
+                title: 'Page Not Found',
+                description: 'Sorry, the page you are looking for does not exist or has been moved. Please check the URL or return to the homepage.',
+                backHome: 'Back to Homepage',
+                browseProducts: 'Browse Products',
+                needHelp: 'Need help?',
+                contactUs: 'Contact us'
             },
             // Checkout
             checkout: {

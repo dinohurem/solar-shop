@@ -131,7 +131,7 @@ import { Observable } from 'rxjs';
     </div>
   `,
     styles: [`
-    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap');
+    
     
     :host {
       font-family: 'DM Sans', sans-serif;

@@ -7,16 +7,18 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
   standalone: true,
   imports: [CommonModule, TranslatePipe],
   template: `
-    <!-- Hero Section -->
-    <section class="relative bg-gradient-to-br from-solar-600 to-solar-800 text-white py-20 px-4 md:px-8 lg:px-32">
-      <div class="max-w-6xl mx-auto text-center">
-        <h1 class="font-['Poppins'] font-semibold text-4xl md:text-5xl lg:text-6xl mb-6 leading-tight">
-          {{ 'company.title' | translate }}
-        </h1>
-        <p class="font-['DM_Sans'] text-base md:text-lg max-w-4xl mx-auto opacity-80 leading-relaxed">
-          {{ 'company.subtitle' | translate }}
-        </p>
-      </div>
+    <!-- Hero Section with Video -->
+    <section class="relative h-[400px] md:h-[500px] lg:h-[600px] overflow-hidden">
+      <video
+        autoplay
+        muted
+        loop
+        playsinline
+        poster="assets/videos/hero-poster.jpg"
+        class="absolute inset-0 w-full h-full object-cover"
+      >
+        <source src="assets/videos/hero-video.mp4" type="video/mp4">
+      </video>
     </section>
 
     <!-- About Us Section -->
@@ -427,7 +429,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
     </section>
   `,
   styles: [`
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+    
   `]
 })
 export class CompanyComponent {

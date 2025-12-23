@@ -48,6 +48,8 @@
             "assets": [
               "src/favicon.ico",
               "src/assets",
+              "src/sitemap.xml",
+              "src/robots.txt",
               {
                 "glob": "**/*",
                 "input": "public"
@@ -78,7 +80,17 @@
                   "maximumError": "16kB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": true
+                },
+                "fonts": {
+                  "inline": true
+                }
+              }
             },
             "development": {
               "optimization": false,
@@ -114,6 +126,8 @@
             "assets": [
               "src/favicon.ico",
               "src/assets",
+              "src/sitemap.xml",
+              "src/robots.txt",
               {
                 "glob": "**/*",
                 "input": "public"

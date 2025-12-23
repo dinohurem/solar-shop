@@ -1,235 +1,420 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from './guards/auth.guard';
 import { AdminGuard } from './core/auth/guards/admin.guard';
-import { ForgotPasswordComponent } from './core/auth/components/forgot-password/forgot-password.component';
-import { LoginComponent } from './core/auth/components/login/login.component';
-import { RegisterComponent } from './core/auth/components/register/register.component';
-import { ResetPasswordComponent } from './core/auth/components/reset-password/reset-password.component';
-import { ConfirmationComponent } from './core/auth/components/confirmation/confirmation.component';
-import { AuthCallbackComponent } from './core/auth/components/auth-callback/auth-callback.component';
-import { PageLayoutComponent } from './core/page-layout/page-layout.component';
-import { CompanyComponent } from './features/b2c/company/company.component';
-import { BlogComponent } from './features/b2c/blog/blog.component';
-import { BlogDetailComponent } from './features/b2c/blog/blog-detail.component';
-import { ProductListComponent } from './features/b2c/products/product-list/product-list.component';
-import { HomeComponent } from './features/b2c/home/home.component';
-import { ProductDetailsComponent } from './features/b2c/products/product-details/product-details.component';
-import { OffersPageComponent } from './features/b2c/offers/offers-page.component';
-import { OfferDetailsComponent } from './features/b2c/offers/offer-details.component';
-import { ContactComponent } from './features/b2c/contact/contact.component';
-import { PrivacyPolicyComponent } from './features/b2c/privacy-policy/privacy-policy.component';
-import { TermsOfServiceComponent } from './features/b2c/terms-of-service/terms-of-service.component';
-import { CookiePolicyComponent } from './features/b2c/cookie-policy/cookie-policy.component';
-import { SafetyPaymentComponent } from './features/b2c/safety-payment/safety-payment.component';
-import { PartnersComponent } from './features/b2b/partners/partners.component';
-import { PartnersRegisterComponent } from './features/b2b/partners/register/partners-register.component';
-import { PartnersProductsComponent } from './features/b2b/partners/products/partners-products.component';
-import { PartnersProductDetailsComponent } from './features/b2b/partners/products/partners-product-details.component';
-import { PartnersOffersComponent } from './features/b2b/partners/offers/partners-offers.component';
-import { PartnersOfferDetailsComponent } from './features/b2b/partners/offers/partners-offer-details.component';
-import { PartnersContactComponent } from './features/b2b/partners/contact/partners-contact.component';
-import { PartnersAboutComponent } from './features/b2b/partners/about/partners-about.component';
-import { PartnerProfileComponent } from './features/b2b/partners/profile/partner-profile.component';
-import { B2bLayoutComponent } from './features/b2b/shared/layout/b2b-layout.component';
-import { B2bCheckoutComponent } from './features/b2b/checkout/b2b-checkout.component';
-import { B2bOrderReviewComponent } from './features/b2b/checkout/steps/b2b-order-review/b2b-order-review.component';
-import { B2bShippingComponent } from './features/b2b/checkout/steps/b2b-shipping/b2b-shipping.component';
-import { B2bPaymentComponent } from './features/b2b/checkout/steps/b2b-payment/b2b-payment.component';
-import { B2bOrderDetailsComponent } from './features/b2b/order-details/b2b-order-details.component';
 import { CompanyApprovedGuard } from './guards/company-approved.guard';
-import { CheckoutComponent } from './features/b2c/checkout/checkout.component';
-import { OrderReviewComponent } from './features/b2c/checkout/steps/order-review/order-review.component';
-import { ShippingComponent } from './features/b2c/checkout/steps/shipping/shipping.component';
-import { PaymentComponent } from './features/b2c/checkout/steps/payment/payment.component';
-import { ProfileComponent } from './features/b2c/profile/profile.component';
+import { PageLayoutComponent } from './core/page-layout/page-layout.component';
+import { B2bLayoutComponent } from './features/b2b/shared/layout/b2b-layout.component';
 import { AdminLayoutComponent } from './features/admin/admin-layout/admin-layout.component';
-import { AdminDashboardComponent } from './features/admin/dashboard/admin-dashboard.component';
-import { AdminProductsComponent } from './features/admin/products/admin-products.component';
-import { AdminBlogComponent } from './features/admin/blog/admin-blog.component';
-import { AdminCategoriesComponent } from './features/admin/categories/admin-categories.component';
-import { AdminOffersComponent } from './features/admin/offers/admin-offers.component';
-import { AdminUsersComponent } from './features/admin/users/admin-users.component';
-import { AdminOrdersComponent } from './features/admin/orders/admin-orders.component';
-import { AdminOrdersPartnersComponent } from './features/admin/orders-partners/admin-orders-partners.component';
-import { AdminReviewsComponent } from './features/admin/reviews/admin-reviews.component';
-import { AdminCompanyPricingComponent } from './features/admin/company-pricing/admin-company-pricing.component';
-import { CompanyPricingFormComponent } from './features/admin/company-pricing/company-pricing-form/company-pricing-form.component';
 
-import { AdminCompaniesComponent } from './features/admin/companies/admin-companies.component';
-import { AdminCompanyEditComponent } from './features/admin/companies/admin-company-edit.component';
-import { AdminWishlistComponent } from './features/admin/wishlist/admin-wishlist.component';
-import { AdminContactsComponent } from './features/admin/contacts/admin-contacts.component';
-import { CategoryFormComponent } from './features/admin/categories/category-form/category-form.component';
-import { ProductFormComponent } from './features/admin/products/product-form/product-form.component';
-import { OfferFormComponent } from './features/admin/offers/offer-form/offer-form.component';
-import { BlogFormComponent } from './features/admin/blog/blog-form/blog-form.component';
-import { UserFormComponent } from './features/admin/users/user-form/user-form.component';
-import { OrderFormComponent } from './features/admin/orders/order-form/order-form.component';
-import { OrderDetailsComponent } from './features/b2c/order-details/order-details.component';
-import { PaymentCallbackComponent } from './features/b2c/checkout/payment-callback/payment-callback.component';
-import { OrderConfirmationComponent } from './features/b2c/order-confirmation/order-confirmation.component';
-// Import admin detail components
-import { OfferDetailsComponent as AdminOfferDetailsComponent } from './features/admin/offers/offer-details/offer-details.component';
-import { OrderDetailsComponent as AdminOrderDetailsComponent } from './features/admin/orders/order-details/order-details.component';
-import { EmailTestComponent } from './shared/components/email-test/email-test.component';
+// Eagerly loaded components (critical for initial page load)
+import { HomeComponent } from './features/b2c/home/home.component';
+import { NotFoundComponent } from './features/not-found/not-found.component';
 
 export const routes: Routes = [
-    // Authentication routes (no layout) - no guards needed, Supabase handles auth state
-    { path: 'prijava', component: LoginComponent },
-    { path: 'registracija', component: RegisterComponent },
-    { path: 'potvrda', component: AuthCallbackComponent },
-    { path: 'confirm', component: ConfirmationComponent },
-    { path: 'zaboravljena-lozinka', component: ForgotPasswordComponent },
-    { path: 'reset-lozinka', component: ResetPasswordComponent },
-    
-    // Payment callback (no layout needed)
-    { path: 'payment-callback', component: PaymentCallbackComponent },
-    
-    // Order confirmation (no layout needed)
-    { path: 'order-confirmation', component: OrderConfirmationComponent },
+    // Authentication routes - Lazy loaded
+    {
+        path: 'prijava',
+        loadComponent: () => import('./core/auth/components/login/login.component').then(m => m.LoginComponent)
+    },
+    {
+        path: 'registracija',
+        loadComponent: () => import('./core/auth/components/register/register.component').then(m => m.RegisterComponent)
+    },
+    {
+        path: 'potvrda',
+        loadComponent: () => import('./core/auth/components/auth-callback/auth-callback.component').then(m => m.AuthCallbackComponent)
+    },
+    {
+        path: 'confirm',
+        loadComponent: () => import('./core/auth/components/confirmation/confirmation.component').then(m => m.ConfirmationComponent)
+    },
+    {
+        path: 'zaboravljena-lozinka',
+        loadComponent: () => import('./core/auth/components/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent)
+    },
+    {
+        path: 'reset-lozinka',
+        loadComponent: () => import('./core/auth/components/reset-password/reset-password.component').then(m => m.ResetPasswordComponent)
+    },
+
+    // Payment callback - Lazy loaded
+    {
+        path: 'payment-callback',
+        loadComponent: () => import('./features/b2c/checkout/payment-callback/payment-callback.component').then(m => m.PaymentCallbackComponent)
+    },
+
+    // Order confirmation - Lazy loaded
+    {
+        path: 'order-confirmation',
+        loadComponent: () => import('./features/b2c/order-confirmation/order-confirmation.component').then(m => m.OrderConfirmationComponent)
+    },
 
     // Main application routes (with layout)
     {
         path: '',
         component: PageLayoutComponent,
         children: [
+            // Home - Eagerly loaded (critical path)
             { path: '', component: HomeComponent },
-            { path: 'proizvodi', component: ProductListComponent },
-            { path: 'proizvodi/:id', component: ProductDetailsComponent },
-            { path: 'ponude', component: OffersPageComponent },
-            { path: 'ponude/:id', component: OfferDetailsComponent },
-            { path: 'blog', component: BlogComponent },
-            { path: 'blog/:id', component: BlogDetailComponent },
-            { path: 'tvrtka', component: CompanyComponent },
-            { path: 'kontakt', component: ContactComponent },
-            { path: 'privatnost', component: PrivacyPolicyComponent },
-            { path: 'uvjeti', component: TermsOfServiceComponent },
-            { path: 'kolacici', component: CookiePolicyComponent },
-            { path: 'sigurnost-kupovine', component: SafetyPaymentComponent },
 
+            // Products - Lazy loaded
+            {
+                path: 'proizvodi',
+                loadComponent: () => import('./features/b2c/products/product-list/product-list.component').then(m => m.ProductListComponent)
+            },
+            {
+                path: 'proizvodi/:id',
+                loadComponent: () => import('./features/b2c/products/product-details/product-details.component').then(m => m.ProductDetailsComponent)
+            },
 
-            // Protected routes
-            { path: 'profil', component: ProfileComponent, canActivate: [AuthGuard] },
-            { path: 'detalji-narudzbe/:id', component: OrderDetailsComponent, canActivate: [AuthGuard] },
+            // Offers - Lazy loaded
+            {
+                path: 'ponude',
+                loadComponent: () => import('./features/b2c/offers/offers-page.component').then(m => m.OffersPageComponent)
+            },
+            {
+                path: 'ponude/:id',
+                loadComponent: () => import('./features/b2c/offers/offer-details.component').then(m => m.OfferDetailsComponent)
+            },
 
-            // Checkout routes
+            // Blog - Lazy loaded
+            {
+                path: 'blog',
+                loadComponent: () => import('./features/b2c/blog/blog.component').then(m => m.BlogComponent)
+            },
+            {
+                path: 'blog/:id',
+                loadComponent: () => import('./features/b2c/blog/blog-detail.component').then(m => m.BlogDetailComponent)
+            },
+
+            // Company/About - Lazy loaded
+            {
+                path: 'tvrtka',
+                loadComponent: () => import('./features/b2c/company/company.component').then(m => m.CompanyComponent)
+            },
+
+            // Contact - Lazy loaded
+            {
+                path: 'kontakt',
+                loadComponent: () => import('./features/b2c/contact/contact.component').then(m => m.ContactComponent)
+            },
+
+            // Legal pages - Lazy loaded
+            {
+                path: 'privatnost',
+                loadComponent: () => import('./features/b2c/privacy-policy/privacy-policy.component').then(m => m.PrivacyPolicyComponent)
+            },
+            {
+                path: 'uvjeti',
+                loadComponent: () => import('./features/b2c/terms-of-service/terms-of-service.component').then(m => m.TermsOfServiceComponent)
+            },
+            {
+                path: 'kolacici',
+                loadComponent: () => import('./features/b2c/cookie-policy/cookie-policy.component').then(m => m.CookiePolicyComponent)
+            },
+            {
+                path: 'sigurnost-kupovine',
+                loadComponent: () => import('./features/b2c/safety-payment/safety-payment.component').then(m => m.SafetyPaymentComponent)
+            },
+
+            // Protected routes - Lazy loaded
+            {
+                path: 'profil',
+                loadComponent: () => import('./features/b2c/profile/profile.component').then(m => m.ProfileComponent),
+                canActivate: [AuthGuard]
+            },
+            {
+                path: 'detalji-narudzbe/:id',
+                loadComponent: () => import('./features/b2c/order-details/order-details.component').then(m => m.OrderDetailsComponent),
+                canActivate: [AuthGuard]
+            },
+
+            // Checkout routes - Lazy loaded
             {
                 path: 'blagajna',
-                component: CheckoutComponent,
+                loadComponent: () => import('./features/b2c/checkout/checkout.component').then(m => m.CheckoutComponent),
                 children: [
                     { path: '', redirectTo: 'pregled-narudzbe', pathMatch: 'full' },
-                    { path: 'pregled-narudzbe', component: OrderReviewComponent },
-                    { path: 'dostava', component: ShippingComponent },
-                    { path: 'placanje', component: PaymentComponent }
+                    {
+                        path: 'pregled-narudzbe',
+                        loadComponent: () => import('./features/b2c/checkout/steps/order-review/order-review.component').then(m => m.OrderReviewComponent)
+                    },
+                    {
+                        path: 'dostava',
+                        loadComponent: () => import('./features/b2c/checkout/steps/shipping/shipping.component').then(m => m.ShippingComponent)
+                    },
+                    {
+                        path: 'placanje',
+                        loadComponent: () => import('./features/b2c/checkout/steps/payment/payment.component').then(m => m.PaymentComponent)
+                    }
                 ]
             }
         ]
     },
 
-    // B2B routes (with B2B layout)
+    // B2B routes - Lazy loaded children
     {
         path: 'partneri',
         component: B2bLayoutComponent,
         children: [
-            { path: '', component: PartnersComponent },
-            { path: 'o-nama', component: PartnersAboutComponent },
-            { path: 'registracija', component: PartnersRegisterComponent },
-            { path: 'proizvodi', component: PartnersProductsComponent, canActivate: [CompanyApprovedGuard] },
-            { path: 'proizvodi/:id', component: PartnersProductDetailsComponent, canActivate: [CompanyApprovedGuard] },
-            { path: 'ponude', component: PartnersOffersComponent, canActivate: [CompanyApprovedGuard] },
-            { path: 'ponude/:id', component: PartnersOfferDetailsComponent, canActivate: [CompanyApprovedGuard] },
-            { path: 'profil', component: PartnerProfileComponent, canActivate: [AuthGuard] },
-            { path: 'detalji-narudzbe/:id', component: B2bOrderDetailsComponent, canActivate: [AuthGuard] },
-            { path: 'kontakt', component: PartnersContactComponent },
+            {
+                path: '',
+                loadComponent: () => import('./features/b2b/partners/partners.component').then(m => m.PartnersComponent)
+            },
+            {
+                path: 'o-nama',
+                loadComponent: () => import('./features/b2b/partners/about/partners-about.component').then(m => m.PartnersAboutComponent)
+            },
+            {
+                path: 'registracija',
+                loadComponent: () => import('./features/b2b/partners/register/partners-register.component').then(m => m.PartnersRegisterComponent)
+            },
+            {
+                path: 'proizvodi',
+                loadComponent: () => import('./features/b2b/partners/products/partners-products.component').then(m => m.PartnersProductsComponent),
+                canActivate: [CompanyApprovedGuard]
+            },
+            {
+                path: 'proizvodi/:id',
+                loadComponent: () => import('./features/b2b/partners/products/partners-product-details.component').then(m => m.PartnersProductDetailsComponent),
+                canActivate: [CompanyApprovedGuard]
+            },
+            {
+                path: 'ponude',
+                loadComponent: () => import('./features/b2b/partners/offers/partners-offers.component').then(m => m.PartnersOffersComponent),
+                canActivate: [CompanyApprovedGuard]
+            },
+            {
+                path: 'ponude/:id',
+                loadComponent: () => import('./features/b2b/partners/offers/partners-offer-details.component').then(m => m.PartnersOfferDetailsComponent),
+                canActivate: [CompanyApprovedGuard]
+            },
+            {
+                path: 'profil',
+                loadComponent: () => import('./features/b2b/partners/profile/partner-profile.component').then(m => m.PartnerProfileComponent),
+                canActivate: [AuthGuard]
+            },
+            {
+                path: 'detalji-narudzbe/:id',
+                loadComponent: () => import('./features/b2b/order-details/b2b-order-details.component').then(m => m.B2bOrderDetailsComponent),
+                canActivate: [AuthGuard]
+            },
+            {
+                path: 'kontakt',
+                loadComponent: () => import('./features/b2b/partners/contact/partners-contact.component').then(m => m.PartnersContactComponent)
+            },
 
-            // B2B Checkout routes
+            // B2B Checkout routes - Lazy loaded
             {
                 path: 'blagajna',
-                component: B2bCheckoutComponent,
+                loadComponent: () => import('./features/b2b/checkout/b2b-checkout.component').then(m => m.B2bCheckoutComponent),
                 canActivate: [CompanyApprovedGuard],
                 children: [
                     { path: '', redirectTo: 'pregled-narudzbe', pathMatch: 'full' },
-                    { path: 'pregled-narudzbe', component: B2bOrderReviewComponent },
-                    { path: 'dostava', component: B2bShippingComponent },
-                    { path: 'placanje', component: B2bPaymentComponent }
+                    {
+                        path: 'pregled-narudzbe',
+                        loadComponent: () => import('./features/b2b/checkout/steps/b2b-order-review/b2b-order-review.component').then(m => m.B2bOrderReviewComponent)
+                    },
+                    {
+                        path: 'dostava',
+                        loadComponent: () => import('./features/b2b/checkout/steps/b2b-shipping/b2b-shipping.component').then(m => m.B2bShippingComponent)
+                    },
+                    {
+                        path: 'placanje',
+                        loadComponent: () => import('./features/b2b/checkout/steps/b2b-payment/b2b-payment.component').then(m => m.B2bPaymentComponent)
+                    }
                 ]
             }
         ]
     },
 
-    // Admin routes
+    // Admin routes - Lazy loaded children
     {
         path: 'admin',
         component: AdminLayoutComponent,
         canActivate: [AdminGuard],
         children: [
-            { path: '', component: AdminDashboardComponent },
+            {
+                path: '',
+                loadComponent: () => import('./features/admin/dashboard/admin-dashboard.component').then(m => m.AdminDashboardComponent)
+            },
 
             // Products
-            { path: 'proizvodi', component: AdminProductsComponent },
-            { path: 'proizvodi/kreiraj', component: ProductFormComponent },
-            { path: 'proizvodi/uredi/:id', component: ProductFormComponent },
-            { path: 'proizvodi/detalji/:id', component: ProductFormComponent },
+            {
+                path: 'proizvodi',
+                loadComponent: () => import('./features/admin/products/admin-products.component').then(m => m.AdminProductsComponent)
+            },
+            {
+                path: 'proizvodi/kreiraj',
+                loadComponent: () => import('./features/admin/products/product-form/product-form.component').then(m => m.ProductFormComponent)
+            },
+            {
+                path: 'proizvodi/uredi/:id',
+                loadComponent: () => import('./features/admin/products/product-form/product-form.component').then(m => m.ProductFormComponent)
+            },
+            {
+                path: 'proizvodi/detalji/:id',
+                loadComponent: () => import('./features/admin/products/product-form/product-form.component').then(m => m.ProductFormComponent)
+            },
 
             // Categories
-            { path: 'kategorije', component: AdminCategoriesComponent },
-            { path: 'kategorije/kreiraj', component: CategoryFormComponent },
-            { path: 'kategorije/uredi/:id', component: CategoryFormComponent },
-            { path: 'kategorije/detalji/:id', component: CategoryFormComponent },
+            {
+                path: 'kategorije',
+                loadComponent: () => import('./features/admin/categories/admin-categories.component').then(m => m.AdminCategoriesComponent)
+            },
+            {
+                path: 'kategorije/kreiraj',
+                loadComponent: () => import('./features/admin/categories/category-form/category-form.component').then(m => m.CategoryFormComponent)
+            },
+            {
+                path: 'kategorije/uredi/:id',
+                loadComponent: () => import('./features/admin/categories/category-form/category-form.component').then(m => m.CategoryFormComponent)
+            },
+            {
+                path: 'kategorije/detalji/:id',
+                loadComponent: () => import('./features/admin/categories/category-form/category-form.component').then(m => m.CategoryFormComponent)
+            },
 
             // Blog
-            { path: 'blog', component: AdminBlogComponent },
-            { path: 'blog/kreiraj', component: BlogFormComponent },
-            { path: 'blog/uredi/:id', component: BlogFormComponent },
-            { path: 'blog/detalji/:id', component: BlogFormComponent },
+            {
+                path: 'blog',
+                loadComponent: () => import('./features/admin/blog/admin-blog.component').then(m => m.AdminBlogComponent)
+            },
+            {
+                path: 'blog/kreiraj',
+                loadComponent: () => import('./features/admin/blog/blog-form/blog-form.component').then(m => m.BlogFormComponent)
+            },
+            {
+                path: 'blog/uredi/:id',
+                loadComponent: () => import('./features/admin/blog/blog-form/blog-form.component').then(m => m.BlogFormComponent)
+            },
+            {
+                path: 'blog/detalji/:id',
+                loadComponent: () => import('./features/admin/blog/blog-form/blog-form.component').then(m => m.BlogFormComponent)
+            },
 
             // Offers
-            { path: 'ponude', component: AdminOffersComponent },
-            { path: 'ponude/kreiraj', component: OfferFormComponent },
-            { path: 'ponude/uredi/:id', component: OfferFormComponent },
-            { path: 'ponude/detalji/:id', component: AdminOfferDetailsComponent },
+            {
+                path: 'ponude',
+                loadComponent: () => import('./features/admin/offers/admin-offers.component').then(m => m.AdminOffersComponent)
+            },
+            {
+                path: 'ponude/kreiraj',
+                loadComponent: () => import('./features/admin/offers/offer-form/offer-form.component').then(m => m.OfferFormComponent)
+            },
+            {
+                path: 'ponude/uredi/:id',
+                loadComponent: () => import('./features/admin/offers/offer-form/offer-form.component').then(m => m.OfferFormComponent)
+            },
+            {
+                path: 'ponude/detalji/:id',
+                loadComponent: () => import('./features/admin/offers/offer-details/offer-details.component').then(m => m.OfferDetailsComponent)
+            },
 
             // Users
-            { path: 'korisnici', component: AdminUsersComponent },
-            { path: 'korisnici/kreiraj', component: UserFormComponent },
-            { path: 'korisnici/uredi/:id', component: UserFormComponent },
-            { path: 'korisnici/detalji/:id', component: UserFormComponent },
+            {
+                path: 'korisnici',
+                loadComponent: () => import('./features/admin/users/admin-users.component').then(m => m.AdminUsersComponent)
+            },
+            {
+                path: 'korisnici/kreiraj',
+                loadComponent: () => import('./features/admin/users/user-form/user-form.component').then(m => m.UserFormComponent)
+            },
+            {
+                path: 'korisnici/uredi/:id',
+                loadComponent: () => import('./features/admin/users/user-form/user-form.component').then(m => m.UserFormComponent)
+            },
+            {
+                path: 'korisnici/detalji/:id',
+                loadComponent: () => import('./features/admin/users/user-form/user-form.component').then(m => m.UserFormComponent)
+            },
 
             // Orders
-            { path: 'narudzbe', component: AdminOrdersComponent },
-            { path: 'narudzbe/kreiraj', component: OrderFormComponent },
-            { path: 'narudzbe/uredi/:id', component: OrderFormComponent },
-            { path: 'narudzbe/detalji/:id', component: AdminOrderDetailsComponent },
+            {
+                path: 'narudzbe',
+                loadComponent: () => import('./features/admin/orders/admin-orders.component').then(m => m.AdminOrdersComponent)
+            },
+            {
+                path: 'narudzbe/kreiraj',
+                loadComponent: () => import('./features/admin/orders/order-form/order-form.component').then(m => m.OrderFormComponent)
+            },
+            {
+                path: 'narudzbe/uredi/:id',
+                loadComponent: () => import('./features/admin/orders/order-form/order-form.component').then(m => m.OrderFormComponent)
+            },
+            {
+                path: 'narudzbe/detalji/:id',
+                loadComponent: () => import('./features/admin/orders/order-details/order-details.component').then(m => m.OrderDetailsComponent)
+            },
 
             // Partner Orders (B2B)
-            { path: 'narudzbe-partneri', component: AdminOrdersPartnersComponent },
+            {
+                path: 'narudzbe-partneri',
+                loadComponent: () => import('./features/admin/orders-partners/admin-orders-partners.component').then(m => m.AdminOrdersPartnersComponent)
+            },
 
             // Company Pricing
-            { path: 'cijene-tvrtki', component: AdminCompanyPricingComponent },
-            { path: 'cijene-tvrtki/kreiraj', component: CompanyPricingFormComponent },
-            { path: 'cijene-tvrtki/uredi/:id', component: CompanyPricingFormComponent },
-            { path: 'cijene-tvrtki/detalji/:id', component: CompanyPricingFormComponent },
+            {
+                path: 'cijene-tvrtki',
+                loadComponent: () => import('./features/admin/company-pricing/admin-company-pricing.component').then(m => m.AdminCompanyPricingComponent)
+            },
+            {
+                path: 'cijene-tvrtki/kreiraj',
+                loadComponent: () => import('./features/admin/company-pricing/company-pricing-form/company-pricing-form.component').then(m => m.CompanyPricingFormComponent)
+            },
+            {
+                path: 'cijene-tvrtki/uredi/:id',
+                loadComponent: () => import('./features/admin/company-pricing/company-pricing-form/company-pricing-form.component').then(m => m.CompanyPricingFormComponent)
+            },
+            {
+                path: 'cijene-tvrtki/detalji/:id',
+                loadComponent: () => import('./features/admin/company-pricing/company-pricing-form/company-pricing-form.component').then(m => m.CompanyPricingFormComponent)
+            },
 
             // Companies
-            { path: 'tvrtke', component: AdminCompaniesComponent },
-            { path: 'tvrtke/kreiraj', component: AdminCompanyEditComponent },
-            { path: 'tvrtke/uredi/:id', component: AdminCompanyEditComponent },
-            { path: 'tvrtke/detalji/:id', component: AdminCompanyEditComponent },
+            {
+                path: 'tvrtke',
+                loadComponent: () => import('./features/admin/companies/admin-companies.component').then(m => m.AdminCompaniesComponent)
+            },
+            {
+                path: 'tvrtke/kreiraj',
+                loadComponent: () => import('./features/admin/companies/admin-company-edit.component').then(m => m.AdminCompanyEditComponent)
+            },
+            {
+                path: 'tvrtke/uredi/:id',
+                loadComponent: () => import('./features/admin/companies/admin-company-edit.component').then(m => m.AdminCompanyEditComponent)
+            },
+            {
+                path: 'tvrtke/detalji/:id',
+                loadComponent: () => import('./features/admin/companies/admin-company-edit.component').then(m => m.AdminCompanyEditComponent)
+            },
 
             // Contacts
-            { path: 'kontakti', component: AdminContactsComponent },
+            {
+                path: 'kontakti',
+                loadComponent: () => import('./features/admin/contacts/admin-contacts.component').then(m => m.AdminContactsComponent)
+            },
 
             // Wishlist
-            { path: 'lista-zelja', component: AdminWishlistComponent },
+            {
+                path: 'lista-zelja',
+                loadComponent: () => import('./features/admin/wishlist/admin-wishlist.component').then(m => m.AdminWishlistComponent)
+            },
 
             // Reviews
-            { path: 'recenzije', component: AdminReviewsComponent },
+            {
+                path: 'recenzije',
+                loadComponent: () => import('./features/admin/reviews/admin-reviews.component').then(m => m.AdminReviewsComponent)
+            },
 
             // Email Test
-            { path: 'email-test', component: EmailTestComponent }
+            {
+                path: 'email-test',
+                loadComponent: () => import('./shared/components/email-test/email-test.component').then(m => m.EmailTestComponent)
+            }
         ]
     },
 
-    // Fallback route
-    { path: '**', redirectTo: '' }
+    // 404 Not Found route
+    { path: '**', component: NotFoundComponent }
 ];
