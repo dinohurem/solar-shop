@@ -282,6 +282,6 @@ export class OffersService {
     }
 
     private getDefaultOfferImage(): string {
-        return 'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=500&h=500&fit=crop';
+        return 'assets/images/placeholders/solar-panels-1.jpg';
     }
 } 

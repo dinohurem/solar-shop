@@ -262,8 +262,8 @@ export class ProductsService {
     private getProductImage(images: any[]): string {
         if (images && images.length > 0) {
             const primaryImage = images.find(img => img.is_primary) || images[0];
-            return primaryImage.url || 'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=500&h=500&fit=crop';
+            return primaryImage.url || 'assets/images/placeholders/solar-panels-default.jpg';
         }
-        return 'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=500&h=500&fit=crop';
+        return 'assets/images/placeholders/solar-panels-default.jpg';
     }
 }

@@ -99,7 +99,9 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
             <div class="flex justify-center">
               <div class="relative">
                 <div class="w-96 h-96 bg-gradient-to-br from-solar-100 to-solar-200 rounded-full flex items-center justify-center">
-                  <div class="text-8xl text-solar-600">💰</div>
+                  <svg class="w-32 h-32 text-solar-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
                 </div>
               </div>
             </div>
@@ -113,7 +115,9 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div class="flex justify-center order-2 lg:order-1">
               <div class="w-96 h-96 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center">
-                <div class="text-8xl text-blue-600">🎧</div>
+                <svg class="w-32 h-32 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
               </div>
             </div>
             
@@ -270,7 +274,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
             <div class="text-center">
               <div class="w-16 h-16 bg-solar-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <svg class="w-8 h-8 text-solar-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2V6"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                 </svg>
               </div>
               <h3 class="text-lg font-semibold text-gray-900 mb-2 font-['Poppins']">

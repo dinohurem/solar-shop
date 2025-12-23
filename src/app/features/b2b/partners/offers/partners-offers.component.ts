@@ -348,7 +348,7 @@ export class PartnersOffersComponent implements OnInit, OnDestroy {
           originalPrice: originalPrice,
           discountedPrice: discountedPrice,
           discountPercentage: discountPercentage,
-          imageUrl: offer.image_url || 'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=800&h=600&fit=crop',
+          imageUrl: offer.image_url || 'assets/images/placeholders/solar-panels-1.jpg',
           description: offer.description,
           shortDescription: offer.short_description || '',
           status: offer.status,

@@ -39,7 +39,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
             <!-- Image -->
             <div class="order-2 lg:order-1">
               <img 
-                src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                src="assets/images/placeholders/forest-nature.jpg" 
                 alt="Sustainable Building" 
                 class="w-full h-96 lg:h-[500px] object-cover rounded-[40px]"
               >
@@ -176,7 +176,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
             <!-- Image -->
             <div>
               <img 
-                src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                src="assets/images/placeholders/business-consulting.jpg" 
                 alt="Sustainable Consulting" 
                 class="w-full h-96 lg:h-[500px] object-cover rounded-[40px]"
               >

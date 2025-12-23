@@ -250,11 +250,11 @@ export class BlogService {
 
     private getDefaultPostImage(): string {
         const defaultImages = [
-            'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=800&h=600&fit=crop',
-            'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=600&fit=crop',
-            'https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=800&h=600&fit=crop',
-            'https://images.unsplash.com/photo-1558002038-1055907df827?w=800&h=600&fit=crop',
-            'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop'
+            'assets/images/placeholders/solar-panels-1.jpg',
+            'assets/images/placeholders/solar-panels-2.jpg',
+            'assets/images/placeholders/solar-panels-3.jpg',
+            'assets/images/placeholders/solar-panels-4.jpg',
+            'assets/images/placeholders/solar-panels-5.jpg'
         ];
 
         return defaultImages[Math.floor(Math.random() * defaultImages.length)];

@@ -861,7 +861,7 @@ export class CartService {
             const primaryImage = images.find(img => img.is_primary);
             return primaryImage ? primaryImage.url : images[0].url;
         }
-        return 'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=400&h=400&fit=crop';
+        return 'assets/images/placeholders/solar-panels-default.jpg';
     }
 
     private async getCategoryName(categoryId: string): Promise<string> {
